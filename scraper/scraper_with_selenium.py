@@ -59,6 +59,11 @@ def get_internal_download_link(driver):
     try:
         download_button = driver.find_element(By.CLASS_NAME, 'branded-download')
         download_button_href = download_button.get_attribute('href')
+
+        # Check if download link is external
+        if "mirror" in download_button_href:
+            raise Exception
+
         print("Internal Download Link Found:", download_button_href)
         return download_button_href
     except:
@@ -120,12 +125,12 @@ def main():
     file_path = os.path.join(os.path.abspath('.'), 'projects.csv')
     
     # Test scraping links
-    scrape_project_download_links(driver, ["https://www.planetminecraft.com/project/aloge-v2-2-player-puzzle-parkour-map/", "https://www.planetminecraft.com/project/alfer-arena/"])
+    scrape_project_download_links(driver, ["https://www.planetminecraft.com/project/aloge-v2-2-player-puzzle-parkour-map/", "https://www.planetminecraft.com/project/alfer-arena/", "https://www.planetminecraft.com/project/end-parkour-4801500/"])
 
     # project_links = scrape_project_links(driver, base_url, file_path)
 
     driver.quit()
-    print(f"Scraped {len(project_links)} project links so far.")
+    # print(f"Scraped {len(project_links)} project links so far.")
 
 if __name__ == "__main__":
     main()
