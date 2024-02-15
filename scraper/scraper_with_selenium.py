@@ -53,7 +53,29 @@ def scrape_project_links(driver, url, file_path):
     print(f"Scraped {new_links_found} new project links.")
 
     return list(existing_links)
-    
+
+""" Scrape a download link from the internal Planet Minecraft website """
+def get_internal_download_link(driver):
+    try:
+        download_button = driver.find_element(By.CLASS_NAME, 'branded-download')
+        download_button_href = download_button.get_attribute('href')
+        print("Internal Download Link Found:", download_button_href)
+        return download_button_href
+    except:
+        print("No Internal Download Link Found")
+        return None
+
+""" Scrape a download link for third party websites """
+def get_third_party_download_link(driver):
+    try:
+        download_button = driver.find_element(By.CLASS_NAME, 'third-party-download')
+        download_button_hover_text = download_button.get_attribute('title').split(' ')
+        download_button_link = download_button_hover_text[-1]
+        print("Third-Party Download Link Found:", download_button_link)
+        return download_button_link
+    except:
+        print("No Third Party Download Link Found")
+        return None
 
 """ (IN WORK) Scrapes download links from existing project links """
 def scrape_project_download_links(driver, project_links): 
@@ -63,11 +85,11 @@ def scrape_project_download_links(driver, project_links):
         # Navigate to project page using previously scraped link 
         driver.get(project_link) 
     
-        # Get project download button and slice download link from the button title
-        download_button = driver.find_element(By.CLASS_NAME, 'third-party-download branded-download')
-        download_button_title = download_button.get_attribute("title")
-        download_link = download_button_title[29: len(download_link)]
-        print("download at: " + download_link)
+        # Get internal Planet Minecraft download link
+        internal_download_link = get_internal_download_link(driver)
+
+        # Get third party download link
+        third_party_download_link = get_third_party_download_link(driver)
 
 def initialize_browser():
     chrome_options = Options()
@@ -97,7 +119,11 @@ def main():
     driver = initialize_browser()
     file_path = os.path.join(os.path.abspath('.'), 'projects.csv')
     
-    project_links = scrape_project_links(driver, base_url, file_path)
+    # Test scraping links
+    scrape_project_download_links(driver, ["https://www.planetminecraft.com/project/aloge-v2-2-player-puzzle-parkour-map/", "https://www.planetminecraft.com/project/alfer-arena/"])
+
+    # project_links = scrape_project_links(driver, base_url, file_path)
+
     driver.quit()
     print(f"Scraped {len(project_links)} project links so far.")
 
