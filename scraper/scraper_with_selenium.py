@@ -7,6 +7,9 @@ import pandas as pd
 import os
 import time
 
+PAGES_PER_CSV_UPDATE = 1; 
+DOWNLOAD_LINKS_PER_CSV_UPDATE = 5
+NUM_PAGES = 2
 
 """ Returns list of all project links scraped """
 def scrape_project_links(driver, url, file_path):
@@ -15,8 +18,8 @@ def scrape_project_links(driver, url, file_path):
     existing_df = initialize_dataframe(file_path)
     existing_links = set(existing_df['URL'].tolist())
 
-    NUM_PAGES = 10 # Number of pages to scrape 
-    PAGES_PER_CSV_UPDATE = 1 # Number of pages to scrape before updating the csv
+    # NUM_PAGES = 200 # Number of pages to scrape 
+    # PAGES_PER_CSV_UPDATE = 1 # Number of pages to scrape before updating the csv
 
     for i in range (1, NUM_PAGES):
         # Navigate to page 
@@ -41,7 +44,7 @@ def scrape_project_links(driver, url, file_path):
 
             # Append project links in buffer to dataframe
             for project_link in buffer: 
-                existing_df.loc[len(existing_df.index)] = [project_link] 
+                existing_df.loc[len(existing_df.index), "PROJECT PAGE URL"] = project_link
             
             buffer = [] 
             save_dataframe(existing_df, file_path)
@@ -83,10 +86,13 @@ def get_third_party_download_link(driver):
         return None
 
 """ (IN WORK) Scrapes download links from existing project links """
-def scrape_project_download_links(driver, project_links): 
-
-    for project_link in project_links:
-
+def scrape_project_download_links(driver, project_links, file_path): 
+    buffer = []
+    existing_df = initialize_dataframe(file_path)
+    
+    for i in range (0, len(project_links)):
+        project_link = project_links[i]
+        
         # Navigate to project page using previously scraped link 
         driver.get(project_link) 
     
@@ -95,6 +101,29 @@ def scrape_project_download_links(driver, project_links):
 
         # Get third party download link
         third_party_download_link = get_third_party_download_link(driver)
+
+        if internal_download_link:
+            buffer.append(internal_download_link)
+        
+        elif third_party_download_link:
+            buffer.append(third_party_download_link)
+        
+        else: 
+            print("No project link found for " + project_link) 
+            buffer.append("")
+
+        if (len(buffer) == DOWNLOAD_LINKS_PER_CSV_UPDATE): 
+            for link in buffer:
+                existing_df.loc[i, "PROJECT DOWNLOAD URL"] = link
+            
+            buffer = [] 
+            save_dataframe(existing_df, file_path)
+
+
+
+
+
+
 
 def initialize_browser():
     chrome_options = Options()
@@ -109,7 +138,7 @@ def initialize_dataframe(file_path):
     if os.path.exists(file_path):
         df = pd.read_csv(file_path)
     else:
-        df = pd.DataFrame(columns=['URL'])
+        df = pd.DataFrame(columns=['PROJECT PAGE URL', 'PROJECT DOWNLOAD URL'])
         df.to_csv(file_path, index=False)  # Save instantly if created new
     return df
 
@@ -124,8 +153,10 @@ def main():
     driver = initialize_browser()
     file_path = os.path.join(os.path.abspath('.'), 'projects.csv')
     
+    project_page_links = scrape_project_links(driver, base_url, file_path); 
+
     # Test scraping links
-    scrape_project_download_links(driver, ["https://www.planetminecraft.com/project/aloge-v2-2-player-puzzle-parkour-map/", "https://www.planetminecraft.com/project/alfer-arena/", "https://www.planetminecraft.com/project/end-parkour-4801500/"])
+    scrape_project_download_links(driver, project_page_links, file_path)
 
     # project_links = scrape_project_links(driver, base_url, file_path)
 
