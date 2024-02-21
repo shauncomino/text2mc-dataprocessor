@@ -2,6 +2,7 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 import pandas as pd
 import os
@@ -10,6 +11,8 @@ import time
 PAGES_PER_CSV_UPDATE = 1; 
 DOWNLOAD_LINKS_PER_CSV_UPDATE = 5
 NUM_PAGES = 2
+
+is_downloading_first_time = True
 
 """ Returns list of all project links scraped """
 def scrape_project_links(driver, url, file_path):
@@ -119,14 +122,54 @@ def scrape_project_download_links(driver, project_links, file_path):
             buffer = [] 
             save_dataframe(existing_df, file_path)
 
+def download_internal_map(driver, internal_download_link):
+    global is_downloading_first_time
 
+    driver.get(internal_download_link)
 
+    # Clicking the download button for the first time opens a sponsor waiting page
+    # For the first time downloading, click the download button and close the sponsor page
+    if is_downloading_first_time:
+        print("First time downloading")
+        is_downloading_first_time = False
 
+        download_button = driver.find_element(By.CLASS_NAME, 'branded-download')
+        download_button.click()
 
+        wait = WebDriverWait(driver, 10)
+        wait.until(EC.number_of_windows_to_be(2))
 
+        # Two tabs open: (1) the original map page and (2) the sponsor waiting page
+        if len(driver.window_handles) == 2:
+            # Switch to second tab
+            print("Switching to second tab")
+            driver.switch_to.window(driver.window_handles[1])
+
+            # Close second tab
+            print("Closing second tab")
+            driver.close()
+            
+            # Switch to original tab
+            print("Switching to first tab")
+            driver.switch_to.window(driver.window_handles[0])
+            
+            # Refresh the page
+            print("Refreshing page")
+            driver.refresh()
+
+    # TODO: Download the map and store it
+    print("Downloading Map")
+    wait = WebDriverWait(driver, 10)
+    download_button = driver.find_element(By.CLASS_NAME, 'branded-download')
+
+    wait.until(EC.element_to_be_clickable(download_button))
+    download_button.click()
+
+    # TODO: Wait for the map to finish downloading
 
 def initialize_browser():
     chrome_options = Options()
+    chrome_options.enable_downloads = True
     # chrome_options.add_argument("--headless")  # Uncomment if you don't need a browser GUI
     service = Service()  # Update with your ChromeDriver path
     driver = webdriver.Chrome(service=service, options=chrome_options)
@@ -153,12 +196,15 @@ def main():
     driver = initialize_browser()
     file_path = os.path.join(os.path.abspath('.'), 'projects.csv')
     
-    project_page_links = scrape_project_links(driver, base_url, file_path); 
+    # project_page_links = scrape_project_links(driver, base_url, file_path); 
 
     # Test scraping links
-    scrape_project_download_links(driver, project_page_links, file_path)
+    # scrape_project_download_links(driver, project_page_links, file_path)
 
     # project_links = scrape_project_links(driver, base_url, file_path)
+
+    internal_test_map = "https://www.planetminecraft.com/project/the-moon-5763469/download/worldmap/"
+    download_internal_map(driver, internal_test_map)
 
     driver.quit()
     # print(f"Scraped {len(project_links)} project links so far.")
