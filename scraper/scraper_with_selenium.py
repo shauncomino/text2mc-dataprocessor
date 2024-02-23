@@ -5,57 +5,50 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support import expected_conditions as EC
 import pandas as pd
 import os
-import time
 
+# Column titles of the CSV, change as desired 
+PAGE_URL = "PAGE_URL"
+DOWNLOAD_URL = "DOWNLOAD_URL"
+DESCRIPTORS = "DESCRIPTORS"
+
+# Control csv save rate 
 PAGES_PER_CSV_UPDATE = 1; 
 DOWNLOAD_LINKS_PER_CSV_UPDATE = 5
-NUM_PAGES = 2
+
+# 25 links per full page 
+PAGES_TO_SCRAPE = 2
 
 """ Returns list of all project links scraped """
-def scrape_project_links(driver, url, file_path):
-    buffer = []
-    new_links_found = 0
-    existing_df = initialize_dataframe(file_path)
-    existing_links = set(existing_df['URL'].tolist())
+def scrape_project_links(driver, url, data_dict, file_path):
+    num_new_links = 0
 
-    # NUM_PAGES = 200 # Number of pages to scrape 
-    # PAGES_PER_CSV_UPDATE = 1 # Number of pages to scrape before updating the csv
+    # Iterate for given number of pages 
+    for project_pages_scraped in range (1, PAGES_TO_SCRAPE):
+        driver.get(url) # load URL 
 
-    for i in range (1, NUM_PAGES):
-        # Navigate to page 
-        print("\nNavigating to: " + url)
-        driver.get(url)
-        time.sleep(0.1) 
-
-        # Get project links from page 
-        projects = driver.find_elements(By.CSS_SELECTOR, 'a[href^="/project"]')
-
-        # Get original links from 
-        for project in projects:
-            url = project.get_attribute('href')
-            if url and url not in existing_links:
-                new_links_found += 1
-                existing_links.add(url)
-                buffer.append(url)
-                print("Found new link: " + url)
+        # Pull list of r-info classes from page
+        r_info_classes = driver.find_elements(By.CLASS_NAME, 'r-info')
         
-        # To prevent major data loss in case of network error, update CSV periodically 
-        if (i % PAGES_PER_CSV_UPDATE == 0): 
+        # Look at each r-info class in list 
+        for r_info_class in r_info_classes:
+            # Scrape project page link from the class 
+            new_link = (r_info_class.find_element(By.CSS_SELECTOR, 'a[href^="/project"]')).get_attribute("href") 
+           
+           # Make sure don't already have link
+            if new_link and not data_dict.get(new_link):
+                num_new_links += 1
+                data_dict.update({new_link: {DOWNLOAD_URL: None, DESCRIPTORS: None} })
+                print("Found new link: " + str(new_link))
+        
+        # Update csv 
+        if (project_pages_scraped % PAGES_PER_CSV_UPDATE == 0): 
+            save_to_csv(dict_to_df(data_dict), file_path)
 
-            # Append project links in buffer to dataframe
-            for project_link in buffer: 
-                existing_df.loc[len(existing_df.index), "PROJECT PAGE URL"] = project_link
-            
-            buffer = [] 
-            save_dataframe(existing_df, file_path)
-
-        # Set URL to next page 
+        # Update URL
         pagination_next = driver.find_element(By.CLASS_NAME, "pagination_next")
         url = pagination_next.get_attribute("href")
 
-    print(f"Scraped {new_links_found} new project links.")
-
-    return list(existing_links)
+    print(f"Scraped {num_new_links} new project links.")
 
 """ Scrape a download link from the internal Planet Minecraft website """
 def get_internal_download_link(driver):
@@ -85,83 +78,79 @@ def get_third_party_download_link(driver):
         print("No Third Party Download Link Found")
         return None
 
-""" (IN WORK) Scrapes download links from existing project links """
-def scrape_project_download_links(driver, project_links, file_path): 
-    buffer = []
-    existing_df = initialize_dataframe(file_path)
-    
-    for i in range (0, len(project_links)):
-        project_link = project_links[i]
+"""Scrapes the project download links using previously captured project page links"""
+def scrape_project_download_links(driver, data_dict, file_path): 
+    project_links = list(data_dict.keys())
+    download_links_scraped = 0
+    for project_link in project_links:
+        hasDownloadLink = type(data_dict.get(project_link).get(DOWNLOAD_URL)) == str
+        if not hasDownloadLink: 
+            download_links_scraped += 1
+            # Navigate to project page using previously scraped link 
+            driver.get(project_link) 
         
-        # Navigate to project page using previously scraped link 
-        driver.get(project_link) 
-    
-        # Get internal Planet Minecraft download link
-        internal_download_link = get_internal_download_link(driver)
+            # Get internal Planet Minecraft download link
+            internal_download_link = get_internal_download_link(driver)
 
-        # Get third party download link
-        third_party_download_link = get_third_party_download_link(driver)
+            # Get third party download link
+            third_party_download_link = get_third_party_download_link(driver)
 
-        if internal_download_link:
-            buffer.append(internal_download_link)
-        
-        elif third_party_download_link:
-            buffer.append(third_party_download_link)
-        
-        else: 
-            print("No project link found for " + project_link) 
-            buffer.append("")
-
-        if (len(buffer) == DOWNLOAD_LINKS_PER_CSV_UPDATE): 
-            for link in buffer:
-                existing_df.loc[i, "PROJECT DOWNLOAD URL"] = link
+            # Check and store download links 
+            if internal_download_link:
+                data_dict.update({project_link: {DOWNLOAD_URL: internal_download_link, DESCRIPTORS: None}})
+            elif third_party_download_link:
+                data_dict.update({project_link: {DOWNLOAD_URL: third_party_download_link, DESCRIPTORS: None}})
+            else: 
+                print("No project link found for " + project_link) 
             
-            buffer = [] 
-            save_dataframe(existing_df, file_path)
+            # Update csv 
+            if (download_links_scraped % DOWNLOAD_LINKS_PER_CSV_UPDATE == 0): 
+                save_to_csv(dict_to_df(data_dict), file_path)
 
-
-
-
-
-
-
+    print(f"Scraped {download_links_scraped} new download links.")
+    
 def initialize_browser():
     chrome_options = Options()
-    # chrome_options.add_argument("--headless")  # Uncomment if you don't need a browser GUI
+    chrome_options.add_argument("--headless")  # Uncomment if you don't need a browser GUI
+    chrome_options.add_argument('log-level=3') # Only log "fatal" errors (most aren't actually program-critical)
+
     service = Service()  # Update with your ChromeDriver path
     driver = webdriver.Chrome(service=service, options=chrome_options)
     return driver
 
+"""Converts dataframe to dictionary, with the project page links being the unique keys"""
+def df_to_dict(df): 
+    return df.set_index(PAGE_URL).T.to_dict('dict')
 
+"""Converts dictionary to dataframe"""
+def dict_to_df(data_dict): 
+    page_links = list(data_dict.keys())
+    df = pd.DataFrame.from_dict(data_dict, orient='index', columns=[PAGE_URL, DOWNLOAD_URL, DESCRIPTORS])
+    df[PAGE_URL] = page_links
+    return df
+    
+"""Initializes a DataFrame from a CSV file or creates a new one if the file doesn't exist."""
 def initialize_dataframe(file_path):
-    """Initializes a DataFrame from a CSV file or creates a new one if the file doesn't exist."""
-    if os.path.exists(file_path):
-        df = pd.read_csv(file_path)
-    else:
-        df = pd.DataFrame(columns=['PROJECT PAGE URL', 'PROJECT DOWNLOAD URL'])
-        df.to_csv(file_path, index=False)  # Save instantly if created new
+    if not os.path.exists(file_path):
+        df = pd.DataFrame(columns=[PAGE_URL, DOWNLOAD_URL, DESCRIPTORS])
+
+    df = pd.read_csv("projects.csv")
     return df
 
-
-def save_dataframe(df, file_path):
-    """Saves the DataFrame to a CSV file."""
+"""Saves the DataFrame to a CSV file."""
+def save_to_csv(df, file_path):
     df.to_csv(file_path, index=False)
-
 
 def main():
     base_url = "https://www.planetminecraft.com/projects/land-structure/?platform=1&monetization=0&share=world_link&order=order_latest"
     driver = initialize_browser()
     file_path = os.path.join(os.path.abspath('.'), 'projects.csv')
+    data_dict = df_to_dict(initialize_dataframe(file_path))
     
-    project_page_links = scrape_project_links(driver, base_url, file_path); 
-
-    # Test scraping links
-    scrape_project_download_links(driver, project_page_links, file_path)
-
-    # project_links = scrape_project_links(driver, base_url, file_path)
+    scrape_project_links(driver, base_url, data_dict, file_path) 
+    scrape_project_download_links(driver, data_dict, file_path)
 
     driver.quit()
-    # print(f"Scraped {len(project_links)} project links so far.")
 
 if __name__ == "__main__":
     main()
