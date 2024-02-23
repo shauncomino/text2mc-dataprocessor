@@ -122,6 +122,9 @@ def scrape_project_download_links(driver, project_links, file_path):
             buffer = [] 
             save_dataframe(existing_df, file_path)
 
+def get_map_title(driver):
+    return driver.find_element(By.ID, 'resource-title-text').text
+
 """ Clicking the download button for the first time opens a sponsor waiting page """
 """ For the first time downloading, click the download button and close the sponsor page """
 def handle_first_map_download(driver):
@@ -155,19 +158,18 @@ def wait_until_download_finished():
 
 def download_internal_map(driver, internal_download_link):
     driver.get(internal_download_link)
-    print("On map:", driver.title)
+    print("Downloading map:", get_map_title(driver))
 
     if is_downloading_first_time:
         handle_first_map_download(driver)
 
     # Download the map
-    print("Downloading map")
     download_button = driver.find_element(By.CLASS_NAME, 'branded-download')
     driver.execute_script("arguments[0].click()", download_button)
 
     # Wait until the download finishes
     wait_until_download_finished()
-    print("Finished downloading:", driver.title)
+    print("Finished downloading:", get_map_title(driver))
 
 def initialize_browser():
     chrome_options = Options()
