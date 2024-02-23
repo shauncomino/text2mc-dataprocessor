@@ -122,9 +122,6 @@ def scrape_project_download_links(driver, project_links, file_path):
             buffer = [] 
             save_dataframe(existing_df, file_path)
 
-def get_map_title(driver):
-    return driver.find_element(By.ID, 'resource-title-text').text
-
 """ Clicking the download button for the first time opens a sponsor waiting page """
 """ For the first time downloading, click the download button and close the sponsor page """
 def handle_first_map_download(driver):
@@ -153,12 +150,23 @@ def handle_first_map_download(driver):
         print("Switching to first tab")
         driver.switch_to.window(driver.window_handles[0])
 
-def wait_until_download_finished():
-    time.sleep(10)
+def wait_until_download_finished(driver):
+    # Go to the downloads page in Chrome
+    driver.get('chrome://downloads/')
+
+    # While the map is not downloaded
+    while True:
+        # Check if the map is downloading (Chrome shows a pause and cancel buttons)
+        try:
+            pause_button = driver.find_element(By.ID, 'pauseOrResume')
+        # Else the map finished downloading (There is no more pause and cancel buttons)
+        except:
+            break
 
 def download_internal_map(driver, internal_download_link):
     driver.get(internal_download_link)
-    print("Downloading map:", get_map_title(driver))
+    map_title = driver.find_element(By.ID, 'resource-title-text').text
+    print("Downloading map:", map_title)
 
     if is_downloading_first_time:
         handle_first_map_download(driver)
@@ -168,8 +176,8 @@ def download_internal_map(driver, internal_download_link):
     driver.execute_script("arguments[0].click()", download_button)
 
     # Wait until the download finishes
-    wait_until_download_finished()
-    print("Finished downloading:", get_map_title(driver))
+    wait_until_download_finished(driver)
+    print("Finished downloading:", map_title)
 
 def initialize_browser():
     chrome_options = Options()
@@ -209,8 +217,10 @@ def main():
 
     internal_test_map1 = "https://www.planetminecraft.com/project/the-moon-5763469/download/worldmap/"
     internal_test_map2 = "https://www.planetminecraft.com/project/guildhall-6203399/"
+    internal_test_map3 = "https://www.planetminecraft.com/project/royal-village-farms-automatic-multi-farm-in-1-20-2-free-download/"
     download_internal_map(driver, internal_test_map1)
     download_internal_map(driver, internal_test_map2)
+    download_internal_map(driver, internal_test_map3)
 
     driver.quit()
     # print(f"Scraped {len(project_links)} project links so far.")
