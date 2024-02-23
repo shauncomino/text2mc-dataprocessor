@@ -122,41 +122,43 @@ def scrape_project_download_links(driver, project_links, file_path):
             buffer = [] 
             save_dataframe(existing_df, file_path)
 
+""" Clicking the download button for the first time opens a sponsor waiting page """
+""" For the first time downloading, click the download button and close the sponsor page """
+def handle_first_map_download(driver):
+    print("First time downloading")
+    is_downloading_first_time = False
+
+    # Click the download button
+    download_button = driver.find_element(By.CLASS_NAME, 'branded-download')
+    driver.execute_script("arguments[0].click()", download_button)
+
+    # Wait until the sponsor page tab opens
+    wait = WebDriverWait(driver, 10)
+    wait.until(EC.number_of_windows_to_be(2))
+
+    # Two tabs open: (1) the original map page and (2) the sponsor waiting page
+    if len(driver.window_handles) == 2:
+        # Switch to second tab
+        print("Switching to second tab")
+        driver.switch_to.window(driver.window_handles[1])
+
+        # Close second tab
+        print("Closing second tab")
+        driver.close()
+
+        # Switch to original tab
+        print("Switching to first tab")
+        driver.switch_to.window(driver.window_handles[0])
+
 def wait_until_download_finished():
     time.sleep(10)
 
 def download_internal_map(driver, internal_download_link):
-    global is_downloading_first_time
-
     driver.get(internal_download_link)
+    print("On map:", driver.title)
 
-    # Clicking the download button for the first time opens a sponsor waiting page
-    # For the first time downloading, click the download button and close the sponsor page
     if is_downloading_first_time:
-        print("First time downloading")
-        is_downloading_first_time = False
-
-        # Click the download button
-        download_button = driver.find_element(By.CLASS_NAME, 'branded-download')
-        driver.execute_script("arguments[0].click()", download_button)
-
-        # Wait until the sponsor page tab opens
-        wait = WebDriverWait(driver, 10)
-        wait.until(EC.number_of_windows_to_be(2))
-
-        # Two tabs open: (1) the original map page and (2) the sponsor waiting page
-        if len(driver.window_handles) == 2:
-            # Switch to second tab
-            print("Switching to second tab")
-            driver.switch_to.window(driver.window_handles[1])
-
-            # Close second tab
-            print("Closing second tab")
-            driver.close()
-            
-            # Switch to original tab
-            print("Switching to first tab")
-            driver.switch_to.window(driver.window_handles[0])
+        handle_first_map_download(driver)
 
     # Download the map
     print("Downloading map")
@@ -165,7 +167,7 @@ def download_internal_map(driver, internal_download_link):
 
     # Wait until the download finishes
     wait_until_download_finished()
-    print("Map downloaded")
+    print("Finished downloading:", driver.title)
 
 def initialize_browser():
     chrome_options = Options()
@@ -203,8 +205,10 @@ def main():
 
     # project_links = scrape_project_links(driver, base_url, file_path)
 
-    internal_test_map = "https://www.planetminecraft.com/project/the-moon-5763469/download/worldmap/"
-    download_internal_map(driver, internal_test_map)
+    internal_test_map1 = "https://www.planetminecraft.com/project/the-moon-5763469/download/worldmap/"
+    internal_test_map2 = "https://www.planetminecraft.com/project/guildhall-6203399/"
+    download_internal_map(driver, internal_test_map1)
+    download_internal_map(driver, internal_test_map2)
 
     driver.quit()
     # print(f"Scraped {len(project_links)} project links so far.")
