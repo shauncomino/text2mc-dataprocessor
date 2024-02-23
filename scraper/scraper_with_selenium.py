@@ -122,6 +122,9 @@ def scrape_project_download_links(driver, project_links, file_path):
             buffer = [] 
             save_dataframe(existing_df, file_path)
 
+def wait_until_download_finished():
+    time.sleep(10)
+
 def download_internal_map(driver, internal_download_link):
     global is_downloading_first_time
 
@@ -133,9 +136,11 @@ def download_internal_map(driver, internal_download_link):
         print("First time downloading")
         is_downloading_first_time = False
 
+        # Click the download button
         download_button = driver.find_element(By.CLASS_NAME, 'branded-download')
-        download_button.click()
+        driver.execute_script("arguments[0].click()", download_button)
 
+        # Wait until the sponsor page tab opens
         wait = WebDriverWait(driver, 10)
         wait.until(EC.number_of_windows_to_be(2))
 
@@ -152,20 +157,15 @@ def download_internal_map(driver, internal_download_link):
             # Switch to original tab
             print("Switching to first tab")
             driver.switch_to.window(driver.window_handles[0])
-            
-            # Refresh the page
-            print("Refreshing page")
-            driver.refresh()
 
-    # TODO: Download the map and store it
-    print("Downloading Map")
-    wait = WebDriverWait(driver, 10)
+    # Download the map
+    print("Downloading map")
     download_button = driver.find_element(By.CLASS_NAME, 'branded-download')
+    driver.execute_script("arguments[0].click()", download_button)
 
-    wait.until(EC.element_to_be_clickable(download_button))
-    download_button.click()
-
-    # TODO: Wait for the map to finish downloading
+    # Wait until the download finishes
+    wait_until_download_finished()
+    print("Map downloaded")
 
 def initialize_browser():
     chrome_options = Options()
