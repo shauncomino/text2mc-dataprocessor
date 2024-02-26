@@ -1,0 +1,16 @@
+minecraft:grass
+minecraft:dirt
+minecraft:sand
+minecraft:sandstone
+minecraft:stone
+minecraft:gravel
+minecraft:white_terracotta
+minecraft:red_terracotta
+minecraft:brown_terracotta
+minecraft:orange_terracotta
+minecraft:yellow_terracotta
+minecraft:light_gray_terracotta
+minecraft:terracotta
+minecraft:red_sand
+minecraft:red_sandstone
+minecraft:water
