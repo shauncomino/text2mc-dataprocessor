@@ -342,3 +342,5 @@ minecraft:cave_vines_plant
 minecraft:flowering_azalea
 minecraft:snow_block
 minecraft:big_dripleaf_stem
+minecraft:spruce_trapdoor
+minecraft:sea_lantern
