@@ -1,14 +1,20 @@
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.support.ui import WebDriverWait
+from bs4 import BeautifulSoup
+from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support import expected_conditions as EC
 import pandas as pd
+from openai import OpenAI
+import os 
 import os
 
 # Column titles of the CSV, change as desired 
 PAGE_URL = "PAGE_URL"
 DOWNLOAD_URL = "DOWNLOAD_URL"
+IMAGE_URL = "IMAGE_URL"
 DESCRIPTORS = "DESCRIPTORS"
 
 # Control csv save rate 
@@ -18,7 +24,9 @@ DOWNLOAD_LINKS_PER_CSV_UPDATE = 5
 # 25 links per full page 
 PAGES_TO_SCRAPE = 2
 
-""" Returns list of all project links scraped """
+API_KEY = "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"
+
+"""Scrapes project and image links"""
 def scrape_project_links(driver, url, data_dict, file_path):
     num_new_links = 0
 
@@ -28,7 +36,9 @@ def scrape_project_links(driver, url, data_dict, file_path):
 
         # Pull list of r-info classes from page
         r_info_classes = driver.find_elements(By.CLASS_NAME, 'r-info')
-        
+        pictures = driver.find_elements(By.CSS_SELECTOR, 'picture')
+
+        index = 0
         # Look at each r-info class in list 
         for r_info_class in r_info_classes:
             # Scrape project page link from the class 
@@ -37,7 +47,9 @@ def scrape_project_links(driver, url, data_dict, file_path):
            # Make sure don't already have link
             if new_link and not data_dict.get(new_link):
                 num_new_links += 1
-                data_dict.update({new_link: {DOWNLOAD_URL: None, DESCRIPTORS: None} })
+                image_url = pictures[index].find_element(By.CSS_SELECTOR, 'img').get_attribute("src")
+                data_dict.update({new_link: {DOWNLOAD_URL: None, IMAGE_URL: image_url, DESCRIPTORS: None} })
+                index += 1
                 print("Found new link: " + str(new_link))
         
         # Update csv 
@@ -65,6 +77,50 @@ def get_internal_download_link(driver):
     except:
         print("No Internal Download Link Found")
         return None
+
+def get_image_descriptors(data_dict, file_path): 
+    prompt = "Describe the architectural style of this Minecraft build in ten words or phrases."
+    project_links = list(data_dict.keys())
+
+    descriptions_generated = 0
+    for project_link in project_links:
+        hasDescriptors = type(data_dict.get(project_link).get(DESCRIPTORS)) == str
+
+        if not hasDescriptors: 
+            descriptors = gpt4_image_prompt(prompt, data_dict.get(project_link).get(IMAGE_URL))
+
+            data_dict.get(project_link).update({DESCRIPTORS: descriptors})
+            descriptions_generated += 1
+        
+        if (descriptions_generated % DOWNLOAD_LINKS_PER_CSV_UPDATE == 0): 
+            save_to_csv(dict_to_df(data_dict), file_path)
+
+
+
+"""Gets a response back from ChatGPT-4 for a prompt including an image"""
+def gpt4_image_prompt(prompt, image_url): 
+    os.environ["OPENAI_API_KEY"] = API_KEY 
+    client = OpenAI()
+
+    response = client.chat.completions.create(
+    model="gpt-4-vision-preview",
+    messages=[
+        {
+        "role": "user",
+        "content": [
+            {"type": "text", "text": prompt}, 
+            {
+            "type": "image_url",
+            "image_url": {
+                "url": image_url,
+            },
+            },
+        ],
+        }
+    ],
+    max_tokens=300,
+    )
+    return response.choices[0].message.content.strip().replace('\n', '')
 
 """ Scrape a download link for third party websites """
 def get_third_party_download_link(driver):
@@ -97,9 +153,11 @@ def scrape_project_download_links(driver, data_dict, file_path):
 
             # Check and store download links 
             if internal_download_link:
-                data_dict.update({project_link: {DOWNLOAD_URL: internal_download_link, DESCRIPTORS: None}})
+                data_dict.get(project_link).update({DOWNLOAD_URL: internal_download_link})
+                #data_dict.update({project_link: {DOWNLOAD_URL: internal_download_link, DESCRIPTORS: None}})
             elif third_party_download_link:
-                data_dict.update({project_link: {DOWNLOAD_URL: third_party_download_link, DESCRIPTORS: None}})
+                data_dict.get(project_link).update({DOWNLOAD_URL: third_party_download_link})
+                #data_dict.update({project_link: {DOWNLOAD_URL: third_party_download_link, DESCRIPTORS: None}})
             else: 
                 print("No project link found for " + project_link) 
             
@@ -108,10 +166,10 @@ def scrape_project_download_links(driver, data_dict, file_path):
                 save_to_csv(dict_to_df(data_dict), file_path)
 
     print(f"Scraped {download_links_scraped} new download links.")
-    
+
 def initialize_browser():
     chrome_options = Options()
-    chrome_options.add_argument("--headless")  # Uncomment if you don't need a browser GUI
+    #chrome_options.add_argument("--headless")  # Uncomment if you don't need a browser GUI
     chrome_options.add_argument('log-level=3') # Only log "fatal" errors (most aren't actually program-critical)
 
     service = Service()  # Update with your ChromeDriver path
@@ -125,14 +183,14 @@ def df_to_dict(df):
 """Converts dictionary to dataframe"""
 def dict_to_df(data_dict): 
     page_links = list(data_dict.keys())
-    df = pd.DataFrame.from_dict(data_dict, orient='index', columns=[PAGE_URL, DOWNLOAD_URL, DESCRIPTORS])
+    df = pd.DataFrame.from_dict(data_dict, orient='index', columns=[PAGE_URL, DOWNLOAD_URL, IMAGE_URL, DESCRIPTORS])
     df[PAGE_URL] = page_links
     return df
     
 """Initializes a DataFrame from a CSV file or creates a new one if the file doesn't exist."""
 def initialize_dataframe(file_path):
     if not os.path.exists(file_path):
-        df = pd.DataFrame(columns=[PAGE_URL, DOWNLOAD_URL, DESCRIPTORS])
+        df = pd.DataFrame(columns=[PAGE_URL, DOWNLOAD_URL, IMAGE_URL, DESCRIPTORS])
 
     df = pd.read_csv("projects.csv")
     return df
@@ -149,6 +207,7 @@ def main():
     
     scrape_project_links(driver, base_url, data_dict, file_path) 
     scrape_project_download_links(driver, data_dict, file_path)
+    get_image_descriptors(data_dict, file_path)
 
     driver.quit()
 
