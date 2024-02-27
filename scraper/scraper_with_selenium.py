@@ -5,11 +5,10 @@ from selenium.webdriver.support.ui import WebDriverWait
 from bs4 import BeautifulSoup
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.support import expected_conditions as EC
 import pandas as pd
 from openai import OpenAI
-import os 
 import os
+import time
 
 # Column titles of the CSV, change as desired 
 PAGE_URL = "PAGE_URL"
@@ -20,6 +19,9 @@ DESCRIPTORS = "DESCRIPTORS"
 # Control csv save rate 
 PAGES_PER_CSV_UPDATE = 1; 
 DOWNLOAD_LINKS_PER_CSV_UPDATE = 5
+
+# Flag to check if the user started to download maps
+is_downloading_first_time = True
 
 # 25 links per full page 
 PAGES_TO_SCRAPE = 2
@@ -95,8 +97,6 @@ def get_image_descriptors(data_dict, file_path):
         if (descriptions_generated % DOWNLOAD_LINKS_PER_CSV_UPDATE == 0): 
             save_to_csv(dict_to_df(data_dict), file_path)
 
-
-
 """Gets a response back from ChatGPT-4 for a prompt including an image"""
 def gpt4_image_prompt(prompt, image_url): 
     os.environ["OPENAI_API_KEY"] = API_KEY 
@@ -167,8 +167,70 @@ def scrape_project_download_links(driver, data_dict, file_path):
 
     print(f"Scraped {download_links_scraped} new download links.")
 
+""" Clicking the download button for the first time opens a sponsor waiting page """
+""" For the first time downloading, click the download button and close the sponsor page """
+def handle_first_map_download(driver):
+    print("First time downloading")
+
+    global is_downloading_first_time
+    is_downloading_first_time = False
+
+    # Click the download button
+    download_button = driver.find_element(By.CLASS_NAME, 'branded-download')
+    driver.execute_script("arguments[0].click()", download_button)
+
+    # Wait until the sponsor page tab opens
+    wait = WebDriverWait(driver, 10)
+    wait.until(EC.number_of_windows_to_be(2))
+
+    # Two tabs open: (1) the original map page and (2) the sponsor waiting page
+    if len(driver.window_handles) == 2:
+        # Switch to second tab
+        print("Switching to second tab")
+        driver.switch_to.window(driver.window_handles[1])
+
+        # Close second tab
+        print("Closing second tab")
+        driver.close()
+
+        # Switch to original tab
+        print("Switching to first tab")
+        driver.switch_to.window(driver.window_handles[0])
+
+def wait_until_download_finished(driver):
+    # Go to the downloads page in Chrome
+    driver.get('chrome://downloads/')
+
+    # While the map is not downloaded
+    while True:
+        # Check if the map is downloading (Chrome shows a pause and cancel buttons)
+        try:
+            pause_button = driver.find_element(By.ID, 'pauseOrResume')
+        # Else the map finished downloading (There is no more pause and cancel buttons)
+        except:
+            break
+
+def download_internal_map(driver, internal_download_link):
+    driver.get(internal_download_link)
+    map_title = driver.find_element(By.ID, 'resource-title-text').text
+    print("Downloading map:", map_title)
+
+    global is_downloading_first_time
+    
+    if is_downloading_first_time:
+        handle_first_map_download(driver)
+
+    # Download the map
+    download_button = driver.find_element(By.CLASS_NAME, 'branded-download')
+    driver.execute_script("arguments[0].click()", download_button)
+
+    # Wait until the download finishes
+    wait_until_download_finished(driver)
+    print("Finished downloading:", map_title)
+
 def initialize_browser():
     chrome_options = Options()
+    chrome_options.enable_downloads = True
     #chrome_options.add_argument("--headless")  # Uncomment if you don't need a browser GUI
     chrome_options.add_argument('log-level=3') # Only log "fatal" errors (most aren't actually program-critical)
 
