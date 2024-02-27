@@ -12,6 +12,8 @@ PAGES_PER_CSV_UPDATE = 1;
 DOWNLOAD_LINKS_PER_CSV_UPDATE = 5
 NUM_PAGES = 2
 
+is_downloading_first_time = True
+
 """ Returns list of all project links scraped """
 def scrape_project_links(driver, url, file_path):
     buffer = []
@@ -125,6 +127,9 @@ def scrape_project_download_links(driver, project_links, file_path):
 def handle_first_map_download(driver):
     print("First time downloading")
 
+    global is_downloading_first_time
+    is_downloading_first_time = False
+
     # Click the download button
     download_button = driver.find_element(By.CLASS_NAME, 'branded-download')
     driver.execute_script("arguments[0].click()", download_button)
@@ -160,11 +165,13 @@ def wait_until_download_finished(driver):
         except:
             break
 
-def download_internal_map(driver, internal_download_link, is_downloading_first_time):
+def download_internal_map(driver, internal_download_link):
     driver.get(internal_download_link)
     map_title = driver.find_element(By.ID, 'resource-title-text').text
     print("Downloading map:", map_title)
 
+    global is_downloading_first_time
+    
     if is_downloading_first_time:
         handle_first_map_download(driver)
 
@@ -215,9 +222,10 @@ def main():
     internal_test_map1 = "https://www.planetminecraft.com/project/the-moon-5763469/download/worldmap/"
     internal_test_map2 = "https://www.planetminecraft.com/project/guildhall-6203399/"
     internal_test_map3 = "https://www.planetminecraft.com/project/royal-village-farms-automatic-multi-farm-in-1-20-2-free-download/"
-    download_internal_map(driver, internal_test_map1, True)
-    download_internal_map(driver, internal_test_map2, False)
-    download_internal_map(driver, internal_test_map3, False)
+    
+    download_internal_map(driver, internal_test_map1)
+    download_internal_map(driver, internal_test_map2)
+    download_internal_map(driver, internal_test_map3)
 
     driver.quit()
     # print(f"Scraped {len(project_links)} project links so far.")
