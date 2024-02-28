@@ -2,13 +2,11 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.support.ui import WebDriverWait
-from bs4 import BeautifulSoup
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.chrome.options import Options
 import pandas as pd
 from openai import OpenAI
 import os
-import time
 
 # Column titles of the CSV, change as desired 
 PAGE_URL = "PAGE_URL"
@@ -26,7 +24,8 @@ is_downloading_first_time = True
 # 25 links per full page 
 PAGES_TO_SCRAPE = 2
 
-API_KEY = "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"
+# TODO: Read from file
+API_KEY = ""
 
 """Scrapes project and image links"""
 def scrape_project_links(driver, url, data_dict, file_path):
