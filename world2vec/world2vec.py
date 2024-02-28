@@ -152,7 +152,22 @@ class World2Vec:
             # Otherwise, increase to the next y layer
             else:
                 current_y += 1
-        # Close the output file
+        # Get the current directory of the Python script
+        current_directory = os.path.dirname(__file__)
+
+        # Extract path of code file, and add to with testbuilds
+        folder_name = 'testbuilds'
+        folder_path = os.path.join(current_directory, folder_name)
+
+        # Check if the folder exists
+        if not os.path.exists(folder_path) or not os.path.isdir(folder_path):
+            # Create the folder if it doesn't exist
+            os.makedirs(folder_path)
+            
+        # Now that the folder exists, you can save the schematic file
+        schem.save(folder_path, "my_schematic_" + str(build_no), mcschematic.Version.JE_1_20_1)
+
+
         schem.save("testbuilds", "my_schematic_" + str(build_no), mcschematic.Version.JE_1_20_1)
                         #build_file.close()
         print("Build extracted to " + "my_schematics" + str(build_no) + ".schematic...!\n")
