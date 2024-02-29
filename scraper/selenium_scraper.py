@@ -158,7 +158,18 @@ class WebScraper:
 
         print(f"Scraped {download_links_scraped} new download urls.")
 
-    
+    """ Go through the CSV file and download each map """
+    def download_project_maps(self):
+        for row in self.projects_df.itertuples():
+            row_download_url = row.DOWNLOAD_URL
+
+            # Check internal download link
+            if "planetminecraft.com" in row_download_url:
+                self.download_internal_map(row_download_url)
+            # Otherwise external download link
+            else:
+                print("External download link found")
+
     """ Scrape a download link for third party websites """
     def get_third_party_download_link(self):
         try:
