@@ -6,6 +6,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.chrome.options import Options
 import pandas as pd
 from openai import OpenAI
+import time
 import os
 from dataclasses import dataclass, field
 from typeguard import typechecked
@@ -254,14 +255,17 @@ class WebScraper:
             # Switch to second tab
             print("Switching to second tab")
             self.driver.switch_to.window(self.driver.window_handles[1])
+            time.sleep(0.33)
 
             # Close second tab
             print("Closing second tab")
             self.driver.close()
+            time.sleep(0.33)
 
             # Switch to original tab
             print("Switching to first tab")
             self.driver.switch_to.window(self.driver.window_handles[0])
+            time.sleep(0.33)
 
     def wait_until_download_finished(self):
         # Go to the downloads page in Chrome
@@ -269,6 +273,8 @@ class WebScraper:
 
         # While the map is not downloaded
         while True:
+            time.sleep(1)
+
             # Check if the map is downloading (Chrome shows a pause and cancel buttons)
             try:
                 pause_button = self.driver.find_element(By.ID, 'pauseOrResume')
