@@ -52,6 +52,13 @@ class WebScraperConfig:
         #chrome_options.add_argument("--headless")  # Uncomment if you don't need a browser GUI
         chrome_options.add_argument('log-level=3') # Only log "fatal" errors (most aren't actually program-critical)
         
+        prefs = {
+                "download.default_directory" : self.BUILD_DOWNLOAD_DIRECTORY,
+                "download.prompt_for_download": False,
+                "download.directory_upgrade": True,
+            }
+        chrome_options.add_experimental_option("prefs", prefs)
+
         driver = webdriver.Chrome(options=chrome_options)
 
         return driver
