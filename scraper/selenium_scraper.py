@@ -168,7 +168,7 @@ class WebScraper:
                 self.download_internal_map(row_download_url)
             # Otherwise external download link
             else:
-                print("External download link found")
+                self.download_external_map(row_download_url)
 
     """ Scrape a download link for third party websites """
     def get_third_party_download_link(self):
@@ -293,3 +293,7 @@ class WebScraper:
         # Wait until the download finishes
         self.wait_until_download_finished()
         print("Finished downloading:", map_title)
+
+    # TODO: Add support for external map downloads
+    def download_external_map(self, external_download_link):
+        print("External download link found")
