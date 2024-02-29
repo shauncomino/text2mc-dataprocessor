@@ -15,8 +15,9 @@ from typeguard import typechecked
 PAGES_PER_CSV_UPDATE = 1; 
 DOWNLOAD_LINKS_PER_CSV_UPDATE = 5
 
-# Flag to check if the user started to download maps
+# Map downloading global variables
 is_downloading_first_time = True
+file_name = ""
 
 # 25 links per full page 
 PAGES_TO_SCRAPE = 2
@@ -166,6 +167,17 @@ class WebScraper:
 
         print(f"Scraped {download_links_scraped} new download urls.")
 
+    def update_csv(self, row):
+        global file_name
+
+        file_type = ".{0}".format(file_name.split('.')[-1])
+        local_file_path = f"builds/{file_name}"
+
+        # TODO: Create a new tuple and replace to current row
+        # self.projects_df.loc[row.index, row.FILE_TYPE] = file_type
+        # self.projects_df.loc[row.index, row.BUILD_PATH] = local_file_path
+        # self.save_to_csv()
+
     """ Go through the CSV file and download each map """
     def download_project_maps(self):
         for row in self.projects_df.itertuples():
@@ -177,6 +189,10 @@ class WebScraper:
             # Otherwise external download link
             else:
                 self.download_external_map(row_download_url)
+                continue # TODO: Remove this "continue" after finishing the external map download function
+
+            # Update CSV file
+            self.update_csv(row)
 
     """ Scrape a download link for third party websites """
     def get_third_party_download_link(self):
@@ -287,6 +303,9 @@ class WebScraper:
                 pause_button = self.driver.find_element(By.ID, 'pauseOrResume')
             # Else the map finished downloading (There is no more pause and cancel buttons)
             except:
+                # Update the file name
+                global file_name
+                file_name = self.driver.execute_script("return document.querySelector('downloads-manager').shadowRoot.querySelector('#downloadsList downloads-item').shadowRoot.querySelector('div#content  #file-link').text")
                 break
 
     def download_internal_map(self, internal_download_link):
