@@ -176,32 +176,23 @@ class WebScraper:
 
         print(f"Scraped {download_links_scraped} new download urls.")
 
-    def update_csv(self, row):
-        global file_name
-
-        file_type = ".{0}".format(file_name.split('.')[-1])
-        local_file_path = f"builds/{file_name}"
-
-        # TODO: Create a new tuple and replace to current row
-        # self.projects_df.loc[row.index, row.FILE_TYPE] = file_type
-        # self.projects_df.loc[row.index, row.BUILD_PATH] = local_file_path
-        # self.save_to_csv()
-
-    """ Go through the CSV file and download each map """
-    def download_project_maps(self):
+    """ Go through the CSV file and scrape the raw download links """
+    def scrape_raw_map_download_links(self):
         for index, row in self.projects_df.iterrows():
             row_download_url = row["DOWNLOAD_URL"]
+            raw_download_link = ""
 
             # Check internal download link
             if "planetminecraft.com" in row_download_url:
-                self.download_internal_map(row_download_url)
+                raw_download_link = self.scrape_internal_raw_download_link(row_download_url)
             # Otherwise external download link
             else:
-                # self.download_external_map(row_download_url)
-                continue # TODO: Remove this "continue" after finishing the external map download function
+                raw_download_link = self.scrape_third_party_raw_download_link(row_download_url)
 
-            # Update CSV file
-            self.update_csv(row)
+            # Add the raw download link to the CSV file
+            if raw_download_link is not None:
+                self.projects_df.loc[index, row["RAW_DOWNLOAD_LINK"]] = raw_download_link
+                self.save_to_csv()
 
     """ Scrape a download link for third party websites """
     def get_third_party_download_link(self):
@@ -335,8 +326,10 @@ class WebScraper:
         self.wait_until_download_finished()
         print("Finished downloading:", map_title)
 
-    # TODO: Add support for external map downloads
-    def download_external_map(self, external_download_link):
+    def scrape_internal_raw_download_link(self, internal_download_link):
+        return
+
+    def scrape_third_party_raw_download_link(self, external_download_link):
         self.driver.get(external_download_link)
 
         download_button = None
@@ -351,6 +344,7 @@ class WebScraper:
                 download_button = self.driver.find_element(By.CSS_SELECTOR, 'div[aria-label="Download"]')
             else:
                 print("third-party type not recognized: " + external_download_link)
+                return
         except:
             print("Download page not available")
             return
@@ -361,16 +355,10 @@ class WebScraper:
         
         try:
             raw_download_link = download_button.get_attribute('href')
+            return raw_download_link
         except:
             print("Cannot find raw download link")
             return
-        
-        try:
-            self.driver.execute_script("arguments[0].click()", download_button)
-            self.wait_until_download_finished()
-        except Exception as e:
-            print("Unable to download external map")
-            print(e)
 
     def download_with_raw_link(self, raw_download_link: str = None, filename: Optional[str] = None):
         # Make a request to get the file
