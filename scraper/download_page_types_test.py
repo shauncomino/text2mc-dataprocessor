@@ -10,10 +10,9 @@ def main():
     scraper_config = WebScraperConfig(**config)
     web_scraper = WebScraper(scraper_config)
 
-    test_mediafire_link = "https://www.mediafire.com/file/uyoi29ruip5v3dy/United_States_tjc%25286%2529.zip/file"
-    test_googledrive_link = ""
+    test_link = "https://download1514.mediafire.com/y3k7sx6z5log6jKY89T8QaqhDKy59KF-TdeZ133J8PEYrsC44Zss_iFXXivPKWZN6F9Hw9vFoaAdJhDTIMo3WaHxWOy2ttA80sThZ2AjLqt2afRNFZ1OdTMlfuQTBaym2ajJHL2rZSybcsIwSSFdTwo3JW_2gyq6hxQ85hsC3Zyz4Q/qy4qfwk23z9ao9a/FarmHouseLandscape.zip"
 
-    web_scraper.download_external_map(test_mediafire_link)
+    web_scraper.download_with_raw_link(test_link)
 
 
 if __name__ == '__main__':

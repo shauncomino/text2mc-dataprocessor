@@ -360,6 +360,35 @@ class WebScraper:
             print("Unable to download external map")
             print(e)
 
+    def download_with_raw_link(self, raw_download_link: str = None, filename: Optional[str] = None):
+        # Make a request to get the file
+        response = requests.get(raw_download_link, stream=True)
+
+        # Extract filename from URL if not provided
+        if filename is None:
+            filename = raw_download_link.split("/")[-1]
+
+        # Combine the directory and filename
+        filepath = os.path.join(self.cfg.BUILD_DOWNLOAD_DIRECTORY, filename)
+
+        # Total size in bytes.
+        total_size = int(response.headers.get('content-length', 0))
+
+        # Initialize the progress bar
+        progress_bar = tqdm(total=total_size, unit='iB', unit_scale=True)
+
+        # Open the file with write-binary mode
+        with open(filepath, 'wb') as file:
+            for data in response.iter_content(chunk_size=1024):
+                progress_bar.update(len(data))
+                file.write(data)
+                
+        progress_bar.close()
+
+        # Check if the file was downloaded completely
+        if total_size != 0 and progress_bar.n != total_size:
+            print("ERROR, something went wrong")
+
 
     
 
