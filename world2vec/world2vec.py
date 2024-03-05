@@ -1,6 +1,9 @@
 import anvil
 import os
 from typing import Generator
+import mcschematic
+
+# Now you can use mcschematic
 
 # Class to parse data files and vectorize them into information the model can train on
 class World2Vec:
@@ -23,8 +26,8 @@ class World2Vec:
                 # Only search the region file if it is not empty (because apparently sometimes they are empty?)
                 if (region.data):
                     # Retrieve each chunk in the region
-                    for x in range(0, 31):
-                        for z in range(0, 31):
+                    for x in range(0, 32):
+                        for z in range(0, 32):
                             # Region files need not contain 32x32 chunks, so we must check if the chunk exists
                             if region.chunk_data(x, z):
                                 chunk = anvil.Region.get_chunk(region, x, z)
@@ -55,14 +58,15 @@ class World2Vec:
         print("Build chunks found!")
     
     # Extracts a build from a list of chunks and writes a file containing block info and coordinates
-    def extract_build(chunk_gen: Generator[anvil.Chunk, None, None], filename: str):
-        print("Extracting build from chunks into " + filename + ".txt...")
+    def extract_build(chunk_gen: Generator[anvil.Chunk, None, None], build_no: int):
+        print("Extracting build from chunks into " + "my_schematics" + ".schematic...")
         # Read in terrain blocks to an array
         t_file = open("terrain.txt", 'r')
         terrain = t_file.read().splitlines()
         t_file.close()
         # Open the output file
-        build_file = open(filename + ".txt", 'w')
+        schem = mcschematic.MCSchematic()
+        #                   build_file = open(filename + ".txt", 'w')
         # Part of this process is finding the lowest y-value that can be considered the "surface"
         # This will almost certainly never by y=0, so if this value is unchanged, we know something went wrong
         lowest_surface_y = 0
@@ -93,11 +97,11 @@ class World2Vec:
                 print("Error: No surface section found in chunk", chunk.x, chunk.z)
                 return
             # Iterate through the surface section and find the lowest surface (terrain) block
-            # Because we are specifying the section, we are using relative coordinates in the 0-15 range, rather than global coordinates 
+            # Because we are specifying the section, we are using relative coordinates in the 0-16 range, rather than global coordinates 
             # (this is better for us, as it is world-agnostic)
-            for x in range(0, 15):
-                for z in range(0, 15):
-                    for y in range(0, 15):
+            for x in range(0, 16):
+                for z in range(0, 16):
+                    for y in range(0, 16):
                         # Here we calculate the true y value, in order to compare against other sections
                         true_y = y + (surface_section_y * 16)
                         block = anvil.Chunk.get_block(chunk, x, y, z, section=surface_section)
@@ -126,8 +130,8 @@ class World2Vec:
             for chunk in chunks:
                 relative_chunk_x = chunk.x - origin_x
                 relative_chunk_z = chunk.z - origin_z
-                for x in range(0, 15):
-                    for z in range(0, 15):
+                for x in range(0, 16):
+                    for z in range(0, 16):
                         # This function CAN take global y values, so we don't have to worry about finding specific sections
                         block = anvil.Chunk.get_block(chunk, x, current_y, z)
                         # We're going to ignore air blocks, as we can just fill in empty coordinates later with air blocks
@@ -140,13 +144,30 @@ class World2Vec:
                             new_y = current_y - lowest_surface_y
                             new_z = (relative_chunk_z * 16) + z
                             # Finally, we write to the output file
-                            build_file.write(anvil.Block.name(block) + " " + str(new_x) + " " + str(new_y) + " " + str(new_z) + "\n")
+                            schem.setBlock((int(new_x), int(new_y), int(new_z)),anvil.Block.name(block))
+                            #                       build_file.write(anvil.Block.name(block) + " " + str(new_x) + " " + str(new_y) + " " + str(new_z) + "\n")
             # If this layer is empty, stop searching
             if (empty_layer):
                 searching = False
             # Otherwise, increase to the next y layer
             else:
                 current_y += 1
-        # Close the output file
-        build_file.close()
-        print("Build extracted to " + filename + ".txt!\n")
+        # Get the current directory of the Python script
+        current_directory = os.path.dirname(__file__)
+
+        # Extract path of code file, and add to with testbuilds
+        folder_name = 'testbuilds'
+        folder_path = os.path.join(current_directory, folder_name)
+
+        # Check if the folder exists
+        if not os.path.exists(folder_path) or not os.path.isdir(folder_path):
+            # Create the folder if it doesn't exist
+            os.makedirs(folder_path)
+            
+        # Now that the folder exists, you can save the schematic file
+        schem.save(folder_path, "my_schematic_" + str(build_no), mcschematic.Version.JE_1_20_1)
+
+
+        schem.save("testbuilds", "my_schematic_" + str(build_no), mcschematic.Version.JE_1_20_1)
+                        #build_file.close()
+        print("Build extracted to " + "my_schematics" + str(build_no) + ".schematic...!\n")
