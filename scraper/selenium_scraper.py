@@ -29,7 +29,7 @@ PAGES_TO_SCRAPE = 2
 @dataclass
 class WebScraperConfig:
     def default_csv_columns():
-        return ["PAGE_URL", "DOWNLOAD_URL", "IMAGE_URL", "GPT4_DESCRIPTION", "AUTHOR_DESCRIPTION", "FILE_TYPE", "BUILD_PATH"]
+        return ["PAGE_URL", "DOWNLOAD_URL", "IMAGE_URL", "GPT4_DESCRIPTION", "AUTHOR_DESCRIPTION", "FILE_TYPE", "BUILD_PATH", "RAW_DOWNLOAD_LINK"]
     
     PROJECT_DESCRIPTION_PROMPT: str = None
     """ ChatGPT-4 prompt for generating image descriptions. """
@@ -340,17 +340,29 @@ class WebScraper:
         self.driver.get(external_download_link)
 
         download_button = None
-        if "mediafire" in external_download_link:
-            download_button = self.driver.find_element(By.ID, "download_link")
-        elif "curseforge" in external_download_link:
-            download_button = self.driver.find_element(By.CLASS_NAME, "download-cta")
-        elif "drive.google" in external_download_link:
-            download_button = self.driver.find_element(By.CSS_SELECTOR, 'div[aria-label="Download"]')
-        else:
-            print("third-party type not recognized: " + external_download_link)
+        raw_download_link = ""
+
+        try:
+            if "mediafire" in external_download_link:
+                download_button = self.driver.find_element(By.ID, "downloadButton")
+            elif "curseforge" in external_download_link:
+                download_button = self.driver.find_element(By.CLASS_NAME, "download-cta")
+            elif "drive.google" in external_download_link:
+                download_button = self.driver.find_element(By.CSS_SELECTOR, 'div[aria-label="Download"]')
+            else:
+                print("third-party type not recognized: " + external_download_link)
+        except:
+            print("Download page not available")
+            return
 
         if (download_button is None):
             print("Cannot find download button element")
+            return
+        
+        try:
+            raw_download_link = download_button.get_attribute('href')
+        except:
+            print("Cannot find raw download link")
             return
         
         try:
