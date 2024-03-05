@@ -128,7 +128,7 @@ class WebScraper:
                 # Check if the new link is original 
                 if new_url and not self.projects_df.loc[target_row, project_url_column].any():
                     num_new_links += 1
-                    self.projects_df.loc[len(self.projects_df)] = [new_url, "", image_url, "", "", "", ""]
+                    self.projects_df.loc[len(self.projects_df)] = [new_url, "", image_url, "", "", "", "", ""]
             
             # Update csv 
             if (project_pages_scraped % PAGES_PER_CSV_UPDATE == 0): 
