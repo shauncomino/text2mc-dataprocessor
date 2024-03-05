@@ -143,8 +143,17 @@ class World2Vec:
                             new_x = (relative_chunk_x * 16) + x
                             new_y = current_y - lowest_surface_y
                             new_z = (relative_chunk_z * 16) + z
+                            # Extract and format the block's properties (if they exist)
+                            block_properties = "["
+                            if len(block.properties) > 0:
+                                for prop in sorted(block.properties):
+                                    block_properties = block_properties + prop + "=" + str(block.properties.get(prop)) + ","
+                            block_properties = block_properties[:-1] + "]"
                             # Finally, we write to the output file
-                            schem.setBlock((int(new_x), int(new_y), int(new_z)),anvil.Block.name(block))
+                            if len(block.properties) > 0:
+                                schem.setBlock((int(new_x), int(new_y), int(new_z)),anvil.Block.name(block) + block_properties)
+                            else:
+                                schem.setBlock((int(new_x), int(new_y), int(new_z)),anvil.Block.name(block))
                             #                       build_file.write(anvil.Block.name(block) + " " + str(new_x) + " " + str(new_y) + " " + str(new_z) + "\n")
             # If this layer is empty, stop searching
             if (empty_layer):
