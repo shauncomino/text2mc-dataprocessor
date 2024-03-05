@@ -10,6 +10,9 @@ import time
 import os
 from dataclasses import dataclass, field
 from typeguard import typechecked
+from typing import Optional
+import requests
+from tqdm import tqdm
 
 # Control csv save rate 
 PAGES_PER_CSV_UPDATE = 1; 
@@ -46,11 +49,16 @@ class WebScraperConfig:
     BUILD_DOWNLOAD_DIRECTORY: str = None
     """ Directory to save the build downloads. """
 
+    NO_GUI: Optional[int] = 0
+    """ Whether or not the browser should be headless """
 
     def initialize_browser(self):
         chrome_options = Options()
         chrome_options.enable_downloads = True
-        #chrome_options.add_argument("--headless")  # Uncomment if you don't need a browser GUI
+
+        if self.NO_GUI:
+            chrome_options.add_argument("--headless")
+
         chrome_options.add_argument('log-level=3') # Only log "fatal" errors (most aren't actually program-critical)
         
         prefs = {
@@ -69,12 +77,13 @@ class WebScraperConfig:
             raise ValueError("OpenAI API key is required.")
         
         if self.BUILD_DOWNLOAD_DIRECTORY is None:
-            self.BUILD_DOWNLOAD_DIRECTORY = os.path.join(os.path.abspath('.'), 'builds')
+            self.BUILD_DOWNLOAD_DIRECTORY = os.path.join(os.path.dirname(__file__), 'builds')
 
         self.openai_client = OpenAI(api_key=self.OPEN_AI_API_KEY)
         
         if not self.CSV_FILE_PATH or not os.path.exists(self.CSV_FILE_PATH):
             self.df = pd.DataFrame(columns=self.CSV_COLUMNS)
+            self.CSV_FILE_PATH = os.path.join(os.path.abspath('./'), "projects.csv")
         else: 
             self.df = pd.read_csv(self.CSV_FILE_PATH)
         
@@ -188,7 +197,7 @@ class WebScraper:
                 self.download_internal_map(row_download_url)
             # Otherwise external download link
             else:
-                self.download_external_map(row_download_url)
+                # self.download_external_map(row_download_url)
                 continue # TODO: Remove this "continue" after finishing the external map download function
 
             # Update CSV file
@@ -328,4 +337,31 @@ class WebScraper:
 
     # TODO: Add support for external map downloads
     def download_external_map(self, external_download_link):
-        print("External download link found")
+        self.driver.get(external_download_link)
+
+        download_button = None
+        if "mediafire" in external_download_link:
+            download_button = self.driver.find_element(By.ID, "download_link")
+        elif "curseforge" in external_download_link:
+            download_button = self.driver.find_element(By.CLASS_NAME, "download-cta")
+        elif "drive.google" in external_download_link:
+            download_button = self.driver.find_element(By.CSS_SELECTOR, 'div[aria-label="Download"]')
+        else:
+            print("third-party type not recognized: " + external_download_link)
+
+        if (download_button is None):
+            print("Cannot find download button element")
+            return
+        
+        try:
+            self.driver.execute_script("arguments[0].click()", download_button)
+            self.wait_until_download_finished()
+        except Exception as e:
+            print("Unable to download external map")
+            print(e)
+
+
+    
+
+
+    

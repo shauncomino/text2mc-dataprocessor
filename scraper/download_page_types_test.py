@@ -10,10 +10,11 @@ def main():
     scraper_config = WebScraperConfig(**config)
     web_scraper = WebScraper(scraper_config)
 
-    web_scraper.scrape_project_links() 
-    web_scraper.scrape_project_download_links()
-    # web_scraper.get_build_descriptions()
-    web_scraper.download_project_maps()
+    test_mediafire_link = "https://www.mediafire.com/file/uyoi29ruip5v3dy/United_States_tjc%25286%2529.zip/file"
+    test_googledrive_link = ""
+
+    web_scraper.download_external_map(test_mediafire_link)
+
 
 if __name__ == '__main__':
     main()

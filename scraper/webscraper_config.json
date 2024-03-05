@@ -1,5 +1,6 @@
 {
   "OPEN_AI_API_KEY": "",
   "CSV_FILE_PATH": "",
-  "PROJECT_DESCRIPTION_PROMPT": "Caption this Minecraft build like you are making a generative AI dataset. BE CONCISE. Include block types and architectural style."
+  "PROJECT_DESCRIPTION_PROMPT": "Caption this Minecraft build like you are making a generative AI dataset. BE CONCISE. Include block types and architectural style.",
+  "NO_GUI": 0
 }
