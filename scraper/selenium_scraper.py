@@ -189,8 +189,8 @@ class WebScraper:
 
     """ Go through the CSV file and download each map """
     def download_project_maps(self):
-        for row in self.projects_df.itertuples():
-            row_download_url = row.DOWNLOAD_URL
+        for index, row in self.projects_df.iterrows():
+            row_download_url = row["DOWNLOAD_URL"]
 
             # Check internal download link
             if "planetminecraft.com" in row_download_url:
