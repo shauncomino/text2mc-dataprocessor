@@ -8,6 +8,7 @@ minecraft:bamboo
 minecraft:basalt
 minecraft:bedrock
 minecraft:beehive
+minecraft:beetroots
 minecraft:big_dripleaf
 minecraft:blackstone
 minecraft:blue_ice
