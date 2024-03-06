@@ -13,23 +13,20 @@ from typeguard import typechecked
 from typing import Optional
 import requests
 from tqdm import tqdm
+import re
+import traceback
+
 
 # Control csv save rate 
-PAGES_PER_CSV_UPDATE = 1; 
+PAGES_PER_CSV_UPDATE = 5; 
 DOWNLOAD_LINKS_PER_CSV_UPDATE = 5
-
-# Map downloading global variables
-is_downloading_first_time = True
-file_name = ""
-
-# 25 links per full page 
-PAGES_TO_SCRAPE = 2
+ROWS_EDITED_PER_UPDATE = 100
 
 
 @dataclass
 class WebScraperConfig:
     def default_csv_columns():
-        return ["PAGE_URL", "DOWNLOAD_URL", "IMAGE_URL", "GPT4_DESCRIPTION", "AUTHOR_DESCRIPTION", "FILE_TYPE", "BUILD_PATH", "RAW_DOWNLOAD_LINK"]
+        return ["PAGE_URL", "DOWNLOAD_URL", "IMAGE_URL", "GPT4_DESCRIPTION", "TAGS", "RAW_DOWNLOAD_LINK"]
     
     PROJECT_DESCRIPTION_PROMPT: str = None
     """ ChatGPT-4 prompt for generating image descriptions. """
@@ -65,6 +62,9 @@ class WebScraperConfig:
                 "download.default_directory" : self.BUILD_DOWNLOAD_DIRECTORY,
                 "download.prompt_for_download": False,
                 "download.directory_upgrade": True,
+                "profile.default_content_settings.cookies": 2,
+                "profile.block_third_party_cookies": True
+
             }
         chrome_options.add_experimental_option("prefs", prefs)
 
@@ -76,16 +76,25 @@ class WebScraperConfig:
         if self.OPEN_AI_API_KEY is None:
             raise ValueError("OpenAI API key is required.")
         
-        if self.BUILD_DOWNLOAD_DIRECTORY is None:
-            self.BUILD_DOWNLOAD_DIRECTORY = os.path.join(os.path.dirname(__file__), 'builds')
+        if self.BUILD_DOWNLOAD_DIRECTORY is None or not os.path.exists(self.BUILD_DOWNLOAD_DIRECTORY):
+            self.BUILD_DOWNLOAD_DIRECTORY = os.path.join(os.path.abspath('./'), 'builds')
 
+        os.makedirs(self.BUILD_DOWNLOAD_DIRECTORY, exist_ok=True)
         self.openai_client = OpenAI(api_key=self.OPEN_AI_API_KEY)
         
         if not self.CSV_FILE_PATH or not os.path.exists(self.CSV_FILE_PATH):
             self.df = pd.DataFrame(columns=self.CSV_COLUMNS)
             self.CSV_FILE_PATH = os.path.join(os.path.abspath('./'), "projects.csv")
+            if (os.path.exists(self.CSV_FILE_PATH)):
+                print("Previous CSV file found! Loading...")
+                self.df = pd.read_csv(self.CSV_FILE_PATH)
+                self.df = self.df.loc[:, ~self.df.columns.str.contains('^Unnamed')]
+                print(self.df.head())
         else: 
+            print("Previous CSV file found! Loading...")
             self.df = pd.read_csv(self.CSV_FILE_PATH)
+            self.df = self.df.loc[:, ~self.df.columns.str.contains('^Unnamed')]
+            print(self.df.head())
         
         self.driver = self.initialize_browser()      
 
@@ -103,13 +112,13 @@ class WebScraper:
         self.projects_df.to_csv(self.cfg.CSV_FILE_PATH, index=False)
 
     """Scrapes project and image links"""
-    def scrape_project_links(self):
+    def scrape_project_links(self, pages_to_scrape: Optional[int] = 1):
         num_new_links = 0
 
         current_url = self.cfg.BASE_URL 
 
         # Iterate for given number of pages 
-        for project_pages_scraped in range (0, PAGES_TO_SCRAPE):
+        for project_pages_scraped in range (0, pages_to_scrape):
             self.driver.get(current_url) # load next page  
 
             # Pull list of r-info classes from page
@@ -125,11 +134,16 @@ class WebScraper:
                 target_row = self.projects_df[self.cfg.CSV_COLUMNS[0]] == new_url
                 project_url_column = self.cfg.CSV_COLUMNS[0]
 
-                # Check if the new link is original 
-                if new_url and not self.projects_df.loc[target_row, project_url_column].any():
+                if new_url and not (self.projects_df[project_url_column] == new_url).any():
                     num_new_links += 1
-                    self.projects_df.loc[len(self.projects_df)] = [new_url, "", image_url, "", "", "", "", ""]
-            
+                    # Create a dictionary with all column names initialized to an empty string or appropriate default value
+                    row_data = {col: "" for col in self.projects_df.columns}
+                    # Assign new_url to the "PAGE_URL" column and image_url to the "IMAGE_URL" column
+                    row_data["PAGE_URL"] = new_url
+                    row_data["IMAGE_URL"] = image_url
+                    # Append the new row to the DataFrame
+                    self.projects_df.loc[len(self.projects_df)] = row_data
+                            
             # Update csv 
             if (project_pages_scraped % PAGES_PER_CSV_UPDATE == 0): 
                 self.save_to_csv()
@@ -139,6 +153,7 @@ class WebScraper:
             current_url = pagination_next.get_attribute("href")
         
         print(f"Scraped {num_new_links} new project urls.")
+        self.save_to_csv()
 
 
     """Scrapes the project download links using previously captured project page links"""
@@ -162,10 +177,10 @@ class WebScraper:
 
                 # Check and store download links 
                 if internal_download_link:
-                    self.projects_df.loc[row, self.cfg.CSV_COLUMNS[1]] = internal_download_link
+                    self.projects_df.loc[row, "DOWNLOAD_URL"] = internal_download_link
                     download_links_scraped += 1
                 elif third_party_download_link:
-                    self.projects_df.loc[row, self.cfg.CSV_COLUMNS[1]] = third_party_download_link
+                    self.projects_df.loc[row, "DOWNLOAD_URL"] = third_party_download_link
                     download_links_scraped += 1
                 else: 
                     print("No project link found for " + project_link) 
@@ -186,13 +201,19 @@ class WebScraper:
             if "planetminecraft.com" in row_download_url:
                 raw_download_link = self.scrape_internal_raw_download_link(row_download_url)
             # Otherwise external download link
-            else:
+            elif "mediafire" in row_download_url:
                 raw_download_link = self.scrape_third_party_raw_download_link(row_download_url)
-
+            else:
+                pass
+            
             # Add the raw download link to the CSV file
             if raw_download_link is not None:
-                self.projects_df.loc[index, row["RAW_DOWNLOAD_LINK"]] = raw_download_link
+                self.projects_df.loc[index, "RAW_DOWNLOAD_LINK"] = raw_download_link
+                
+            if index % ROWS_EDITED_PER_UPDATE == 0:
                 self.save_to_csv()
+        
+        self.save_to_csv()
 
     """ Scrape a download link for third party websites """
     def get_third_party_download_link(self):
@@ -257,109 +278,97 @@ class WebScraper:
         # Remove quotes, newlines, and leading/trailing whitespace
         return response.choices[0].message.content.strip().replace('\n', '').replace("\"", '')
     
-    """ Clicking the download button for the first time opens a sponsor waiting page """
-    """ For the first time downloading, click the download button and close the sponsor page """
-    def handle_first_map_download(self):
-        print("First time downloading")
-
-        global is_downloading_first_time
-        is_downloading_first_time = False
-
-        # Click the download button
-        download_button = self.driver.find_element(By.CLASS_NAME, 'branded-download')
-        self.driver.execute_script("arguments[0].click()", download_button)
-
-        # Wait until the sponsor page tab opens
-        wait = WebDriverWait(self.driver, 10)
-        wait.until(EC.number_of_windows_to_be(2))
-
-        # Two tabs open: (1) the original map page and (2) the sponsor waiting page
-        if len(self.driver.window_handles) == 2:
-            # Switch to second tab
-            print("Switching to second tab")
-            self.driver.switch_to.window(self.driver.window_handles[1])
-            time.sleep(0.33)
-
-            # Close second tab
-            print("Closing second tab")
-            self.driver.close()
-            time.sleep(0.33)
-
-            # Switch to original tab
-            print("Switching to first tab")
-            self.driver.switch_to.window(self.driver.window_handles[0])
-            time.sleep(0.33)
-
-    def wait_until_download_finished(self):
-        # Go to the downloads page in Chrome
-        self.driver.get('chrome://downloads/')
-
-        # While the map is not downloaded
-        while True:
-            time.sleep(1)
-
-            # Check if the map is downloading (Chrome shows a pause and cancel buttons)
+    """ Scrapes the tags of all the existing builds in the dataframe """
+    def scrape_tags(self):
+        for index, row in self.projects_df.iterrows():
             try:
-                pause_button = self.driver.find_element(By.ID, 'pauseOrResume')
-            # Else the map finished downloading (There is no more pause and cancel buttons)
-            except:
-                # Update the file name
-                global file_name
-                file_name = self.driver.execute_script("return document.querySelector('downloads-manager').shadowRoot.querySelector('#downloadsList downloads-item').shadowRoot.querySelector('div#content  #file-link').text")
-                break
+                page_url = row["PAGE_URL"]
+                tags = self.scrape_tags_of_one_build(page_url)
 
-    def download_internal_map(self, internal_download_link):
-        self.driver.get(internal_download_link)
-        map_title = self.driver.find_element(By.ID, 'resource-title-text').text
-        print("Downloading map:", map_title)
+                if len(tags) > 0:
+                    self.projects_df.loc[index, "TAGS"] = tags
+                
+                if index % ROWS_EDITED_PER_UPDATE == 0:
+                    self.save_to_csv()
+            except Exception as e:
+                print(e)
+                print(f"Failed to scrape tags for link: {page_url}")
+            
+        self.save_to_csv()
 
-        global is_downloading_first_time
-        
-        if is_downloading_first_time:
-            self.handle_first_map_download()
 
-        # Download the map
-        download_button = self.driver.find_element(By.CLASS_NAME, 'branded-download')
-        self.driver.execute_script("arguments[0].click()", download_button)
-
-        # Wait until the download finishes
-        self.wait_until_download_finished()
-        print("Finished downloading:", map_title)
-
-    def scrape_internal_raw_download_link(self, internal_download_link):
-        return
-
+    """ Gets the tags of a single build from the build page """
+    def scrape_tags_of_one_build(self, build_page_url):
+        tags_list = list()
+        self.driver.get(build_page_url)
+        tags = self.driver.find_elements(By.CLASS_NAME, "tag")
+        for tag in tags:
+            # Extracting the inner text of the tag element
+            tag_text = tag.find_element(By.TAG_NAME, "a").text
+            # Appending the extracted text to the tags_list
+            tags_list.append(tag_text)
+            
+        return str(tags_list)
+    
+    """ Gets the GET requestable URL from the planetminecraft build page using regular expressions """
+    def scrape_internal_raw_download_link(self, build_page_url):
+        download_link = None
+        try:
+            self.driver.get(build_page_url)
+            scripts = self.driver.find_elements(By.TAG_NAME, "script")
+            for script in scripts:
+                if "schematic:" in script.get_attribute("innerHTML"):
+                    # Extract the URL using regular expression
+                    matches = re.search(r'schematic: "(.*?)",', script.get_attribute("innerHTML"), re.DOTALL)
+                    if matches:
+                        s3_url = matches.group(1)
+                        # Extract the part of the URL after 'static.planetminecraft.com' and before the query parameters
+                        url_path = re.search(r'static\.planetminecraft\.com(.*?\.\w+)', s3_url)
+                        if url_path:
+                            # Form the direct download link
+                            download_link = f"https://static.planetminecraft.com{url_path.group(1)}"
+                            break
+        except Exception as e:
+            print(e)
+            print("Couldn't locate direct download link for planetminecraft hosted build")
+                    
+        return download_link
+    
+    """ Yoinks the GET requestable URL from the third-party link """
     def scrape_third_party_raw_download_link(self, external_download_link):
         self.driver.get(external_download_link)
 
         download_button = None
-        raw_download_link = ""
+        raw_download_link = None
 
         try:
             if "mediafire" in external_download_link:
                 download_button = self.driver.find_element(By.ID, "downloadButton")
-            elif "curseforge" in external_download_link:
-                download_button = self.driver.find_element(By.CLASS_NAME, "download-cta")
-            elif "drive.google" in external_download_link:
-                download_button = self.driver.find_element(By.CSS_SELECTOR, 'div[aria-label="Download"]')
-            else:
-                print("third-party type not recognized: " + external_download_link)
-                return
+                raw_download_link = download_button.get_attribute('href')
         except:
             print("Download page not available")
-            return
 
-        if (download_button is None):
-            print("Cannot find download button element")
-            return
-        
-        try:
-            raw_download_link = download_button.get_attribute('href')
-            return raw_download_link
-        except:
-            print("Cannot find raw download link")
-            return
+        return raw_download_link
+    
+    """ Downloads all the builds using get requests """
+    def download_all_builds(self):
+        for index, row in self.projects_df.iterrows():
+            print(row)
+            raw_url = row["RAW_DOWNLOAD_LINK"]
 
+            # Check if raw_url is not NaN, not None, and not an empty string
+            if pd.notna(raw_url) and raw_url:
+                try:
+                    self.download_with_raw_link(raw_download_link=raw_url)
+                except Exception as e:
+                    print(e)
+                    print(traceback.format_exc())  # This ensures that you see the traceback of the exception
+                    print(f"Failed to download with link: {raw_url}")
+            else:
+                print("Skipping empty or invalid URL.")
+
+            
+    """ Downloads a single build using a get request """
     def download_with_raw_link(self, raw_download_link: str = None, filename: Optional[str] = None):
         # Make a request to get the file
         response = requests.get(raw_download_link, stream=True)
@@ -382,7 +391,7 @@ class WebScraper:
             for data in response.iter_content(chunk_size=1024):
                 progress_bar.update(len(data))
                 file.write(data)
-                
+
         progress_bar.close()
 
         # Check if the file was downloaded completely

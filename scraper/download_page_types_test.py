@@ -10,10 +10,9 @@ def main():
     scraper_config = WebScraperConfig(**config)
     web_scraper = WebScraper(scraper_config)
 
-    test_link = "https://download1514.mediafire.com/y3k7sx6z5log6jKY89T8QaqhDKy59KF-TdeZ133J8PEYrsC44Zss_iFXXivPKWZN6F9Hw9vFoaAdJhDTIMo3WaHxWOy2ttA80sThZ2AjLqt2afRNFZ1OdTMlfuQTBaym2ajJHL2rZSybcsIwSSFdTwo3JW_2gyq6hxQ85hsC3Zyz4Q/qy4qfwk23z9ao9a/FarmHouseLandscape.zip"
+    test_link = "https://static.planetminecraft.com/files/resource_media/schematic/boulevardier-s-shophouse.zip"
 
     web_scraper.download_with_raw_link(test_link)
-
-
+    
 if __name__ == '__main__':
     main()

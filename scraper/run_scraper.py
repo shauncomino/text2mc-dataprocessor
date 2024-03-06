@@ -10,10 +10,11 @@ def main():
     scraper_config = WebScraperConfig(**config)
     web_scraper = WebScraper(scraper_config)
 
-    web_scraper.scrape_project_links() 
+    web_scraper.scrape_project_links(pages_to_scrape=1) 
     web_scraper.scrape_project_download_links()
-    # web_scraper.get_build_descriptions()
+    web_scraper.scrape_tags()
     web_scraper.scrape_raw_map_download_links()
+    web_scraper.download_all_builds()
 
 if __name__ == '__main__':
     main()
