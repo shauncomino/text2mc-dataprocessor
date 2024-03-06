@@ -20,7 +20,7 @@ import traceback
 # Control csv save rate 
 PAGES_PER_CSV_UPDATE = 5; 
 DOWNLOAD_LINKS_PER_CSV_UPDATE = 5
-ROWS_EDITED_PER_UPDATE = 100
+ROWS_EDITED_PER_UPDATE = 400
 
 
 @dataclass
@@ -123,26 +123,26 @@ class WebScraper:
 
             # Pull list of r-info classes from page
             r_info_classes = self.driver.find_elements(By.CLASS_NAME, 'r-info')
-            image_urls = self.driver.find_elements(By.CSS_SELECTOR, 'picture')
-
+        
             # Look at each r-info class in list 
             for index in range (0, len(r_info_classes)):
-                # Scrape project page link from the class 
-                new_url = (r_info_classes[index].find_element(By.CSS_SELECTOR, 'a[href^="/project"]')).get_attribute("href") 
-                image_url = image_urls[index].find_element(By.CSS_SELECTOR, 'img').get_attribute("src")
+                try:
+                    # Scrape project page link from the class 
+                    new_url = (r_info_classes[index].find_element(By.CSS_SELECTOR, 'a[href^="/project"]')).get_attribute("href") 
 
-                target_row = self.projects_df[self.cfg.CSV_COLUMNS[0]] == new_url
-                project_url_column = self.cfg.CSV_COLUMNS[0]
+                    project_url_column = self.cfg.CSV_COLUMNS[0]
 
-                if new_url and not (self.projects_df[project_url_column] == new_url).any():
-                    num_new_links += 1
-                    # Create a dictionary with all column names initialized to an empty string or appropriate default value
-                    row_data = {col: "" for col in self.projects_df.columns}
-                    # Assign new_url to the "PAGE_URL" column and image_url to the "IMAGE_URL" column
-                    row_data["PAGE_URL"] = new_url
-                    row_data["IMAGE_URL"] = image_url
-                    # Append the new row to the DataFrame
-                    self.projects_df.loc[len(self.projects_df)] = row_data
+                    if new_url and not (self.projects_df[project_url_column] == new_url).any():
+                        num_new_links += 1
+                        # Create a dictionary with all column names initialized to an empty string or appropriate default value
+                        row_data = {col: "" for col in self.projects_df.columns}
+                        # Assign new_url to the "PAGE_URL" column and image_url to the "IMAGE_URL" column
+                        row_data["PAGE_URL"] = new_url
+                        # Append the new row to the DataFrame
+                        self.projects_df.loc[len(self.projects_df)] = row_data
+                except Exception as e:
+                    print(e)
+                    print(traceback.format_exc())
                             
             # Update csv 
             if (project_pages_scraped % PAGES_PER_CSV_UPDATE == 0): 
@@ -157,18 +157,50 @@ class WebScraper:
 
 
     """Scrapes the project download links using previously captured project page links"""
-    def scrape_project_download_links(self): 
+    def scrape_project_page_info(self): 
         download_links_scraped = 0
 
-        for row in range (0, len(self.projects_df.index)): 
+        columns_to_check = ["TAGS", "IMAGE_URL", "DOWNLOAD_URL"]
+        first_na_row = self.projects_df[columns_to_check].isna().all(axis=1).idxmax()
+
+        if (first_na_row != 0):
+            print(f"Found previously calculated values tags, image urls, and download urls. Starting page info scraping at index: {first_na_row}")
+
+        for row in range(first_na_row, len(self.projects_df.index)): 
             download_url = self.projects_df.loc[row, self.cfg.CSV_COLUMNS[1]] 
 
             if download_url == "" or pd.isna(download_url):
-                project_link = self.projects_df.loc[row, self.cfg.CSV_COLUMNS[0]]
+                project_link = self.projects_df.loc[row, "PAGE_URL"]
             
                 # Navigate to project page using previously scraped link 
                 self.driver.get(project_link) 
-            
+
+                tags = ""
+                try:
+                    # Grab the tags of the build
+                    tags = self.scrape_tags_of_one_build()
+                except Exception as e:
+                    print(e)
+                    print(traceback.format_exc())
+
+                if len(tags) > 0:
+                    self.projects_df.loc[row, "TAGS"] = tags
+
+                large_jpg_url = ""
+                # Grab the large image URL of the build
+                try:
+                    large_jpg_selector = 'picture.lg-img-wrap source[srcset$="_l.jpg"]'
+                    large_jpg_element = self.driver.find_element(By.CSS_SELECTOR, large_jpg_selector)
+
+                    # Extract the 'srcset' attribute, which contains the URL of the large JPG image
+                    large_jpg_url = large_jpg_element.get_attribute('srcset')
+
+                except Exception as e:
+                    print(e)
+                    print(traceback.format_exc())
+                
+                self.projects_df.loc[row, "IMAGE_URL"] = large_jpg_url
+
                 # Get internal Planet Minecraft download link
                 internal_download_link = self.get_internal_download_link()
 
@@ -184,36 +216,54 @@ class WebScraper:
                     download_links_scraped += 1
                 else: 
                     print("No project link found for " + project_link) 
-                
-                # Update csv 
-                if (download_links_scraped % DOWNLOAD_LINKS_PER_CSV_UPDATE == 0): 
-                    self.save_to_csv()
 
-        print(f"Scraped {download_links_scraped} new download urls.")
+            # Update csv 
+            if (row % ROWS_EDITED_PER_UPDATE == 0): 
+                print(f"Scraped {download_links_scraped} new download urls, tags, and images")
+                self.save_to_csv()
 
     """ Go through the CSV file and scrape the raw download links """
     def scrape_raw_map_download_links(self):
-        for index, row in self.projects_df.iterrows():
-            row_download_url = row["DOWNLOAD_URL"]
+        total_rows = len(self.projects_df.index)
+        
+        # Find the last NA value in the RAW_DOWNLOAD_LINK column
+        reversed_na_series = self.projects_df["RAW_DOWNLOAD_LINK"].isna()[::-1]
+        last_na_index = reversed_na_series.idxmax() if reversed_na_series.any() else -1
+        
+        # Check if a last NA index was found
+        if last_na_index >= 0:
+            print(f"Found precalculated raw download links. Starting at index: {last_na_index}.")
+            start_index = last_na_index + 1  # We will start scraping from the next index
+        else:
+            # If no NA values are found, start from the beginning
+            print("No NA values found in RAW_DOWNLOAD_LINK column. Starting from the beginning.")
+            start_index = 0
+
+        for index in range(start_index, total_rows):
+            row_download_url = self.projects_df.at[index, "DOWNLOAD_URL"]
             raw_download_link = ""
 
             # Check internal download link
             if "planetminecraft.com" in row_download_url:
                 raw_download_link = self.scrape_internal_raw_download_link(row_download_url)
-            # Otherwise external download link
+            # Otherwise, check for external download link
             elif "mediafire" in row_download_url:
                 raw_download_link = self.scrape_third_party_raw_download_link(row_download_url)
             else:
+                # Handle case for other download URLs or when it's empty
                 pass
-            
+
             # Add the raw download link to the CSV file
-            if raw_download_link is not None:
-                self.projects_df.loc[index, "RAW_DOWNLOAD_LINK"] = raw_download_link
-                
-            if index % ROWS_EDITED_PER_UPDATE == 0:
+            if raw_download_link:
+                self.projects_df.at[index, "RAW_DOWNLOAD_LINK"] = raw_download_link
+
+            # Save to CSV file periodically and at the end
+            if index % ROWS_EDITED_PER_UPDATE == 0 or index == total_rows - 1:
                 self.save_to_csv()
-        
+
+        # Ensure the final state of the DataFrame is saved
         self.save_to_csv()
+
 
     """ Scrape a download link for third party websites """
     def get_third_party_download_link(self):
@@ -277,30 +327,10 @@ class WebScraper:
 
         # Remove quotes, newlines, and leading/trailing whitespace
         return response.choices[0].message.content.strip().replace('\n', '').replace("\"", '')
-    
-    """ Scrapes the tags of all the existing builds in the dataframe """
-    def scrape_tags(self):
-        for index, row in self.projects_df.iterrows():
-            try:
-                page_url = row["PAGE_URL"]
-                tags = self.scrape_tags_of_one_build(page_url)
 
-                if len(tags) > 0:
-                    self.projects_df.loc[index, "TAGS"] = tags
-                
-                if index % ROWS_EDITED_PER_UPDATE == 0:
-                    self.save_to_csv()
-            except Exception as e:
-                print(e)
-                print(f"Failed to scrape tags for link: {page_url}")
-            
-        self.save_to_csv()
-
-
-    """ Gets the tags of a single build from the build page """
-    def scrape_tags_of_one_build(self, build_page_url):
+    """ Gets the tags of a single build from the build page, assumes that you are on the page """
+    def scrape_tags_of_one_build(self):
         tags_list = list()
-        self.driver.get(build_page_url)
         tags = self.driver.find_elements(By.CLASS_NAME, "tag")
         for tag in tags:
             # Extracting the inner text of the tag element
