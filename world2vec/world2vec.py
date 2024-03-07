@@ -59,7 +59,7 @@ class World2Vec:
                             if chunk_data:
                                 chunk = anvil.Region.get_chunk(region, x, z)
                                 # Calculate the time the chunk has been inhabited
-                                inhabited_time = chunk_data["InhabitedTime"].value / 20
+                                inhabited_time = chunk_data["Level"]["InhabitedTime"].value or chunk_data["InhabitedTime"].value / 20
                                 # Check whether the chunk has been visited at all, if not we can skip checking it
                                 if(inhabited_time > 5):
                                     # Check whether the given world is superflat
