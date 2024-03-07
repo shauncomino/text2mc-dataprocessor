@@ -145,6 +145,8 @@ minecraft:spawner
 minecraft:moss_block
 minecraft:moss_carpet
 minecraft:mossy_cobblestone
+minecraft:furnace
+minecraft:lit_furnace
 minecraft:mud
 minecraft:red_mushroom
 minecraft:mushroom_stem
@@ -345,3 +347,9 @@ minecraft:snow_block
 minecraft:big_dripleaf_stem
 minecraft:spruce_trapdoor
 minecraft:sea_lantern
+minecraft:wheat_seeds
+minecraft:beetroot_seeds
+minecraft:melon_seeds
+minecraft:pumpkin_seeds
+minecraft:grindstone
+minecraft:black_wool
