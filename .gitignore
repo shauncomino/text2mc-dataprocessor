@@ -1,0 +1,6 @@
+__pycache__
+.vs/
+.vscode/
+builds/
+/.vscode
+/.vs
