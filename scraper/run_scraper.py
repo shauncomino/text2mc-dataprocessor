@@ -14,9 +14,8 @@ def main():
     web_scraper = WebScraper(scraper_config)
 
     # web_scraper.scrape_project_links(pages_to_scrape=1770)
-    web_scraper.scrape_project_page_info()
-    # web_scraper.scrape_tags()
-    # web_scraper.scrape_raw_map_download_links()
+    # web_scraper.scrape_project_page_info()
+    web_scraper.scrape_raw_map_download_links()
     # web_scraper.download_all_builds()
 
 

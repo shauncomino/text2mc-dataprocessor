@@ -261,6 +261,7 @@ class WebScraper:
                     f"Scraped {download_links_scraped} new download urls, tags, and images"
                 )
                 self.save_to_csv()
+        self.save_to_csv()
 
     """ Go through the CSV file and scrape the raw download links """
 
@@ -268,11 +269,10 @@ class WebScraper:
         total_rows = len(self.projects_df.index)
 
         # Find the last NA value in the RAW_DOWNLOAD_LINK column
-        reversed_na_series = self.projects_df["RAW_DOWNLOAD_LINK"].isna()[::-1]
-        last_na_index = reversed_na_series.idxmax() if reversed_na_series.any() else -1
+        last_na_index = self.projects_df["RAW_DOWNLOAD_LINK"].last_valid_index()
 
         # Check if a last NA index was found
-        if last_na_index >= 0:
+        if last_na_index is not None:
             print(
                 f"Found precalculated raw download links. Starting at index: {last_na_index}."
             )
@@ -289,30 +289,34 @@ class WebScraper:
         for index in tqdm(
             range(start_index, total_rows), desc="Raw Download Link Scraping Progress"
         ):
-            row_download_url = self.projects_df.at[index, "DOWNLOAD_URL"]
-            raw_download_link = ""
+            try:
+                row_download_url = self.projects_df.at[index, "DOWNLOAD_URL"]
+                raw_download_link = ""
 
-            # Check internal download link
-            if "planetminecraft.com" in row_download_url:
-                raw_download_link = self.scrape_internal_raw_download_link(
-                    row_download_url
-                )
-            # Otherwise, check for external download link
-            elif "mediafire" in row_download_url:
-                raw_download_link = self.scrape_third_party_raw_download_link(
-                    row_download_url
-                )
-            else:
-                # Handle case for other download URLs or when it's empty
-                pass
+                # Check internal download link
+                if "planetminecraft.com" in row_download_url:
+                    raw_download_link = self.scrape_internal_raw_download_link(
+                        row_download_url
+                    )
+                # Otherwise, check for external download link
+                elif "mediafire" in row_download_url:
+                    raw_download_link = self.scrape_third_party_raw_download_link(
+                        row_download_url
+                    )
+                else:
+                    # Handle case for other download URLs or when it's empty
+                    pass
 
-            # Add the raw download link to the CSV file
-            if raw_download_link:
-                self.projects_df.at[index, "RAW_DOWNLOAD_LINK"] = raw_download_link
+                # Add the raw download link to the CSV file
+                if raw_download_link:
+                    self.projects_df.at[index, "RAW_DOWNLOAD_LINK"] = raw_download_link
 
-            # Save to CSV file periodically and at the end
-            if index % ROWS_EDITED_PER_UPDATE == 0 or index == total_rows - 1:
-                self.save_to_csv()
+                # Save to CSV file periodically and at the end
+                if index % ROWS_EDITED_PER_UPDATE == 0:
+                    self.save_to_csv()
+            except Exception as e:
+                print(e)
+                print(traceback.format_exc())
 
         # Ensure the final state of the DataFrame is saved
         self.save_to_csv()
@@ -452,20 +456,21 @@ class WebScraper:
 
     def scrape_third_party_raw_download_link(self, external_download_link):
         self.driver.get(external_download_link)
-
-        download_button = None
         raw_download_link = None
 
         try:
             if "mediafire" in external_download_link:
-                download_button = self.driver.find_element(By.ID, "downloadButton")
-                raw_download_link = download_button.get_attribute("href")
+                download_buttons = self.driver.find_elements(By.ID, "downloadButton")
+                if len(download_buttons) > 0:
+                    raw_download_link = download_buttons[0].get_attribute("href")
+                else:
+                    print(
+                        f"Download button not found for third party link: {external_download_link}"
+                    )
+
         except Exception as e:
             print(e)
             print(traceback.format_exc())
-            print(
-                f"Download page not available for third party link: {external_download_link}"
-            )
 
         return raw_download_link
 
