@@ -353,3 +353,4 @@ minecraft:melon_seeds
 minecraft:pumpkin_seeds
 minecraft:grindstone
 minecraft:black_wool
+minecraft:stone_slab

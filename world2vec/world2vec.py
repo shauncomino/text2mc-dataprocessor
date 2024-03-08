@@ -30,9 +30,7 @@ class World2Vec:
         nb_file.close()
         # This is the list of all the build chunks
         build_chunks = []
-        # This variable tracks the coordinates of the last identified build chunk, used to reduce computation time 
-        # when faraway chunks are reached
-        last_build_chunk = [None, None]
+        relevant_regions = []
         # Variables to track the build bounds
         low_x = None
         high_x = None
@@ -65,7 +63,7 @@ class World2Vec:
                                     print(f"No InhabitedTime data in chunk at coordinates ({x}, {z})")
                                     sys.exit(1)
                                 # Check whether the chunk has been visited at all, if not we can skip checking it
-                                if(inhabited_time > 5):
+                                if(inhabited_time > 10):
                                     # Check whether the given world is superflat
                                     if superflat is None:
                                         start_section = 0
@@ -104,14 +102,32 @@ class World2Vec:
                                                     low_z = chunk.z
                                                 if high_z is None or chunk.z > high_z:
                                                     high_z = chunk.z
-                                                last_build_chunk[0] = chunk.x
-                                                last_build_chunk[1] = chunk.z
+                                                if filename not in relevant_regions:
+                                                    region_x = filename.split("r.")[1].split(".")[0]
+                                                    region_z = filename.split("r.")[1].split(".")[0]
+                                                    if chunk.x == 0:
+                                                        new_file = "r." + str(region_x - 1) + "." + str(region_z) + ".mca"
+                                                        if new_file in os.listdir(dir):
+                                                            relevant_regions.append(new_file)
+                                                    elif chunk.x == 31:
+                                                        new_file = "r." + str(region_x + 1) + "." + str(region_z) + ".mca"
+                                                        if new_file in os.listdir(dir):
+                                                            relevant_regions.append(new_file)
+                                                    if chunk.z == 0:
+                                                        new_file = "r." + str(region_x) + "." + str(region_z - 1) + ".mca"
+                                                        if new_file in os.listdir(dir):
+                                                            relevant_regions.append(new_file)
+                                                    elif chunk.z == 31:
+                                                        new_file = "r." + str(region_x) + "." + str(region_z + 1) + ".mca"
+                                                        if new_file in os.listdir(dir):
+                                                            relevant_regions.append(new_file)
+                                                    relevant_regions.append(filename)
                                                 chunk_added = True
                                                 break
                                         if chunk_added:
                                             break
         # Iterate through .mca files in dir to fill in missing chunks
-        for filename in os.listdir(dir):
+        for filename in relevant_regions:
             if filename.endswith(".mca"):
                 # Retrieve the region
                 region = anvil.Region.from_file(os.path.join(dir, filename))
@@ -127,7 +143,7 @@ class World2Vec:
                                     if (chunk.x >= low_x and chunk.x <= high_x) and (chunk.z >= low_z and chunk.z <= high_z):
                                         build_chunks.append(chunk)
         # Check for failure and send error message
-        if last_build_chunk[0] == None:
+        if len(build_chunks) == 0:
             print("Error: Build could not be found in region files")
             return
         print("Build chunks found!")
@@ -154,7 +170,7 @@ class World2Vec:
                 min_range = -4
             surface_section = None
             surface_section_y = 0
-            # Begin with section -4 or 0 depending on world surface and find the first section up from there that contains a large amount of air (the "surface" section)
+            # Begin with section -4, 0, or 3 depending on world surface and find the first section up from there that contains a large amount of air (the "surface" section)
             # We stop at section 9 because that is the highest section that get_build_chunks() searches
             for s in range(min_range, 10):
                 air_count = 0
