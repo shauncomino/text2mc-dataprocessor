@@ -22,7 +22,7 @@ class World2Vec:
         return block
 
     # Reads all region files in dir and returns a Generator of Chunks, all of which contain blocks that are not in natural_blocks.txt
-    def get_build_chunks(dir: str) -> tuple[list, bool]:
+    def get_build_chunks(dir: str) -> tuple[list, bool, int]:
         print("Searching directory " + dir + "...")
         # Read in the natural blocks to an array
         nb_file = open("natural_blocks.txt", 'r')
@@ -38,6 +38,7 @@ class World2Vec:
         high_z = None
         # Flag for superflat worlds
         superflat = None
+        superflat_y = 0
         # Iterate through .mca files in dir
         for filename in os.listdir(dir):
             if filename.endswith(".mca"):
@@ -69,12 +70,14 @@ class World2Vec:
                                         start_section = 0
                                         if chunk.version is not None and chunk.version > 1451:
                                             start_section = -4
-                                        section = anvil.Chunk.get_section(chunk, start_section)
-                                        for block in anvil.Chunk.stream_blocks(chunk, section = section):
-                                            block = World2Vec.convert_if_old(block)
-                                            if block != None and anvil.Block.name(block) == "minecraft:grass_block":
-                                                superflat = True
-                                                break
+                                        for s in range(start_section, 0):
+                                            section = anvil.Chunk.get_section(chunk, s)
+                                            for block in anvil.Chunk.stream_blocks(chunk, section = section):
+                                                block = World2Vec.convert_if_old(block)
+                                                if block != None and anvil.Block.name(block) == "minecraft:grass_block":
+                                                    superflat_y = s
+                                                    superflat = True
+                                                    break
                                         if superflat is None:
                                             superflat = False
                                     # If it's a superflat world, change the search sections
@@ -103,8 +106,8 @@ class World2Vec:
                                                 if high_z is None or chunk.z > high_z:
                                                     high_z = chunk.z
                                                 if filename not in relevant_regions:
-                                                    region_x = filename.split("r.")[1].split(".")[0]
-                                                    region_z = filename.split("r.")[1].split(".")[1]
+                                                    region_x = int(filename.split("r.")[1].split(".")[0])
+                                                    region_z = int(filename.split("r.")[1].split(".")[1])
                                                     if chunk.x == 0:
                                                         new_file = "r." + str(region_x - 1) + "." + str(region_z) + ".mca"
                                                         if new_file in os.listdir(dir):
@@ -147,10 +150,10 @@ class World2Vec:
             print("Error: Build could not be found in region files")
             return
         print("Build chunks found!")
-        return build_chunks, superflat
+        return build_chunks, superflat, superflat_y
 
     # Extracts a build from a list of chunks and writes a file containing block info and coordinates
-    def extract_build(chunks: List, superflat: bool, build_no: int):
+    def extract_build(chunks: List, superflat: bool, superflat_surface: int, build_no: int):
         print("Extracting build from chunks into " + "my_schematics" + ".schematic...")
         # Open the output file
         schem = mcschematic.MCSchematic()
@@ -162,12 +165,10 @@ class World2Vec:
         level = 0
         # If it's a superflat world, we need to search the lower sections
         if(superflat):
-            min_range = 0
+            min_range = superflat_surface
             lowest_surface_y = -100
             level = -100
         for chunk in chunks:
-            if superflat and chunk.version is not None and chunk.version > 1451:
-                min_range = -4
             surface_section = None
             surface_section_y = 0
             # Begin with section -4, 0, or 3 depending on world surface and find the first section up from there that contains a large amount of air (the "surface" section)
