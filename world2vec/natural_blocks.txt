@@ -124,6 +124,7 @@ minecraft:ladder
 minecraft:lapis_ore
 minecraft:deepslate_lapis_ore
 minecraft:jungle_leaves
+minecraft:jungle_trapdoor
 minecraft:azalea_leaves
 minecraft:oak_leaves
 minecraft:birch_leaves
@@ -213,6 +214,7 @@ minecraft:weeping_vines_plant
 minecraft:white_wool
 minecraft:raw_copper_block
 minecraft:raw_iron_block
+minecraft:iron_trapdoor
 minecraft:rail
 minecraft:water
 minecraft:lava
@@ -254,6 +256,10 @@ minecraft:oak_trapdoor
 minecraft:oak_door
 minecraft:oak_pressure_plate
 minecraft:dark_oak_trapdoor
+minecraft:potted_dandelion
+minecraft:potted_cactus
+minecraft:potted_dead_bush
+minecraft:potted_spruce_sapling
 minecraft:dark_oak_door
 minecraft:dark_oak_pressure_plate
 minecraft:stripped_oak_wood
@@ -337,11 +343,15 @@ minecraft:red_tulip
 minecraft:pink_tulip
 minecraft:mangrove_log
 minecraft:mangrove_leaves
+minecraft:fletching_table
 minecraft:mangrove_propagule
 minecraft:muddy_mangrove_roots
 minecraft:mangrove_roots
 minecraft:cave_vines
 minecraft:cave_vines_plant
+minecraft:stonecutter
+minecraft:lectern
+minecraft:water_cauldron
 minecraft:flowering_azalea
 minecraft:snow_block
 minecraft:big_dripleaf_stem

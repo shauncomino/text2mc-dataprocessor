@@ -170,7 +170,7 @@ class World2Vec:
             level = -100
         for chunk in chunks:
             surface_section = None
-            surface_section_y = 0
+            surface_section_y = min_range
             # Begin with section -4, 0, or 3 depending on world surface and find the first section up from there that contains a large amount of air (the "surface" section)
             # We stop at section 9 because that is the highest section that get_build_chunks() searches
             for s in range(min_range, 10):
@@ -183,7 +183,7 @@ class World2Vec:
                         # We'll check for a section to have a good portion of air, testing says 1024 blocks is a good fit
                         if air_count == 1024:
                             surface_section = section
-                            surface_section_y = s
+                            surface_section_y = s - 1
                             break
                 # If we've already found a surface section, stop searching
                 if surface_section != None:
