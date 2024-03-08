@@ -2,6 +2,9 @@ import anvil
 import os
 from typing import Generator
 import mcschematic
+from typing import List
+import nbtlib
+import sys
 
 # Now you can use mcschematic
 
@@ -12,11 +15,14 @@ class World2Vec:
     @staticmethod
     def convert_if_old(block) -> anvil.Block:
         if isinstance(block, anvil.OldBlock):
-            block = anvil.OldBlock.convert(block)
+            try:
+                block = anvil.OldBlock.convert(block)
+            except:
+                return None
         return block
 
     # Reads all region files in dir and returns a Generator of Chunks, all of which contain blocks that are not in natural_blocks.txt
-    def get_build_chunks(dir: str) -> list:
+    def get_build_chunks(dir: str) -> tuple[list, bool]:
         print("Searching directory " + dir + "...")
         # Read in the natural blocks to an array
         nb_file = open("natural_blocks.txt", 'r')
@@ -27,9 +33,6 @@ class World2Vec:
         # This variable tracks the coordinates of the last identified build chunk, used to reduce computation time 
         # when faraway chunks are reached
         last_build_chunk = [None, None]
-        # Dynamic radii to eliminate chunks that are too far from the build
-        x_radius = 3
-        z_radius = 3
         # Variables to track the build bounds
         low_x = None
         high_x = None
@@ -50,59 +53,63 @@ class World2Vec:
                     for x in range(0, 32):
                         for z in range(0, 32):
                             # Region files need not contain 32x32 chunks, so we must check if the chunk exists
-                            if region.chunk_data(x, z):
+                            chunk_data = region.chunk_data(x, z)
+                            if chunk_data:
                                 chunk = anvil.Region.get_chunk(region, x, z)
-                                # Check whether the given world is superflat
-                                if superflat is None:
-                                    start_section = 0
-                                    if chunk.version is not None and chunk.version > 1451:
-                                        start_section = -4
-                                    section = anvil.Chunk.get_section(chunk, start_section)
-                                    for block in anvil.Chunk.stream_blocks(chunk, section = section):
-                                        block = World2Vec.convert_if_old(block)
-                                        if anvil.Block.name(block) == "minecraft:grass_block":
-                                            superflat = True
-                                            break
+                                # Calculate the time the chunk has been inhabited
+                                if 'Level' in chunk_data and 'InhabitedTime' in chunk_data['Level']:
+                                    inhabited_time = chunk_data['Level']['InhabitedTime'].value / 20
+                                elif 'InhabitedTime' in chunk_data:
+                                    inhabited_time = chunk_data['InhabitedTime'].value / 20
+                                else:
+                                    print(f"No InhabitedTime data in chunk at coordinates ({x}, {z})")
+                                    sys.exit(1)
+                                # Check whether the chunk has been visited at all, if not we can skip checking it
+                                if(inhabited_time > 5):
+                                    # Check whether the given world is superflat
                                     if superflat is None:
-                                        superflat = False
-                                # If it's a superflat world, change the search sections
-                                if superflat:
-                                    if chunk.version is not None and chunk.version > 1451:
-                                        search_sections = range(-4, 4)
-                                    else:
-                                        search_sections = range(0, 8)
-                                # If there is already an identified build chunk
-                                if last_build_chunk[0] != None:
-                                    # If this chunk is too far away, just skip it
-                                    if (abs(chunk.x - last_build_chunk[0]) >= x_radius) and (abs(chunk.z - last_build_chunk[1]) >= z_radius):
-                                        continue
-                                # Search the relevant sections
-                                chunk_added = False
-                                for s in search_sections:
-                                    section = anvil.Chunk.get_section(chunk, s)
-                                    # Check each block in the section
-                                    for block in anvil.Chunk.stream_blocks(chunk, section=section):
-                                        block = World2Vec.convert_if_old(block)
-                                        # If it's not a natural block, add this chunk to the Generator
-                                        if anvil.Block.name(block) not in natural_blocks:
-                                            build_chunks.append(chunk)
-                                            if low_x is None or chunk.x < low_x:
-                                                low_x = chunk.x
-                                            if high_x is None or chunk.x > high_x:
-                                                high_x = chunk.x
-                                            if low_z is None or chunk.z < low_z:
-                                                low_z = chunk.z
-                                            if high_z is None or chunk.z > high_z:
-                                                high_z = chunk.z
-                                            if last_build_chunk[0] != None:
-                                                x_radius = x_radius + abs(chunk.x - last_build_chunk[0])
-                                                z_radius = z_radius + abs(chunk.z - last_build_chunk[1])
-                                            last_build_chunk[0] = chunk.x
-                                            last_build_chunk[1] = chunk.z
-                                            chunk_added = True
+                                        start_section = 0
+                                        if chunk.version is not None and chunk.version > 1451:
+                                            start_section = -4
+                                        section = anvil.Chunk.get_section(chunk, start_section)
+                                        for block in anvil.Chunk.stream_blocks(chunk, section = section):
+                                            block = World2Vec.convert_if_old(block)
+                                            if block != None and anvil.Block.name(block) == "minecraft:grass_block":
+                                                superflat = True
+                                                break
+                                        if superflat is None:
+                                            superflat = False
+                                    # If it's a superflat world, change the search sections
+                                    if superflat:
+                                        if chunk.version is not None and chunk.version > 1451:
+                                            search_sections = range(-4, 4)
+                                        else:
+                                            search_sections = range(0, 8)
+
+                                    # Search the relevant sections
+                                    chunk_added = False
+                                    for s in search_sections:
+                                        section = anvil.Chunk.get_section(chunk, s)
+                                        # Check each block in the section
+                                        for block in anvil.Chunk.stream_blocks(chunk, section=section):
+                                            block = World2Vec.convert_if_old(block)
+                                            # If it's not a natural block, add this chunk to the Generator
+                                            if block != None and anvil.Block.name(block) not in natural_blocks:
+                                                build_chunks.append(chunk)
+                                                if low_x is None or chunk.x < low_x:
+                                                    low_x = chunk.x
+                                                if high_x is None or chunk.x > high_x:
+                                                    high_x = chunk.x
+                                                if low_z is None or chunk.z < low_z:
+                                                    low_z = chunk.z
+                                                if high_z is None or chunk.z > high_z:
+                                                    high_z = chunk.z
+                                                last_build_chunk[0] = chunk.x
+                                                last_build_chunk[1] = chunk.z
+                                                chunk_added = True
+                                                break
+                                        if chunk_added:
                                             break
-                                    if chunk_added:
-                                        break
         # Iterate through .mca files in dir to fill in missing chunks
         for filename in os.listdir(dir):
             if filename.endswith(".mca"):
@@ -124,31 +131,35 @@ class World2Vec:
             print("Error: Build could not be found in region files")
             return
         print("Build chunks found!")
-        return build_chunks
+        return build_chunks, superflat
 
     # Extracts a build from a list of chunks and writes a file containing block info and coordinates
-    def extract_build(chunks: list, build_no: int):
+    def extract_build(chunks: List, superflat: bool, build_no: int):
         print("Extracting build from chunks into " + "my_schematics" + ".schematic...")
-        w_file = open("waterlogged_blocks.txt", 'r')
-        waterlogged_blocks = w_file.read().splitlines()
-        w_file.close()
         # Open the output file
         schem = mcschematic.MCSchematic()
         # Part of this process is finding the lowest y-value that can be considered the "surface"
         # This will almost certainly never by y=-100, so if this value is unchanged, we know something went wrong
-        lowest_surface_y = -100
+        lowest_surface_y = 0
         # Iterate through the chunks
+        min_range = 0
+        level = 0
+        # If it's a superflat world, we need to search the lower sections
+        if(superflat):
+            min_range = -4
+            lowest_surface_y = -100
+            level = -100
         for chunk in chunks:
             surface_section = None
             surface_section_y = 0
-            # Begin with section -4 and find the first section up from there that contains a large amount of air (the "surface" section)
+            # Begin with section -4 or 0 depending on world surface and find the first section up from there that contains a large amount of air (the "surface" section)
             # We stop at section 10 because that is the highest section that get_build_chunks() searches
-            for s in range(-4, 10):
+            for s in range(min_range, 10):
                 air_count = 0
                 section = anvil.Chunk.get_section(chunk, s)
                 for block in anvil.Chunk.stream_blocks(chunk, section=section):
                     block = World2Vec.convert_if_old(block)
-                    if anvil.Block.name(block) == "minecraft:air":
+                    if block != None and anvil.Block.name(block) == "minecraft:air":
                         air_count += 1
                         # We'll check for a section to have a good portion of air, testing says 1024 blocks is a good fit
                         if air_count == 1024:
@@ -172,15 +183,13 @@ class World2Vec:
                         true_y = y + (surface_section_y * 16)
                         block = World2Vec.convert_if_old(anvil.Chunk.get_block(chunk, x, y, z, section=surface_section))
                         # Check if there is an air block above it, to confirm it is a surface block
-                        if anvil.Block.name(anvil.Chunk.get_block(chunk, x, true_y + 1, z)) == "minecraft:air":
-                            if lowest_surface_y == -100 or true_y < lowest_surface_y:
+                        if block != None and anvil.Block.name(anvil.Chunk.get_block(chunk, x, true_y + 1, z)) == "minecraft:air":
+                            if lowest_surface_y == level or true_y < lowest_surface_y:
                                 lowest_surface_y = true_y
         # Check for failure and output an error message
-        if lowest_surface_y == -100:
-            print("Error: Could not find the surface y-value")
+        if lowest_surface_y == level:
+            print("Error: No surface block found in chunks")
             return
-        # Now, we have the y-value of the lowest surface block. Next, we have to write the build blocks (from that y-value up) to the output file
-        # Since the anvil-parser library only uses relative x and z values, we need to be careful about how we iterate through the chunks
         # Again, we don't need global coordinates, but we do need the blocks to be in the right places relative to each other
         # So, we're going to "create" our own (0, 0) and place everything relative to that point
         # To do this, we're just going to pick one of the chunks and call it the (0, 0) chunk, then map all the other chunks accordingly
@@ -201,7 +210,7 @@ class World2Vec:
                         block = World2Vec.convert_if_old(anvil.Chunk.get_block(chunk, x, current_y, z))
                         # We're going to ignore air blocks, as we can just fill in empty coordinates later with air blocks
                         # This just cleans up the output file for better readability
-                        if anvil.Block.name(block) != "minecraft:air":
+                        if block != None and anvil.Block.name(block) != "minecraft:air":
                             # We've found a non-air block, so this isn't an empty layer
                             empty_layer = False
                             # We need to map the coordinates to our new system now
@@ -240,7 +249,4 @@ class World2Vec:
         # Now that the folder exists, you can save the schematic file
         schem.save(folder_path, "my_schematic_" + str(build_no), mcschematic.Version.JE_1_20_1)
 
-
-        schem.save("testbuilds", "my_schematic_" + str(build_no), mcschematic.Version.JE_1_20_1)
-                        #build_file.close()
         print("Build extracted to " + "my_schematics" + str(build_no) + ".schematic...!\n")
