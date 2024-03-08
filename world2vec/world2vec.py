@@ -104,7 +104,7 @@ class World2Vec:
                                                     high_z = chunk.z
                                                 if filename not in relevant_regions:
                                                     region_x = filename.split("r.")[1].split(".")[0]
-                                                    region_z = filename.split("r.")[1].split(".")[0]
+                                                    region_z = filename.split("r.")[1].split(".")[1]
                                                     if chunk.x == 0:
                                                         new_file = "r." + str(region_x - 1) + "." + str(region_z) + ".mca"
                                                         if new_file in os.listdir(dir):
