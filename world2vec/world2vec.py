@@ -48,7 +48,7 @@ class World2Vec:
                 # Only search the region file if it is not empty (because apparently sometimes they are empty?)
                 if (region.data):
                     # Set search sections
-                    search_sections = range(3, 10)
+                    search_sections = range(9, 2, -1)
                     # Retrieve each chunk in the region
                     for x in range(0, 32):
                         for z in range(0, 32):
@@ -82,9 +82,9 @@ class World2Vec:
                                     # If it's a superflat world, change the search sections
                                     if superflat:
                                         if chunk.version is not None and chunk.version > 1451:
-                                            search_sections = range(-4, 4)
+                                            search_sections = range(3, -5, -1)
                                         else:
-                                            search_sections = range(0, 8)
+                                            search_sections = range(7, -1, -1)
 
                                     # Search the relevant sections
                                     chunk_added = False
@@ -139,21 +139,23 @@ class World2Vec:
         # Open the output file
         schem = mcschematic.MCSchematic()
         # Part of this process is finding the lowest y-value that can be considered the "surface"
-        # This will almost certainly never by y=-100, so if this value is unchanged, we know something went wrong
+        # This will almost certainly never be y=-100, so if this value is unchanged, we know something went wrong
         lowest_surface_y = 0
         # Iterate through the chunks
-        min_range = 0
+        min_range = 3
         level = 0
         # If it's a superflat world, we need to search the lower sections
         if(superflat):
-            min_range = -4
+            min_range = 0
             lowest_surface_y = -100
             level = -100
         for chunk in chunks:
+            if superflat and chunk.version is not None and chunk.version > 1451:
+                min_range = -4
             surface_section = None
             surface_section_y = 0
             # Begin with section -4 or 0 depending on world surface and find the first section up from there that contains a large amount of air (the "surface" section)
-            # We stop at section 10 because that is the highest section that get_build_chunks() searches
+            # We stop at section 9 because that is the highest section that get_build_chunks() searches
             for s in range(min_range, 10):
                 air_count = 0
                 section = anvil.Chunk.get_section(chunk, s)
