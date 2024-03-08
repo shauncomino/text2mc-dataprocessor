@@ -4,6 +4,7 @@ from typing import Generator
 import mcschematic
 from typing import List
 import nbtlib
+import sys
 
 # Now you can use mcschematic
 
@@ -32,9 +33,6 @@ class World2Vec:
         # This variable tracks the coordinates of the last identified build chunk, used to reduce computation time 
         # when faraway chunks are reached
         last_build_chunk = [None, None]
-        # Dynamic radii to eliminate chunks that are too far from the build
-        x_radius = 3
-        z_radius = 3
         # Variables to track the build bounds
         low_x = None
         high_x = None
@@ -59,7 +57,13 @@ class World2Vec:
                             if chunk_data:
                                 chunk = anvil.Region.get_chunk(region, x, z)
                                 # Calculate the time the chunk has been inhabited
-                                inhabited_time = chunk_data["Level"]["InhabitedTime"].value or chunk_data["InhabitedTime"].value / 20
+                                if 'Level' in chunk_data and 'InhabitedTime' in chunk_data['Level']:
+                                    inhabited_time = chunk_data['Level']['InhabitedTime'].value / 20
+                                elif 'InhabitedTime' in chunk_data:
+                                    inhabited_time = chunk_data['InhabitedTime'].value / 20
+                                else:
+                                    print(f"No InhabitedTime data in chunk at coordinates ({x}, {z})")
+                                    sys.exit(1)
                                 # Check whether the chunk has been visited at all, if not we can skip checking it
                                 if(inhabited_time > 5):
                                     # Check whether the given world is superflat
@@ -81,11 +85,7 @@ class World2Vec:
                                             search_sections = range(-4, 4)
                                         else:
                                             search_sections = range(0, 8)
-                                    # If there is already an identified build chunk
-                                    if last_build_chunk[0] != None:
-                                        # If this chunk is too far away, just skip it
-                                        if (abs(chunk.x - last_build_chunk[0]) >= x_radius) and (abs(chunk.z - last_build_chunk[1]) >= z_radius):
-                                            continue
+
                                     # Search the relevant sections
                                     chunk_added = False
                                     for s in search_sections:
@@ -104,9 +104,6 @@ class World2Vec:
                                                     low_z = chunk.z
                                                 if high_z is None or chunk.z > high_z:
                                                     high_z = chunk.z
-                                                if last_build_chunk[0] != None:
-                                                    x_radius = x_radius + abs(chunk.x - last_build_chunk[0])
-                                                    z_radius = z_radius + abs(chunk.z - last_build_chunk[1])
                                                 last_build_chunk[0] = chunk.x
                                                 last_build_chunk[1] = chunk.z
                                                 chunk_added = True

@@ -1,4 +1,5 @@
 minecraft:grass
+minecraft:grass_block
 minecraft:dirt
 minecraft:sand
 minecraft:sandstone
