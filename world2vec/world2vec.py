@@ -31,11 +31,7 @@ class World2Vec:
         # This is the list of all the build chunks
         build_chunks = []
         relevant_regions = []
-        # Variables to track the build bounds
-        low_x = None
-        high_x = None
-        low_z = None
-        high_z = None
+
         # Flag for superflat worlds
         superflat = None
         superflat_y = 0
@@ -96,15 +92,8 @@ class World2Vec:
                                             block = World2Vec.convert_if_old(block)
                                             # If it's not a natural block, add this chunk to the Generator
                                             if block != None and anvil.Block.name(block) not in natural_blocks:
+                                                #print(anvil.Block.name(block),chunk.x,chunk.z)
                                                 build_chunks.append(chunk)
-                                                if low_x is None or chunk.x < low_x:
-                                                    low_x = chunk.x
-                                                if high_x is None or chunk.x > high_x:
-                                                    high_x = chunk.x
-                                                if low_z is None or chunk.z < low_z:
-                                                    low_z = chunk.z
-                                                if high_z is None or chunk.z > high_z:
-                                                    high_z = chunk.z
                                                 if filename not in relevant_regions:
                                                     region_x = int(filename.split("r.")[1].split(".")[0])
                                                     region_z = int(filename.split("r.")[1].split(".")[1])
@@ -129,6 +118,21 @@ class World2Vec:
                                                 break
                                         if chunk_added:
                                             break
+        if build_chunks:
+            length = len(build_chunks)
+            avg_x = sum(chunk.x for chunk in build_chunks) / length
+            avg_z = sum(chunk.z for chunk in build_chunks) / length
+
+            # Remove chunks that are more than 25 chunks away from the average
+            build_chunks = [chunk for chunk in build_chunks if abs(chunk.x - avg_x) <= length and abs(chunk.z - avg_z) <= length]
+            print("Before",low_x,high_x,low_z,high_z)
+            low_x = min(chunk.x for chunk in build_chunks)
+            high_x = max(chunk.x for chunk in build_chunks)
+            low_z = min(chunk.z for chunk in build_chunks)
+            high_z = max(chunk.z for chunk in build_chunks)
+            print("After",low_x,high_x,low_z,high_z)
+
+            
         # Iterate through .mca files in dir to fill in missing chunks
         for filename in relevant_regions:
             if filename.endswith(".mca"):
@@ -144,7 +148,9 @@ class World2Vec:
                                 chunk = anvil.Region.get_chunk(region, x, z)
                                 if chunk not in build_chunks:
                                     if (chunk.x >= low_x and chunk.x <= high_x) and (chunk.z >= low_z and chunk.z <= high_z):
-                                        build_chunks.append(chunk)
+                                        if abs(chunk.x - avg_x) <= length and abs(chunk.z - avg_z) <= length:
+                                            build_chunks.append(chunk)
+
         # Check for failure and send error message
         if len(build_chunks) == 0:
             print("Error: Build could not be found in region files")
