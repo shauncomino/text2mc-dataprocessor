@@ -119,13 +119,15 @@ class World2Vec:
                                         if chunk_added:
                                             break
         if build_chunks:
-            length = len(build_chunks)
+            length = len(build_chunks)/1.5
             avg_x = sum(chunk.x for chunk in build_chunks) / length
             avg_z = sum(chunk.z for chunk in build_chunks) / length
 
+            print("Before",length)
             # Remove chunks that are more than 25 chunks away from the average
             build_chunks = [chunk for chunk in build_chunks if abs(chunk.x - avg_x) <= length and abs(chunk.z - avg_z) <= length]
-            print("Before",low_x,high_x,low_z,high_z)
+            print("After",len(build_chunks))
+
             low_x = min(chunk.x for chunk in build_chunks)
             high_x = max(chunk.x for chunk in build_chunks)
             low_z = min(chunk.z for chunk in build_chunks)
@@ -148,8 +150,7 @@ class World2Vec:
                                 chunk = anvil.Region.get_chunk(region, x, z)
                                 if chunk not in build_chunks:
                                     if (chunk.x >= low_x and chunk.x <= high_x) and (chunk.z >= low_z and chunk.z <= high_z):
-                                        if abs(chunk.x - avg_x) <= length and abs(chunk.z - avg_z) <= length:
-                                            build_chunks.append(chunk)
+                                        build_chunks.append(chunk)
 
         # Check for failure and send error message
         if len(build_chunks) == 0:
