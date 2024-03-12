@@ -123,16 +123,16 @@ class World2Vec:
             avg_x = sum(chunk.x for chunk in build_chunks) / length
             avg_z = sum(chunk.z for chunk in build_chunks) / length
 
-            print("Before",length)
+            #print("Before",length)
             # Remove chunks that are more than 25 chunks away from the average
             build_chunks = [chunk for chunk in build_chunks if abs(chunk.x - avg_x) <= length and abs(chunk.z - avg_z) <= length]
-            print("After",len(build_chunks))
+            #print("After",len(build_chunks))
 
             low_x = min(chunk.x for chunk in build_chunks)
             high_x = max(chunk.x for chunk in build_chunks)
             low_z = min(chunk.z for chunk in build_chunks)
             high_z = max(chunk.z for chunk in build_chunks)
-            print("After",low_x,high_x,low_z,high_z)
+            #print("After",low_x,high_x,low_z,high_z)
 
             
         # Iterate through .mca files in dir to fill in missing chunks
@@ -207,11 +207,13 @@ class World2Vec:
                     for y in range(0, 16):
                         # Here we calculate the true y value, in order to compare against other sections
                         true_y = y + (surface_section_y * 16)
-                        block = World2Vec.convert_if_old(anvil.Chunk.get_block(chunk, x, y, z, section=surface_section))
                         # Check if there is an air block above it, to confirm it is a surface block
-                        if block != None and anvil.Block.name(anvil.Chunk.get_block(chunk, x, true_y + 1, z)) == "minecraft:air":
-                            if lowest_surface_y == level or true_y < lowest_surface_y:
-                                lowest_surface_y = true_y
+                        if anvil.Block.name(anvil.Chunk.get_block(chunk, x, true_y + 1, z)) == "minecraft:air":
+                            air_blocks_above = [anvil.Block.name(anvil.Chunk.get_block(chunk, x, true_y + i, z)) == "minecraft:air" for i in range(1, 10)]
+                            if all(air_blocks_above):
+                                if lowest_surface_y == level or true_y < lowest_surface_y:
+                                    lowest_surface_y = true_y
+                            
         # Check for failure and output an error message
         if lowest_surface_y == level:
             print("Error: No surface block found in chunks")

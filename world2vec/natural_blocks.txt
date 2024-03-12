@@ -327,6 +327,7 @@ minecraft:dark_oak_stairs
 minecraft:pink_petals
 minecraft:cherry_leaves
 minecraft:cherry_log
+minecraft:bricks
 minecraft:mossy_stone_bricks
 minecraft:cracked_stone_bricks
 minecraft:sunflower
