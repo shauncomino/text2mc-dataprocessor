@@ -121,16 +121,16 @@ class World2Vec:
             avg_x = sum(chunk.x for chunk in build_chunks) / length
             avg_z = sum(chunk.z for chunk in build_chunks) / length
 
-            print("Before",length)
+            #print("Before",length)
             # Remove chunks that are more than 25 chunks away from the average
             build_chunks = [chunk for chunk in build_chunks if abs(chunk.x - avg_x) <= length and abs(chunk.z - avg_z) <= length]
-            print("After",len(build_chunks))
+            #print("After",len(build_chunks))
 
             low_x = min(chunk.x for chunk in build_chunks)
             high_x = max(chunk.x for chunk in build_chunks)
             low_z = min(chunk.z for chunk in build_chunks)
             high_z = max(chunk.z for chunk in build_chunks)
-            print("After",low_x,high_x,low_z,high_z)
+            #print("After",low_x,high_x,low_z,high_z)
 
             
         # Iterate through .mca files in dir to fill in missing chunks
@@ -220,7 +220,6 @@ class World2Vec:
             all_ys.append(chunk_lowest_y)
         
         lowest_surface_y = int(sum(all_ys) / len(all_ys))
-        
         # Again, we don't need global coordinates, but we do need the blocks to be in the right places relative to each other
         # So, we're going to "create" our own (0, 0) and place everything relative to that point
         # To do this, we're just going to pick one of the chunks and call it the (0, 0) chunk, then map all the other chunks accordingly
