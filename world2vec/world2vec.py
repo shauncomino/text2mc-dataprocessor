@@ -123,7 +123,7 @@ class World2Vec:
 
             #print("Before",length)
             # Remove chunks that are more than 25 chunks away from the average
-            build_chunks = [chunk for chunk in build_chunks if abs(chunk.x - avg_x) <= length and abs(chunk.z - avg_z) <= length]
+            #build_chunks = [chunk for chunk in build_chunks if abs(chunk.x - avg_x) <= length and abs(chunk.z - avg_z) <= length]
             #print("After",len(build_chunks))
 
             low_x = min(chunk.x for chunk in build_chunks)
@@ -179,7 +179,7 @@ class World2Vec:
             surface_section = None
             # Begin with section -4, 0, or 3 depending on world surface and find the first section up from there that contains a large amount of air (the "surface" section)
             # We stop at section 9 because that is the highest section that get_build_chunks() searches
-            for s in range(min_range, 10):
+            for s in range(min_range, 30):
                 air_count = 0
                 section = anvil.Chunk.get_section(chunk, s)
                 for block in anvil.Chunk.stream_blocks(chunk, section=section):
@@ -189,7 +189,7 @@ class World2Vec:
                         # We'll check for a section to have a good portion of air, testing says 1024 blocks is a good fit
                         if air_count == 1024:
                             surface_section = section
-                            all_surface_sections.append(s - 1)
+                            all_surface_sections.append(s)
                             break
                 # If we've already found a surface section, stop searching
                 if surface_section != None:
@@ -207,23 +207,26 @@ class World2Vec:
             # Iterate through the surface section and find the lowest surface block
             # Because we are specifying the section, we are using relative coordinates in the 0-16 range, rather than global coordinates 
             # (this is better for us, as it is world-agnostic)
+            # We start at -8 in the y level just in case the surface block is close to the section border
             for x in range(0, 16):
                 for z in range(0, 16):
-                    for y in range(0, 16):
+                    for y in range(-8, 16):
                         # Here we calculate the true y value, in order to compare against other sections
                         true_y = y + (surface_section_mode * 16)
                         block = World2Vec.convert_if_old(anvil.Chunk.get_block(chunk, x, y, z, section=anvil.Chunk.get_section(chunk, surface_section_mode)))
                         # Check if there is an air block above it, to confirm it is a surface block
-                        if block != None and anvil.Block.name(anvil.Chunk.get_block(chunk, x, true_y + 1, z)) == "minecraft:air":
+                        if block != None and anvil.Block.name(anvil.Chunk.get_block(chunk, x, true_y, z)) != "minecraft:air" and anvil.Block.name(anvil.Chunk.get_block(chunk, x, true_y + 1, z)) == "minecraft:air":
                             if chunk_lowest_y == level or true_y < chunk_lowest_y:
                                 chunk_lowest_y = true_y
             all_ys.append(chunk_lowest_y)
         
-        for y1 in all_ys:
-            for y2 in all_ys:
-                if y1 - y2 > 10:
-                    all_ys.remove(y2)
+        #for y1 in all_ys:
+            #for y2 in all_ys:
+                #if y1 - y2 > 10:
+                    #all_ys.remove(y2)
         lowest_surface_y = int(sum(all_ys) / len(all_ys))
+        #testing:
+        #lowest_surface_y = min(all_ys)
         print("surface:", lowest_surface_y)
         # Again, we don't need global coordinates, but we do need the blocks to be in the right places relative to each other
         # So, we're going to "create" our own (0, 0) and place everything relative to that point
