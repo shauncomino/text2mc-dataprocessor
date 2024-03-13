@@ -220,14 +220,8 @@ class World2Vec:
                                 chunk_lowest_y = true_y
             all_ys.append(chunk_lowest_y)
         
-        #for y1 in all_ys:
-            #for y2 in all_ys:
-                #if y1 - y2 > 10:
-                    #all_ys.remove(y2)
         lowest_surface_y = int(sum(all_ys) / len(all_ys))
-        #testing:
-        #lowest_surface_y = min(all_ys)
-        print("surface:", lowest_surface_y)
+
         # Again, we don't need global coordinates, but we do need the blocks to be in the right places relative to each other
         # So, we're going to "create" our own (0, 0) and place everything relative to that point
         # To do this, we're just going to pick one of the chunks and call it the (0, 0) chunk, then map all the other chunks accordingly
