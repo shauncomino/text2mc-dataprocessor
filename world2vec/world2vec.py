@@ -1,9 +1,7 @@
 import anvil
 import os
-from typing import Generator
 import mcschematic
 from typing import List
-import nbtlib
 import sys
 
 # Now you can use mcschematic
@@ -22,7 +20,7 @@ class World2Vec:
         return block
 
     # Reads all region files in dir and returns a Generator of Chunks, all of which contain blocks that are not in natural_blocks.txt
-    def get_build_chunks(dir: str) -> tuple[list, bool]:
+    def get_build_chunks(dir: str) -> tuple[list, bool, int]:
         print("Searching directory " + dir + "...")
         # Read in the natural blocks to an array
         nb_file = open("natural_blocks.txt", 'r')
@@ -30,16 +28,11 @@ class World2Vec:
         nb_file.close()
         # This is the list of all the build chunks
         build_chunks = []
-        # This variable tracks the coordinates of the last identified build chunk, used to reduce computation time 
-        # when faraway chunks are reached
-        last_build_chunk = [None, None]
-        # Variables to track the build bounds
-        low_x = None
-        high_x = None
-        low_z = None
-        high_z = None
+        relevant_regions = []
+
         # Flag for superflat worlds
         superflat = None
+        superflat_y = 0
         # Iterate through .mca files in dir
         for filename in os.listdir(dir):
             if filename.endswith(".mca"):
@@ -65,18 +58,20 @@ class World2Vec:
                                     print(f"No InhabitedTime data in chunk at coordinates ({x}, {z})")
                                     sys.exit(1)
                                 # Check whether the chunk has been visited at all, if not we can skip checking it
-                                if(inhabited_time > 5):
+                                if(inhabited_time > 30):
                                     # Check whether the given world is superflat
                                     if superflat is None:
                                         start_section = 0
                                         if chunk.version is not None and chunk.version > 1451:
                                             start_section = -4
-                                        section = anvil.Chunk.get_section(chunk, start_section)
-                                        for block in anvil.Chunk.stream_blocks(chunk, section = section):
-                                            block = World2Vec.convert_if_old(block)
-                                            if block != None and anvil.Block.name(block) == "minecraft:grass_block":
-                                                superflat = True
-                                                break
+                                        for s in range(start_section, 0):
+                                            section = anvil.Chunk.get_section(chunk, s)
+                                            for block in anvil.Chunk.stream_blocks(chunk, section = section):
+                                                block = World2Vec.convert_if_old(block)
+                                                if block != None and anvil.Block.name(block) == "minecraft:grass_block":
+                                                    superflat_y = s
+                                                    superflat = True
+                                                    break
                                         if superflat is None:
                                             superflat = False
                                     # If it's a superflat world, change the search sections
@@ -95,23 +90,51 @@ class World2Vec:
                                             block = World2Vec.convert_if_old(block)
                                             # If it's not a natural block, add this chunk to the Generator
                                             if block != None and anvil.Block.name(block) not in natural_blocks:
+                                                #print(anvil.Block.name(block),chunk.x,chunk.z)
                                                 build_chunks.append(chunk)
-                                                if low_x is None or chunk.x < low_x:
-                                                    low_x = chunk.x
-                                                if high_x is None or chunk.x > high_x:
-                                                    high_x = chunk.x
-                                                if low_z is None or chunk.z < low_z:
-                                                    low_z = chunk.z
-                                                if high_z is None or chunk.z > high_z:
-                                                    high_z = chunk.z
-                                                last_build_chunk[0] = chunk.x
-                                                last_build_chunk[1] = chunk.z
+                                                if filename not in relevant_regions:
+                                                    region_x = int(filename.split("r.")[1].split(".")[0])
+                                                    region_z = int(filename.split("r.")[1].split(".")[1])
+                                                    if chunk.x == 0:
+                                                        new_file = "r." + str(region_x - 1) + "." + str(region_z) + ".mca"
+                                                        if new_file in os.listdir(dir):
+                                                            relevant_regions.append(new_file)
+                                                    elif chunk.x == 31:
+                                                        new_file = "r." + str(region_x + 1) + "." + str(region_z) + ".mca"
+                                                        if new_file in os.listdir(dir):
+                                                            relevant_regions.append(new_file)
+                                                    if chunk.z == 0:
+                                                        new_file = "r." + str(region_x) + "." + str(region_z - 1) + ".mca"
+                                                        if new_file in os.listdir(dir):
+                                                            relevant_regions.append(new_file)
+                                                    elif chunk.z == 31:
+                                                        new_file = "r." + str(region_x) + "." + str(region_z + 1) + ".mca"
+                                                        if new_file in os.listdir(dir):
+                                                            relevant_regions.append(new_file)
+                                                    relevant_regions.append(filename)
                                                 chunk_added = True
                                                 break
                                         if chunk_added:
                                             break
+        if build_chunks:
+            length = len(build_chunks)/1.5
+            avg_x = sum(chunk.x for chunk in build_chunks) / length
+            avg_z = sum(chunk.z for chunk in build_chunks) / length
+
+            #print("Before",length)
+            # Remove chunks that are more than 25 chunks away from the average
+            #build_chunks = [chunk for chunk in build_chunks if abs(chunk.x - avg_x) <= length and abs(chunk.z - avg_z) <= length]
+            #print("After",len(build_chunks))
+
+            low_x = min(chunk.x for chunk in build_chunks)
+            high_x = max(chunk.x for chunk in build_chunks)
+            low_z = min(chunk.z for chunk in build_chunks)
+            high_z = max(chunk.z for chunk in build_chunks)
+            #print("After",low_x,high_x,low_z,high_z)
+
+            
         # Iterate through .mca files in dir to fill in missing chunks
-        for filename in os.listdir(dir):
+        for filename in relevant_regions:
             if filename.endswith(".mca"):
                 # Retrieve the region
                 region = anvil.Region.from_file(os.path.join(dir, filename))
@@ -126,15 +149,16 @@ class World2Vec:
                                 if chunk not in build_chunks:
                                     if (chunk.x >= low_x and chunk.x <= high_x) and (chunk.z >= low_z and chunk.z <= high_z):
                                         build_chunks.append(chunk)
+
         # Check for failure and send error message
-        if last_build_chunk[0] == None:
+        if len(build_chunks) == 0:
             print("Error: Build could not be found in region files")
             return
         print("Build chunks found!")
-        return build_chunks, superflat
+        return build_chunks, superflat, superflat_y
 
     # Extracts a build from a list of chunks and writes a file containing block info and coordinates
-    def extract_build(chunks: List, superflat: bool, build_no: int):
+    def extract_build(chunks: List, superflat: bool, superflat_surface: int, build_no: int):
         print("Extracting build from chunks into " + "my_schematics" + ".schematic...")
         # Open the output file
         schem = mcschematic.MCSchematic()
@@ -144,19 +168,18 @@ class World2Vec:
         # Iterate through the chunks
         min_range = 3
         level = 0
+        all_surface_sections = []
+        surface_section_mode = None
         # If it's a superflat world, we need to search the lower sections
         if(superflat):
-            min_range = 0
+            min_range = superflat_surface
             lowest_surface_y = -100
             level = -100
         for chunk in chunks:
-            if superflat and chunk.version is not None and chunk.version > 1451:
-                min_range = -4
             surface_section = None
-            surface_section_y = 0
-            # Begin with section -4 or 0 depending on world surface and find the first section up from there that contains a large amount of air (the "surface" section)
+            # Begin with section -4, 0, or 3 depending on world surface and find the first section up from there that contains a large amount of air (the "surface" section)
             # We stop at section 9 because that is the highest section that get_build_chunks() searches
-            for s in range(min_range, 10):
+            for s in range(min_range, 30):
                 air_count = 0
                 section = anvil.Chunk.get_section(chunk, s)
                 for block in anvil.Chunk.stream_blocks(chunk, section=section):
@@ -166,7 +189,7 @@ class World2Vec:
                         # We'll check for a section to have a good portion of air, testing says 1024 blocks is a good fit
                         if air_count == 1024:
                             surface_section = section
-                            surface_section_y = s
+                            all_surface_sections.append(s)
                             break
                 # If we've already found a surface section, stop searching
                 if surface_section != None:
@@ -175,23 +198,30 @@ class World2Vec:
             if surface_section is None:
                 print("Error: No surface section found in chunk", chunk.x, chunk.z)
                 return
+        
+        # Find the mode (most common) surface section among the build chunks
+        surface_section_mode = max(set(all_surface_sections), key = all_surface_sections.count)
+        all_ys = []
+        for chunk in chunks:
+            chunk_lowest_y = level
             # Iterate through the surface section and find the lowest surface block
             # Because we are specifying the section, we are using relative coordinates in the 0-16 range, rather than global coordinates 
             # (this is better for us, as it is world-agnostic)
+            # We start at -8 in the y level just in case the surface block is close to the section border
             for x in range(0, 16):
                 for z in range(0, 16):
-                    for y in range(0, 16):
+                    for y in range(-8, 16):
                         # Here we calculate the true y value, in order to compare against other sections
-                        true_y = y + (surface_section_y * 16)
-                        block = World2Vec.convert_if_old(anvil.Chunk.get_block(chunk, x, y, z, section=surface_section))
+                        true_y = y + (surface_section_mode * 16)
+                        block = World2Vec.convert_if_old(anvil.Chunk.get_block(chunk, x, y, z, section=anvil.Chunk.get_section(chunk, surface_section_mode)))
                         # Check if there is an air block above it, to confirm it is a surface block
-                        if block != None and anvil.Block.name(anvil.Chunk.get_block(chunk, x, true_y + 1, z)) == "minecraft:air":
-                            if lowest_surface_y == level or true_y < lowest_surface_y:
-                                lowest_surface_y = true_y
-        # Check for failure and output an error message
-        if lowest_surface_y == level:
-            print("Error: No surface block found in chunks")
-            return
+                        if block != None and anvil.Block.name(anvil.Chunk.get_block(chunk, x, true_y, z)) != "minecraft:air" and anvil.Block.name(anvil.Chunk.get_block(chunk, x, true_y + 1, z)) == "minecraft:air":
+                            if chunk_lowest_y == level or true_y < chunk_lowest_y:
+                                chunk_lowest_y = true_y
+            all_ys.append(chunk_lowest_y)
+        
+        lowest_surface_y = int(sum(all_ys) / len(all_ys))
+
         # Again, we don't need global coordinates, but we do need the blocks to be in the right places relative to each other
         # So, we're going to "create" our own (0, 0) and place everything relative to that point
         # To do this, we're just going to pick one of the chunks and call it the (0, 0) chunk, then map all the other chunks accordingly
