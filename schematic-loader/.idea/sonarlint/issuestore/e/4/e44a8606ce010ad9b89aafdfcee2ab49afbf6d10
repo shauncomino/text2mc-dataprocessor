@@ -1,0 +1,17 @@
+
+	java:S112%"FDefine and throw a dedicated exception instead of using a generic one.(Ò‚Òéüÿÿÿÿ8¢ï‡Ğã1J$161e2e64-9c70-49ec-9e31-70e3d7d3c8a7
+]
+java:S1220""Move this file to a named package.8£ï‡Ğã1J$ed61f5fd-c17a-4231-ac14-06ee0e09d823
+ƒ	java:S125"<This block of commented-out lines of code should be removed.(éÆ„Şøÿÿÿÿ8©ï‡Ğã1J$4d140c53-5fe9-488b-ad41-71c52061ea71
+ƒ	java:S125"<This block of commented-out lines of code should be removed.(÷¦€€şÿÿÿÿ8ªï‡Ğã1J$bc5e22cf-2305-4fd6-9665-008460a5a8fd
+š
+java:S6204"RReplace this usage of 'Stream.collect(Collectors.toList())' with 'Stream.toList()'(Ì²ÎÈşÿÿÿÿ8Ò¬‰Ğã1J$6fd8bac7-6de0-40d4-9290-80662719e2e0
+•
+java:S6204"RReplace this usage of 'Stream.collect(Collectors.toList())' with 'Stream.toList()'(ê¹8Ô¬‰Ğã1J$dc73cd8a-5703-45f7-a6f4-2aede6a03950
+•
+java:S6204"RReplace this usage of 'Stream.collect(Collectors.toList())' with 'Stream.toList()'(Şù§û8Ô¬‰Ğã1J$ca8a440f-f28b-4bd3-b2dd-36adaaea5dc3
+l	java:S106"+Replace this use of System.out by a logger.(Ò‡ºf8¬ï‡Ğã1J$aa6c2f58-9138-4691-ac01-e7ea22607a4c
+r	java:S106 "+Replace this use of System.out by a logger.(ªÓ¼áşÿÿÿÿ8¬ï‡Ğã1J$70013a51-75a4-444b-8418-685562f5ac72
+r	java:S106!"+Replace this use of System.out by a logger.(ÆŠãğûÿÿÿÿ8­ï‡Ğã1J$9a3ba76a-3119-4490-b9aa-5a559ac4d98d
+r	java:S106""+Replace this use of System.out by a logger.(ªÓ¼áşÿÿÿÿ8­ï‡Ğã1J$61b33c4e-c559-44d3-b42d-eacc036e0503
+r	java:S106#"+Replace this use of System.out by a logger.(—è¸Çüÿÿÿÿ8­ï‡Ğã1J$365b3fa8-aafa-4b8e-8eb4-18aa26d195ef

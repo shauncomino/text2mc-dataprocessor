@@ -1,2 +1,18 @@
 
-L	java:S106"+Replace this use of System.out by a logger.(½¦ÿÿÿÿÿ8ÂïˆÏã1
+	java:S112!"FDefine and throw a dedicated exception instead of using a generic one.(Ò‚Òéüÿÿÿÿ8ÎÑŒĞã1J$1e212031-f3d8-40bb-95d9-65a4a10480e0
+š
+java:S6204"RReplace this usage of 'Stream.collect(Collectors.toList())' with 'Stream.toList()'(Ì²ÎÈşÿÿÿÿ8ØÑŒĞã1J$d682a369-70be-4eae-ab4a-302986753b7f
+•
+java:S6204"RReplace this usage of 'Stream.collect(Collectors.toList())' with 'Stream.toList()'(ê¹8ÙÑŒĞã1J$7383576e-c18c-49c7-8ade-ed9f76b286c3
+•
+java:S6204"RReplace this usage of 'Stream.collect(Collectors.toList())' with 'Stream.toList()'(Şù§û8ÙÑŒĞã1J$e230fe52-10fb-4963-b48a-3e47e7ffea4f
+r	java:S106"+Replace this use of System.out by a logger.(ĞÁ³ôúÿÿÿÿ8ÜÑŒĞã1J$5cf0df6f-44fa-4623-b561-2859fbe00e0c
+m	java:S106"+Replace this use of System.out by a logger.(Û¥šË8¼äŞĞã1J$2d343410-d85a-4d97-a8ba-9bf74b0dcd91
+r	java:S106"+Replace this use of System.out by a logger.(”Å–İıÿÿÿÿ8ÿãßĞã1J$6c67201d-73a2-4c8a-96fa-cf0de88b7626
+F	java:S106"+Replace this use of System.out by a logger.(¯Ìï*8ë¸âĞã1
+L	java:S106"+Replace this use of System.out by a logger.(ªÓ¼áşÿÿÿÿ8ë¸âĞã1
+F	java:S106"+Replace this use of System.out by a logger.(Ò‡ºf8ë¸âĞã1
+L	java:S106"+Replace this use of System.out by a logger.(ªÓ¼áşÿÿÿÿ8ë¸âĞã1
+L	java:S106"+Replace this use of System.out by a logger.(ÆŠãğûÿÿÿÿ8ì¸âĞã1
+L	java:S106"+Replace this use of System.out by a logger.(ªÓ¼áşÿÿÿÿ8ì¸âĞã1
+L	java:S106"+Replace this use of System.out by a logger.(—è¸Çüÿÿÿÿ8ì¸âĞã1
