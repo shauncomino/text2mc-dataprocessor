@@ -1,9 +1,7 @@
 import anvil
 import os
-from typing import Generator
 import mcschematic
 from typing import List
-import nbtlib
 import sys
 
 # Now you can use mcschematic
@@ -170,6 +168,8 @@ class World2Vec:
         # Iterate through the chunks
         min_range = 3
         level = 0
+        all_surface_sections = []
+        surface_section_mode = None
         # If it's a superflat world, we need to search the lower sections
         if(superflat):
             min_range = superflat_surface
@@ -177,7 +177,6 @@ class World2Vec:
             level = -100
         for chunk in chunks:
             surface_section = None
-            surface_section_y = min_range
             # Begin with section -4, 0, or 3 depending on world surface and find the first section up from there that contains a large amount of air (the "surface" section)
             # We stop at section 9 because that is the highest section that get_build_chunks() searches
             for s in range(min_range, 10):
@@ -190,7 +189,7 @@ class World2Vec:
                         # We'll check for a section to have a good portion of air, testing says 1024 blocks is a good fit
                         if air_count == 1024:
                             surface_section = section
-                            surface_section_y = s - 1
+                            all_surface_sections.append(s - 1)
                             break
                 # If we've already found a surface section, stop searching
                 if surface_section != None:
@@ -199,6 +198,12 @@ class World2Vec:
             if surface_section is None:
                 print("Error: No surface section found in chunk", chunk.x, chunk.z)
                 return
+        
+        # Find the mode (most common) surface section among the build chunks
+        surface_section_mode = max(set(all_surface_sections), key = all_surface_sections.count)
+        all_ys = []
+        for chunk in chunks:
+            chunk_lowest_y = level
             # Iterate through the surface section and find the lowest surface block
             # Because we are specifying the section, we are using relative coordinates in the 0-16 range, rather than global coordinates 
             # (this is better for us, as it is world-agnostic)
@@ -206,16 +211,16 @@ class World2Vec:
                 for z in range(0, 16):
                     for y in range(0, 16):
                         # Here we calculate the true y value, in order to compare against other sections
-                        true_y = y + (surface_section_y * 16)
-                        block = World2Vec.convert_if_old(anvil.Chunk.get_block(chunk, x, y, z, section=surface_section))
+                        true_y = y + (surface_section_mode * 16)
+                        block = World2Vec.convert_if_old(anvil.Chunk.get_block(chunk, x, y, z, section=anvil.Chunk.get_section(chunk, surface_section_mode)))
                         # Check if there is an air block above it, to confirm it is a surface block
                         if block != None and anvil.Block.name(anvil.Chunk.get_block(chunk, x, true_y + 1, z)) == "minecraft:air":
-                            if lowest_surface_y == level or true_y < lowest_surface_y:
-                                lowest_surface_y = true_y
-        # Check for failure and output an error message
-        if lowest_surface_y == level:
-            print("Error: No surface block found in chunks")
-            return
+                            if chunk_lowest_y == level or true_y < chunk_lowest_y:
+                                chunk_lowest_y = true_y
+            all_ys.append(chunk_lowest_y)
+        
+        lowest_surface_y = int(sum(all_ys) / len(all_ys))
+        
         # Again, we don't need global coordinates, but we do need the blocks to be in the right places relative to each other
         # So, we're going to "create" our own (0, 0) and place everything relative to that point
         # To do this, we're just going to pick one of the chunks and call it the (0, 0) chunk, then map all the other chunks accordingly
