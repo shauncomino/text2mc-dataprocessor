@@ -1,0 +1,14 @@
+
+	java:S112"FDefine and throw a dedicated exception instead of using a generic one.(Ò‚Òéüÿÿÿÿ8…¡Ò÷ã1J$753573ec-1a3c-4353-aa37-ec69ea95747f
+s
+java:S2201"+The return value of "collect" must be used.(ëÔ™şÿÿÿÿ8”¡Ò÷ã1J$a8d71f8a-787c-469e-9394-aa2821775846
+š
+java:S6204"RReplace this usage of 'Stream.collect(Collectors.toList())' with 'Stream.toList()'(ëÔ™şÿÿÿÿ8•¡Ò÷ã1J$99397690-4e62-40cd-b6da-89a094519a1a
+n
+java:S2201"+The return value of "collect" must be used.(„É£Ÿ8•¡Ò÷ã1J$7473aaf0-540b-4d4f-9b5d-1472e4207f1e
+•
+java:S6204"RReplace this usage of 'Stream.collect(Collectors.toList())' with 'Stream.toList()'(„É£Ÿ8–¡Ò÷ã1J$e985e288-5fd4-44ef-bbef-402d706c6b1f
+n
+java:S2201"+The return value of "collect" must be used.(Ùûü¨8–¡Ò÷ã1J$e4c104f7-ece3-49ec-b6e4-f18d0d645988
+•
+java:S6204"RReplace this usage of 'Stream.collect(Collectors.toList())' with 'Stream.toList()'(Ùûü¨8–¡Ò÷ã1J$d8a3bd67-a135-4bfb-bc0e-1fce7ba2419e
