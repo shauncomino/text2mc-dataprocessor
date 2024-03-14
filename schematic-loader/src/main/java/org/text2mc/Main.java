@@ -19,16 +19,20 @@ public class Main {
             List<SchematicBlockEntity> blockEntities = schematic.blockEntities().collect(Collectors.toList());
             List<SchematicEntity> entities = schematic.entities().collect(Collectors.toList());
 
-            System.out.println(schematic.name());
-            System.out.println(schematic.width());
-            System.out.println(schematic.height());
-            System.out.println(schematic.length());
-            System.out.println();
-            System.out.println(blocks);
-            System.out.println();
-            System.out.println(blockEntities);
-            System.out.println();
-            System.out.println(entities);
+            int length = schematic.length();
+            int width = schematic.width();
+            int height = schematic.height();
+
+            System.out.println(length + " " + width + " " + height);
+
+            for (Pair<SchematicBlockPos, SchematicBlock> block : blocks) {
+                int x = block.left.x;
+                int y = block.left.y;
+                int z = block.left.z;
+                String blockName = block.right.name;
+                Coordinate coord = new Coordinate(x, y, z, blockName);
+                System.out.println(coord);
+            }
         } catch (ParsingException | IOException e) {
             throw new RuntimeException(e);
         }
