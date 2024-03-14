@@ -1,18 +1,19 @@
 
-	java:S112%"FDefine and throw a dedicated exception instead of using a generic one.(Ò‚Òéüÿÿÿÿ8ÊêÔã1J$282a5099-ea23-43ec-8b5e-d9905c2c2e4f
+	java:S112&"FDefine and throw a dedicated exception instead of using a generic one.(Ò‚Òéüÿÿÿÿ8ù½éìã1J$c101e7e4-aab5-49b3-b2e3-6236004ed9f2
 „
-java:S1854"ARemove this useless assignment to local variable "blockEntities".(ê¹8öêÔã1J$4e9df0dd-9890-4463-a93c-d68e0e8ed0fb
+java:S1854"ARemove this useless assignment to local variable "blockEntities".(ê¹8É¾éìã1J$75763862-2f63-4abb-8105-1129f06bdbd2
 
-java:S1854"<Remove this useless assignment to local variable "entities".(Şù§û8öêÔã1J$5a600869-a2c4-4c65-afed-e17ae581f50d
+java:S1854"<Remove this useless assignment to local variable "entities".(Şù§û8É¾éìã1J$7d59e614-395d-48ea-9521-07b538548b6d
 š
-java:S6204"RReplace this usage of 'Stream.collect(Collectors.toList())' with 'Stream.toList()'(Ì²ÎÈşÿÿÿÿ8øêÔã1J$51f33959-b85b-4431-928c-3534a93cff4d
+java:S6204"RReplace this usage of 'Stream.collect(Collectors.toList())' with 'Stream.toList()'(Ì²ÎÈşÿÿÿÿ8Ë¾éìã1J$06a9be7a-bc53-4645-8703-173efb70367c
 •
-java:S6204"RReplace this usage of 'Stream.collect(Collectors.toList())' with 'Stream.toList()'(ê¹8ùêÔã1J$7c695aad-7bcb-4998-9904-e18e40074466
+java:S6204"RReplace this usage of 'Stream.collect(Collectors.toList())' with 'Stream.toList()'(ê¹8Ì¾éìã1J$d7ff8abb-6b40-47c9-ba54-79f0af62767d
 u
-java:S1481"2Remove this unused "blockEntities" local variable.(ê¹8ûêÔã1J$6f2b93f3-a3a7-486a-9d69-c03592301cde
+java:S1481"2Remove this unused "blockEntities" local variable.(ê¹8Ì¾éìã1J$fd797030-df4d-44fd-9e24-63a02c1c136b
 •
-java:S6204"RReplace this usage of 'Stream.collect(Collectors.toList())' with 'Stream.toList()'(Şù§û8ûêÔã1J$b0a1d388-79a5-4a45-bc2c-f0c780fbf769
+java:S6204"RReplace this usage of 'Stream.collect(Collectors.toList())' with 'Stream.toList()'(Şù§û8Ì¾éìã1J$c66924da-0406-4d27-9980-27a56378e2d6
 p
-java:S1481"-Remove this unused "entities" local variable.(Şù§û8üêÔã1J$56cd1028-8e31-4785-ad11-dbd79453d328
-r	java:S106"+Replace this use of System.out by a logger.(ÙÕÆéÿÿÿÿÿ8Á”Ôã1J$2a6983fa-2b87-412a-afd8-8d7163726a33
-m	java:S106""+Replace this use of System.out by a logger.(Ç’É8Å×šÔã1J$607ea209-24ca-4bad-b873-58cb0827af62
+java:S1481"-Remove this unused "entities" local variable.(Şù§û8Í¾éìã1J$c1bd23b1-e180-45e1-a960-4e13be0dd42b
+m	java:S106."+Replace this use of System.out by a logger.(…ÈŒ8Ò¾éìã1J$d6d24720-da9f-491a-9a1c-9212686f09d4
+r	java:S1060"+Replace this use of System.out by a logger.(ªÓ¼áşÿÿÿÿ8Ò¾éìã1J$355d9943-8a0a-497a-af88-9b5aef4d883c
+r	java:S1062"+Replace this use of System.out by a logger.(ªÓ¼áşÿÿÿÿ8Ò¾éìã1J$22cd871d-a8d3-4631-b579-cda0a9d2cfc0

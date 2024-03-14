@@ -19,22 +19,35 @@ public class Main {
             List<SchematicBlockEntity> blockEntities = schematic.blockEntities().collect(Collectors.toList());
             List<SchematicEntity> entities = schematic.entities().collect(Collectors.toList());
 
-            int length = schematic.length();
             int width = schematic.width();
             int height = schematic.height();
+            int length = schematic.length();
 
-            System.out.println(length + " " + width + " " + height);
+            String[][][] blockNames = new String[width][height][length];
 
             for (Pair<SchematicBlockPos, SchematicBlock> block : blocks) {
                 int x = block.left.x;
                 int y = block.left.y;
                 int z = block.left.z;
                 String blockName = block.right.name;
-                Coordinate coord = new Coordinate(x, y, z, blockName);
-                System.out.println(coord);
+                blockNames[x][y][z] = blockName;
             }
+
+            printBlockNames(blockNames);
         } catch (ParsingException | IOException e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    public static void printBlockNames(String[][][] blockNames) {
+        for (int i = 0; i < blockNames.length; i++) {
+            for (int j = 0; j < blockNames[i].length; j++) {
+                for (int k = 0; k < blockNames[i][j].length; k++) {
+                    System.out.print("(" + i + "," + j + "," + k + "): " + blockNames[i][j][k] + " ");
+                }
+                System.out.println();
+            }
+            System.out.println();
         }
     }
 }
