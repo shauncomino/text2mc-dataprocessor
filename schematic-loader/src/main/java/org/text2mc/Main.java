@@ -16,6 +16,7 @@ public class Main {
         World world = new World(width, height, length);
         WorldHandler worldHandler = new WorldHandler(world);
         worldHandler.addBlocks(schematicHandler.getBlocks());
+        worldHandler.addBlockEntities(schematicHandler.getBlockEntities());
 
         world.printWorld();
     }
