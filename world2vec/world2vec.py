@@ -59,7 +59,7 @@ class World2Vec:
                                     print(f"No InhabitedTime data in chunk at coordinates ({x}, {z})")
                                     sys.exit(1)
                                 # Check whether the chunk has been visited at all, if not we can skip checking it
-                                if(inhabited_time > 30):
+                                if(inhabited_time > 15):
                                     # Check whether the given world is superflat
                                     if superflat is None:
                                         start_section = 0
