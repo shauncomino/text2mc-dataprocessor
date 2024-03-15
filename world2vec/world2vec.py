@@ -3,7 +3,8 @@ import os
 import mcschematic
 from typing import List
 import sys
-
+from sklearn.cluster import DBSCAN
+import numpy as np
 # Now you can use mcschematic
 
 # Class to parse data files and vectorize them into information the model can train on
@@ -117,21 +118,22 @@ class World2Vec:
                                         if chunk_added:
                                             break
         if build_chunks:
-            length = len(build_chunks)/1.5
-            avg_x = sum(chunk.x for chunk in build_chunks) / length
-            avg_z = sum(chunk.z for chunk in build_chunks) / length
+            data = np.array([(chunk.x, chunk.z) for chunk in build_chunks])
 
-            #print("Before",length)
-            # Remove chunks that are more than 25 chunks away from the average
-            #build_chunks = [chunk for chunk in build_chunks if abs(chunk.x - avg_x) <= length and abs(chunk.z - avg_z) <= length]
-            #print("After",len(build_chunks))
-
+            # Apply DBSCAN clustering
+            dbscan = DBSCAN(eps=3, min_samples=2).fit(data)
+            labels = dbscan.labels_
+            
+            # Get the label of the main cluster
+            main_cluster_label = np.argmax(np.bincount(labels[labels != -1]))  # Exclude noise points labeled as -1
+            
+            # Remove chunks that are outside the main cluster
+            build_chunks = [chunk for chunk, label in zip(build_chunks, labels) if label == main_cluster_label]
+    
             low_x = min(chunk.x for chunk in build_chunks)
             high_x = max(chunk.x for chunk in build_chunks)
             low_z = min(chunk.z for chunk in build_chunks)
             high_z = max(chunk.z for chunk in build_chunks)
-            #print("After",low_x,high_x,low_z,high_z)
-
             
         # Iterate through .mca files in dir to fill in missing chunks
         for filename in relevant_regions:
