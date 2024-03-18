@@ -1,0 +1,21 @@
+batch_size: 256
+cutout_coords: false
+debug: false
+emb_dimension: 32
+epochs: 30
+initial_lr: 0.001
+input_world_coords: !!python/tuple
+- !!python/tuple
+  - 1026
+  - 1077
+- !!python/tuple
+  - 63
+  - 73
+- !!python/tuple
+  - 1088
+  - 1152
+input_world_path: C:/Projects/embeddings_test/block2vec\Drehmal v2.1.1 PRIMORDIAL/Drehmal
+  v2.1.1 PRIMORDIAL
+neighbor_radius: 1
+output_path: output\block2vec\ruins
+world_coords_name: ruins
