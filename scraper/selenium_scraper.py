@@ -32,6 +32,8 @@ class WebScraperConfig:
             "GPT4_DESCRIPTION",
             "TAGS",
             "RAW_DOWNLOAD_LINK",
+            "DOWNLOAD_SIZE",
+            "FILE_NAME",
         ]
 
     PROJECT_DESCRIPTION_PROMPT: str = None
@@ -91,6 +93,9 @@ class WebScraperConfig:
         if self.BUILD_DOWNLOAD_DIRECTORY is None or not os.path.exists(
             self.BUILD_DOWNLOAD_DIRECTORY
         ):
+            print(
+                "Did not find build directory provided or none was provided. Automatically assigning"
+            )
             self.BUILD_DOWNLOAD_DIRECTORY = os.path.join(
                 os.path.abspath("./"), "builds"
             )
@@ -185,16 +190,23 @@ class WebScraper:
 
     """Scrapes the project download links using previously captured project page links"""
 
-    def scrape_project_page_info(self):
+    def scrape_project_page_info(self, restart=False):
         download_links_scraped = 0
 
         columns_to_check = ["TAGS", "IMAGE_URL", "DOWNLOAD_URL"]
-        first_na_row = self.projects_df[columns_to_check].isna().all(axis=1).idxmax()
 
-        if first_na_row != 0:
-            print(
-                f"Found previously calculated values tags, image urls, and download urls. Starting page info scraping at index: {first_na_row}"
+        if not restart:
+            first_na_row = (
+                self.projects_df[columns_to_check].isna().all(axis=1).idxmax()
             )
+
+            if first_na_row != 0:
+                print(
+                    f"Found previously calculated values tags, image urls, and download urls. Starting page info scraping at index: {first_na_row}"
+                )
+        else:
+            print("Restarting scraping process for page info")
+            first_na_row = 0
 
         for row in tqdm(
             range(first_na_row, len(self.projects_df.index)),
@@ -265,25 +277,33 @@ class WebScraper:
 
     """ Go through the CSV file and scrape the raw download links """
 
-    def scrape_raw_map_download_links(self):
+    def scrape_raw_map_download_links(
+        self, restart=False, download_when_extracted=False
+    ):
+
         total_rows = len(self.projects_df.index)
 
         # Find the last NA value in the RAW_DOWNLOAD_LINK column
         last_na_index = self.projects_df["RAW_DOWNLOAD_LINK"].last_valid_index()
 
-        # Check if a last NA index was found
-        if last_na_index is not None:
-            print(
-                f"Found precalculated raw download links. Starting at index: {last_na_index}."
-            )
-            start_index = (
-                last_na_index + 1
-            )  # We will start scraping from the next index
+        if not restart:
+            # Check if a last NA index was found
+            if last_na_index is not None:
+                print(
+                    f"Found precalculated raw download links. Starting at index: {last_na_index}."
+                )
+                start_index = (
+                    last_na_index + 1
+                )  # We will start scraping from the next index
+            else:
+                # If no NA values are found, start from the beginning
+                print(
+                    "No NA values found in RAW_DOWNLOAD_LINK column. Starting from the beginning."
+                )
+                start_index = 0
         else:
-            # If no NA values are found, start from the beginning
-            print(
-                "No NA values found in RAW_DOWNLOAD_LINK column. Starting from the beginning."
-            )
+            print("Restarting scraping progress for raw map download links")
+            self.projects_df["RAW_DOWNLOAD_LINK"] = pd.Series(dtype="str")
             start_index = 0
 
         for index in tqdm(
@@ -310,6 +330,9 @@ class WebScraper:
                 # Add the raw download link to the CSV file
                 if raw_download_link:
                     self.projects_df.at[index, "RAW_DOWNLOAD_LINK"] = raw_download_link
+                    if download_when_extracted:
+                        download_size = self.download_with_raw_link(raw_download_link)
+                        self.projects_df.at[index, "DOWNLOAD_SIZE"] = download_size
 
                 # Save to CSV file periodically and at the end
                 if index % ROWS_EDITED_PER_UPDATE == 0:
@@ -494,6 +517,61 @@ class WebScraper:
             else:
                 print("Skipping empty or invalid URL.")
 
+    def calculate_download_size_from_raw_links(self, restart=False):
+        if "DOWNLOAD_SIZE" not in self.projects_df.columns.tolist():
+            self.projects_df["DOWNLOAD_SIZE"] = pd.Series(dtype="int")
+
+        total_rows = len(self.projects_df.index)
+
+        # Find the last NA value in the DOWNLOAD_SIZE column
+        last_na_index = self.projects_df["DOWNLOAD_SIZE"].last_valid_index()
+
+        if not restart:
+            if last_na_index is not None:
+                print(
+                    f"Found precalculated DOWNLOAD_SIZE values. Starting at index: {last_na_index + 1}."
+                )
+                start_index = (
+                    last_na_index + 1
+                )  # We will start scraping from the next index
+            else:
+                print(
+                    "No NA values found in DOWNLOAD_SIZE column. Starting from the beginning."
+                )
+                start_index = 0
+        else:
+            print("Restarting scraping progress for raw map download links")
+            self.projects_df["DOWNLOAD_SIZE"] = pd.Series(dtype="int")
+            start_index = 0
+
+        for index in tqdm(
+            range(start_index, total_rows), desc="Download Size Calculation Progress"
+        ):
+            try:
+                raw_download_link = self.projects_df.at[index, "RAW_DOWNLOAD_LINK"]
+
+                if pd.isna(raw_download_link) or len(raw_download_link) == 0:
+                    continue
+
+                # Perform a HEAD request to get file size
+                response = requests.head(raw_download_link, allow_redirects=True)
+                size = response.headers.get("Content-Length", None)
+
+                if size is not None:
+                    self.projects_df.at[index, "DOWNLOAD_SIZE"] = int(size)
+                else:
+                    print(f"Could not determine size for {raw_download_link}")
+
+                # Placeholder for ROWS_EDITED_PER_UPDATE value
+                ROWS_EDITED_PER_UPDATE = 100
+
+                # Save to CSV file periodically and at the end
+                if index % ROWS_EDITED_PER_UPDATE == 0:
+                    self.save_to_csv()
+
+            except Exception as e:
+                print(f"Request failed for {raw_download_link}: {e}")
+
     """ Downloads a single build using a get request """
 
     def download_with_raw_link(
@@ -526,3 +604,5 @@ class WebScraper:
         # Check if the file was downloaded completely
         if total_size != 0 and progress_bar.n != total_size:
             print("ERROR, something went wrong")
+
+        return total_size

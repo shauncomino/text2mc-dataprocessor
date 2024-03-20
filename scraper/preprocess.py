@@ -22,6 +22,9 @@ class PreprocessorConfig:
     CSV_FILE_PATH: str = None
     """ CSV file path."""
 
+    DOWNLOADED_BUILDS_DIRECTORY: str = None
+    """ Directory that contains all the heterogenous build paths """
+
     def __post_init__(self):
 
         if not self.CSV_FILE_PATH or not os.path.exists(self.CSV_FILE_PATH):
