@@ -47,17 +47,16 @@ class world2vecDriver:
 
     def __init__(self, cfg: world2vecDriverConfig = None):
         self.cfg = cfg
-        self.projects_df = pd.read_csv(self.cfg.CSV_FILE_PATH)
 
     def convert_build_to_vector(self, folder_or_build_path, processed_file_prefix):
+        pass
+
+    def convert_vector_to_hdf5(self, vector, processed_file_prefix):
         hdf5_out_path = os.path.join(
             self.cfg.PROCESSED_BUILDS_FOLDER, f"{processed_file_prefix}.hdf5"
         )
 
-    def convert_vector_to_hdf5():
-        pass
-
-    def convert_schem_to_vector():
+    def convert_schemfile_to_vector():
         pass
 
 
