@@ -1,7 +1,9 @@
 
 ‰
-java:S1192O"FDefine a constant instead of duplicating this literal "UTF-8" 3 times.(ƒ¢—Ú8Åë¬æ1J$47c3b2a6-8baf-4f38-b162-6831b1839481
-m	java:S106$"+Replace this use of System.out by a logger.(î¯Û›8ğ°ªæ1J$e0429bc9-e38a-455c-8ff3-81d7725ca7c8
-r	java:S106V"+Replace this use of System.out by a logger.(¨¶ÑÍşÿÿÿÿ8÷°ªæ1J$e9e2c20a-765e-42a2-92a1-05cbcbf45f08
+java:S1192F"FDefine a constant instead of duplicating this literal "UTF-8" 9 times.(û°³Ù8ğßæ1J$ba7c990b-0b59-47f8-b180-ac308b1b04d6
+m	java:S106$"+Replace this use of System.out by a logger.(î¯Û›8—òßæ1J$1890e4ca-bddc-450b-ac96-c2263bb08de2
+•
+java:S3776B"RRefactor this method to reduce its Cognitive Complexity from 16 to the 15 allowed.(ƒšğ¼8òßæ1J$20c195eb-40e8-4e79-92f7-03f404e938ef
+r	java:S106e"+Replace this use of System.out by a logger.(¨¶ÑÍşÿÿÿÿ8¤òßæ1J$3af9fbb1-cc1e-48e1-9454-44a67e2495ae
 y
-java:S1068"6Remove this unused "schemDirectoryPath" private field.(Ï›è8ø°ªæ1J$2bec6ae9-9e33-40c4-9dbd-ed4b5a09d828
+java:S1068"6Remove this unused "schemDirectoryPath" private field.(Ï›è8¥òßæ1J$3e5f7366-2773-4542-8cca-bf77865f6f2d

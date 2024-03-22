@@ -67,21 +67,36 @@ public class FileHandler {
         try {
             File file = new File(filePath);
 
+            FileUtils.write(file, "[", "UTF-8", true);
+
             for (int x = 0; x < worldArr.length; x++) {
+                FileUtils.write(file, "[", "UTF-8", true);
+
                 for (int y = 0; y < worldArr[x].length; y++) {
+                    FileUtils.write(file, "[", "UTF-8", true);
+
                     for (int z = 0; z < worldArr[x][y].length; z++) {
-                        String blockName = worldArr[x][y][z];
+                        String blockName = String.format("\"%s\"", worldArr[x][y][z]);
 
                         if (z != worldArr[x][y].length - 1) {
-                            blockName += " ";
+                            blockName += ", ";
                         }
 
                         FileUtils.write(file, blockName, "UTF-8", true);
                     }
-                    FileUtils.write(file, "\n", "UTF-8", true);
+                    FileUtils.write(file, "]", "UTF-8", true);
+
+                    if (y != worldArr[x].length - 1) {
+                        FileUtils.write(file, ",", "UTF-8", true);
+                    }
                 }
-                FileUtils.write(file, "\n", "UTF-8", true);
+                FileUtils.write(file, "]", "UTF-8", true);
+
+                if (x != worldArr.length - 1) {
+                    FileUtils.write(file, ",", "UTF-8", true);
+                }
             }
+            FileUtils.write(file, "]\n", "UTF-8", true);
         } catch (IOException e) {
             System.out.println(e);
         }
