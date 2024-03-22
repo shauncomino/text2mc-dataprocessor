@@ -1,11 +1,7 @@
 
 ‰
-java:S1192Q"FDefine a constant instead of duplicating this literal "UTF-8" 3 times.(ƒ¢—Ú8Åë¬æ1J$6d4b80bb-698f-46e2-9c9c-8eba67986e44
-m	java:S106&"+Replace this use of System.out by a logger.(î¯Û›8ğ°ªæ1J$f1a48743-62dd-451a-9296-d720068275d6
-r	java:S106X"+Replace this use of System.out by a logger.(¨¶ÑÍşÿÿÿÿ8÷°ªæ1J$722fe87b-d25e-4bbd-97ca-840547ca7920
-u
-java:S1128"3Remove this unused import 'java.io.BufferedWriter'.(¬õº/8ø°ªæ1J$74b93b5b-a59b-44f6-9942-a91c55c1512f
-w
-java:S1128	"/Remove this unused import 'java.io.FileWriter'.(Ã‘ÅÃıÿÿÿÿ8ø°ªæ1J$cf570f74-da3c-498c-b45a-38205c03425e
+java:S1192O"FDefine a constant instead of duplicating this literal "UTF-8" 3 times.(ƒ¢—Ú8Åë¬æ1J$47c3b2a6-8baf-4f38-b162-6831b1839481
+m	java:S106$"+Replace this use of System.out by a logger.(î¯Û›8ğ°ªæ1J$e0429bc9-e38a-455c-8ff3-81d7725ca7c8
+r	java:S106V"+Replace this use of System.out by a logger.(¨¶ÑÍşÿÿÿÿ8÷°ªæ1J$e9e2c20a-765e-42a2-92a1-05cbcbf45f08
 y
-java:S1068"6Remove this unused "schemDirectoryPath" private field.(Ï›è8ø°ªæ1J$023557e2-7851-4a80-ab9d-08ada8d102f1
+java:S1068"6Remove this unused "schemDirectoryPath" private field.(Ï›è8ø°ªæ1J$2bec6ae9-9e33-40c4-9dbd-ed4b5a09d828
