@@ -5,6 +5,7 @@ from typing import List
 import sys
 from sklearn.cluster import DBSCAN
 import numpy as np
+import json
 # Now you can use mcschematic
 
 # Class to parse data files and vectorize them into information the model can train on
@@ -284,3 +285,26 @@ class World2Vec:
         schem.save(folder_path, "my_schematic_" + str(build_no), mcschematic.Version.JE_1_20_1)
 
         print("Build extracted to " + "my_schematics" + str(build_no) + ".schematic...!\n")
+
+    def export_json_to_npy(input_file_path: str, output_file_path: str):
+        # Load JSON data
+        with open(input_file_path) as f:
+            data = json.load(f)
+
+        # Extract dimensions from JSON
+        dimensions = data['worldDimensions']
+        width = dimensions['width']
+        height = dimensions['height']
+        length = dimensions['length']
+
+        # Create a 3D array with dimensions from JSON
+        world_array = np.zeros((width, height, length), dtype=object)
+
+        # Fill the array with block names based on JSON data
+        for block in data['blocks']:
+            x, y, z = block['x'], block['y'], block['z']
+            block_name = block['name']
+            world_array[x, y, z] = block_name
+
+        # Save 3D array to a .npy file
+        np.save(output_file_path, world_array)
