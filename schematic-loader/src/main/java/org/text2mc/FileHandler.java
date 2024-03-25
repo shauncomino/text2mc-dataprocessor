@@ -1,5 +1,7 @@
 package org.text2mc;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import net.sandrohc.schematic4j.schematic.Schematic;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
@@ -57,46 +59,20 @@ public class FileHandler {
             worldHandler.addBlocks(schematicHandler.getBlocks());
             worldHandler.addBlockEntities(schematicHandler.getBlockEntities());
             worldHandler.addEntities(schematicHandler.getEntities());
-
-            String[][][] worldArr = world.getWorldArr();
-            writeSchematicToFile(outputFilePath, worldArr);
+            writeSchematicToFile(outputFilePath, world);
         }
     }
 
-    private void writeSchematicToFile(String filePath, String[][][] worldArr) {
+    private String getOutputString(World world) {
+        Gson gson = new GsonBuilder().disableHtmlEscaping().setPrettyPrinting().create();
+        return gson.toJson(world);
+    }
+
+    private void writeSchematicToFile(String filePath, World world) {
         try {
             File file = new File(filePath);
-
-            FileUtils.write(file, "[", "UTF-8", true);
-
-            for (int x = 0; x < worldArr.length; x++) {
-                FileUtils.write(file, "[", "UTF-8", true);
-
-                for (int y = 0; y < worldArr[x].length; y++) {
-                    FileUtils.write(file, "[", "UTF-8", true);
-
-                    for (int z = 0; z < worldArr[x][y].length; z++) {
-                        String blockName = String.format("\"%s\"", worldArr[x][y][z]);
-
-                        if (z != worldArr[x][y].length - 1) {
-                            blockName += ", ";
-                        }
-
-                        FileUtils.write(file, blockName, "UTF-8", true);
-                    }
-                    FileUtils.write(file, "]", "UTF-8", true);
-
-                    if (y != worldArr[x].length - 1) {
-                        FileUtils.write(file, ",", "UTF-8", true);
-                    }
-                }
-                FileUtils.write(file, "]", "UTF-8", true);
-
-                if (x != worldArr.length - 1) {
-                    FileUtils.write(file, ",", "UTF-8", true);
-                }
-            }
-            FileUtils.write(file, "]\n", "UTF-8", true);
+            String output = getOutputString(world);
+            FileUtils.write(file, output, "UTF-8", true);
         } catch (IOException e) {
             System.out.println(e);
         }

@@ -22,3 +22,7 @@ R
 "src/main/output/my_schematic_1.out,f\f\ffb34bb8033c034b5d7da42ea0855b05b475b6e8
 U
 %src/main/output/yellow-taxi-model.out,2\e\2ef853f4e8562b79f6fa806fb9879fa729032529
+^
+.src/main/java/org/text2mc/WorldDimensions.java,0\c\0c58f0159efa6d36aafae4c3489c09aced450615
+T
+$src/main/java/org/text2mc/Block.java,f\2\f2584b308fca7e4221de5ad2e0a3f5a6fb92062e

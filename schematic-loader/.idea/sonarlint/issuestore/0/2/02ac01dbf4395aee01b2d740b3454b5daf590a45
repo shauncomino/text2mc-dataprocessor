@@ -1,8 +1,8 @@
 
-	java:S112"FDefine and throw a dedicated exception instead of using a generic one.(Ò‚Òéüÿÿÿÿ8…¡Ò÷ã1J$c20ab237-669b-4aed-84e4-f6d91b837c6c
+	java:S112"FDefine and throw a dedicated exception instead of using a generic one.(Ò‚Òéüÿÿÿÿ8…¡Ò÷ã1J$b38fb265-386b-46b8-9e08-7187ee1be893
 •
-java:S6204"RReplace this usage of 'Stream.collect(Collectors.toList())' with 'Stream.toList()'(Ô°¬8•¡Ò÷ã1J$66255942-f571-498c-96e7-c0e0c00d0805
+java:S6204"RReplace this usage of 'Stream.collect(Collectors.toList())' with 'Stream.toList()'(Ô°¬8•¡Ò÷ã1J$f4d5463b-bf74-460c-a2ea-33e8e9cae8dc
 š
-java:S6204"RReplace this usage of 'Stream.collect(Collectors.toList())' with 'Stream.toList()'(¸Ÿ©Ëüÿÿÿÿ8–¡Ò÷ã1J$d914aa81-aa80-44fa-ace5-c45a500db445
+java:S6204"RReplace this usage of 'Stream.collect(Collectors.toList())' with 'Stream.toList()'(¸Ÿ©Ëüÿÿÿÿ8–¡Ò÷ã1J$65bfbe27-2a7e-44f6-9ba9-638a9e23d4fc
 •
-java:S6204"RReplace this usage of 'Stream.collect(Collectors.toList())' with 'Stream.toList()'(Âº½8–¡Ò÷ã1J$b84fa13b-31ad-44d6-adde-b772ead9733b
+java:S6204"RReplace this usage of 'Stream.collect(Collectors.toList())' with 'Stream.toList()'(Âº½8–¡Ò÷ã1J$dd2cbc16-d1e5-4be8-ae1c-b04b5035006f
