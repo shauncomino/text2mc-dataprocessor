@@ -209,15 +209,18 @@ class World2Vec:
         # Find the mode (most common) surface section among the build chunks
         surface_section_mode = max(set(all_surface_sections), key = all_surface_sections.count)
         all_ys = []
+        start_y = -8
+        if superflat:
+            start_y = 0
         for chunk in chunks:
             chunk_lowest_y = level
             # Iterate through the surface section and find the lowest surface block
             # Because we are specifying the section, we are using relative coordinates in the 0-16 range, rather than global coordinates 
             # (this is better for us, as it is world-agnostic)
-            # We start at -8 in the y level just in case the surface block is close to the section border
+            # We start at -8 in the y level just in case the surface block is close to the section border (if it is not superflat)
             for x in range(0, 16):
                 for z in range(0, 16):
-                    for y in range(-8, 16):
+                    for y in range(start_y, 16):
                         # Here we calculate the true y value, in order to compare against other sections
                         true_y = y + (surface_section_mode * 16)
                         block = World2Vec.convert_if_old(anvil.Chunk.get_block(chunk, x, y, z, section=anvil.Chunk.get_section(chunk, surface_section_mode)))
