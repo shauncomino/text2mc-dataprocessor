@@ -1,5 +1,5 @@
 plugins {
-    id("java")
+    id("application")
 }
 
 group = "org.text2mc"
@@ -32,4 +32,8 @@ apply(plugin = "com.github.johnrengelman.shadow")
 
 tasks.test {
     useJUnitPlatform()
+}
+
+application {
+    mainClass = "org.text2mc.Main"
 }
