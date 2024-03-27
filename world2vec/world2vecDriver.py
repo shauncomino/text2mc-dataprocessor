@@ -15,7 +15,7 @@ import requests
 from tqdm import tqdm
 import re
 import traceback
-from world2vec.world2vec import World2Vec
+from world2vec import World2Vec
 
 
 @dataclass
