@@ -1,44 +1,35 @@
 package org.text2mc;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class World {
-    private String[][][] worldArr;
-    private int width;
-    private int height;
-    private int length;
+    private List<Block> blocks;
+    private WorldDimensions worldDimensions;
 
     public World(int width, int height, int length) {
-        worldArr = new String[width][height][length];
-        this.width = width;
-        this.height = height;
-        this.length = length;
+        blocks = new ArrayList<>();
+        worldDimensions = new WorldDimensions(width, height, length);
     }
 
-    public String[][][] getWorldArr() {
-        return worldArr;
+    public List<Block> getBlocks() {
+        return blocks;
+    }
+
+    public WorldDimensions getWorldDimensions() {
+        return worldDimensions;
     }
 
     public boolean isValidCoordinate(int x, int y, int z) {
-        return x >= 0 && x < width &&
-                y >= 0 && y < height &&
-                z >= 0 && z < length;
+        return x >= 0 && x < worldDimensions.getWidth() &&
+                y >= 0 && y < worldDimensions.getHeight() &&
+                z >= 0 && z < worldDimensions.getLength();
     }
 
     public void initializeCoordinate(String name, int x, int y, int z) {
         if (!isValidCoordinate(x, y, z)) {
             return;
         }
-        worldArr[x][y][z] = name;
-    }
-
-    public void printWorld() {
-        for (int x = 0; x < worldArr.length; x++) {
-            for (int y = 0; y < worldArr[x].length; y++) {
-                for (int z = 0; z < worldArr[x][y].length; z++) {
-                    System.out.print(worldArr[x][y][z] + " ");
-                }
-                System.out.println();
-            }
-            System.out.println();
-        }
+        blocks.add(new Block(name, x, y, z));
     }
 }
