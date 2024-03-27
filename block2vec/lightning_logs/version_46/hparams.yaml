@@ -1,0 +1,6 @@
+coords: !!python/tuple
+- &id001 !!python/tuple
+  - 0
+  - 10
+- *id001
+- *id001
