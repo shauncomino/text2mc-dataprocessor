@@ -19,6 +19,10 @@ class World2Vec:
             except:
                 return None
         return block
+    
+    # Finds the subdirectory containing region files
+    def find_regions_dir(dir: str) -> str:
+        pass
 
     # Reads all region files in dir and returns a Generator of Chunks, all of which contain blocks that are not in natural_blocks.txt
     def get_build_chunks(dir: str) -> tuple[list, bool, int]:
