@@ -70,14 +70,18 @@ class World2Vec:
                                         start_section = 0
                                         if chunk.version is not None and chunk.version > 1451:
                                             start_section = -4
-                                        for s in range(start_section, 0):
+                                        for s in range(start_section, 1):
                                             section = anvil.Chunk.get_section(chunk, s)
-                                            for block in anvil.Chunk.stream_blocks(chunk, section = section):
-                                                block = World2Vec.convert_if_old(block)
-                                                if block != None and anvil.Block.name(block) == "minecraft:grass_block":
-                                                    superflat_y = s
-                                                    superflat = True
-                                                    break
+                                            for x in range(0, 16):
+                                                for y in range(0, 16):
+                                                    for z in range(0, 16):
+                                                        true_y = y + (s * 16)
+                                                        block = World2Vec.convert_if_old(anvil.Chunk.get_block(chunk, x, true_y, z))
+                                                        block_above = World2Vec.convert_if_old(anvil.Chunk.get_block(chunk, x, true_y + 1, z))
+                                                        if block != None and block_above != None and anvil.Block.name(block) == "minecraft:bedrock" and anvil.Block.name(block_above) == "minecraft:dirt":
+                                                            superflat_y = s
+                                                            superflat = True
+                                                            break
                                         if superflat is None:
                                             superflat = False
                                     # If it's a superflat world, change the search sections
@@ -94,9 +98,8 @@ class World2Vec:
                                         # Check each block in the section
                                         for block in anvil.Chunk.stream_blocks(chunk, section=section):
                                             block = World2Vec.convert_if_old(block)
-                                            # If it's not a natural block, add this chunk to the Generator
+                                            # If it's not a natural block, add this chunk to the list
                                             if block != None and anvil.Block.name(block) not in natural_blocks:
-                                                #print(anvil.Block.name(block),chunk.x,chunk.z)
                                                 build_chunks.append(chunk)
                                                 if filename not in relevant_regions:
                                                     region_x = int(filename.split("r.")[1].split(".")[0])
@@ -223,9 +226,10 @@ class World2Vec:
                     for y in range(start_y, 16):
                         # Here we calculate the true y value, in order to compare against other sections
                         true_y = y + (surface_section_mode * 16)
-                        block = World2Vec.convert_if_old(anvil.Chunk.get_block(chunk, x, y, z, section=anvil.Chunk.get_section(chunk, surface_section_mode)))
+                        block = World2Vec.convert_if_old(anvil.Chunk.get_block(chunk, x, true_y, z))
+                        block_above = World2Vec.convert_if_old(anvil.Chunk.get_block(chunk, x, true_y+1, z))
                         # Check if there is an air block above it, to confirm it is a surface block
-                        if block != None and anvil.Block.name(anvil.Chunk.get_block(chunk, x, true_y, z)) != "minecraft:air" and anvil.Block.name(anvil.Chunk.get_block(chunk, x, true_y + 1, z)) == "minecraft:air":
+                        if block != None and block_above != None and anvil.Block.name(block) != "minecraft:air" and anvil.Block.name(block_above) == "minecraft:air":
                             if chunk_lowest_y == level or true_y < chunk_lowest_y:
                                 chunk_lowest_y = true_y
             all_ys.append(chunk_lowest_y)

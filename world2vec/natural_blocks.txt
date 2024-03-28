@@ -365,3 +365,4 @@ minecraft:pumpkin_seeds
 minecraft:grindstone
 minecraft:black_wool
 minecraft:stone_slab
+minecraft:flowing_water
