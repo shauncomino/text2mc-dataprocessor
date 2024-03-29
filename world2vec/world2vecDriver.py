@@ -8,7 +8,7 @@ import pandas as pd
 from openai import OpenAI
 import time
 from pandas import DataFrame
-import os
+import os, shutil
 from dataclasses import dataclass, field
 from typeguard import typechecked
 from typing import Optional
@@ -20,6 +20,11 @@ from world2vec import World2Vec
 import sys
 import subprocess
 import traceback
+import zipfile
+import numpy as np
+import h5py
+import glob
+
 
 
 @dataclass
@@ -55,16 +60,28 @@ class world2vecDriver:
     def process_batch(self, 
         dataframe_path: str = None, start_index: int = None, end_index: int = None, batch_num: int = None
     ):
-        temp_dir_path = self.create_directory(self, str("temp" + batch_num))
+        temp_dir_path = self.create_directory(self, str("temp" + str(batch_num)))
         dataframe = pd.read_csv(dataframe_path)
         dataframe["PROCESSED_PATHS"] = pd.Series()
         for row in dataframe[start_index:end_index]:
             try:
                 unprocessed_build_path = os.path.join(self.cfg.DOWNLOADED_BUILDS_FOLDER, row["FILENAME"])
                 if row["FILENAME"].endswith(".zip"):
-                    returned_paths = self.extract_to_temporary_directory(unprocessed_build_path)
+                    self.extract_to_temporary_directory(unprocessed_build_path, temp_dir_path)
+                    if (len(glob.glob(os.path.join(temp_dir_path, '*.mca'))) > 0):
+                        # .mca files means it's a standard Minecraft save
+                        pass
+                    elif (len(glob.glob(os.path.join(temp_dir_path, '*.schem'))) > 0):
+                        # Handles the case when there are 0 or more .schem files in the .zip archive
+                        pass
+
+                    self.delete_directory_contents(temp_dir_path)
                 elif row["FILENAME"].endswith(".schem"):
-                    self.convert_schemfile_to_hdf5(self, unprocessed_build_path, temp_dir_path)
+                    schem_name = row["FILENAME"].split(".")[0]
+                    self.convert_schemfile_to_hdf5(
+                        self, unprocessed_build_path, temp_dir_path, os.path.join(temp_dir_path, schem_name + ".json"), 
+                        str("build_" + str(batch_num)))
+                    self.delete_directory_contents(temp_dir_path)
                 else:
                     row["PROCESSED_PATHS"] = None
                     continue
@@ -73,7 +90,20 @@ class world2vecDriver:
                 print(f"Error processing build {row["FILENAME"]}")
                 print(traceback.format_exc())
             
-    def extract_zip_to_temporary_directory(source_archive_path: str = None):
+    def extract_zip_to_temporary_directory(source_archive_path: str = None, outfolder_path: str = None):
+        with zipfile.ZipFile(source_archive_path, 'r') as zip_ref:
+            zip_ref.extractall(outfolder_path)
+        
+    def delete_directory_contents(folder: str = None):
+        for filename in os.listdir(folder):
+            file_path = os.path.join(folder, filename)
+            try:
+                if os.path.isfile(file_path) or os.path.islink(file_path):
+                    os.unlink(file_path)
+                elif os.path.isdir(file_path):
+                    shutil.rmtree(file_path)
+            except Exception as e:
+                print('Failed to delete %s. Reason: %s' % (file_path, e))
         
         
 
@@ -92,26 +122,35 @@ class world2vecDriver:
             ]
         )
 
-    def convert_json_to_npy(self, json_file_path, npy_file_path):
-        World2Vec.export_json_to_npy(json_file_path, npy_file_path)
+    def convert_json_to_npy(self, json_file_path) -> np.ndarray:
+        return World2Vec.export_json_to_npy(json_file_path)
 
     def convert_vector_to_hdf5(self, vector, processed_file_prefix):
         hdf5_out_path = os.path.join(
-            self.cfg.PROCESSED_BUILDS_FOLDER, f"{processed_file_prefix}.hdf5"
+            self.cfg.PROCESSED_BUILDS_FOLDER, f"{processed_file_prefix}.h5"
         )
+        hdf5_file = h5py.File(f"{processed_file_prefix}.h5", 'w')
         
-    def convert_schemfile_to_hdf5(self, schem_file_path, json_export_directory, json_file_path, npy_file_path, vector, processed_file_prefix):
-        self.convert_schemfile_to_json(schem_file_path, json_export_directory)
-        self.convert_json_to_npy(json_file_path, npy_file_path)
-        self.convert_vector_to_hdf5(vector, processed_file_prefix)
+        
+        
+    def convert_schemfile_to_hdf5(self, schem_file_path, json_export_directory, json_file_path, processed_file_prefix):
+        self.convert_schemfile_to_json(self, schem_file_path, json_export_directory)
+        vector = self.convert_json_to_npy(self, json_file_path)
+        self.convert_vector_to_hdf5(self, vector, processed_file_prefix)
 
     def file_exists(self, dir_name: str = None, f_name: str = None): 
         return os.path.exists(dir_name) or os.path.exists(f_name)
         
 
     # Used to create processed and temporary directories
-    def create_directory(self, dir_name: str):
-        pass
+    def create_directory(self, dir_name: str, dir_path: str):
+        try:
+            source_path = './' + dir_path
+            path = os.path.join(source_path, dir_name)
+
+            os.mkdir(path)
+        except Exception as e:
+            print("An error occured when creating directory")
 
     # Deletes a directory after it has been extracted/used
     def delete_directory(self, dir_path: str):
