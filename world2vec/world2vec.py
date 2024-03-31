@@ -6,6 +6,7 @@ import sys
 from sklearn.cluster import DBSCAN
 import numpy as np
 import json
+import math
 # Now you can use mcschematic
 
 # Class to parse data files and vectorize them into information the model can train on
@@ -134,39 +135,69 @@ class World2Vec:
             data = np.array([(chunk.x, chunk.z) for chunk in build_chunks])
 
             # Apply DBSCAN clustering
-            dbscan = DBSCAN(eps=3, min_samples=2).fit(data)
+            dbscan = DBSCAN(eps=5, min_samples=5).fit(data)
             labels = dbscan.labels_
             
             # Get the label of the main cluster
-            main_cluster_label = np.argmax(np.bincount(labels[labels != -1]))  # Exclude noise points labeled as -1
-            
-            # Remove chunks that are outside the main cluster
-            build_chunks = [chunk for chunk, label in zip(build_chunks, labels) if label == main_cluster_label]
-    
-            low_x = min(chunk.x for chunk in build_chunks)
-            high_x = max(chunk.x for chunk in build_chunks)
-            low_z = min(chunk.z for chunk in build_chunks)
-            high_z = max(chunk.z for chunk in build_chunks)
+            unique_labels = set(labels)
+            unique_labels.discard(-1)
+
+            # Identify unique clusters
+            unique_clusters = set(labels)
+
+            # Initialize builds_extracted to keep track of numbers of build created
+            builds_extracted = 0
+
+            # Loop through the clusters
+            for cluster in unique_clusters:
+                # Increment the builds_extracted by 1
+                builds_extracted += 1
+
+                # Extract all the chunks from that cluster
+                cluster_chunks = [chunk for chunk, label in zip(build_chunks, labels) if label == cluster]
+
+                # Find the region files that contain the cluster_chunks from relevant_regions
+
+                low_x = min(chunk.x for chunk in cluster_chunks)
+                high_x = max(chunk.x for chunk in cluster_chunks)
+                low_z = min(chunk.z for chunk in cluster_chunks)
+                high_z = max(chunk.z for chunk in cluster_chunks)
+
+                if len(unique_clusters) > 1:
+                    region_files = set()
+                    for chunk in cluster_chunks:
+                        region_x = math.floor(chunk.x / 32)
+                        region_z = math.floor(chunk.z / 32)
+                        region_filename = f"r.{region_x}.{region_z}.mca"
+                        if region_filename in relevant_regions:
+                            region_files.add(region_filename)
+                    regions_to_process = list(region_files)
+                else:
+                    regions_to_process = relevant_regions
+
+                for filename in regions_to_process:
+                    if filename.endswith(".mca"):
+                        # Retrieve the region
+                        region = anvil.Region.from_file(os.path.join(dir, filename))
+                        # Only search the region file if it is not empty (because apparently sometimes they are empty?)
+                        if (region.data):
+                            # Retrieve each chunk in the region
+                            for x in range(0, 32):
+                                for z in range(0, 32):
+                                    # Region files need not contain 32x32 chunks, so we must check if the chunk exists
+                                    if region.chunk_data(x, z):
+                                        chunk = anvil.Region.get_chunk(region, x, z)
+                                        if chunk not in build_chunks:
+                                            if (chunk.x >= low_x and chunk.x <= high_x) and (chunk.z >= low_z and chunk.z <= high_z):
+                                                build_chunks.append(chunk)
+                print("Build chunks found!")
+
+                World2Vec.extract_build(build_chunks, superflat, superflat_y, build_name, builds_extracted)
+
+                # Call the extract_build function on cluster_chunks, pass in the builds_extracted integer
 
             # Iterate through .mca files in dir to fill in missing chunks
-            for filename in relevant_regions:
-                if filename.endswith(".mca"):
-                    # Retrieve the region
-                    region = anvil.Region.from_file(os.path.join(dir, filename))
-                    # Only search the region file if it is not empty (because apparently sometimes they are empty?)
-                    if (region.data):
-                        # Retrieve each chunk in the region
-                        for x in range(0, 32):
-                            for z in range(0, 32):
-                                # Region files need not contain 32x32 chunks, so we must check if the chunk exists
-                                if region.chunk_data(x, z):
-                                    chunk = anvil.Region.get_chunk(region, x, z)
-                                    if chunk not in build_chunks:
-                                        if (chunk.x >= low_x and chunk.x <= high_x) and (chunk.z >= low_z and chunk.z <= high_z):
-                                            build_chunks.append(chunk)
-            print("Build chunks found!")
-
-            World2Vec.extract_build(build_chunks, superflat, superflat_y, build_name, 0)
+            
             
     # Extracts a build from a list of chunks and writes a file containing block info and coordinates
     def extract_build(chunks: List, superflat: bool, superflat_surface: int, build_name: str, build_no: int):
