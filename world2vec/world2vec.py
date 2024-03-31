@@ -26,7 +26,7 @@ class World2Vec:
         pass
 
     # Reads all region files in dir and returns a Generator of Chunks, all of which contain blocks that are not in natural_blocks.txt
-    def get_build_chunks(dir: str) -> tuple[list, bool, int]:
+    def get_build(dir: str, build_name: str):
         print("Searching directory " + dir + "...")
         # Read in the natural blocks to an array
         nb_file = open("natural_blocks.txt", 'r')
@@ -122,6 +122,11 @@ class World2Vec:
                                                 break
                                         if chunk_added:
                                             break
+                # Check for failure and send error message
+        if len(build_chunks) == 0:
+            print("Error: Build could not be found in region files")
+            return
+        
         if build_chunks:
             data = np.array([(chunk.x, chunk.z) for chunk in build_chunks])
 
@@ -139,34 +144,30 @@ class World2Vec:
             high_x = max(chunk.x for chunk in build_chunks)
             low_z = min(chunk.z for chunk in build_chunks)
             high_z = max(chunk.z for chunk in build_chunks)
+
+            # Iterate through .mca files in dir to fill in missing chunks
+            for filename in relevant_regions:
+                if filename.endswith(".mca"):
+                    # Retrieve the region
+                    region = anvil.Region.from_file(os.path.join(dir, filename))
+                    # Only search the region file if it is not empty (because apparently sometimes they are empty?)
+                    if (region.data):
+                        # Retrieve each chunk in the region
+                        for x in range(0, 32):
+                            for z in range(0, 32):
+                                # Region files need not contain 32x32 chunks, so we must check if the chunk exists
+                                if region.chunk_data(x, z):
+                                    chunk = anvil.Region.get_chunk(region, x, z)
+                                    if chunk not in build_chunks:
+                                        if (chunk.x >= low_x and chunk.x <= high_x) and (chunk.z >= low_z and chunk.z <= high_z):
+                                            build_chunks.append(chunk)
+            print("Build chunks found!")
+
+            World2Vec.extract_build(build_chunks, superflat, superflat_y, build_name, 0)
             
-        # Iterate through .mca files in dir to fill in missing chunks
-        for filename in relevant_regions:
-            if filename.endswith(".mca"):
-                # Retrieve the region
-                region = anvil.Region.from_file(os.path.join(dir, filename))
-                # Only search the region file if it is not empty (because apparently sometimes they are empty?)
-                if (region.data):
-                    # Retrieve each chunk in the region
-                    for x in range(0, 32):
-                        for z in range(0, 32):
-                            # Region files need not contain 32x32 chunks, so we must check if the chunk exists
-                            if region.chunk_data(x, z):
-                                chunk = anvil.Region.get_chunk(region, x, z)
-                                if chunk not in build_chunks:
-                                    if (chunk.x >= low_x and chunk.x <= high_x) and (chunk.z >= low_z and chunk.z <= high_z):
-                                        build_chunks.append(chunk)
-
-        # Check for failure and send error message
-        if len(build_chunks) == 0:
-            print("Error: Build could not be found in region files")
-            return
-        print("Build chunks found!")
-        return build_chunks, superflat, superflat_y
-
     # Extracts a build from a list of chunks and writes a file containing block info and coordinates
-    def extract_build(chunks: List, superflat: bool, superflat_surface: int, build_no: int):
-        print("Extracting build from chunks into " + "my_schematics" + ".schematic...")
+    def extract_build(chunks: List, superflat: bool, superflat_surface: int, build_name: str, build_no: int):
+        print("Extracting build from chunks into " + build_name +  "_" + ".schematic...")
         # Open the output file
         schem = mcschematic.MCSchematic()
         # Part of this process is finding the lowest y-value that can be considered the "surface"
@@ -286,9 +287,9 @@ class World2Vec:
             os.makedirs(folder_path)
             
         # Now that the folder exists, you can save the schematic file
-        schem.save(folder_path, "my_schematic_" + str(build_no), mcschematic.Version.JE_1_20_1)
+        schem.save(folder_path, build_name +  "_" + str(build_no), mcschematic.Version.JE_1_20_1)
 
-        print("Build extracted to " + "my_schematics" + str(build_no) + ".schematic...!\n")
+        print("Build extracted to " + build_name + "_" + str(build_no) + ".schematic...!\n")
 
     def export_json_to_npy(input_file_path: str, output_file_path: str):
         # Load JSON data
