@@ -101,6 +101,7 @@ class World2Vec:
                                             block = World2Vec.convert_if_old(block)
                                             # If it's not a natural block, add this chunk to the list
                                             if block != None and anvil.Block.name(block) not in natural_blocks:
+                                                #print(anvil.Block.name(block))
                                                 build_chunks.append(chunk)
                                                 if filename not in relevant_regions:
                                                     region_x = int(filename.split("r.")[1].split(".")[0])
@@ -155,6 +156,8 @@ class World2Vec:
 
                 # Extract all the chunks from that cluster
                 cluster_chunks = [chunk for chunk, label in zip(build_chunks, labels) if label == cluster]
+                #for chunk in cluster_chunks:
+                    #print("Chunk found at coordinates", chunk.x, chunk.z)
 
                 # Find the region files that contain the cluster_chunks from relevant_regions
 

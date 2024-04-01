@@ -211,7 +211,8 @@ minecraft:light_gray_terracotta
 minecraft:cyan_terracotta
 minecraft:purple_terracotta
 minecraft:blue_terracotta
-minecraft:brown_terracotta	
+minecraft:brown_terracotta
+minecraft:yellow_terracotta
 minecraft:green_terracotta
 minecraft:red_terracotta
 minecraft:black_terracotta
