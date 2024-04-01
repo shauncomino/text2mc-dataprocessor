@@ -151,6 +151,7 @@ class World2Vec:
 
             # Identify unique clusters
             unique_clusters = set(labels)
+            unique_clusters.discard(-1)
 
             # Initialize builds_extracted to keep track of numbers of build created
             builds_extracted = 0
@@ -164,6 +165,8 @@ class World2Vec:
                 cluster_chunks = [chunk for chunk, label in zip(build_chunks, labels) if label == cluster]
 
                 # Find the region files that contain the cluster_chunks from relevant_regions
+                for chunk in cluster_chunks:
+                    print("Chunk found at", chunk.x, chunk.z)
 
                 low_x = min(chunk.x for chunk in cluster_chunks)
                 high_x = max(chunk.x for chunk in cluster_chunks)
