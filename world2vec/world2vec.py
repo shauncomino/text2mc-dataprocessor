@@ -103,7 +103,6 @@ class World2Vec:
                                             if block != None and anvil.Block.name(block) not in natural_blocks:
                                                 #print(anvil.Block.name(block))
                                                 build_chunks.append(chunk)
-                                                print(anvil.Block.name(block) + " found at coordinates", chunk.x*16, chunk.z*16)
                                                 if filename not in relevant_regions:
                                                     region_x = int(filename.split("r.")[1].split(".")[0])
                                                     region_z = int(filename.split("r.")[1].split(".")[1])
@@ -157,8 +156,6 @@ class World2Vec:
 
                 # Extract all the chunks from that cluster
                 cluster_chunks = [chunk for chunk, label in zip(build_chunks, labels) if label == cluster]
-                for chunk in cluster_chunks:
-                    print("Chunk found at coordinates", chunk.x, chunk.z)
 
                 # Find the region files that contain the cluster_chunks from relevant_regions
 
@@ -191,12 +188,12 @@ class World2Vec:
                                     # Region files need not contain 32x32 chunks, so we must check if the chunk exists
                                     if region.chunk_data(x, z):
                                         chunk = anvil.Region.get_chunk(region, x, z)
-                                        if chunk not in build_chunks:
+                                        if chunk not in cluster_chunks:
                                             if (chunk.x >= low_x and chunk.x <= high_x) and (chunk.z >= low_z and chunk.z <= high_z):
-                                                build_chunks.append(chunk)
+                                                cluster_chunks.append(chunk)
                 print("Build chunks found!")
 
-                World2Vec.extract_build(build_chunks, superflat, superflat_y, build_name, builds_extracted)
+                World2Vec.extract_build(cluster_chunks, superflat, superflat_y, build_name, builds_extracted)
 
                 # Call the extract_build function on cluster_chunks, pass in the builds_extracted integer
 

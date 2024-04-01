@@ -4,3 +4,4 @@ __pycache__
 builds/
 /.vscode
 /.vs
+world2vec/worlds/
