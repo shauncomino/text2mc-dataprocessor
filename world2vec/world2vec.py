@@ -80,9 +80,15 @@ class World2Vec:
                                                         block = World2Vec.convert_if_old(anvil.Chunk.get_block(chunk, x, true_y, z))
                                                         block_above = World2Vec.convert_if_old(anvil.Chunk.get_block(chunk, x, true_y + 1, z))
                                                         if block != None and block_above != None and anvil.Block.name(block) == "minecraft:bedrock" and anvil.Block.name(block_above) == "minecraft:dirt":
-                                                            superflat_y = s
-                                                            superflat = True
-                                                            break
+                                                            upper_layer_test = True
+                                                            for i in range(1, 3):
+                                                                next_block = World2Vec.convert_if_old(anvil.Chunk.get_block(chunk, x, true_y + 1 + i, z))
+                                                                if anvil.Block.name(next_block) != "minecraft:dirt" and anvil.Block.name(next_block) != "minecraft_grass":
+                                                                    upper_layer_test = False
+                                                            if upper_layer_test:
+                                                                superflat_y = s
+                                                                superflat = True
+                                                                break
                                         if superflat is None:
                                             superflat = False
                                     # If it's a superflat world, change the search sections

@@ -352,6 +352,12 @@ minecraft:cherry_leaves
 minecraft:cherry_log
 minecraft:bricks
 minecraft:mossy_stone_bricks
+minecraft:mossy_stone_brick_stairs
+minecraft:mossy_stone_brick_slab
+minecraft:mossy_stone_brick_wall
+minecraft:barrel
+minecraft:stone_slab
+minecraft:stone_brick_slab
 minecraft:cracked_stone_bricks
 minecraft:sunflower
 minecraft:stone_brick_stairs
@@ -386,7 +392,6 @@ minecraft:beetroot_seeds
 minecraft:melon_seeds
 minecraft:pumpkin_seeds
 minecraft:grindstone
-minecraft:stone_slab
 minecraft:flowing_water
 minecraft:loom
 minecraft:brick_wall
@@ -425,5 +430,9 @@ minecraft:brown_carpet
 minecraft:green_carpet
 minecraft:red_carpet
 minecraft:black_carpet
+minecraft:prismarine
+minecraft:prismarine_bricks
+minecraft:dark_prismarine
+minecraft:grass_path
 minecraft:oak_wall_sign
 minecraft:spruce_wall_sign
