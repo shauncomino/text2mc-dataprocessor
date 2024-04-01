@@ -221,7 +221,9 @@ minecraft:twisting_vines_plant
 minecraft:vine
 minecraft:weeping_vines_plant
 minecraft:smooth_stone_slab
-minecraft:smoker'
+minecraft:smoker
+minecraft:polished_andesite
+minecraft:redstone_torch
 minecraft:blast_furnace
 minecraft:raw_copper_block
 minecraft:raw_iron_block
@@ -423,3 +425,5 @@ minecraft:brown_carpet
 minecraft:green_carpet
 minecraft:red_carpet
 minecraft:black_carpet
+minecraft:oak_wall_sign
+minecraft:spruce_wall_sign
