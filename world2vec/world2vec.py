@@ -25,6 +25,34 @@ class World2Vec:
     # Finds the subdirectory containing region files
     def find_regions_dir(dir: str) -> str:
         pass
+    @staticmethod
+    def find_inhabited_time_exists(dir:str) -> bool:
+        for filename in os.listdir(dir):
+            if filename.endswith(".mca"):
+                # Retrieve the region
+                region = anvil.Region.from_file(os.path.join(dir, filename))
+                # Only search the region file if it is not empty (because apparently sometimes they are empty?)
+                if (region.data):
+                    # Set search sections
+                    search_sections = range(9, 2, -1)
+                    # Retrieve each chunk in the region
+                    for x in range(0, 32):
+                        for z in range(0, 32):
+                            # Region files need not contain 32x32 chunks, so we must check if the chunk exists
+                            chunk_data = region.chunk_data(x, z)
+                            if chunk_data:
+                                # Calculate the time the chunk has been inhabited
+                                if 'Level' in chunk_data and 'InhabitedTime' in chunk_data['Level']:
+                                    inhabited_time = chunk_data['Level']['InhabitedTime'].value / 20
+                                elif 'InhabitedTime' in chunk_data:
+                                    inhabited_time = chunk_data['InhabitedTime'].value / 20
+                                else:
+                                    return False
+                                
+                                if inhabited_time > 0:
+                                    return True
+        return False
+
 
     # Reads all region files in dir and returns a Generator of Chunks, all of which contain blocks that are not in natural_blocks.txt
     def get_build(dir: str, build_name: str):
@@ -41,6 +69,10 @@ class World2Vec:
         superflat = None
         superflat_y = 0
         # Iterate through .mca files in dir
+        inhabited_time_exist = World2Vec.find_inhabited_time_exists(dir)
+        inhabited_time_check = 0
+        if inhabited_time_exist:
+            inhabited_time_check = 1.5
         for filename in os.listdir(dir):
             if filename.endswith(".mca"):
                 # Retrieve the region
@@ -48,6 +80,7 @@ class World2Vec:
                 # Only search the region file if it is not empty (because apparently sometimes they are empty?)
                 if (region.data):
                     # Set search sections
+                    inhabited_time_exist = True
                     search_sections = range(9, 2, -1)
                     # Retrieve each chunk in the region
                     for x in range(0, 32):
@@ -55,17 +88,19 @@ class World2Vec:
                             # Region files need not contain 32x32 chunks, so we must check if the chunk exists
                             chunk_data = region.chunk_data(x, z)
                             if chunk_data:
-                                chunk = anvil.Region.get_chunk(region, x, z)
+                                try:
+                                    chunk = anvil.Region.get_chunk(region, x, z)
+                                except Exception as e:
+                                    return
                                 # Calculate the time the chunk has been inhabited
                                 if 'Level' in chunk_data and 'InhabitedTime' in chunk_data['Level']:
                                     inhabited_time = chunk_data['Level']['InhabitedTime'].value / 20
                                 elif 'InhabitedTime' in chunk_data:
                                     inhabited_time = chunk_data['InhabitedTime'].value / 20
                                 else:
-                                    print(f"No InhabitedTime data in chunk at coordinates ({x}, {z})")
-                                    sys.exit(1)
+                                    inhabited_time_exist = False
                                 # Check whether the chunk has been visited at all, if not we can skip checking it
-                                if(inhabited_time > 15):
+                                if(inhabited_time >= inhabited_time_check or inhabited_time_exist == False):
                                     # Check whether the given world is superflat
                                     if superflat is None:
                                         start_section = 0
@@ -81,10 +116,9 @@ class World2Vec:
                                                         block_above = World2Vec.convert_if_old(anvil.Chunk.get_block(chunk, x, true_y + 1, z))
                                                         if block != None and block_above != None and anvil.Block.name(block) == "minecraft:bedrock" and anvil.Block.name(block_above) == "minecraft:dirt":
                                                             upper_layer_test = True
-                                                            for i in range(1, 3):
-                                                                next_block = World2Vec.convert_if_old(anvil.Chunk.get_block(chunk, x, true_y + 1 + i, z))
-                                                                if anvil.Block.name(next_block) != "minecraft:dirt" and anvil.Block.name(next_block) != "minecraft_grass":
-                                                                    upper_layer_test = False
+                                                            next_block = World2Vec.convert_if_old(anvil.Chunk.get_block(chunk, x, true_y + 2, z))
+                                                            if anvil.Block.name(next_block) != "minecraft:dirt" and anvil.Block.name(next_block) != "minecraft_grass":
+                                                                upper_layer_test = False
                                                             if upper_layer_test:
                                                                 superflat_y = s
                                                                 superflat = True
@@ -164,15 +198,12 @@ class World2Vec:
                 # Extract all the chunks from that cluster
                 cluster_chunks = [chunk for chunk, label in zip(build_chunks, labels) if label == cluster]
 
-                # Find the region files that contain the cluster_chunks from relevant_regions
-                for chunk in cluster_chunks:
-                    print("Chunk found at", chunk.x, chunk.z)
-
                 low_x = min(chunk.x for chunk in cluster_chunks)
                 high_x = max(chunk.x for chunk in cluster_chunks)
                 low_z = min(chunk.z for chunk in cluster_chunks)
                 high_z = max(chunk.z for chunk in cluster_chunks)
 
+                # Find the region files that contain the cluster_chunks from relevant_regions
                 if len(unique_clusters) > 1:
                     region_files = set()
                     for chunk in cluster_chunks:
@@ -276,7 +307,7 @@ class World2Vec:
                                 chunk_lowest_y = true_y
             all_ys.append(chunk_lowest_y)
         
-        lowest_surface_y = int(sum(all_ys) / len(all_ys))
+        lowest_surface_y = int(sum(all_ys) / len(all_ys)) - 1
 
         # Again, we don't need global coordinates, but we do need the blocks to be in the right places relative to each other
         # So, we're going to "create" our own (0, 0) and place everything relative to that point
