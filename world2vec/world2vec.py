@@ -34,7 +34,6 @@ class World2Vec:
                 # Only search the region file if it is not empty (because apparently sometimes they are empty?)
                 if (region.data):
                     # Set search sections
-                    search_sections = range(9, 2, -1)
                     # Retrieve each chunk in the region
                     for x in range(0, 32):
                         for z in range(0, 32):
@@ -91,6 +90,7 @@ class World2Vec:
                                 try:
                                     chunk = anvil.Region.get_chunk(region, x, z)
                                 except Exception as e:
+                                    print("Error: Could not read chunk", x, z, "in", filename, "due to", e)
                                     return
                                 # Calculate the time the chunk has been inhabited
                                 if 'Level' in chunk_data and 'InhabitedTime' in chunk_data['Level']:
@@ -141,7 +141,7 @@ class World2Vec:
                                             block = World2Vec.convert_if_old(block)
                                             # If it's not a natural block, add this chunk to the list
                                             if block != None and anvil.Block.name(block) not in natural_blocks:
-                                                #print(anvil.Block.name(block))
+                                                #print(anvil.Block.name(block) + "at " + str(chunk.x) + ", " + str(chunk.z))
                                                 build_chunks.append(chunk)
                                                 if filename not in relevant_regions:
                                                     region_x = int(filename.split("r.")[1].split(".")[0])
