@@ -8,6 +8,7 @@ from typing import Union
 import numpy as np
 import json
 import math
+import glob
 # Now you can use mcschematic
 
 # Class to parse data files and vectorize them into information the model can train on
@@ -24,8 +25,21 @@ class World2Vec:
         return block
     
     # Finds the subdirectory containing region files
-    def find_regions_dir(dir: str) -> str:
-        pass
+    def find_regions_dir(dir: str) -> list:
+        dirs = glob.glob("**/*.mca", root_dir=dir, recursive=True)
+        paths = []
+        for d in dirs:
+            if "region" in d:
+                path = dir + "/"
+                for folder in d.split('\\'):
+                    path += folder
+                    if folder == "region":
+                        if path not in paths and "DIM-1" not in path and "DIM1" not in path:
+                            paths.append(path)
+                        break
+                    else:
+                        path += "/"
+        return paths
 
     @staticmethod
     def find_inhabited_time_exists(dir:str) -> bool:
