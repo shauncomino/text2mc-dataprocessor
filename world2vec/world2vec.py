@@ -110,6 +110,7 @@ class World2Vec:
 
         # Flag for superflat worlds
         superflat = False
+        superflat_markers = []
         # Iterate through .mca files in dir
         inhabited_time_exist = World2Vec.find_inhabited_time_exists(dir)
         inhabited_time_check = 0
@@ -146,8 +147,11 @@ class World2Vec:
                                 # Check whether the chunk has been visited at all, if not we can skip checking it
                                 if(inhabited_time >= inhabited_time_check or inhabited_time_exist == False):
                                     
-                                    superflat, surface_section = World2Vec.find_surface_section(chunk, search_sections.stop + 1, search_sections.start + 1, superflat)
-
+                                    superflat_mode = False
+                                    if len(superflat_markers) != 0:
+                                        superflat_mode = max(set(superflat_markers), key=superflat_markers.count)
+                                    superflat, surface_section = World2Vec.find_surface_section(chunk, search_sections.stop + 1, search_sections.start + 1, superflat_mode)
+                                    superflat_markers.append(superflat)
                                     # Search the relevant sections
                                     chunk_added = False
                                     for s in range(surface_section, surface_section + 4):
