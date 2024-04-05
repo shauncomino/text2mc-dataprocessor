@@ -328,7 +328,7 @@ class World2Vec:
                 return
         
         # Find the mode (most common) surface section among the build chunks
-        surface_section_mode = max(set(all_surface_sections), key = all_surface_sections.count)
+        surface_section_mode = min(set(all_surface_sections))
         all_ys = []
         start_y = -8
         if superflat:
