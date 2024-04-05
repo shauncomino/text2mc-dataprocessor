@@ -74,6 +74,7 @@ class World2Vec:
             inhabited_time_check = 1.5
         for filename in os.listdir(dir):
             if filename.endswith(".mca"):
+                #print("Now in:" +  filename + "\n")
                 # Retrieve the region
                 region = anvil.Region.from_file(os.path.join(dir, filename))
                 # Only search the region file if it is not empty (because apparently sometimes they are empty?)
@@ -141,7 +142,7 @@ class World2Vec:
                                             block = World2Vec.convert_if_old(block)
                                             # If it's not a natural block, add this chunk to the list
                                             if block != None and anvil.Block.name(block) not in natural_blocks:
-                                                #print(anvil.Block.name(block) + "at " + str(chunk.x) + ", " + str(chunk.z))
+                                                print(anvil.Block.name(block) + " at " + str(chunk.x) + ", " + str(chunk.z))
                                                 build_chunks.append(chunk)
                                                 if filename not in relevant_regions:
                                                     region_x = int(filename.split("r.")[1].split(".")[0])
