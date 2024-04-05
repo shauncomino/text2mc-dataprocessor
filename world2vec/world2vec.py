@@ -103,7 +103,7 @@ class World2Vec:
                                 # Check whether the chunk has been visited at all, if not we can skip checking it
                                 if(inhabited_time >= inhabited_time_check or inhabited_time_exist == False):
                                     if chunk.version is not None and chunk.version > 1451:
-                                        search_sections = range(16, -5, -1)
+                                        search_sections = range(16, -4, -1)
                                     else:
                                         search_sections = range(10, -1, -1)
                                     
@@ -244,17 +244,15 @@ class World2Vec:
         schem = mcschematic.MCSchematic()
         # Part of this process is finding the lowest y-value that can be considered the "surface"
         # This will almost certainly never be y=-100, so if this value is unchanged, we know something went wrong
-        lowest_surface_y = 0
+        lowest_surface_y = -100
         # Iterate through the chunks
-        min_range = 3
-        level = 0
+        if (chunks[0].version > 1451):
+            min_range = -4
+        else:
+            min_range = 0
+        level = -100
         all_surface_sections = []
         surface_section_mode = None
-        # If it's a superflat world, we need to search the lower sections
-        if(superflat):
-            min_range = superflat_surface
-            lowest_surface_y = -100
-            level = -100
         for chunk in chunks:
             surface_section = None
             # Begin with section -4, 0, or 3 depending on world surface and find the first section up from there that contains a large amount of air (the "surface" section)
