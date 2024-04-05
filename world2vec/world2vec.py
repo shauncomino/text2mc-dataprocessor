@@ -176,7 +176,6 @@ class World2Vec:
                                             block = World2Vec.convert_if_old(block)
                                             # If it's not a natural block, add this chunk to the list
                                             if block != None and anvil.Block.name(block) not in natural_blocks:
-                                                print(anvil.Block.name(block) + " at " + str(chunk.x) + ", " + str(chunk.z))
                                                 build_chunks.append(chunk)
                                                 if filename not in relevant_regions:
                                                     region_x = int(filename.split("r.")[1].split(".")[0])
@@ -309,13 +308,15 @@ class World2Vec:
                     if block != None and anvil.Block.name(block) == "minecraft:air":
                         air_count += 1
                         # We'll check for a section to have a good portion of air, testing says 1024 blocks is a good fit
-                        if air_count == 1024:
+                        if surface_section is not None and air_count == 1024:
                             surface_section = section
                             good_section = True
-                        if air_count == 4096:
+                        if surface_section is not None and air_count == 4096:
                             surface_section = anvil.Chunk.get_section(chunk, s + 1)
                             superflat_void = True
                             break
+                if surface_section is None and air_count != 4096:
+                    surface_section = section
                 if superflat_void:
                     all_surface_sections.append(s + 1)
                     break
@@ -328,6 +329,7 @@ class World2Vec:
                 return
         
         # Find the mode (most common) surface section among the build chunks
+        print(all_surface_sections)
         surface_section_mode = max(set(all_surface_sections), key = all_surface_sections.count)
         all_ys = []
         start_y = -8
@@ -363,6 +365,7 @@ class World2Vec:
         current_y = lowest_surface_y
         # We also need a stopping point, so we need a flag to tell us when to stop searching for blocks (we don't want to spend time searching the sky)
         searching = True
+        empty_layers = 0
         while (searching):
             empty_layer = True
             for chunk in chunks:
@@ -394,7 +397,9 @@ class World2Vec:
                                 schem.setBlock((int(new_x), int(new_y), int(new_z)),anvil.Block.name(block))
             # If this layer is empty, stop searching
             if (empty_layer):
-                searching = False
+                empty_layers += 1
+                if empty_layers == 3:
+                    searching = False
             # Otherwise, increase to the next y layer
             else:
                 current_y += 1
