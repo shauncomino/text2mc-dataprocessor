@@ -81,7 +81,9 @@ class World2Vec:
                 if (region.data):
                     # Set search sections
                     inhabited_time_exist = True
-                    search_sections = range(16, 2, -1)
+                    search_sections = range(16, 0, -1)
+                    if anvil.Region.get_chunk(region, 0, 0).version > 1451:
+                        search_sections = range(16, -4, -1)
                     # Retrieve each chunk in the region
                     for x in range(0, 32):
                         for z in range(0, 32):
@@ -285,7 +287,9 @@ class World2Vec:
             surface_section = None
             # Begin with section -4, 0, or 3 depending on world surface and find the first section up from there that contains a large amount of air (the "surface" section)
             # We stop at section 9 because that is the highest section that get_build_chunks() searches
-            for s in range(min_range, 16):
+            for s in range(16, min_range, -1):
+                good_section = False
+                superflat_void = False
                 air_count = 0
                 section = anvil.Chunk.get_section(chunk, s)
                 for block in anvil.Chunk.stream_blocks(chunk, section=section):
@@ -295,10 +299,17 @@ class World2Vec:
                         # We'll check for a section to have a good portion of air, testing says 1024 blocks is a good fit
                         if air_count == 1024:
                             surface_section = section
-                            all_surface_sections.append(s)
+                            good_section = True
                             break
-                # If we've already found a surface section, stop searching
-                if surface_section != None:
+                        if air_count == 4096:
+                            surface_section = anvil.Chunk.get_section(chunk, s + 1)
+                            superflat_void = True
+                            break
+                if not good_section:
+                    if superflat_void:
+                        all_surface_sections.append(s + 1)
+                    else:
+                        all_surface_sections.append(s)
                     break
             # Check for failure and output an error message
             if surface_section is None:
