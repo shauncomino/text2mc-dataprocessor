@@ -285,7 +285,7 @@ class World2Vec:
         # Iterate through the chunks
         min_range = 0
         if chunks[0].version > 1451:
-            min_range = -4
+            min_range = -5
         level = 0
         all_surface_sections = []
         surface_section_mode = None
@@ -311,16 +311,17 @@ class World2Vec:
                         if surface_section is not None and air_count == 1024:
                             surface_section = section
                             good_section = True
-                        if surface_section is not None and air_count == 4096:
+                        if surface_section is not None and air_count == 4096 and s <= min_range:
                             surface_section = anvil.Chunk.get_section(chunk, s + 1)
                             superflat_void = True
+                            superflat = True
                             break
                 if surface_section is None and air_count != 4096:
                     surface_section = section
-                if superflat_void:
+                elif superflat_void:
                     all_surface_sections.append(s + 1)
                     break
-                elif not good_section:
+                elif surface_section is not None and not good_section and not superflat:
                     all_surface_sections.append(s)
                     break
             # Check for failure and output an error message
