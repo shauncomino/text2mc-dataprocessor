@@ -110,19 +110,7 @@ class World2Vec:
                 if (region.data):
                     # Set search sections
                     inhabited_time_exist = True
-                    search_sections = range(16, -1, -1)
-                    x = 0
-                    z = 0
-                    while not region.chunk_data(x, z):
-                        x += 1
-                        if not region.chunk_data(x, z):
-                            z += 1
-                            if region.chunk_data(x, z):
-                                break
-                        else:
-                            break
-                    if anvil.Region.get_chunk(region, x, z).version > 1451:
-                        search_sections = range(16, -5, -1)
+                    search_sections = range(16, -5, -1)
                     # Retrieve each chunk in the region
                     for x in range(0, 32):
                         for z in range(0, 32):
@@ -144,7 +132,7 @@ class World2Vec:
                                 # Check whether the chunk has been visited at all, if not we can skip checking it
                                 if(inhabited_time >= inhabited_time_check or inhabited_time_exist == False):
                                     
-                                    superflat, surface_section = World2Vec.find_surface_section(chunk, search_sections.stop, search_sections.start + 1, superflat)
+                                    superflat, surface_section = World2Vec.find_surface_section(chunk, search_sections.stop + 1, search_sections.start + 1, superflat)
 
                                     # Search the relevant sections
                                     chunk_added = False
@@ -274,45 +262,8 @@ class World2Vec:
             lowest_surface_y = -100
             level = -100
         for chunk in chunks:
-            surface_section = None
-            # Begin with section -4, 0, or 3 depending on world surface and find the first section up from there that contains a large amount of air (the "surface" section)
-            # We stop at section 9 because that is the highest section that get_build_chunks() searches
-            for s in range(16, min_range, -1):
-                good_section = False
-                superflat_void = False
-                air_count = 0
-                section = anvil.Chunk.get_section(chunk, s)
-                for block in anvil.Chunk.stream_blocks(chunk, section=section):
-                    block = World2Vec.convert_if_old(block)
-                    if block != None and anvil.Block.name(block) == "minecraft:air":
-                        air_count += 1
-                        # We'll check for a section to have a good portion of air, testing says 1024 blocks is a good fit
-                        if surface_section is not None and air_count == 1024:
-                            surface_section = section
-                            good_section = True
-                        if surface_section is not None and air_count == 4096 and s <= min_range:
-                            surface_section = anvil.Chunk.get_section(chunk, s + 1)
-                            superflat_void = True
-                            superflat = True
-                            break
-                if surface_section is None and air_count != 4096:
-                    surface_section = section
-                elif superflat_void:
-                    all_surface_sections.append(s + 1)
-                    prev_length += 1
-                    break
-                elif surface_section is not None and not good_section and not superflat:
-                    all_surface_sections.append(s)
-                    prev_length += 1
-                    break
-            # Check for failure and output an error message
-            if surface_section is None:
-                print("Error: No surface section found in chunk", chunk.x, chunk.z)
-                return
-            elif len(all_surface_sections) == prev_length:
-                superflat = True
-                all_surface_sections.append(min_range + 1)
-                prev_length += 1
+            superflat, surface_section = World2Vec.find_surface_section(chunk, 16, min_range, superflat)
+            all_surface_sections.append(surface_section)
         # Find the mode (most common) surface section among the build chunks
         surface_section_mode = max(set(all_surface_sections), key = all_surface_sections.count)
         all_ys = []
