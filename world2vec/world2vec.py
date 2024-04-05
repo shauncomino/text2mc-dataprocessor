@@ -84,7 +84,7 @@ class World2Vec:
                     if surface_section is not None and air_count == 1024:
                         surface_section = section
                         good_section = True
-                    if surface_section is not None and air_count == 4096 and s <= low_section:
+                    if surface_section is not None and air_count == 4096 and s <= low_section + 4:
                         surface_section = anvil.Chunk.get_section(chunk, s + 1)
                         superflat_void = True
                         superflat = True
@@ -186,7 +186,7 @@ class World2Vec:
                                                 break
                                         if chunk_added:
                                             break
-                # Check for failure and send error message
+        # Check for failure and send error message
         if len(build_chunks) == 0:
             print("Error: Build could not be found in region files")
             return
@@ -195,7 +195,7 @@ class World2Vec:
             data = np.array([(chunk.x, chunk.z) for chunk in build_chunks])
 
             # Apply DBSCAN clustering
-            dbscan = DBSCAN(eps=5, min_samples=5).fit(data)
+            dbscan = DBSCAN(eps=3, min_samples=3).fit(data)
             labels = dbscan.labels_
             
             # Get the label of the main cluster
@@ -273,7 +273,6 @@ class World2Vec:
             min_range = -5
         level = 0
         all_surface_sections = []
-        prev_length = 0
         surface_section_mode = None
         # If it's a superflat world, we need to search the lower sections
         if(superflat):
