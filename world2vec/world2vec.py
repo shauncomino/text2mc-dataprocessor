@@ -4,6 +4,7 @@ import mcschematic
 from typing import List
 import sys
 from sklearn.cluster import DBSCAN
+from typing import Union
 import numpy as np
 import json
 import math
@@ -25,6 +26,7 @@ class World2Vec:
     # Finds the subdirectory containing region files
     def find_regions_dir(dir: str) -> str:
         pass
+
     @staticmethod
     def find_inhabited_time_exists(dir:str) -> bool:
         for filename in os.listdir(dir):
@@ -52,6 +54,37 @@ class World2Vec:
                                     return True
         return False
 
+    @staticmethod
+    def find_surface_section(chunk:anvil.Chunk, low_section:int, high_section:int, superflat:bool) -> Union[bool, int]:
+        surface_section = None
+        for s in range(high_section, low_section, -1):
+            good_section = False
+            superflat_void = False
+            air_count = 0
+            section = anvil.Chunk.get_section(chunk, s)
+            for block in anvil.Chunk.stream_blocks(chunk, section=section):
+                block = World2Vec.convert_if_old(block)
+                if block != None and anvil.Block.name(block) == "minecraft:air":
+                    air_count += 1
+                    # We'll check for a section to have a good portion of air, testing says 1024 blocks is a good fit
+                    if surface_section is not None and air_count == 1024:
+                        surface_section = section
+                        good_section = True
+                    if surface_section is not None and air_count == 4096 and s <= low_section:
+                        surface_section = anvil.Chunk.get_section(chunk, s + 1)
+                        superflat_void = True
+                        superflat = True
+                        break
+            if surface_section is None and air_count != 4096:
+                surface_section = section
+            elif superflat_void:
+                return superflat, s + 1
+            elif surface_section is not None and not good_section and not superflat:
+                return superflat, s
+        # Check for failure and output an error message
+        if surface_section is None:
+            print("Error: No surface section found in chunk", chunk.x, chunk.z)
+            return
 
     # Reads all region files in dir and returns a Generator of Chunks, all of which contain blocks that are not in natural_blocks.txt
     def get_build(dir: str, build_name: str):
@@ -145,28 +178,7 @@ class World2Vec:
                                         else:
                                             search_sections = range(7, -1, -1)
                                     
-                                    surface_section = None
-                                    # Begin with section -4, 0, or 3 depending on world surface and find the first section up from there that contains a large amount of air (the "surface" section)
-                                    # We stop at section 9 because that is the highest section that get_build_chunks() searches
-                                    for s in range(search_sections.stop + 1, search_sections.start + 1):
-                                        air_count = 0
-                                        section = anvil.Chunk.get_section(chunk, s)
-                                        for block in anvil.Chunk.stream_blocks(chunk, section=section):
-                                            block = World2Vec.convert_if_old(block)
-                                            if block != None and anvil.Block.name(block) == "minecraft:air":
-                                                air_count += 1
-                                                # We'll check for a section to have a good portion of air, testing says 1024 blocks is a good fit
-                                                if air_count == 1024:
-                                                    surface_section = s
-                                                if air_count == 4096:
-                                                    surface_section = None
-                                        # If we've already found a surface section, stop searching
-                                        if surface_section != None:
-                                            break
-                                    # Check for failure and output an error message
-                                    if surface_section is None:
-                                        print("Error: No surface section found in chunk", chunk.x, chunk.z)
-                                        return
+                                    superflat, surface_section = World2Vec.find_surface_section(chunk, search_sections.stop + 1, search_sections.start + 1, superflat)
 
                                     # Search the relevant sections
                                     chunk_added = False
