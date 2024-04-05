@@ -102,10 +102,36 @@ class World2Vec:
                                     inhabited_time_exist = False
                                 # Check whether the chunk has been visited at all, if not we can skip checking it
                                 if(inhabited_time >= inhabited_time_check or inhabited_time_exist == False):
-                                    if chunk.version is not None and chunk.version > 1451:
-                                        search_sections = range(16, -4, -1)
-                                    else:
-                                        search_sections = range(10, -1, -1)
+                                    # Check whether the given world is superflat
+                                    if superflat is None:
+                                        start_section = 0
+                                        if chunk.version is not None and chunk.version > 1451:
+                                            start_section = -4
+                                        for s in range(start_section, 1):
+                                            section = anvil.Chunk.get_section(chunk, s)
+                                            for x in range(0, 16):
+                                                for y in range(0, 16):
+                                                    for z in range(0, 16):
+                                                        true_y = y + (s * 16)
+                                                        block = World2Vec.convert_if_old(anvil.Chunk.get_block(chunk, x, true_y, z))
+                                                        block_above = World2Vec.convert_if_old(anvil.Chunk.get_block(chunk, x, true_y + 1, z))
+                                                        if block != None and block_above != None and anvil.Block.name(block) == "minecraft:bedrock" and anvil.Block.name(block_above) == "minecraft:dirt":
+                                                            upper_layer_test = True
+                                                            next_block = World2Vec.convert_if_old(anvil.Chunk.get_block(chunk, x, true_y + 2, z))
+                                                            if anvil.Block.name(next_block) != "minecraft:dirt" and anvil.Block.name(next_block) != "minecraft_grass":
+                                                                upper_layer_test = False
+                                                            if upper_layer_test:
+                                                                superflat_y = s
+                                                                superflat = True
+                                                                break
+                                        if superflat is None:
+                                            superflat = False
+                                    # If it's a superflat world, change the search sections
+                                    if superflat:
+                                        if chunk.version is not None and chunk.version > 1451:
+                                            search_sections = range(3, -5, -1)
+                                        else:
+                                            search_sections = range(7, -1, -1)
                                     
                                     surface_section = None
                                     # Begin with section -4, 0, or 3 depending on world surface and find the first section up from there that contains a large amount of air (the "surface" section)
@@ -244,15 +270,17 @@ class World2Vec:
         schem = mcschematic.MCSchematic()
         # Part of this process is finding the lowest y-value that can be considered the "surface"
         # This will almost certainly never be y=-100, so if this value is unchanged, we know something went wrong
-        lowest_surface_y = -100
+        lowest_surface_y = 0
         # Iterate through the chunks
-        if chunks[0].version > 1451:
-            min_range = -4
-        else:
-            min_range = 0
-        level = -100
+        min_range = 3
+        level = 0
         all_surface_sections = []
         surface_section_mode = None
+        # If it's a superflat world, we need to search the lower sections
+        if(superflat):
+            min_range = superflat_surface
+            lowest_surface_y = -100
+            level = -100
         for chunk in chunks:
             surface_section = None
             # Begin with section -4, 0, or 3 depending on world surface and find the first section up from there that contains a large amount of air (the "surface" section)
@@ -281,10 +309,7 @@ class World2Vec:
         surface_section_mode = max(set(all_surface_sections), key = all_surface_sections.count)
         all_ys = []
         start_y = -8
-        min_section = 0
-        if chunks[0].version is not None and chunks[0].version > 1451:
-            min_section = -4
-        if surface_section_mode == min_section:
+        if superflat:
             start_y = 0
         for chunk in chunks:
             chunk_lowest_y = level
