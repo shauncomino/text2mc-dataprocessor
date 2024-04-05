@@ -284,7 +284,9 @@ class World2Vec:
         # This will almost certainly never be y=-100, so if this value is unchanged, we know something went wrong
         lowest_surface_y = 0
         # Iterate through the chunks
-        min_range = 3
+        min_range = 0
+        if chunks[0].version > 1451:
+            min_range = -4
         level = 0
         all_surface_sections = []
         surface_section_mode = None
