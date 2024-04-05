@@ -141,7 +141,7 @@ class World2Vec:
                                     # If it's a superflat world, change the search sections
                                     if superflat:
                                         if chunk.version is not None and chunk.version > 1451:
-                                            search_sections = range(3, -5, -1)
+                                            search_sections = range(3, -4, -1)
                                         else:
                                             search_sections = range(7, -1, -1)
                                     
@@ -328,7 +328,7 @@ class World2Vec:
                 return
         
         # Find the mode (most common) surface section among the build chunks
-        surface_section_mode = min(set(all_surface_sections))
+        surface_section_mode = max(set(all_surface_sections), key = all_surface_sections.count)
         all_ys = []
         start_y = -8
         if superflat:
