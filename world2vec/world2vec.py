@@ -246,7 +246,7 @@ class World2Vec:
         # This will almost certainly never be y=-100, so if this value is unchanged, we know something went wrong
         lowest_surface_y = -100
         # Iterate through the chunks
-        if (chunks[0].version > 1451):
+        if chunks[0].version > 1451:
             min_range = -4
         else:
             min_range = 0
@@ -281,7 +281,10 @@ class World2Vec:
         surface_section_mode = max(set(all_surface_sections), key = all_surface_sections.count)
         all_ys = []
         start_y = -8
-        if superflat:
+        min_section = 0
+        if chunks[0].version is not None and chunks[0].version > 1451:
+            min_section = -4
+        if surface_section_mode == min_section:
             start_y = 0
         for chunk in chunks:
             chunk_lowest_y = level
