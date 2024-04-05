@@ -81,7 +81,7 @@ class World2Vec:
                 return superflat, s + 1
             elif surface_section is not None and not good_section and not superflat:
                 return superflat, s + 1
-        return True, low_section
+        return True, low_section + 1
 
     # Reads all region files in dir and returns a Generator of Chunks, all of which contain blocks that are not in natural_blocks.txt
     def get_build(dir: str, build_name: str):
