@@ -329,6 +329,10 @@ class World2Vec:
                         # We're going to ignore air blocks, as we can just fill in empty coordinates later with air blocks
                         # This just cleans up the output file for better readability
                         if block != None and anvil.Block.name(block) != "minecraft:air":
+                            if not anvil.Block.name(block).startswith("minecraft"):
+                                # This is a modded block, and we should skip the build
+                                print("Modded block found in build. Skipping...")
+                                return
                             # We've found a non-air block, so this isn't an empty layer
                             empty_layer = False
                             # We need to map the coordinates to our new system now
