@@ -262,7 +262,7 @@ class World2Vec:
             lowest_surface_y = -100
             level = -100
         for chunk in chunks:
-            superflat, surface_section = World2Vec.find_surface_section(chunk, 16, min_range, superflat)
+            superflat, surface_section = World2Vec.find_surface_section(chunk, min_range, 16, superflat)
             all_surface_sections.append(surface_section)
         # Find the mode (most common) surface section among the build chunks
         surface_section_mode = max(set(all_surface_sections), key = all_surface_sections.count)
