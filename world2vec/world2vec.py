@@ -81,7 +81,7 @@ class World2Vec:
                 if (region.data):
                     # Set search sections
                     inhabited_time_exist = True
-                    search_sections = range(16, 0, -1)
+                    search_sections = range(16, -1, -1)
                     x = 0
                     z = 0
                     while not region.chunk_data(x, z):
@@ -93,7 +93,7 @@ class World2Vec:
                         else:
                             break
                     if anvil.Region.get_chunk(region, x, z).version > 1451:
-                        search_sections = range(16, -4, -1)
+                        search_sections = range(16, -5, -1)
                     # Retrieve each chunk in the region
                     for x in range(0, 32):
                         for z in range(0, 32):
@@ -141,14 +141,14 @@ class World2Vec:
                                     # If it's a superflat world, change the search sections
                                     if superflat:
                                         if chunk.version is not None and chunk.version > 1451:
-                                            search_sections = range(3, -4, -1)
+                                            search_sections = range(3, -5, -1)
                                         else:
                                             search_sections = range(7, -1, -1)
                                     
                                     surface_section = None
                                     # Begin with section -4, 0, or 3 depending on world surface and find the first section up from there that contains a large amount of air (the "surface" section)
                                     # We stop at section 9 because that is the highest section that get_build_chunks() searches
-                                    for s in range(search_sections.stop, search_sections.start):
+                                    for s in range(search_sections.stop + 1, search_sections.start + 1):
                                         air_count = 0
                                         section = anvil.Chunk.get_section(chunk, s)
                                         for block in anvil.Chunk.stream_blocks(chunk, section=section):
@@ -158,7 +158,8 @@ class World2Vec:
                                                 # We'll check for a section to have a good portion of air, testing says 1024 blocks is a good fit
                                                 if air_count == 1024:
                                                     surface_section = s
-                                                    break
+                                                if air_count == 4096:
+                                                    surface_section = None
                                         # If we've already found a surface section, stop searching
                                         if surface_section != None:
                                             break
@@ -331,11 +332,11 @@ class World2Vec:
             if surface_section is None:
                 print("Error: No surface section found in chunk", chunk.x, chunk.z)
                 return
-            elif superflat and len(all_surface_sections) == prev_length:
-                all_surface_sections.append(min_range)
+            elif len(all_surface_sections) == prev_length:
+                superflat = True
+                all_surface_sections.append(min_range + 1)
                 prev_length += 1
         # Find the mode (most common) surface section among the build chunks
-        print(all_surface_sections)
         surface_section_mode = max(set(all_surface_sections), key = all_surface_sections.count)
         all_ys = []
         start_y = -8
@@ -360,7 +361,9 @@ class World2Vec:
                                 chunk_lowest_y = true_y
             all_ys.append(chunk_lowest_y)
         
-        lowest_surface_y = int(sum(all_ys) / len(all_ys)) - 1
+        lowest_surface_y = int(sum(all_ys) / len(all_ys))
+        if surface_section_mode != min_range + 1:
+            lowest_surface_y -= 1
 
         # Again, we don't need global coordinates, but we do need the blocks to be in the right places relative to each other
         # So, we're going to "create" our own (0, 0) and place everything relative to that point
