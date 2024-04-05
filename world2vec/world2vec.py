@@ -82,7 +82,17 @@ class World2Vec:
                     # Set search sections
                     inhabited_time_exist = True
                     search_sections = range(16, 0, -1)
-                    if anvil.Region.get_chunk(region, 0, 0).version > 1451:
+                    x = 0
+                    z = 0
+                    while not region.chunk_data(x, z):
+                        x += 1
+                        if not region.chunk_data(x, z):
+                            z += 1
+                            if region.chunk_data(x, z):
+                                break
+                        else:
+                            break
+                    if anvil.Region.get_chunk(region, x, z).version > 1451:
                         search_sections = range(16, -4, -1)
                     # Retrieve each chunk in the region
                     for x in range(0, 32):
