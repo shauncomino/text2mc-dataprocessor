@@ -310,16 +310,15 @@ class World2Vec:
                         if air_count == 1024:
                             surface_section = section
                             good_section = True
-                            break
                         if air_count == 4096:
                             surface_section = anvil.Chunk.get_section(chunk, s + 1)
                             superflat_void = True
                             break
-                if not good_section:
-                    if superflat_void:
-                        all_surface_sections.append(s + 1)
-                    else:
-                        all_surface_sections.append(s)
+                if superflat_void:
+                    all_surface_sections.append(s + 1)
+                    break
+                elif not good_section:
+                    all_surface_sections.append(s)
                     break
             # Check for failure and output an error message
             if surface_section is None:
