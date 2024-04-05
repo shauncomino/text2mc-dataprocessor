@@ -1,6 +1,7 @@
 __pycache__
 .vs/
 .vscode/
+env/
 builds/
 /.vscode
 /.vs
