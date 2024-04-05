@@ -288,6 +288,7 @@ class World2Vec:
             min_range = -5
         level = 0
         all_surface_sections = []
+        prev_length = 0
         surface_section_mode = None
         # If it's a superflat world, we need to search the lower sections
         if(superflat):
@@ -320,15 +321,19 @@ class World2Vec:
                     surface_section = section
                 elif superflat_void:
                     all_surface_sections.append(s + 1)
+                    prev_length += 1
                     break
                 elif surface_section is not None and not good_section and not superflat:
                     all_surface_sections.append(s)
+                    prev_length += 1
                     break
             # Check for failure and output an error message
             if surface_section is None:
                 print("Error: No surface section found in chunk", chunk.x, chunk.z)
                 return
-        
+            elif superflat and len(all_surface_sections) == prev_length:
+                all_surface_sections.append(min_range)
+                prev_length += 1
         # Find the mode (most common) surface section among the build chunks
         print(all_surface_sections)
         surface_section_mode = max(set(all_surface_sections), key = all_surface_sections.count)
