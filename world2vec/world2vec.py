@@ -132,10 +132,32 @@ class World2Vec:
                                             search_sections = range(3, -5, -1)
                                         else:
                                             search_sections = range(7, -1, -1)
+                                    
+                                    surface_section = None
+                                    # Begin with section -4, 0, or 3 depending on world surface and find the first section up from there that contains a large amount of air (the "surface" section)
+                                    # We stop at section 9 because that is the highest section that get_build_chunks() searches
+                                    for s in range(search_sections.stop, search_sections.start):
+                                        air_count = 0
+                                        section = anvil.Chunk.get_section(chunk, s)
+                                        for block in anvil.Chunk.stream_blocks(chunk, section=section):
+                                            block = World2Vec.convert_if_old(block)
+                                            if block != None and anvil.Block.name(block) == "minecraft:air":
+                                                air_count += 1
+                                                # We'll check for a section to have a good portion of air, testing says 1024 blocks is a good fit
+                                                if air_count == 1024:
+                                                    surface_section = s
+                                                    break
+                                        # If we've already found a surface section, stop searching
+                                        if surface_section != None:
+                                            break
+                                    # Check for failure and output an error message
+                                    if surface_section is None:
+                                        print("Error: No surface section found in chunk", chunk.x, chunk.z)
+                                        return
 
                                     # Search the relevant sections
                                     chunk_added = False
-                                    for s in search_sections:
+                                    for s in range(surface_section, surface_section + 4):
                                         section = anvil.Chunk.get_section(chunk, s)
                                         # Check each block in the section
                                         for block in anvil.Chunk.stream_blocks(chunk, section=section):
