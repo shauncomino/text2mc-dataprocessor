@@ -155,6 +155,10 @@ class World2Vec:
                                         # Check each block in the section
                                         for block in anvil.Chunk.stream_blocks(chunk, section=section):
                                             block = World2Vec.convert_if_old(block)
+                                            if not anvil.Block.name(block).startswith("minecraft"):
+                                                # This is a modded block, and we should skip the build
+                                                print("Modded block found in build. Skipping...")
+                                                return
                                             # If it's not a natural block, add this chunk to the list
                                             if block != None and anvil.Block.name(block) not in natural_blocks:
                                                 build_chunks.append(chunk)
