@@ -81,7 +81,7 @@ class World2Vec:
                 if (region.data):
                     # Set search sections
                     inhabited_time_exist = True
-                    search_sections = range(9, 2, -1)
+                    search_sections = range(16, 2, -1)
                     # Retrieve each chunk in the region
                     for x in range(0, 32):
                         for z in range(0, 32):
@@ -285,7 +285,7 @@ class World2Vec:
             surface_section = None
             # Begin with section -4, 0, or 3 depending on world surface and find the first section up from there that contains a large amount of air (the "surface" section)
             # We stop at section 9 because that is the highest section that get_build_chunks() searches
-            for s in range(min_range, 10):
+            for s in range(min_range, 16):
                 air_count = 0
                 section = anvil.Chunk.get_section(chunk, s)
                 for block in anvil.Chunk.stream_blocks(chunk, section=section):
