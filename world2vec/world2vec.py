@@ -274,7 +274,7 @@ class World2Vec:
         lowest_surface_y = 0
         # Iterate through the chunks
         min_range = 0
-        if chunks[0].version > 1451:
+        if chunks[0].version is not None and chunks[0].version > 1451:
             min_range = -5
         level = 0
         all_surface_sections = []
