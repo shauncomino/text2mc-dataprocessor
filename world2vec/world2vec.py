@@ -84,6 +84,8 @@ class World2Vec:
                     if surface_section is not None and air_count == 1024:
                         surface_section = section
                         good_section = True
+                        print("Superflat detected!")
+
                     if surface_section is not None and air_count == 4096 and s <= low_section + 4:
                         surface_section = anvil.Chunk.get_section(chunk, s + 1)
                         superflat_void = True
@@ -98,7 +100,7 @@ class World2Vec:
         return True, low_section + 1
 
     # Reads all region files in dir and returns a Generator of Chunks, all of which contain blocks that are not in natural_blocks.txt
-    def get_build(dir: str, build_name: str):
+    def get_build(dir: str, save_dir:str, build_name: str)-> List[str]:
         print("Searching directory " + dir + "...")
         # Read in the natural blocks to an array
         nb_file = open("natural_blocks.txt", 'r')
@@ -150,7 +152,9 @@ class World2Vec:
                                     superflat_mode = False
                                     if len(superflat_markers) != 0:
                                         superflat_mode = max(set(superflat_markers), key=superflat_markers.count)
-                                    superflat, surface_section = World2Vec.find_surface_section(chunk, search_sections.stop + 1, search_sections.start + 1, superflat_mode)
+
+                                    superflat, surface_section = World2Vec.find_surface_section(chunk, search_sections.stop, search_sections.start + 1, superflat_mode)
+
                                     superflat_markers.append(superflat)
                                     # Search the relevant sections
                                     chunk_added = False
@@ -165,6 +169,7 @@ class World2Vec:
                                                 return
                                             # If it's not a natural block, add this chunk to the list
                                             if block != None and anvil.Block.name(block) not in natural_blocks:
+                                                #print(anvil.Block.name(block) + "at " + str(chunk.x) + ", " + str(chunk.z) + " added to build!")
                                                 build_chunks.append(chunk)
                                                 if filename not in relevant_regions:
                                                     region_x = int(filename.split("r.")[1].split(".")[0])
@@ -214,6 +219,8 @@ class World2Vec:
             builds_extracted = 0
 
             # Loop through the clusters
+            schem_paths = []
+
             for cluster in unique_clusters:
                 # Increment the builds_extracted by 1
                 builds_extracted += 1
@@ -255,16 +262,15 @@ class World2Vec:
                                             if (chunk.x >= low_x and chunk.x <= high_x) and (chunk.z >= low_z and chunk.z <= high_z):
                                                 cluster_chunks.append(chunk)
                 print("Build chunks found!")
-
-                World2Vec.extract_build(cluster_chunks, superflat, build_name, builds_extracted)
+                World2Vec.extract_build(cluster_chunks, superflat, save_dir, build_name, builds_extracted, schem_paths)
 
                 # Call the extract_build function on cluster_chunks, pass in the builds_extracted integer
-
+            return schem_paths
             # Iterate through .mca files in dir to fill in missing chunks
             
             
     # Extracts a build from a list of chunks and writes a file containing block info and coordinates
-    def extract_build(chunks: List, superflat: bool, build_name: str, build_no: int):
+    def extract_build(chunks: List, superflat: bool,  save_dir:str, build_name: str, build_no: int, schem_paths: List[str]):
         print("Extracting build from chunks into " + build_name +  "_" + ".schematic...")
         # Open the output file
         schem = mcschematic.MCSchematic()
@@ -273,7 +279,7 @@ class World2Vec:
         lowest_surface_y = 0
         # Iterate through the chunks
         min_range = 0
-        if chunks[0].version > 1451:
+        if chunks[0].version is not None and chunks[0].version > 1451:
             min_range = -5
         level = 0
         all_surface_sections = []
@@ -365,20 +371,13 @@ class World2Vec:
             # Otherwise, increase to the next y layer
             else:
                 current_y += 1
-        # Get the current directory of the Python script
-        current_directory = os.path.dirname(__file__)
-
         # Extract path of code file, and add to with testbuilds
-        folder_name = 'testbuilds'
-        folder_path = os.path.join(current_directory, folder_name)
-
-        # Check if the folder exists
-        if not os.path.exists(folder_path) or not os.path.isdir(folder_path):
-            # Create the folder if it doesn't exist
-            os.makedirs(folder_path)
             
         # Now that the folder exists, you can save the schematic file
-        schem.save(folder_path, build_name +  "_" + str(build_no), mcschematic.Version.JE_1_20_1)
+        schem.save(save_dir, build_name +  "_" + str(build_no), mcschematic.Version.JE_1_20_1)
+        schem_file_path = os.path.join(save_dir, build_name +  "_" + str(build_no) + ".schematic")
+
+        schem_paths.append(schem_file_path)
 
         print("Build extracted to " + build_name + "_" + str(build_no) + ".schematic...!\n")
 
