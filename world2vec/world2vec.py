@@ -152,7 +152,9 @@ class World2Vec:
                                     superflat_mode = False
                                     if len(superflat_markers) != 0:
                                         superflat_mode = max(set(superflat_markers), key=superflat_markers.count)
+
                                     superflat, surface_section = World2Vec.find_surface_section(chunk, search_sections.stop, search_sections.start + 1, superflat_mode)
+
                                     superflat_markers.append(superflat)
                                     # Search the relevant sections
                                     chunk_added = False
