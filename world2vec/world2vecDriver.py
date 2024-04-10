@@ -43,7 +43,7 @@ class world2vecDriverConfig:
             print("Invalid build source folder or not provided")
 
         if self.PROCESSED_BUILDS_FOLDER is None or not os.path.exists(
-            self.PROCESSED_BUILD_FOLDER
+            self.PROCESSED_BUILDS_FOLDER
         ):
             self.PROCESSED_BUILDS_FOLDER = os.path.join(
                 os.path.abspath("./"), "vectorized_builds"
@@ -107,9 +107,9 @@ class world2vecDriver:
         
         
 
-    def convert_build_to_schemfile(self, folder_or_build_path, processed_file_prefix):
+    def convert_build_to_schemfile(self, folder_or_build_path, processed_path, processed_file_prefix):
         regions_dir = World2Vec.find_regions_dir(folder_or_build_path)
-        World2Vec.get_build_chunks(regions_dir, processed_file_prefix)  # function needs to be rewritten, but will eventually work like this
+        World2Vec.get_build(regions_dir, processed_path, processed_file_prefix)
 
     def convert_schemfile_to_json(self, schem_file_path: str, json_export_directory: str):
         subprocess.call(
