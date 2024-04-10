@@ -84,6 +84,8 @@ class World2Vec:
                     if surface_section is not None and air_count == 1024:
                         surface_section = section
                         good_section = True
+                        print("Superflat detected!")
+
                     if surface_section is not None and air_count == 4096 and s <= low_section + 4:
                         surface_section = anvil.Chunk.get_section(chunk, s + 1)
                         superflat_void = True
@@ -150,7 +152,9 @@ class World2Vec:
                                     superflat_mode = False
                                     if len(superflat_markers) != 0:
                                         superflat_mode = max(set(superflat_markers), key=superflat_markers.count)
-                                    superflat, surface_section = World2Vec.find_surface_section(chunk, search_sections.stop + 1, search_sections.start + 1, superflat_mode)
+
+                                    superflat, surface_section = World2Vec.find_surface_section(chunk, search_sections.stop, search_sections.start + 1, superflat_mode)
+
                                     superflat_markers.append(superflat)
                                     # Search the relevant sections
                                     chunk_added = False
@@ -165,6 +169,7 @@ class World2Vec:
                                                 return
                                             # If it's not a natural block, add this chunk to the list
                                             if block != None and anvil.Block.name(block) not in natural_blocks:
+                                                #print(anvil.Block.name(block) + "at " + str(chunk.x) + ", " + str(chunk.z) + " added to build!")
                                                 build_chunks.append(chunk)
                                                 if filename not in relevant_regions:
                                                     region_x = int(filename.split("r.")[1].split(".")[0])
@@ -274,7 +279,7 @@ class World2Vec:
         lowest_surface_y = 0
         # Iterate through the chunks
         min_range = 0
-        if chunks[0].version > 1451:
+        if chunks[0].version is not None and chunks[0].version > 1451:
             min_range = -5
         level = 0
         all_surface_sections = []
