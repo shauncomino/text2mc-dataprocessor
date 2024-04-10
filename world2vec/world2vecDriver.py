@@ -115,7 +115,7 @@ class world2vecDriver:
         
     def convert_build_to_schemfile(self, folder_or_build_path, processed_file_prefix):
         regions_dir = World2Vec.find_regions_dir(folder_or_build_path)[0]
-        return World2Vec.get_build(regions_dir, self.cfg.PROCESSED_BUILDS_FOLDER, processed_file_prefix)  # function needs to be rewritten, but will eventually work like this
+        return World2Vec.get_build(regions_dir, self.cfg.PROCESSED_BUILDS_FOLDER, processed_file_prefix, natural_blocks_path=r'C:\Users\shaun\OneDrive\Desktop\personal\CS classes\CS classes\COP4934\text2mc\text2mc-dataprocessor\world2vec\natural_blocks.txt')
 
     def convert_schemfile_to_json(self, schem_file_path: str, json_export_directory: str):
         subprocess.call(
