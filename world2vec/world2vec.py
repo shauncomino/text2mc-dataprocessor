@@ -6,6 +6,7 @@ import sys
 from sklearn.cluster import DBSCAN
 import numpy as np
 import json
+import h5py
 
 # Now you can use mcschematic
 
@@ -431,3 +432,9 @@ class World2Vec:
 
         # Return ndarray
         return world_array
+
+    def export_npy_to_hdf5(output_file_prefix: str, world_array: np.ndarray):
+        # Open HDF5 file in write mode
+        with h5py.File(f'{output_file_prefix}.h5', 'w') as f:
+            # Create a dataset in the HDF5 file with the same name as the file name and write the array data
+            f.create_dataset(output_file_prefix, data=world_array)

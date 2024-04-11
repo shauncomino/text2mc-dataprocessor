@@ -4,4 +4,5 @@ build_chunks, superflat, superflat_surface = World2Vec.get_build_chunks("mansion
 
 World2Vec.extract_build(build_chunks, superflat, superflat_surface, 1)
 
-World2Vec.export_json_to_npy("testjsons/m35mako.json", "testoutputs/m35mako.npy")
+world_arr = World2Vec.export_json_to_npy("testjsons/m35mako.json")
+World2Vec.export_npy_to_hdf5("m35mako", world_arr)
