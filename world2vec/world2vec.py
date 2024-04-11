@@ -202,7 +202,7 @@ class World2Vec:
                                         World2Vec.find_surface_section(
                                             chunk,
                                             search_sections.stop,
-                                            search_sections.start + 1,
+                                            search_sections.start,
                                             superflat_mode,
                                         )
                                     )
