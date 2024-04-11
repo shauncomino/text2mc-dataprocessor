@@ -99,7 +99,6 @@ class World2Vec:
                     if surface_section is not None and air_count == 1024:
                         surface_section = section
                         good_section = True
-                        print("Superflat detected!")
 
                     if (
                         surface_section is not None
@@ -543,7 +542,7 @@ class World2Vec:
             + ".schematic...!\n"
         )
 
-    def export_json_to_npy(input_file_path: str, output_file_path: str):
+    def export_json_to_npy(input_file_path: str):
         # Load JSON data
         with open(input_file_path) as f:
             data = json.load(f)
@@ -563,5 +562,4 @@ class World2Vec:
             block_name = block["name"]
             world_array[x, y, z] = block_name
 
-        # Save 3D array to a .npy file
-        np.save(output_file_path, world_array)
+        return world_array
