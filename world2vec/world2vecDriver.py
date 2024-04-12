@@ -45,7 +45,7 @@ class world2vecDriverConfig:
 
 
 class world2vecDriver:
-    
+
     def __init__(self, cfg: world2vecDriverConfig = None):
         self.cfg = cfg
 
@@ -119,7 +119,7 @@ class world2vecDriver:
 
                 # Search all files within the temporary directory once
                 all_files = glob.glob(
-                    os.path.join(temp_dir_path, "/**/*"), recursive=True
+                    os.path.join(temp_dir_path, "**/*"), recursive=True
                 )
 
                 schems_paths = []
@@ -128,14 +128,14 @@ class world2vecDriver:
                 for path in all_files:
                     if path.endswith(".schem") or path.endswith(".schematic"):
                         schems_paths.append(path)
-                    if path.endswith(".mca"):
+                    if path.endswith(".mca") or path.endswith(".mcr"):
                         mca_paths.append(path)
 
                 # If '.schem' files or '.schematic' files are present, use them
                 if len(schems_paths) > 0:
                     processed_paths = schems_paths
 
-                # If neither '.schem' nor '.schematic' files are found, but '.mca' files are, convert them
+                # If neither '.schem' nor '.schematic' files are found, but '.mca'/'.mcr' files are, convert them
                 if len(mca_paths) > 0 and len(schems_paths) == 0:
                     schem_paths = self.convert_build_to_schemfile(
                         temp_dir_path, f"build_{processed_file_name}"
@@ -145,6 +145,7 @@ class world2vecDriver:
             elif filename.endswith(".schematic") or filename.endswith(".schem"):
                 processed_paths = [filename]
 
+            print(f"Processed paths: {processed_paths}")
             if straight_to_hdf5:
                 new_paths = list()
                 for path in processed_paths:
@@ -168,7 +169,8 @@ class world2vecDriver:
                         traceback.format_exc()
                 processed_paths = new_paths
 
-            self.delete_directory_contents(temp_dir_path)
+            # self.delete_directory_contents(temp_dir_path)
+            # os.rmdir(temp_dir_path)
 
         except Exception as e:
             print(f"Error processing build {filename}: {e}")
@@ -321,7 +323,7 @@ def main():
     rar_df = projects_df[projects_df["SUFFIX"] == ".rar"]
     for i, row in rar_df[0:num_to_process].iterrows():
         world2vecdriver.process_build(
-            row["FILENAME"], f"schematic_test_{i}", r"D:\\temp"
+            row["FILENAME"], f"schematic_test_{i}", rf"D:\\temp_{i}"
         )
 
 
