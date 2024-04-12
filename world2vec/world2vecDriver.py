@@ -45,7 +45,7 @@ class world2vecDriverConfig:
 
 
 class world2vecDriver:
-
+    
     def __init__(self, cfg: world2vecDriverConfig = None):
         self.cfg = cfg
 
