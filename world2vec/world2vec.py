@@ -7,6 +7,7 @@ from sklearn.cluster import DBSCAN
 from typing import Union
 import numpy as np
 import json
+import h5py
 import math
 import glob
 
