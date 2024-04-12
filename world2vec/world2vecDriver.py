@@ -164,10 +164,10 @@ def main():
     world2vecdriver = world2vecDriver(cfg=config)
 
     args = sys.argv
-    source_df_path = args[0]
-    start_index = args[1]
-    end_index = args[2]
-    batch_num = args[3]
+    source_df_path = args[1]
+    start_index = args[2]
+    end_index = args[3]
+    batch_num = args[4]
     world2vecdriver.process_batch(source_df_path, start_index, end_index, batch_num)
 
 

@@ -17,4 +17,8 @@ module load python
 pip install -r requirements.txt
 
 # Commands to run Python script
-python world2vecDriver.py "$source_df_path" "$start_index" "$end_index" "$batch_num"
+# $1 is the data frame path
+# $2 is the starting index
+# $3 is the ending index
+# $4 is the batch number
+python world2vecDriver.py $1 $2 $3 $4
