@@ -45,7 +45,7 @@ class world2vecDriverConfig:
 
 
 class world2vecDriver:
-    
+
     def __init__(self, cfg: world2vecDriverConfig = None):
         self.cfg = cfg
 
@@ -119,37 +119,33 @@ class world2vecDriver:
 
                 # Search all files within the temporary directory once
                 all_files = glob.glob(
-                    os.path.join(temp_dir_path, "/**/*"), recursive=True
+                    os.path.join(temp_dir_path, "**/*"), recursive=True
                 )
 
-                # Filter the search results by file extension
-                processed_paths = [
-                    f
-                    for f in all_files
-                    if f.endswith(".schem")
-                    or f.endswith(".schematic")
-                    or f.endswith(".mca")
-                ]
+                schems_paths = []
+                mca_paths = []
 
-                # If no '.schem' files, but there are '.schematic' files, use them
-                if not any(f.endswith(".schem") for f in processed_paths) and any(
-                    f.endswith(".schematic") for f in processed_paths
-                ):
-                    processed_paths = [
-                        f for f in processed_paths if f.endswith(".schematic")
-                    ]
+                for path in all_files:
+                    if path.endswith(".schem") or path.endswith(".schematic"):
+                        schems_paths.append(path)
+                    if path.endswith(".mca") or path.endswith(".mcr"):
+                        mca_paths.append(path)
 
-                # If neither '.schem' nor '.schematic' files are found, but '.mca' files are, convert them
-                if not processed_paths or all(
-                    f.endswith(".mca") for f in processed_paths
-                ):
+                # If '.schem' files or '.schematic' files are present, use them
+                if len(schems_paths) > 0:
+                    processed_paths = schems_paths
+
+                # If neither '.schem' nor '.schematic' files are found, but '.mca'/'.mcr' files are, convert them
+                if len(mca_paths) > 0 and len(schems_paths) == 0:
                     schem_paths = self.convert_build_to_schemfile(
                         temp_dir_path, f"build_{processed_file_name}"
                     )
                     processed_paths = schem_paths
+
             elif filename.endswith(".schematic") or filename.endswith(".schem"):
                 processed_paths = [filename]
 
+            print(f"Processed paths: {processed_paths}")
             if straight_to_hdf5:
                 new_paths = list()
                 for path in processed_paths:
@@ -173,7 +169,8 @@ class world2vecDriver:
                         traceback.format_exc()
                 processed_paths = new_paths
 
-            self.delete_directory_contents(temp_dir_path)
+            # self.delete_directory_contents(temp_dir_path)
+            # os.rmdir(temp_dir_path)
 
         except Exception as e:
             print(f"Error processing build {filename}: {e}")
@@ -300,12 +297,12 @@ def main():
     num_to_process = 5
 
     # Process a single .schem file
-    print("Processings .schem files")
-    schem_df = projects_df[projects_df["SUFFIX"] == ".schem"]
-    for i, row in schem_df[0:num_to_process].iterrows():
-        world2vecdriver.process_build(
-            row["FILENAME"], f"schem_test_{i}", r"D:\\temp", straight_to_hdf5=True
-        )
+    # print("Processings .schem files")
+    # schem_df = projects_df[projects_df["SUFFIX"] == ".schem"]
+    # for i, row in schem_df[0:num_to_process].iterrows():
+    #     world2vecdriver.process_build(
+    #         row["FILENAME"], f"schem_test_{i}", r"D:\\temp", straight_to_hdf5=True
+    #     )
 
     # Process a single .zip archive
     # print("Processing .zip files")
@@ -322,12 +319,12 @@ def main():
     #     )
 
     # Process a single .rar archive
-    # print("Processing .rar files")
-    # rar_df = projects_df[projects_df["SUFFIX"] == ".rar"]
-    # for i, row in rar_df[0:num_to_process].iterrows():
-    #     world2vecdriver.process_build(
-    #         row["FILENAME"], f"schematic_test_{i}", r"D:\\temp"
-    #     )
+    print("Processing .rar files")
+    rar_df = projects_df[projects_df["SUFFIX"] == ".rar"]
+    for i, row in rar_df[0:num_to_process].iterrows():
+        world2vecdriver.process_build(
+            row["FILENAME"], f"schematic_test_{i}", rf"D:\\temp_{i}"
+        )
 
 
 if __name__ == "__main__":
