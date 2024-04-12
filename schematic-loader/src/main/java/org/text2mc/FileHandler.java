@@ -4,26 +4,19 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import net.sandrohc.schematic4j.schematic.Schematic;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.FilenameUtils;
 
 import java.io.File;
 import java.io.IOException;
 
 public class FileHandler {
     private String schemFilePath;
-    private String outputDirectoryPath;
-    private String outputFileExtension;
+    private String outputFilePath;
     private File schemFile;
 
-    public FileHandler(String schemFilePath, String outputDirectoryPath, String outputFileExtension) {
+    public FileHandler(String schemFilePath, String outputFilePath) {
         this.schemFilePath = schemFilePath;
-        this.outputDirectoryPath = outputDirectoryPath;
-        this.outputFileExtension = outputFileExtension;
+        this.outputFilePath = outputFilePath;
         this.schemFile = new File(schemFilePath);
-    }
-
-    public String getOutputFilePath(String schemFileName) {
-        return outputDirectoryPath + schemFileName + outputFileExtension;
     }
 
     private boolean fileExists(String filePath) {
@@ -36,9 +29,6 @@ public class FileHandler {
             System.out.println("Could not find schematic file");
             return;
         }
-
-        String schemFileName = FilenameUtils.removeExtension(schemFile.getName());
-        String outputFilePath = getOutputFilePath(schemFileName);
 
         if (fileExists(outputFilePath)) {
             System.out.println("Schematic output file already exists");
