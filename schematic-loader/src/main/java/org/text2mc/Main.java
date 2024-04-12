@@ -2,10 +2,9 @@ package org.text2mc;
 
 public class Main {
     public static void main(String[] args) {
-        String schematicDirectoryPath = "src/main/resources/";
-        String outputDirectoryPath = "src/main/output/";
-        String outputFileExtension = ".json";
-        FileHandler fileHandler = new FileHandler(schematicDirectoryPath, outputDirectoryPath, outputFileExtension);
-        fileHandler.exportSchematicFiles();
+        String schemFilePath = args[0];
+        String outputFilePath = args[1];
+        FileHandler fileHandler = new FileHandler(schemFilePath, outputFilePath);
+        fileHandler.exportSchematicFile();
     }
 }
