@@ -311,12 +311,12 @@ def main():
 
     # Code to test the driver manually
 
-    # config = world2vecDriverConfig(
-    #     DOWNLOADED_BUILDS_FOLDER=r"D:\builds",
-    #     PROCESSED_BUILDS_FOLDER=r"D:\processed_builds",
-    #     BLOCK_JSON_PATH=r"C:\Users\shaun\OneDrive\Desktop\personal\CS classes\CS classes\COP4934\text2mc\text2mc-dataprocessor\world2vec\block_ints.json",
-    # )
-    # world2vecdriver = world2vecDriver(cfg=config)
+    config = world2vecDriverConfig(
+        DOWNLOADED_BUILDS_FOLDER=r"D:\builds",
+        PROCESSED_BUILDS_FOLDER=r"D:\processed_builds",
+        BLOCK_JSON_PATH=r"C:\Users\shaun\OneDrive\Desktop\personal\CS classes\CS classes\COP4934\text2mc\text2mc-dataprocessor\world2vec\block_ints.json",
+    )
+    world2vecdriver = world2vecDriver(cfg=config)
 
     # world2vecdriver.process_batch(
     #     dataframe_path=r"C:\Users\shaun\OneDrive\Desktop\personal\CS classes\CS classes\COP4934\text2mc\text2mc-dataprocessor\projects_df_processed.csv",
@@ -332,37 +332,37 @@ def main():
     num_to_process = 5
 
     # Process .schem files
-    # print("Processings .schem files")
-    # schem_df = projects_df[projects_df["SUFFIX"] == ".schem"]
-    # for i, row in schem_df[0:num_to_process].iterrows():
-    #     world2vecdriver.process_build(
-    #         row["FILENAME"], f"schem_test_{i}", r"D:\\temp", straight_to_hdf5=True
-    #     )
+    print("Processings .schem files")
+    schem_df = projects_df[projects_df["SUFFIX"] == ".schem"]
+    for i, row in schem_df[0:num_to_process].iterrows():
+        world2vecdriver.process_build(
+            row["FILENAME"], f"schem_test_{i}", r"D:\\temp", straight_to_hdf5=True
+        )
 
     # Process a single .zip archive
-    # print("Processing .zip files")
-    # zip_df = projects_df[projects_df["SUFFIX"] == ".zip"]
-    # for i, row in zip_df[0:num_to_process].iterrows():
-    #     world2vecdriver.process_build(row["FILENAME"], f"zip_test_{i}", r"D:\\temp")
+    print("Processing .zip files")
+    zip_df = projects_df[projects_df["SUFFIX"] == ".zip"]
+    for i, row in zip_df[0:num_to_process].iterrows():
+        world2vecdriver.process_build(row["FILENAME"], f"zip_test_{i}", r"D:\\temp")
 
     # Process a single .schematic file
-    # print("Processing .schematic files")
-    # schematic_df = projects_df[projects_df["SUFFIX"] == ".schematic"]
-    # for i, row in schematic_df[0:num_to_process].iterrows():
-    #     world2vecdriver.process_build(
-    #         row["FILENAME"], f"schematic_test_{row["FILENAME"]}", r"D:\\temp", straight_to_hdf5=True
-    #     )
+    print("Processing .schematic files")
+    schematic_df = projects_df[projects_df["SUFFIX"] == ".schematic"]
+    for i, row in schematic_df[0:num_to_process].iterrows():
+        world2vecdriver.process_build(
+            row["FILENAME"], f"schematic_test_{row["FILENAME"]}", r"D:\\temp", straight_to_hdf5=True
+        )
 
     # Process a single .rar archive
-    # print("Processing .rar files")
-    # rar_df = projects_df[projects_df["SUFFIX"] == ".rar"]
-    # for i, row in rar_df[0:num_to_process].iterrows():
-    #     world2vecdriver.process_build(
-    #         row["FILENAME"],
-    #         f"schematic_test_{i}",
-    #         "D:\\temp",
-    #         straight_to_hdf5=True,
-    #     )
+    print("Processing .rar files")
+    rar_df = projects_df[projects_df["SUFFIX"] == ".rar"]
+    for i, row in rar_df[0:num_to_process].iterrows():
+        world2vecdriver.process_build(
+            row["FILENAME"],
+            f"schematic_test_{i}",
+            "D:\\temp",
+            straight_to_hdf5=True,
+        )
 
 
 if __name__ == "__main__":
