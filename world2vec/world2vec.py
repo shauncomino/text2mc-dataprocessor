@@ -6,7 +6,8 @@ import sys
 from sklearn.cluster import DBSCAN
 from typing import Union
 import numpy as np
-
+import json
+import h5py
 import math
 import glob
 
@@ -541,3 +542,31 @@ class World2Vec:
             + str(build_no)
             + ".schematic...!\n"
         )
+
+    def export_json_to_npy(input_file_path: str):
+        # Load JSON data
+        with open(input_file_path) as f:
+            data = json.load(f)
+
+        # Extract dimensions from JSON
+        dimensions = data["worldDimensions"]
+        width = dimensions["width"]
+        height = dimensions["height"]
+        length = dimensions["length"]
+
+        # Create a 3D array with dimensions from JSON
+        world_array = np.zeros((width, height, length), dtype=object)
+
+        # Fill the array with block names based on JSON data
+        for block in data["blocks"]:
+            x, y, z = block["x"], block["y"], block["z"]
+            block_name = block["name"]
+            world_array[x, y, z] = block_name
+
+        return world_array
+
+    def export_npy_to_hdf5(output_file_prefix: str, world_array: np.ndarray):
+        # Open HDF5 file in write mode
+        with h5py.File(f"{output_file_prefix}.h5", "w") as f:
+            # Create a dataset in the HDF5 file with the same name as the file name and write the array data
+            f.create_dataset(output_file_prefix, data=world_array)
