@@ -14,6 +14,8 @@ import numpy as np
 import h5py
 import glob
 import patoolib
+import json
+import h5py
 
 
 @dataclass
@@ -23,6 +25,9 @@ class world2vecDriverConfig:
 
     PROCESSED_BUILDS_FOLDER: str = None
     """ Processed .hdf5 builds """
+
+    BLOCK_JSON_PATH: str = None
+    """ Path to the JSON blocks path """
 
     def __post_init__(self):
 
@@ -35,11 +40,14 @@ class world2vecDriverConfig:
             self.PROCESSED_BUILDS_FOLDER
         ):
             print(
-                "Processed build folder not passed or incorrect, creating a new folder"
+                f"Processed build folder not passed or incorrect, creating a new folder. Passed path: {self.PROCESSED_BUILDS_FOLDER}"
             )
             self.PROCESSED_BUILDS_FOLDER = os.path.join(
                 os.path.abspath("./"), "vectorized_builds"
             )
+
+        if self.BLOCK_JSON_PATH is None or not os.path.exists(self.BLOCK_JSON_PATH):
+            print("Block JSON not passed or invalid path, making new .json")
 
         os.makedirs(self.PROCESSED_BUILDS_FOLDER, exist_ok=True)
 
@@ -107,8 +115,6 @@ class world2vecDriver:
         if not os.path.exists(temp_dir_path):
             os.mkdir(temp_dir_path)
         try:
-            # Assuming this is part of a class with access to self.cfg.DOWNLOADED_BUILDS_FOLDER, etc.
-
             unprocessed_build_path = os.path.join(
                 self.cfg.DOWNLOADED_BUILDS_FOLDER, filename
             )
@@ -128,14 +134,14 @@ class world2vecDriver:
                 for path in all_files:
                     if path.endswith(".schem") or path.endswith(".schematic"):
                         schems_paths.append(path)
-                    if path.endswith(".mca") or path.endswith(".mcr"):
+                    if path.endswith(".mca"):
                         mca_paths.append(path)
 
                 # If '.schem' files or '.schematic' files are present, use them
                 if len(schems_paths) > 0:
                     processed_paths = schems_paths
 
-                # If neither '.schem' nor '.schematic' files are found, but '.mca'/'.mcr' files are, convert them
+                # If neither '.schem' nor '.schematic' files are found, but '.mca' files are, convert them
                 if len(mca_paths) > 0 and len(schems_paths) == 0:
                     schem_paths = self.convert_build_to_schemfile(
                         temp_dir_path, f"build_{processed_file_name}"
@@ -143,9 +149,10 @@ class world2vecDriver:
                     processed_paths = schem_paths
 
             elif filename.endswith(".schematic") or filename.endswith(".schem"):
-                processed_paths = [filename]
+                processed_paths = [
+                    os.path.join(self.cfg.DOWNLOADED_BUILDS_FOLDER, filename)
+                ]
 
-            print(f"Processed paths: {processed_paths}")
             if straight_to_hdf5:
                 new_paths = list()
                 for path in processed_paths:
@@ -157,20 +164,25 @@ class world2vecDriver:
                             self.cfg.PROCESSED_BUILDS_FOLDER,
                             f"{processed_file_name}.h5",
                         )
+                        print(f"Schempaths: {path}")
                         self.convert_schemfile_to_json(path, temp_json_path)
                         npy_array = self.convert_json_to_npy(temp_json_path)
+                        vfunc_integerize = np.vectorize(self.integerize_build)
+                        npy_array = vfunc_integerize(npy_array)
                         self.convert_vector_to_hdf5(npy_array, hdf5_path)
-                        new_paths.append(hdf5_path)
+                        if os.path.exists(hdf5_path):
+                            new_paths.append(hdf5_path)
                     except Exception as e:
                         print(
                             f"Error processing schem to hdf5: {os.path.split(path)[-1]}"
                         )
                         print(e)
                         traceback.format_exc()
+
                 processed_paths = new_paths
 
-            # self.delete_directory_contents(temp_dir_path)
-            # os.rmdir(temp_dir_path)
+            print(f"Processed paths: {processed_paths}")
+            self.delete_directory_contents(temp_dir_path)
 
         except Exception as e:
             print(f"Error processing build {filename}: {e}")
@@ -181,7 +193,9 @@ class world2vecDriver:
     def extract_archive_to_temporary_directory(
         self, source_archive_path: str = None, outfolder_path: str = None
     ):
-        patoolib.extract_archive(source_archive_path, outdir=outfolder_path)
+        patoolib.extract_archive(
+            source_archive_path, outdir=outfolder_path, verbosity=-1
+        )
 
     def delete_directory_contents(self, folder: str = None):
         for filename in os.listdir(folder):
@@ -194,6 +208,10 @@ class world2vecDriver:
             except Exception as e:
                 print("Failed to delete %s. Reason: %s" % (file_path, e))
 
+    def integerize_build(selft, array_of_strings):
+
+        pass
+
     def convert_build_to_schemfile(self, folder_or_build_path, processed_file_prefix):
         regions_dir = World2Vec.find_regions_dir(folder_or_build_path)[0]
         return World2Vec.get_build(
@@ -203,16 +221,15 @@ class world2vecDriver:
             natural_blocks_path=r"C:\Users\shaun\OneDrive\Desktop\personal\CS classes\CS classes\COP4934\text2mc\text2mc-dataprocessor\world2vec\natural_blocks.txt",
         )
 
-    def convert_schemfile_to_json(
-        self, schem_file_path: str, json_export_directory: str
-    ):
+    def convert_schemfile_to_json(self, schem_file_path: str, json_export_path: str):
+        print("Calling subprocess")
         subprocess.call(
             [
                 "java",
                 "-jar",
-                "schematic-loader.jar",
+                "world2vec/schematic-loader.jar",
                 schem_file_path,
-                json_export_directory,
+                json_export_path,
             ]
         )
 
@@ -220,19 +237,8 @@ class world2vecDriver:
         return World2Vec.export_json_to_npy(json_file_path)
 
     def convert_vector_to_hdf5(self, vector, path):
-        hdf5_out_path = os.path.join(self.cfg.PROCESSED_BUILDS_FOLDER, f"{path}.h5")
-        hdf5_file = h5py.File(path, "w")
-
-    def convert_schemfile_to_hdf5(
-        self,
-        schem_file_path,
-        json_export_directory,
-        json_file_path,
-        processed_file_prefix,
-    ):
-        self.convert_schemfile_to_json(schem_file_path, json_export_directory)
-        vector = self.convert_json_to_npy(json_file_path)
-        self.convert_vector_to_hdf5(vector, processed_file_prefix)
+        with h5py.File(path, "w") as file:
+            file.create_dataset(os.path.split(path)[-1], data=vector)
 
     # Used to create processed and temporary directories
     def create_directory(self, dir_path: str):
@@ -251,6 +257,34 @@ class world2vecDriver:
         if os.path.exists(dir_path):
             if os.path.isdir(dir_path):
                 os.rmdir(dir_path)
+
+    def export_json_to_npy(input_file_path: str):
+        # Load JSON data
+        with open(input_file_path) as f:
+            data = json.load(f)
+
+        # Extract dimensions from JSON
+        dimensions = data["worldDimensions"]
+        width = dimensions["width"]
+        height = dimensions["height"]
+        length = dimensions["length"]
+
+        # Create a 3D array with dimensions from JSON
+        world_array = np.zeros((width, height, length), dtype=object)
+
+        # Fill the array with block names based on JSON data
+        for block in data["blocks"]:
+            x, y, z = block["x"], block["y"], block["z"]
+            block_name = block["name"]
+            world_array[x, y, z] = block_name
+
+        return world_array
+
+    def export_npy_to_hdf5(output_file_prefix: str, world_array: np.ndarray):
+        # Open HDF5 file in write mode
+        with h5py.File(f"{output_file_prefix}.h5", "w") as f:
+            # Create a dataset in the HDF5 file with the same name as the file name and write the array data
+            f.create_dataset(output_file_prefix, data=world_array)
 
 
 def main():
@@ -277,11 +311,12 @@ def main():
 
     # Code to test the driver manually
 
-    config = world2vecDriverConfig(
-        DOWNLOADED_BUILDS_FOLDER=r"D:\builds",
-        PROCESSED_BUILDS_FOLDER=r"D:\processed_schems",
-    )
-    world2vecdriver = world2vecDriver(cfg=config)
+    # config = world2vecDriverConfig(
+    #     DOWNLOADED_BUILDS_FOLDER=r"D:\builds",
+    #     PROCESSED_BUILDS_FOLDER=r"D:\processed_builds",
+    #     BLOCK_JSON_PATH=r"C:\Users\shaun\OneDrive\Desktop\personal\CS classes\CS classes\COP4934\text2mc\text2mc-dataprocessor\world2vec\block_ints.json",
+    # )
+    # world2vecdriver = world2vecDriver(cfg=config)
 
     # world2vecdriver.process_batch(
     #     dataframe_path=r"C:\Users\shaun\OneDrive\Desktop\personal\CS classes\CS classes\COP4934\text2mc\text2mc-dataprocessor\projects_df_processed.csv",
@@ -296,7 +331,7 @@ def main():
 
     num_to_process = 5
 
-    # Process a single .schem file
+    # Process .schem files
     # print("Processings .schem files")
     # schem_df = projects_df[projects_df["SUFFIX"] == ".schem"]
     # for i, row in schem_df[0:num_to_process].iterrows():
@@ -310,21 +345,24 @@ def main():
     # for i, row in zip_df[0:num_to_process].iterrows():
     #     world2vecdriver.process_build(row["FILENAME"], f"zip_test_{i}", r"D:\\temp")
 
-    # # Process a single .schematic file
+    # Process a single .schematic file
     # print("Processing .schematic files")
     # schematic_df = projects_df[projects_df["SUFFIX"] == ".schematic"]
     # for i, row in schematic_df[0:num_to_process].iterrows():
     #     world2vecdriver.process_build(
-    #         row["FILENAME"], f"schematic_test_{i}", r"D:\\temp"
+    #         row["FILENAME"], f"schematic_test_{row["FILENAME"]}", r"D:\\temp", straight_to_hdf5=True
     #     )
 
     # Process a single .rar archive
-    print("Processing .rar files")
-    rar_df = projects_df[projects_df["SUFFIX"] == ".rar"]
-    for i, row in rar_df[0:num_to_process].iterrows():
-        world2vecdriver.process_build(
-            row["FILENAME"], f"schematic_test_{i}", rf"D:\\temp_{i}"
-        )
+    # print("Processing .rar files")
+    # rar_df = projects_df[projects_df["SUFFIX"] == ".rar"]
+    # for i, row in rar_df[0:num_to_process].iterrows():
+    #     world2vecdriver.process_build(
+    #         row["FILENAME"],
+    #         f"schematic_test_{i}",
+    #         "D:\\temp",
+    #         straight_to_hdf5=True,
+    #     )
 
 
 if __name__ == "__main__":
