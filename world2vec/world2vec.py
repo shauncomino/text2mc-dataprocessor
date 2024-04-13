@@ -564,9 +564,9 @@ class World2Vec:
             world_array[x, y, z] = block_name
 
         return world_array
-      
-    def export_npy_to_hdf5(output_directory:str, output_file_prefix: str, world_array: np.ndarray):
+
+    def export_npy_to_hdf5(output_file_prefix: str, world_array: np.ndarray):
         # Open HDF5 file in write mode
-        with h5py.File(f'{output_directory}/{output_file_prefix}.h5', 'w') as f:
+        with h5py.File(f"{output_file_prefix}.h5", "w") as f:
             # Create a dataset in the HDF5 file with the same name as the file name and write the array data
             f.create_dataset(output_file_prefix, data=world_array)
