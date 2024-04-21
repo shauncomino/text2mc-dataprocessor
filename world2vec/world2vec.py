@@ -505,7 +505,6 @@ class World2Vec:
                                     )
                             block_properties = block_properties[:-1] + "]"
                             # Finally, we write to the output file
-                            print(anvil.Block.name(block) + block_properties)
                             if len(block.properties) > 0:
                                 schem.setBlock(
                                     (int(new_x), int(new_y), int(new_z)),
