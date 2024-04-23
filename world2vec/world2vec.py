@@ -308,7 +308,7 @@ class World2Vec:
             data = np.array([(chunk.x, chunk.z) for chunk in build_chunks])
 
             # Apply DBSCAN clustering
-            dbscan = DBSCAN(eps=3, min_samples=3).fit(data)
+            dbscan = DBSCAN(eps = 5, min_samples = 5).fit(data)
             labels = dbscan.labels_
 
             # Get the label of the main cluster
@@ -523,9 +523,7 @@ class World2Vec:
             # Otherwise, increase to the next y layer
             else:
                 current_y += 1
-        # Extract path of code file, and add to with testbuilds
 
-        # Now that the folder exists, you can save the schematic file
         schem.save(
             save_dir, build_name + "_" + str(build_no), mcschematic.Version.JE_1_20_1
         )
