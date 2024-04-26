@@ -52,8 +52,15 @@ class world2vecDriverConfig:
 
         if self.BLOCK_JSON_PATH is None or not os.path.exists(self.BLOCK_JSON_PATH):
             print("Block JSON not passed or invalid path, making new .json")
-        
-        if self.BLOCK_TO_TOKEN_JSON_PATH is None or not os.path.exists(self.BLOCK_TO_TOKEN_JSON_PATH):
+
+        if self.BLOCK_TO_TOKEN_JSON_PATH is None or not os.path.exists(
+            self.BLOCK_TO_TOKEN_JSON_PATH
+        ):
+            print("Block to token JSON not passed or invalid path.")
+
+        if self.BLOCK_TO_TOKEN_JSON_PATH is None or not os.path.exists(
+            self.BLOCK_TO_TOKEN_JSON_PATH
+        ):
             print("Block to token JSON not passed or invalid path.")
 
         os.makedirs(self.PROCESSED_BUILDS_FOLDER, exist_ok=True)
@@ -217,9 +224,9 @@ class world2vecDriver:
 
     def integerize_build(self, block_name_array):
         block2tok_lookup = dict()
-    
+
         integerized_array = np.empty(block_name_array.shape, dtype=int)
-        with open(self.cfg.BLOCK_TO_TOKEN_JSON_PATH, 'r') as file:
+        with open(self.cfg.BLOCK_TO_TOKEN_JSON_PATH, "r") as file:
             block2tok_lookup = json.load(file)
 
         for i in range(block_name_array.shape[0]):
@@ -230,9 +237,8 @@ class world2vecDriver:
                     token = block2tok_lookup.get(block_name, -1)
                     integerized_array[i, j, k] = token
                     print("Block name: {}, Token: {}".format(block_name, token))
-                    
+
         return integerized_array
-        
 
     def convert_build_to_schemfile(self, folder_or_build_path, processed_file_prefix):
         regions_dir = World2Vec.find_regions_dir(folder_or_build_path)[0]
@@ -351,21 +357,24 @@ def main():
         r"C:\Projects\text2mc\SCRUM-whatever\text2mc-dataprocessor\projects_df_processed.csv"
     )
 
-    num_to_process = 5
+    num_to_process = 20
 
     # Process .schem files
     print("Processings .schem files")
     schem_df = projects_df[projects_df["SUFFIX"] == ".schem"]
     for i, row in schem_df[0:num_to_process].iterrows():
         world2vecdriver.process_build(
-            row["FILENAME"], f"schem_test_{i}", r"C:\Projects\text2mc\SCRUM-whatever\text2mc-dataprocessor\world2vec", straight_to_hdf5=True
+            row["FILENAME"],
+            f"schem_test_{i}",
+            r"C:\Projects\text2mc\SCRUM-whatever\text2mc-dataprocessor\world2vec",
+            straight_to_hdf5=True,
         )
     """
     # Process a single .zip archive
-    print("Processing .zip files")
-    zip_df = projects_df[projects_df["SUFFIX"] == ".zip"]
-    for i, row in zip_df[0:num_to_process].iterrows():
-        world2vecdriver.process_build(row["FILENAME"], f"zip_test_{i}", r"C:\Projects\text2mc\SCRUM-whatever\text2mc-dataprocessor\world2vec")
+    # print("Processing .zip files")
+    # zip_df = projects_df[projects_df["SUFFIX"] == ".zip"]
+    # for i, row in zip_df[0:num_to_process].iterrows():
+    #     world2vecdriver.process_build(row["FILENAME"], f"zip_test_{i}", r"C:\Projects\text2mc\SCRUM-whatever\text2mc-dataprocessor\world2vec")
 
     # Process a single .schematic file
     print("Processing .schematic files")
