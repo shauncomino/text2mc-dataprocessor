@@ -17,11 +17,17 @@ class SkipGramModel(nn.Module):
         init.uniform_(self.target_embeddings.weight.data, -
                       initrange, initrange)
 
-    def forward(self, target, context):
-        emb_target = self.target_embeddings(target)
+    
+    def forward(self, target_blocks, context_blocks):
+        total_batch_loss = 0
+        for idx in range (0, len(target_blocks)): 
+            target = target_blocks[idx]
+            emb_target = self.target_embeddings(target)
 
-        score = self.output(emb_target)
-        score = F.log_softmax(score, dim=-1)
-        losses = torch.stack([F.nll_loss(score, context_word.long())
-                              for context_word in context.transpose(0, 1)])
-        return losses.mean()
+            score = self.output(emb_target)
+            score = F.log_softmax(score, dim=-1)
+            losses = torch.stack([F.nll_loss(score, context_block.long())
+                                for context_block in context_blocks[idx]])
+            total_batch_loss += losses.mean()
+
+        return losses.mean()/len(target_blocks)
