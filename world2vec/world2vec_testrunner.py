@@ -20,6 +20,9 @@ import json
 import h5py
 import sys 
 
+# Not in vocab token 
+NIV_TOK = 4000
+
 # Load the blockname -> integer lookup dictionary
 cwd = os.getcwd() 
 block2tok_filepath = os.path.join(cwd, "block2tok_mc.json") 
@@ -36,24 +39,35 @@ def has_blockstates(blockname: str):
 
 def convert_block_names_to_integers(build_array: np.ndarray):
     x_dim, y_dim, z_dim = build_array.shape
-    blockset = set() # For debug purposes (don't want 9000 of the same blocks coming up as err)
+    integerized_build = np.zeros((x_dim, y_dim, z_dim), dtype=np.uint16)
 
     for x, y, z in product(range(0, x_dim), range(0, y_dim), range(0, z_dim)): 
         blockname = build_array[x, y, z]
-        
-        if blockname not in blockset:
-            if (block2tok.get(blockname) is None): 
-                blockname_split = blockname.split('[')
+        value = block2tok.get(blockname)
+       
+        if (value is None): 
+            blockname_and_states = blockname.split('[')
+            split_blockname = blockname_and_states[0]
+            value = block2tok.get(split_blockname)
 
-                if block2tok.get(blockname_split[0]) is None: 
-                    print("couldn't find " + blockname_split[0] + " in block2tok")
+            if value is None: 
+                print("Couldn't find " + split_blockname + " aka " + blockname + " in block2tok")
+                integerized_build[x, y, z] = NIV_TOK
+            else: 
+                if (isinstance(value, dict)): 
+                    block_states = blockname_and_states[1].replace(']', "")
+                    token = value.get(block_states)
+                    if (token is None): 
+                        print("For block: \"" + split_blockname + "\", couldn't find state string: \"" + block_states + "\" in block2tok_mc.json")
+                        integerized_build[x, y, z] = NIV_TOK
+                    else: 
+                        integerized_build[x, y, z] = token
                 else: 
-                    print("found " + blockname_split[0] + " in block2tok")
-            else : 
-                print("found " + blockname + " in block2tok")
-            blockset.add(blockname)
-
-    return build_array
+                    integerized_build[x, y, z] = value
+        else : 
+            integerized_build[x, y, z] = block2tok.get(blockname)
+        
+    return integerized_build
 
 def main(): 
     """ 
@@ -121,7 +135,7 @@ def main():
     print("Build npy array for " + build_name  + " is ready.")
 
     # Integerize the numpy array, instead of doing back-and-forth conversion 
-    build_npy_array = convert_block_names_to_integers(build_npy_array) 
+    integerized_build = convert_block_names_to_integers(build_npy_array) 
     print("Integerized build npy array for " + build_name  + " is ready.")
 
     # Get HDF5 file from numpy array
