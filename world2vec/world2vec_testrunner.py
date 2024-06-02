@@ -20,6 +20,12 @@ import json
 import h5py
 import sys 
 
+# Load the blockname -> integer lookup dictionary
+cwd = os.getcwd() 
+block2tok_filepath = os.path.join(cwd, "block2tok_mc.json") 
+with open(block2tok_filepath, 'r') as file:
+    block2tok = json.load(file)
+
 def has_blockstates(blockname: str): 
     regex_square_brackets = r'\[.*?\]'
 
@@ -30,13 +36,21 @@ def has_blockstates(blockname: str):
 
 def convert_block_names_to_integers(build_array: np.ndarray):
     x_dim, y_dim, z_dim = build_array.shape
-    blockset = set()
+    blockset = set() # For debug purposes (don't want 9000 of the same blocks coming up as err)
 
     for x, y, z in product(range(0, x_dim), range(0, y_dim), range(0, z_dim)): 
         blockname = build_array[x, y, z]
         
-        if not blockname in blockset and has_blockstates(blockname):
-            print(blockname)
+        if blockname not in blockset:
+            if (block2tok.get(blockname) is None): 
+                blockname_split = blockname.split('[')
+
+                if block2tok.get(blockname_split[0]) is None: 
+                    print("couldn't find " + blockname_split[0] + " in block2tok")
+                else: 
+                    print("found " + blockname_split[0] + " in block2tok")
+            else : 
+                print("found " + blockname + " in block2tok")
             blockset.add(blockname)
 
     return build_array
@@ -48,9 +62,6 @@ def main():
         JSON -> numpy array, 
         numpy array -> HDF5
     """
-
-
-    cwd = os.getcwd() 
 
     builds_raw_dir = os.path.join(cwd, "builds_raw")
     build_name = "Boulevardier's_Sanctuary_of_All_Times" # This is the name of the build folder for your current run
@@ -120,7 +131,7 @@ def main():
         print("Error: HDF5 for " + build_name + " was not created.")
     else: 
         print("HDF5 for " + build_name  + " is ready.")
-
+    
 
 if __name__ == "__main__":
     main()
