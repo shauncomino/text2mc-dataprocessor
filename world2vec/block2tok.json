@@ -14,10 +14,10 @@
         "face=wall,facing=west": 7
     },
     "acacia_door": {
-        "facing=north,half=lower,hinge=left,open=false": 8,
-        "facing=east,half=lower,hinge=left,open=false": 9,
-        "facing=south,half=lower,hinge=left,open=false": 10,
-        "facing=west,half=lower,hinge=left,open=false": 11
+        "facing=north": 8,
+        "facing=east": 9,
+        "facing=south": 10,
+        "facing=west": 11
     },
     "acacia_fence": 12,
     "acacia_fence_gate": {
@@ -101,7 +101,8 @@
         "facing=south,half=bottom,open=true": 78,
         "facing=south,half=top,open=false": 79,
         "facing=south,half=top,open=true": 80,
-        "facing=west,half=bottom,open=false": 82,
+	"facing=west,half=bottom,open=false": 81,
+        "facing=west,half=bottom,open=true": 82,
         "facing=west,half=top,open=false": 83,
         "facing=west,half=top,open=true": 84
     },
@@ -109,21 +110,13 @@
         "facing=north": 85,
         "facing=east": 86,
         "facing=south": 87,
-        "facing=west": 88,
-        "north": 85,
-        "east": 86,
-        "south": 87,
-        "west": 88
+        "facing=west": 88
     },
     "acacia_wall_sign": {
         "facing=north": 89,
         "facing=east": 90,
         "facing=south": 91,
-        "facing=west": 92,
-        "north": 89,
-        "east": 90,
-        "south": 91,
-        "west": 92
+        "facing=west": 92
     },
     "acacia_wood": {
         "axis=x": 93,
@@ -240,9 +233,7 @@
         "facing=north": 182,
         "facing=south": 182,
         "facing=east": 183,
-        "facing=west": 183,
-        "north/south": 182,
-        "east/west": 183
+        "facing=west": 183
     },
     "bamboo_hanging_sign": {
         "facing=north": 184,
@@ -360,7 +351,8 @@
         "facing=south,half=bottom,open=true": 286,
         "facing=south,half=top,open=false": 287,
         "facing=south,half=top,open=true": 288,
-        "facing=west,half=bottom,open=false": 290,
+	"facing=west,half=bottom,open=false": 289,
+        "facing=west,half=bottom,open=true": 290,
         "facing=west,half=top,open=false": 291,
         "facing=west,half=top,open=true": 292
     },
@@ -493,7 +485,8 @@
         "facing=south,half=bottom,open=true": 392,
         "facing=south,half=top,open=false": 393,
         "facing=south,half=top,open=true": 394,
-        "facing=west,half=bottom,open=false": 396,
+	"facing=west,half=bottom,open=false": 395,
+        "facing=west,half=bottom,open=true": 396,
         "facing=west,half=top,open=false": 397,
         "facing=west,half=top,open=true": 398
     },
@@ -577,10 +570,10 @@
     },
     "blackstone_wall": 467,
     "blast_furnace": {
-        "facing=north,lit=false": 468,
-        "facing=east,lit=false": 469,
-        "facing=south,lit=false": 470,
-        "facing=west,lit=false": 471
+        "facing=north": 468,
+        "facing=east": 469,
+        "facing=south": 470,
+        "facing=west": 471
     },
     "blue_banner": 472,
     "blue_bed": 473,
@@ -688,44 +681,67 @@
     "carrots": 569,
     "cartography_table": 570,
     "carved_pumpkin": {
-        "facing=east": 574
+	"facing=north": 571,
+	"facing=east": 572,
+	"facing=south": 573,
+        "facing=west": 574
     },
     "cauldron": 575,
     "cave_air": 576,
     "cave_vines": 577,
     "cave_vines_plant": 578,
     "chain": {
-        "axis=x": 581
+	"axis=x": 579,
+	"axis=y": 580,
+        "axis=z": 581
     },
     "chain_command_block": 582,
     "cherry_button": {
-        "face=ceiling,facing=east,powered=false": 584,
-        "face=floor,facing=east,powered=false": 586,
-        "face=wall,facing=north,powered=false": 587,
-        "face=wall,facing=east,powered=false": 588,
-        "face=wall,facing=south,powered=false": 589,
-        "face=wall,facing=west,powered=false": 590
+        "face=ceiling,facing=north": 583,
+        "face=ceiling,facing=south": 583,
+        "face=ceiling,facing=east": 584,
+        "face=ceiling,facing=west": 584,
+        "face=floor,facing=north": 585,
+        "face=floor,facing=south": 585,
+        "face=floor,facing=east": 586,
+        "face=floor,facing=west": 586,
+        "face=wall,facing=north": 587,
+        "face=wall,facing=east": 588,
+        "face=wall,facing=south": 589,
+        "face=wall,facing=west": 590
     },
     "cherry_door": {
-        "facing=east,half=lower,hinge=left,open=false": 594
+	"facing=north": 591,
+	"facing=east": 592,
+	"facing=south": 593,
+        "facing=west": 594
     },
     "cherry_fence": 595,
     "cherry_fence_gate": {
-        "facing=east,in_wall=false,open=false": 597
+	"facing=north": 596,
+	"facing=south": 596,
+	"facing=east": 597,
+        "facing=west": 597
     },
     "cherry_hanging_sign": {
-        "": 601
+        "facing=north": 598,
+        "facing=east": 599,
+        "facing=south": 600,
+        "facing=west": 601
     },
     "cherry_leaves": 602,
     "cherry_log": {
-        "axis=x": 605
+	"axis=x": 603,
+	"axis=y": 604,
+        "axis=z": 605
     },
     "cherry_planks": 606,
     "cherry_pressure_plate": 607,
     "cherry_sapling": 608,
     "cherry_sign": 609,
     "cherry_slab": {
-        "type=bottom": 611
+	"type=bottom": 610,
+        "type=top": 611
     },
     "cherry_stairs": {
         "facing=north,half=bottom,shape=straight": 612,
@@ -770,27 +786,46 @@
         "facing=west,half=top,shape=inner_right": 651
     },
     "cherry_trapdoor": {
-        "facing=north,half=bottom,open=false": 653,
-        "facing=north,half=top,open=false": 655,
-        "facing=east,half=bottom,open=false": 657,
-        "facing=east,half=top,open=false": 659,
-        "facing=south,half=bottom,open=false": 661,
-        "facing=south,half=top,open=false": 663,
-        "facing=west,half=bottom,open=false": 665,
-        "facing=west,half=top,open=false": 667
+        "facing=north,half=bottom,open=false": 652,
+        "facing=north,half=bottom,open=true": 653,
+        "facing=north,half=top,open=false": 654,
+        "facing=north,half=top,open=true": 655,
+        "facing=east,half=bottom,open=false": 656,
+        "facing=east,half=bottom,open=true": 657,
+        "facing=east,half=top,open=false": 658,
+        "facing=east,half=top,open=true": 659,
+        "facing=south,half=bottom,open=false": 660,
+        "facing=south,half=bottom,open=true": 661,
+        "facing=south,half=top,open=false": 662,
+        "facing=south,half=top,open=true": 663,
+        "facing=west,half=bottom,open=false": 664,
+	"facing=west,half=bottom,open=true": 665,
+        "facing=west,half=top,open=false": 666,
+        "facing=west,half=top,open=true": 667
     },
     "cherry_wall_hanging_sign": {
-        "": 671
+        "facing=north": 668,
+        "facing=east": 669,
+        "facing=south": 670,
+        "facing=west": 671
     },
     "cherry_wall_sign": {
-        "": 675
+        "facing=north": 672,
+        "facing=east": 673,
+        "facing=south": 674,
+        "facing=west": 675
     },
     "cherry_wood": {
-        "axis=x": 678
+	"axis=x": 676,
+	"axis=y": 677,
+        "axis=z": 678
     },
     "chest": 679,
     "chipped_anvil": {
-        "facing=east": 681
+	"facing=north": 680,
+	"facing=south": 680,
+	"facing=east": 681,
+        "facing=west": 681
     },
     "chiseled_bookshelf": 682,
     "chiseled_deepslate": 683,
@@ -808,7 +843,8 @@
     "coarse_dirt": 695,
     "cobbled_deepslate": 696,
     "cobbled_deepslate_slab": {
-        "type=bottom": 698
+	"type=bottom": 697,
+        "type=top": 698
     },
     "cobbled_deepslate_stairs": {
         "facing=north,half=bottom,shape=straight": 699,
@@ -855,7 +891,8 @@
     "cobbled_deepslate_wall": 739,
     "cobblestone": 740,
     "cobblestone_slab": {
-        "type=bottom": 742
+	"type=bottom": 741,
+        "type=top": 742
     },
     "cobblestone_stairs": {
         "facing=north,half=bottom,shape=straight": 743,
@@ -918,26 +955,43 @@
     "creeper_head": 799,
     "creeper_wall_head": 800,
     "crimson_button": {
-        "face=ceiling,facing=east,powered=false": 802,
-        "face=floor,facing=east,powered=false": 804,
-        "face=wall,facing=north,powered=false": 805,
-        "face=wall,facing=east,powered=false": 806,
-        "face=wall,facing=south,powered=false": 807,
-        "face=wall,facing=west,powered=false": 808
+        "face=ceiling,facing=north": 801,
+        "face=ceiling,facing=south": 801,
+        "face=ceiling,facing=east": 802,
+        "face=ceiling,facing=west": 802,
+        "face=floor,facing=north": 803,
+        "face=floor,facing=south": 803,
+        "face=floor,facing=east": 804,
+        "face=floor,facing=west": 804,
+        "face=wall,facing=north": 805,
+        "face=wall,facing=east": 806,
+        "face=wall,facing=south": 807,
+        "face=wall,facing=west": 808
     },
     "crimson_door": {
-        "facing=east,half=lower,hinge=left,open=false": 812
+	"facing=north": 809,
+	"facing=east": 810,
+	"facing=south": 811,
+        "facing=west": 812
     },
     "crimson_fence": 813,
     "crimson_fence_gate": {
-        "facing=east,in_wall=false,open=false": 815
+        "facing=north": 814,
+	"facing=south": 814,
+	"facing=east": 815,
+	"facing=west": 815
     },
     "crimson_fungus": 816,
     "crimson_hanging_sign": {
-        "": 820
+        "facing=north": 817,
+        "facing=east": 818,
+        "facing=south": 819,
+        "facing=west": 820
     },
     "crimson_hyphae": {
-        "axis=x": 823
+	"axis=x": 821,
+	"axis=y": 822,
+        "axis=z": 823
     },
     "crimson_nylium": 824,
     "crimson_planks": 825,
@@ -945,7 +999,8 @@
     "crimson_roots": 827,
     "crimson_sign": 828,
     "crimson_slab": {
-        "type=bottom": 830
+	"type=bottom": 829,
+        "type=top": 830
     },
     "crimson_stairs": {
         "facing=north,half=bottom,shape=straight": 831,
@@ -990,28 +1045,45 @@
         "facing=west,half=top,shape=inner_right": 870
     },
     "crimson_stem": {
-        "axis=x": 873
+	"axis=x": 871,
+	"axis=y": 872,
+        "axis=z": 873
     },
     "crimson_trapdoor": {
-        "facing=north,half=bottom,open=false": 875,
-        "facing=north,half=top,open=false": 877,
-        "facing=east,half=bottom,open=false": 879,
-        "facing=east,half=top,open=false": 881,
-        "facing=south,half=bottom,open=false": 883,
-        "facing=south,half=top,open=false": 885,
-        "facing=west,half=bottom,open=false": 887,
-        "facing=west,half=top,open=false": 889
+        "facing=north,half=bottom,open=false": 874,
+        "facing=north,half=bottom,open=true": 875,
+        "facing=north,half=top,open=false": 876,
+        "facing=north,half=top,open=true": 877,
+        "facing=east,half=bottom,open=false": 878,
+        "facing=east,half=bottom,open=true": 879,
+        "facing=east,half=top,open=false": 880,
+        "facing=east,half=top,open=true": 881,
+        "facing=south,half=bottom,open=false": 882,
+        "facing=south,half=bottom,open=true": 883,
+        "facing=south,half=top,open=false": 884,
+        "facing=south,half=top,open=true": 885,
+        "facing=west,half=bottom,open=false": 886,
+	"facing=west,half=bottom,open=true": 887,
+        "facing=west,half=top,open=false": 888,
+        "facing=west,half=top,open=true": 889
     },
     "crimson_wall_hanging_sign": {
-        "": 893
+        "facing=north": 890,
+        "facing=east": 891,
+        "facing=south": 892,
+        "facing=west": 893
     },
     "crimson_wall_sign": {
-        "": 897
+        "facing=north": 894,
+        "facing=east": 895,
+        "facing=south": 896,
+        "facing=west": 897
     },
     "crying_obsidian": 898,
     "cut_copper": 899,
     "cut_copper_slab": {
-        "type=bottom": 901
+	"type=bottom": 900,
+        "type=top": 901
     },
     "cut_copper_stairs": {
         "facing=north,half=bottom,shape=straight": 902,
@@ -1057,11 +1129,13 @@
     },
     "cut_red_sandstone": 942,
     "cut_red_sandstone_slab": {
-        "type=bottom": 944
+	"type=bottom": 943,
+        "type=top": 944
     },
     "cut_sandstone": 945,
     "cut_sandstone_slab": {
-        "type=bottom": 947
+	"type=bottom": 946,
+        "type=top": 947
     },
     "cyan_banner": 948,
     "cyan_bed": 949,
@@ -1078,37 +1152,58 @@
     "cyan_wall_banner": 960,
     "cyan_wool": 961,
     "damaged_anvil": {
-        "facing=east": 963
+	"facing=north": 962,
+	"facing=south": 962,
+	"facing=east": 963,
+        "facing=west": 963
     },
     "dandelion": 964,
     "dark_oak_button": {
-        "face=ceiling,facing=east,powered=false": 966,
-        "face=floor,facing=east,powered=false": 968,
-        "face=wall,facing=north,powered=false": 969,
-        "face=wall,facing=east,powered=false": 970,
-        "face=wall,facing=south,powered=false": 971,
-        "face=wall,facing=west,powered=false": 972
+        "face=ceiling,facing=north": 965,
+        "face=ceiling,facing=south": 965,
+        "face=ceiling,facing=east": 966,
+        "face=ceiling,facing=west": 966,
+        "face=floor,facing=north": 967,
+        "face=floor,facing=south": 967,
+        "face=floor,facing=east": 968,
+        "face=floor,facing=west": 968,
+        "face=wall,facing=north": 969,
+        "face=wall,facing=east": 970,
+        "face=wall,facing=south": 971,
+        "face=wall,facing=west": 972
     },
     "dark_oak_door": {
-        "facing=east,half=lower,hinge=left,open=false": 976
+        "facing=north": 973,
+	"facing=east": 974,
+	"facing=south": 975,
+        "facing=west": 976
     },
     "dark_oak_fence": 977,
     "dark_oak_fence_gate": {
-        "facing=east,in_wall=false,open=false": 979
+        "facing=north": 978,
+	"facing=south": 978,
+	"facing=east": 979,
+        "facing=west": 979
     },
     "dark_oak_hanging_sign": {
-        "": 983
+        "facing=north": 980,
+	"facing=east": 981,
+	"facing=south": 982,
+        "facing=west": 983
     },
     "dark_oak_leaves": 984,
     "dark_oak_log": {
-        "axis=x": 987
+	"axis=x": 985,
+	"axis=y": 986,
+        "axis=z": 987
     },
     "dark_oak_planks": 988,
     "dark_oak_pressure_plate": 989,
     "dark_oak_sapling": 990,
     "dark_oak_sign": 991,
     "dark_oak_slab": {
-        "type=bottom": 993
+	"type=bottom": 992,
+        "type=top": 993
     },
     "dark_oak_stairs": {
         "facing=north,half=bottom,shape=straight": 994,
@@ -1153,27 +1248,44 @@
         "facing=west,half=top,shape=inner_right": 1033
     },
     "dark_oak_trapdoor": {
-        "facing=north,half=bottom,open=false": 1035,
-        "facing=north,half=top,open=false": 1037,
-        "facing=east,half=bottom,open=false": 1039,
-        "facing=east,half=top,open=false": 1041,
-        "facing=south,half=bottom,open=false": 1043,
-        "facing=south,half=top,open=false": 1045,
-        "facing=west,half=bottom,open=false": 1047,
-        "facing=west,half=top,open=false": 1049
+        "facing=north,half=bottom,open=false": 1034,
+        "facing=north,half=bottom,open=true": 1035,
+        "facing=north,half=top,open=false": 1036,
+        "facing=north,half=top,open=true": 1037,
+        "facing=east,half=bottom,open=false": 1038,
+        "facing=east,half=bottom,open=true": 1039,
+        "facing=east,half=top,open=false": 1040,
+        "facing=east,half=top,open=true": 1041,
+        "facing=south,half=bottom,open=false": 1042,
+        "facing=south,half=bottom,open=true": 1043,
+        "facing=south,half=top,open=false": 1044,
+        "facing=south,half=top,open=true": 1045,
+        "facing=west,half=bottom,open=false": 1046,
+	"facing=west,half=bottom,open=true": 1047,
+        "facing=west,half=top,open=false": 1048,
+        "facing=west,half=top,open=true": 1049
     },
     "dark_oak_wall_hanging_sign": {
-        "": 1053
+        "facing=north": 1050,
+	"facing=east": 1051,
+	"facing=south": 1052,
+        "facing=west": 1053
     },
     "dark_oak_wall_sign": {
-        "": 1057
+        "facing=north": 1054,
+	"facing=east": 1055,
+	"facing=south": 1056,
+        "facing=west": 1057
     },
     "dark_oak_wood": {
-        "axis=x": 1060
+	"axis=x": 1058,
+	"axis=y": 1059,
+        "axis=z": 1060
     },
     "dark_prismarine": 1061,
     "dark_prismarine_slab": {
-        "type=bottom": 1063
+	"type=bottom": 1062,
+        "type=top": 1063
     },
     "dark_prismarine_stairs": {
         "facing=north,half=bottom,shape=straight": 1064,
@@ -1242,7 +1354,8 @@
     "decorated_pot": 1126,
     "deepslate": 1127,
     "deepslate_brick_slab": {
-        "type=bottom": 1129
+	"type=bottom": 1128,
+        "type=top": 1129
     },
     "deepslate_brick_stairs": {
         "facing=north,half=bottom,shape=straight": 1130,
@@ -1297,7 +1410,8 @@
     "deepslate_lapis_ore": 1178,
     "deepslate_redstone_ore": 1179,
     "deepslate_tile_slab": {
-        "type=bottom": 1181
+	"type=bottom": 1180,
+        "type=top": 1181
     },
     "deepslate_tile_stairs": {
         "facing=north,half=bottom,shape=straight": 1182,
@@ -1344,13 +1458,19 @@
     "deepslate_tile_wall": 1222,
     "deepslate_tiles": 1223,
     "detector_rail": {
-        "powered=false,shape=ascending_east": 1229
+        "shape=east_west": 1224,
+        "shape=north_south": 1225,
+        "shape=ascending_north": 1226,
+        "shape=ascending_east": 1227,
+        "shape=ascending_south": 1228,
+        "shape=ascending_west": 1229
     },
     "diamond_block": 1230,
     "diamond_ore": 1231,
     "diorite": 1232,
     "diorite_slab": {
-        "type=bottom": 1234
+	"type=bottom": 1233,
+        "type=top": 1234
     },
     "diorite_stairs": {
         "facing=north,half=bottom,shape=straight": 1235,
@@ -1411,11 +1531,17 @@
     "end_portal": 1289,
     "end_portal_frame": 1290,
     "end_rod": {
-        "facing=down": 1296
+        "facing=up": 1291,
+        "facing=down": 1292,
+        "facing=north": 1293,
+        "facing=east": 1294,
+        "facing=south": 1295,
+        "facing=west": 1296
     },
     "end_stone": 1297,
     "end_stone_brick_slab": {
-        "type=bottom": 1299
+	"type=bottom": 1298,
+        "type=top": 1299
     },
     "end_stone_brick_stairs": {
         "facing=north,half=bottom,shape=straight": 1300,
@@ -1465,7 +1591,8 @@
     "exposed_copper": 1343,
     "exposed_cut_copper": 1344,
     "exposed_cut_copper_slab": {
-        "type=bottom": 1346
+	"type=bottom": 1345,
+        "type=top": 1346
     },
     "exposed_cut_copper_stairs": {
         "facing=north,half=bottom,shape=straight": 1347,
@@ -1533,7 +1660,8 @@
     "gold_ore": 1408,
     "granite": 1409,
     "granite_slab": {
-        "type=bottom": 1411
+	"type=bottom": 1410,
+        "type=top": 1411
     },
     "granite_stairs": {
         "facing=north,half=bottom,shape=straight": 1412,
@@ -1610,17 +1738,27 @@
     "green_wall_banner": 1482,
     "green_wool": 1483,
     "grindstone": {
-        "face=ceiling,facing=east": 1485
+	"facing=north": 1484,
+	"facing=south": 1484,
+	"facing=east": 1485,
+        "facing=west": 1485
     },
     "hanging_roots": 1486,
     "hay_block": {
-        "axis=x": 1489
+	"axis=x": 1487,
+	"axis=y": 1488,
+        "axis=z": 1489
     },
     "heavy_weighted_pressure_plate": 1490,
     "honey_block": 1491,
     "honeycomb_block": 1492,
     "hopper": {
-        "facing=down": 1498
+        "facing=up": 1493,
+        "facing=down": 1494,
+        "facing=north": 1495,
+        "facing=east": 1496,
+        "facing=south": 1497,
+        "facing=west": 1498
     },
     "horn_coral": 1499,
     "horn_coral_block": 1500,
@@ -1637,53 +1775,85 @@
     "iron_bars": 1511,
     "iron_block": 1512,
     "iron_door": {
-        "facing=east,half=lower,hinge=left,open=false": 1516
+        "facing=north": 1513,
+	"facing=east": 1514,
+	"facing=south": 1515,
+        "facing=west": 1516
     },
     "iron_ore": 1517,
     "iron_trapdoor": {
-        "facing=north,half=bottom,open=false": 1519,
-        "facing=north,half=top,open=false": 1521,
-        "facing=east,half=bottom,open=false": 1523,
-        "facing=east,half=top,open=false": 1525,
-        "facing=south,half=bottom,open=false": 1527,
-        "facing=south,half=top,open=false": 1529,
-        "facing=west,half=bottom,open=false": 1531,
-        "facing=west,half=top,open=false": 1533
+        "facing=north,half=bottom,open=false": 1518,
+        "facing=north,half=bottom,open=true": 1519,
+        "facing=north,half=top,open=false": 1520,
+        "facing=north,half=top,open=true": 1521,
+        "facing=east,half=bottom,open=false": 1522,
+        "facing=east,half=bottom,open=true": 1523,
+        "facing=east,half=top,open=false": 1524,
+        "facing=east,half=top,open=true": 1525,
+        "facing=south,half=bottom,open=false": 1526,
+        "facing=south,half=bottom,open=true": 1527,
+        "facing=south,half=top,open=false": 1528,
+        "facing=south,half=top,open=true": 1529,
+        "facing=west,half=bottom,open=false": 1530,
+	"facing=west,half=bottom,open=true": 1531,
+        "facing=west,half=top,open=false": 1532,
+        "facing=west,half=top,open=true": 1533
     },
     "item_frame": 1534,
     "jack_o_lantern": {
-        "facing=east": 1538
+        "facing=north": 1535,
+	"facing=east": 1536,
+	"facing=south": 1537,
+        "facing=west": 1538
     },
     "jigsaw": 1539,
     "jukebox": 1540,
     "jungle_button": {
-        "face=ceiling,facing=east,powered=false": 1542,
-        "face=floor,facing=east,powered=false": 1544,
-        "face=wall,facing=north,powered=false": 1545,
-        "face=wall,facing=east,powered=false": 1546,
-        "face=wall,facing=south,powered=false": 1547,
-        "face=wall,facing=west,powered=false": 1548
+        "face=ceiling,facing=north": 1541,
+        "face=ceiling,facing=south": 1541,
+        "face=ceiling,facing=east": 1542,
+        "face=ceiling,facing=west": 1542,
+        "face=floor,facing=north": 1543,
+        "face=floor,facing=south": 1543,
+        "face=floor,facing=east": 1544,
+        "face=floor,facing=west": 1544,
+        "face=wall,facing=north": 1545,
+        "face=wall,facing=east": 1546,
+        "face=wall,facing=south": 1547,
+        "face=wall,facing=west": 1548
     },
     "jungle_door": {
-        "facing=east,half=lower,hinge=left,open=false": 1552
+        "facing=north": 1549,
+	"facing=east": 1550,
+	"facing=south": 1551,
+        "facing=west": 1552
     },
     "jungle_fence": 1553,
     "jungle_fence_gate": {
-        "facing=east,in_wall=false,open=false": 1555
+        "facing=north": 1554,
+	"facing=south": 1554,
+	"facing=east": 1555,
+        "facing=west": 1555
     },
     "jungle_hanging_sign": {
-        "": 1559
+        "facing=north": 1556,
+	"facing=east": 1557,
+	"facing=south": 1558,
+        "facing=west": 1559
     },
     "jungle_leaves": 1560,
     "jungle_log": {
-        "axis=x": 1563
+	"axis=x": 1561,
+	"axis=y": 1562,
+        "axis=z": 1563
     },
     "jungle_planks": 1564,
     "jungle_pressure_plate": 1565,
     "jungle_sapling": 1566,
     "jungle_sign": 1567,
     "jungle_slab": {
-        "type=bottom": 1569
+	"type=bottom": 1568,
+        "type=top": 1569
     },
     "jungle_stairs": {
         "facing=north,half=bottom,shape=straight": 1570,
@@ -1728,42 +1898,70 @@
         "facing=west,half=top,shape=inner_right": 1609
     },
     "jungle_trapdoor": {
-        "facing=north,half=bottom,open=false": 1611,
-        "facing=north,half=top,open=false": 1613,
-        "facing=east,half=bottom,open=false": 1615,
-        "facing=east,half=top,open=false": 1617,
-        "facing=south,half=bottom,open=false": 1619,
-        "facing=south,half=top,open=false": 1621,
-        "facing=west,half=bottom,open=false": 1623,
-        "facing=west,half=top,open=false": 1625
+        "facing=north,half=bottom,open=false": 1610,
+        "facing=north,half=bottom,open=true": 1611,
+        "facing=north,half=top,open=false": 1612,
+        "facing=north,half=top,open=true": 1613,
+        "facing=east,half=bottom,open=false": 1614,
+        "facing=east,half=bottom,open=true": 1615,
+        "facing=east,half=top,open=false": 1616,
+        "facing=east,half=top,open=true": 1617,
+        "facing=south,half=bottom,open=false": 1618,
+        "facing=south,half=bottom,open=true": 1619,
+        "facing=south,half=top,open=false": 1620,
+        "facing=south,half=top,open=true": 1621,
+        "facing=west,half=bottom,open=false": 1622,
+	"facing=west,half=bottom,open=true": 1623,
+        "facing=west,half=top,open=false": 1624,
+        "facing=west,half=top,open=true": 1625
     },
     "jungle_wall_hanging_sign": {
-        "": 1629
+        "facing=north": 1626,
+	"facing=east": 1627,
+	"facing=south": 1628,
+        "facing=west": 1629
     },
     "jungle_wall_sign": {
-        "": 1633
+        "facing=north": 1630,
+	"facing=east": 1631,
+	"facing=south": 1632,
+        "facing=west": 1633
     },
     "jungle_wood": {
-        "axis=x": 1636
+	"axis=x": 1634,
+	"axis=y": 1635,
+        "axis=z": 1636
     },
     "kelp": 1637,
     "kelp_plant": 1638,
     "ladder": {
-        "facing=east": 1640
+        "facing=north": 1639,
+	"facing=south": 1639,
+	"facing=east": 1640,
+        "facing=west": 1640
     },
     "lantern": {
+	"hanging=true": 1641,
         "hanging=false": 1642
     },
     "lapis_block": 1643,
     "lapis_ore": 1644,
     "large_amethyst_bud": {
-        "facing=down": 1650
+        "facing=up": 1645,
+        "facing=down": 1646,
+        "facing=north": 1647,
+        "facing=east": 1648,
+        "facing=south": 1649,
+        "facing=west": 1650
     },
     "large_fern": 1651,
     "lava": 1652,
     "lava_cauldron": 1653,
     "lectern": {
-        "facing=east": 1657
+        "facing=north": 1654,
+	"facing=east": 1655,
+	"facing=south": 1656,
+        "facing=west": 1657
     },
     "lever": 1658,
     "light": 1659,
@@ -1797,7 +1995,12 @@
     "light_gray_wool": 1687,
     "light_weighted_pressure_plate": 1688,
     "lightning_rod": {
-        "facing=down,powered=false": 1694
+        "facing=up": 1689,
+        "facing=down": 1690,
+        "facing=north": 1691,
+        "facing=east": 1692,
+        "facing=south": 1693,
+        "facing=west": 1694
     },
     "lilac": 1695,
     "lily_of_the_valley": 1696,
@@ -1834,26 +2037,43 @@
     "magenta_wool": 1727,
     "magma_block": 1728,
     "mangrove_button": {
-        "face=ceiling,facing=east,powered=false": 1730,
-        "face=floor,facing=east,powered=false": 1732,
-        "face=wall,facing=north,powered=false": 1733,
-        "face=wall,facing=east,powered=false": 1734,
-        "face=wall,facing=south,powered=false": 1735,
-        "face=wall,facing=west,powered=false": 1736
+        "face=ceiling,facing=north": 1729,
+        "face=ceiling,facing=south": 1729,
+        "face=ceiling,facing=east": 1730,
+        "face=ceiling,facing=west": 1730,
+        "face=floor,facing=north": 1731,
+        "face=floor,facing=south": 1731,
+        "face=floor,facing=east": 1732,
+        "face=floor,facing=west": 1732,
+        "face=wall,facing=north": 1733,
+        "face=wall,facing=east": 1734,
+        "face=wall,facing=south": 1735,
+        "face=wall,facing=west": 1736
     },
     "mangrove_door": {
-        "facing=east,half=lower,hinge=left,open=false": 1740
+        "facing=north": 1737,
+	"facing=east": 1738,
+	"facing=south": 1739,
+        "facing=west": 1740
     },
     "mangrove_fence": 1741,
     "mangrove_fence_gate": {
-        "facing=east,in_wall=false,open=false": 1743
+        "facing=north": 1742,
+	"facing=south": 1742,
+	"facing=east": 1743,
+        "facing=west": 1743
     },
     "mangrove_hanging_sign": {
-        "": 1747
+        "facing=north": 1744,
+	"facing=east": 1745,
+	"facing=south": 1746,
+        "facing=west": 1747
     },
     "mangrove_leaves": 1748,
     "mangrove_log": {
-        "axis=x": 1751
+	"axis=x": 1749,
+	"axis=y": 1750,
+        "axis=z": 1751
     },
     "mangrove_planks": 1752,
     "mangrove_pressure_plate": 1753,
@@ -1861,7 +2081,8 @@
     "mangrove_roots": 1755,
     "mangrove_sign": 1756,
     "mangrove_slab": {
-        "type=bottom": 1758
+	"type=bottom": 1757,
+        "type=top": 1758
     },
     "mangrove_stairs": {
         "facing=north,half=bottom,shape=straight": 1759,
@@ -1906,26 +2127,47 @@
         "facing=west,half=top,shape=inner_right": 1798
     },
     "mangrove_trapdoor": {
-        "facing=north,half=bottom,open=false": 1800,
-        "facing=north,half=top,open=false": 1802,
-        "facing=east,half=bottom,open=false": 1804,
-        "facing=east,half=top,open=false": 1806,
-        "facing=south,half=bottom,open=false": 1808,
-        "facing=south,half=top,open=false": 1810,
-        "facing=west,half=bottom,open=false": 1812,
-        "facing=west,half=top,open=false": 1814
+        "facing=north,half=bottom,open=false": 1799,
+        "facing=north,half=bottom,open=true": 1800,
+        "facing=north,half=top,open=false": 1801,
+        "facing=north,half=top,open=true": 1802,
+        "facing=east,half=bottom,open=false": 1803,
+        "facing=east,half=bottom,open=true": 1804,
+        "facing=east,half=top,open=false": 1805,
+        "facing=east,half=top,open=true": 1806,
+        "facing=south,half=bottom,open=false": 1807,
+        "facing=south,half=bottom,open=true": 1808,
+        "facing=south,half=top,open=false": 1809,
+        "facing=south,half=top,open=true": 1810,
+        "facing=west,half=bottom,open=false": 1811,
+	"facing=west,half=bottom,open=true": 1812,
+        "facing=west,half=top,open=false": 1813,
+        "facing=west,half=top,open=true": 1814
     },
     "mangrove_wall_hanging_sign": {
-        "": 1818
+        "facing=north": 1815,
+	"facing=east": 1816,
+	"facing=south": 1817,
+        "facing=west": 1818
     },
     "mangrove_wall_sign": {
-        "": 1822
+        "facing=north": 1819,
+	"facing=east": 1820,
+	"facing=south": 1821,
+        "facing=west": 1822
     },
     "mangrove_wood": {
-        "axis=x": 1825
+        "axis=x": 1823,
+	"axis=y": 1824,
+	"axis=z": 1825
     },
     "medium_amethyst_bud": {
-        "facing=down": 1831
+        "facing=up": 1826,
+        "facing=down": 1827,
+        "facing=north": 1828,
+        "facing=east": 1829,
+        "facing=south": 1830,
+        "facing=west": 1831
     },
     "melon": 1832,
     "melon_stem": 1833,
@@ -1933,7 +2175,8 @@
     "moss_carpet": 1835,
     "mossy_cobblestone": 1836,
     "mossy_cobblestone_slab": {
-        "type=bottom": 1838
+        "type=bottom": 1837,
+	"type=top": 1838
     },
     "mossy_cobblestone_stairs": {
         "facing=north,half=bottom,shape=straight": 1839,
@@ -1979,7 +2222,8 @@
     },
     "mossy_cobblestone_wall": 1879,
     "mossy_stone_brick_slab": {
-        "type=bottom": 1881
+        "type=bottom": 1880,
+	"type=top": 1881
     },
     "mossy_stone_brick_stairs": {
         "facing=north,half=bottom,shape=straight": 1882,
@@ -2028,7 +2272,8 @@
     "moving_piston": 1924,
     "mud": 1925,
     "mud_brick_slab": {
-        "type=bottom": 1927
+        "type=bottom": 1926,
+	"type=top": 1927
     },
     "mud_brick_stairs": {
         "facing=north,half=bottom,shape=straight": 1928,
@@ -2079,7 +2324,8 @@
     "mycelium": 1972,
     "nether_brick_fence": 1973,
     "nether_brick_slab": {
-        "type=bottom": 1975
+        "type=bottom": 1974,
+	"type=top": 1975
     },
     "nether_brick_stairs": {
         "facing=north,half=bottom,shape=straight": 1976,
@@ -2135,33 +2381,51 @@
     "netherrack": 2025,
     "note_block": 2026,
     "oak_button": {
-        "face=ceiling,facing=east,powered=false": 2028,
-        "face=floor,facing=east,powered=false": 2030,
-        "face=wall,facing=north,powered=false": 2031,
-        "face=wall,facing=east,powered=false": 2032,
-        "face=wall,facing=south,powered=false": 2033,
-        "face=wall,facing=west,powered=false": 2034
+        "face=ceiling,facing=north": 2027,
+        "face=ceiling,facing=south": 2027,
+        "face=ceiling,facing=east": 2028,
+        "face=ceiling,facing=west": 2028,
+        "face=floor,facing=north": 2029,
+        "face=floor,facing=south": 2029,
+        "face=floor,facing=east": 2030,
+        "face=floor,facing=west": 2030,
+        "face=wall,facing=north": 2031,
+        "face=wall,facing=east": 2032,
+        "face=wall,facing=south": 2033,
+        "face=wall,facing=west": 2034
     },
     "oak_door": {
-        "facing=east,half=lower,hinge=left,open=false": 2038
+        "facing=north": 2035,
+	"facing=east": 2036,
+	"facing=south": 2037,
+        "facing=west": 2038
     },
     "oak_fence": 2039,
     "oak_fence_gate": {
-        "facing=east,in_wall=false,open=false": 2041
+        "facing=north": 2040,
+	"facing=south": 2040,
+	"facing=east": 2041,
+        "facing=west": 2041
     },
     "oak_hanging_sign": {
-        "": 2045
+        "facing=north": 2042,
+	"facing=east": 2043,
+	"facing=south": 2044,
+        "facing=west": 2045
     },
     "oak_leaves": 2046,
     "oak_log": {
-        "axis=x": 2049
+        "axis=x": 2047,
+	"axis=y": 2048,
+	"axis=z": 2049
     },
     "oak_planks": 2050,
     "oak_pressure_plate": 2051,
     "oak_sapling": 2052,
     "oak_sign": 2053,
     "oak_slab": {
-        "type=bottom": 2055
+        "type=bottom": 2054,
+	"type=top": 2055
     },
     "oak_stairs": {
         "facing=north,half=bottom,shape=straight": 2056,
@@ -2206,23 +2470,39 @@
         "facing=west,half=top,shape=inner_right": 2095
     },
     "oak_trapdoor": {
-        "facing=north,half=bottom,open=false": 2097,
-        "facing=north,half=top,open=false": 2099,
-        "facing=east,half=bottom,open=false": 2101,
-        "facing=east,half=top,open=false": 2103,
-        "facing=south,half=bottom,open=false": 2105,
-        "facing=south,half=top,open=false": 2107,
-        "facing=west,half=bottom,open=false": 2109,
-        "facing=west,half=top,open=false": 2111
+        "facing=north,half=bottom,open=false": 2096,
+        "facing=north,half=bottom,open=true": 2097,
+        "facing=north,half=top,open=false": 2098,
+        "facing=north,half=top,open=true": 2099,
+        "facing=east,half=bottom,open=false": 2100,
+        "facing=east,half=bottom,open=true": 2101,
+        "facing=east,half=top,open=false": 2102,
+        "facing=east,half=top,open=true": 2103,
+        "facing=south,half=bottom,open=false": 2104,
+        "facing=south,half=bottom,open=true": 2105,
+        "facing=south,half=top,open=false": 2106,
+        "facing=south,half=top,open=true": 2107,
+        "facing=west,half=bottom,open=false": 2108,
+	"facing=west,half=bottom,open=true": 2109,
+        "facing=west,half=top,open=false": 2110,
+        "facing=west,half=top,open=true": 2111
     },
     "oak_wall_hanging_sign": {
-        "": 2115
+        "facing=north": 2112,
+	"facing=east": 2113,
+	"facing=south": 2114,
+        "facing=west": 2115
     },
     "oak_wall_sign": {
-        "": 2119
+        "facing=north": 2116,
+	"facing=east": 2117,
+	"facing=south": 2118,
+        "facing=west": 2119
     },
     "oak_wood": {
-        "axis=x": 2122
+        "axis=x": 2120,
+	"axis=y": 2121,
+	"axis=z": 2122
     },
     "observer": 2123,
     "obsidian": 2124,
@@ -2246,7 +2526,8 @@
     "oxidized_copper": 2142,
     "oxidized_cut_copper": 2143,
     "oxidized_cut_copper_slab": {
-        "type=bottom": 2145
+        "type=bottom": 2144,
+	"type=top": 2145
     },
     "oxidized_cut_copper_stairs": {
         "facing=north,half=bottom,shape=straight": 2146,
@@ -2295,7 +2576,8 @@
     "pearlescent_froglight": 2188,
     "peony": 2189,
     "petrified_oak_slab": {
-        "type=bottom": 2191
+        "type=bottom": 2190,
+	"type=bottom": 2191
     },
     "piglin_head": 2192,
     "piglin_wall_head": 2193,
@@ -2321,11 +2603,13 @@
     "player_wall_head": 2213,
     "podzol": 2214,
     "pointed_dripstone": {
-        "thickness=base,vertical_direction=down": 2216
+        "facing=up": 2215,
+        "facing=down": 2216
     },
     "polished_andesite": 2217,
     "polished_andesite_slab": {
-        "type=bottom": 2219
+        "type=bottom": 2218,
+	"type=top": 2219
     },
     "polished_andesite_stairs": {
         "facing=north,half=bottom,shape=straight": 2220,
@@ -2372,7 +2656,8 @@
     "polished_basalt": 2260,
     "polished_blackstone": 2261,
     "polished_blackstone_brick_slab": {
-        "type=bottom": 2263
+        "type=bottom": 2262,
+	"type=top": 2263
     },
     "polished_blackstone_brick_stairs": {
         "facing=north,half=bottom,shape=straight": 2264,
@@ -2419,16 +2704,23 @@
     "polished_blackstone_brick_wall": 2304,
     "polished_blackstone_bricks": 2305,
     "polished_blackstone_button": {
-        "face=ceiling,facing=east,powered=false": 2307,
-        "face=floor,facing=east,powered=false": 2309,
-        "face=wall,facing=north,powered=false": 2310,
-        "face=wall,facing=east,powered=false": 2311,
-        "face=wall,facing=south,powered=false": 2312,
-        "face=wall,facing=west,powered=false": 2313
+        "face=ceiling,facing=north": 2306,
+        "face=ceiling,facing=south": 2306,
+        "face=ceiling,facing=east": 2307,
+        "face=ceiling,facing=west": 2307,
+        "face=floor,facing=north": 2308,
+        "face=floor,facing=south": 2308,
+        "face=floor,facing=east": 2309,
+        "face=floor,facing=west": 2309,
+        "face=wall,facing=north": 2310,
+        "face=wall,facing=east": 2311,
+        "face=wall,facing=south": 2312,
+        "face=wall,facing=west": 2313
     },
     "polished_blackstone_pressure_plate": 2314,
     "polished_blackstone_slab": {
-        "type=bottom": 2316
+        "type=bottom": 2315,
+	"type=top": 2316
     },
     "polished_blackstone_stairs": {
         "facing=north,half=bottom,shape=straight": 2317,
@@ -2475,7 +2767,8 @@
     "polished_blackstone_wall": 2357,
     "polished_deepslate": 2358,
     "polished_deepslate_slab": {
-        "type=bottom": 2360
+        "type=bottom": 2359,
+	"type=top": 2360
     },
     "polished_deepslate_stairs": {
         "facing=north,half=bottom,shape=straight": 2361,
@@ -2522,7 +2815,8 @@
     "polished_deepslate_wall": 2401,
     "polished_diorite": 2402,
     "polished_diorite_slab": {
-        "type=bottom": 2404
+        "type=bottom": 2403,
+	"type=top": 2404
     },
     "polished_diorite_stairs": {
         "facing=north,half=bottom,shape=straight": 2405,
@@ -2568,7 +2862,8 @@
     },
     "polished_granite": 2445,
     "polished_granite_slab": {
-        "type=bottom": 2447
+        "type=bottom": 2446,
+	"type=top": 2447
     },
     "polished_granite_stairs": {
         "facing=north,half=bottom,shape=straight": 2448,
@@ -2651,11 +2946,17 @@
     "powder_snow": 2524,
     "powder_snow_cauldron": 2525,
     "powered_rail": {
-        "powered=false,shape=ascending_east": 2531
+        "shape=east_west": 2526,
+        "shape=north_south": 2527,
+        "shape=ascending_north": 2528,
+        "shape=ascending_east": 2529,
+        "shape=ascending_south": 2530,
+        "shape=ascending_west": 2531
     },
     "prismarine": 2532,
     "prismarine_brick_slab": {
-        "type=bottom": 2534
+        "type=bottom": 2533,
+	"type=top": 2534
     },
     "prismarine_brick_stairs": {
         "facing=north,half=bottom,shape=straight": 2535,
@@ -2701,7 +3002,8 @@
     },
     "prismarine_bricks": 2575,
     "prismarine_slab": {
-        "type=bottom": 2577
+        "type=bottom": 2576,
+	"type=bottom": 2577
     },
     "prismarine_stairs": {
         "facing=north,half=bottom,shape=straight": 2578,
@@ -2765,7 +3067,8 @@
     "purpur_block": 2635,
     "purpur_pillar": 2636,
     "purpur_slab": {
-        "type=bottom": 2638
+        "type=bottom": 2637,
+	"type=top": 2638
     },
     "purpur_stairs": {
         "facing=north,half=bottom,shape=straight": 2639,
@@ -2813,7 +3116,8 @@
     "quartz_bricks": 2680,
     "quartz_pillar": 2681,
     "quartz_slab": {
-        "type=bottom": 2683
+        "type=bottom": 2682,
+	"type=top": 2683
     },
     "quartz_stairs": {
         "facing=north,half=bottom,shape=straight": 2684,
@@ -2858,7 +3162,12 @@
         "facing=west,half=top,shape=inner_right": 2723
     },
     "rail": {
-        "shape=ascending_east": 2729
+        "shape=east_west": 2724,
+        "shape=north_south": 2725,
+        "shape=ascending_north": 2726,
+        "shape=ascending_east": 2727,
+        "shape=ascending_south": 2728,
+        "shape=ascending_west": 2729
     },
     "raw_copper_block": 2730,
     "raw_gold_block": 2731,
@@ -2874,7 +3183,8 @@
     "red_mushroom": 2741,
     "red_mushroom_block": 2742,
     "red_nether_brick_slab": {
-        "type=bottom": 2744
+        "type=bottom": 2743,
+	"type=top": 2744
     },
     "red_nether_brick_stairs": {
         "facing=north,half=bottom,shape=straight": 2745,
@@ -2923,7 +3233,8 @@
     "red_sand": 2787,
     "red_sandstone": 2788,
     "red_sandstone_slab": {
-        "type=bottom": 2790
+        "type=bottom": 2789,
+	"type=bottom": 2790
     },
     "red_sandstone_stairs": {
         "facing=north,half=bottom,shape=straight": 2791,
@@ -2990,7 +3301,8 @@
     "sand": 2851,
     "sandstone": 2852,
     "sandstone_slab": {
-        "type=bottom": 2854
+        "type=bottom": 2853,
+	"type=top": 2854
     },
     "sandstone_stairs": {
         "facing=north,half=bottom,shape=straight": 2855,
@@ -3050,7 +3362,12 @@
     "skeleton_wall_skull": 2908,
     "slime_block": 2909,
     "small_amethyst_bud": {
-        "facing=down": 2915
+        "facing=up": 2910,
+        "facing=down": 2911,
+        "facing=north": 2912,
+        "facing=east": 2913,
+        "facing=south": 2914,
+        "facing=west": 2915
     },
     "small_dripleaf": 2916,
     "smithing_table": 2917,
@@ -3058,7 +3375,8 @@
     "smooth_basalt": 2919,
     "smooth_quartz": 2920,
     "smooth_quartz_slab": {
-        "type=bottom": 2922
+        "type=bottom": 2921,
+	"type=top": 2922
     },
     "smooth_quartz_stairs": {
         "facing=north,half=bottom,shape=straight": 2923,
@@ -3104,7 +3422,8 @@
     },
     "smooth_red_sandstone": 2963,
     "smooth_red_sandstone_slab": {
-        "type=bottom": 2965
+        "type=bottom": 2964,
+	"type=top": 2965
     },
     "smooth_red_sandstone_stairs": {
         "facing=north,half=bottom,shape=straight": 2966,
@@ -3150,7 +3469,8 @@
     },
     "smooth_sandstone": 3006,
     "smooth_sandstone_slab": {
-        "type=bottom": 3008
+        "type=bottom": 3007,
+	"type=top": 3008
     },
     "smooth_sandstone_stairs": {
         "facing=north,half=bottom,shape=straight": 3009,
@@ -3196,14 +3516,16 @@
     },
     "smooth_stone": 3049,
     "smooth_stone_slab": {
-        "type=bottom": 3051
+        "type=bottom": 3050,
+	"type=bottom": 3051
     },
     "snow": 3052,
     "snow_block": 3053,
     "soul_campfire": 3054,
     "soul_fire": 3055,
     "soul_lantern": {
-        "hanging=false": 3057
+        "hanging=true": 3056,
+	"hanging=false": 3057
     },
     "soul_sand": 3058,
     "soul_soil": 3059,
@@ -3213,33 +3535,51 @@
     "sponge": 3063,
     "spore_blossom": 3064,
     "spruce_button": {
-        "face=ceiling,facing=east,powered=false": 3066,
-        "face=floor,facing=east,powered=false": 3068,
-        "face=wall,facing=north,powered=false": 3069,
-        "face=wall,facing=east,powered=false": 3070,
-        "face=wall,facing=south,powered=false": 3071,
-        "face=wall,facing=west,powered=false": 3072
+        "face=ceiling,facing=north": 3065,
+        "face=ceiling,facing=south": 3065,
+        "face=ceiling,facing=east": 3066,
+        "face=ceiling,facing=west": 3066,
+        "face=floor,facing=north": 3067,
+        "face=floor,facing=south": 3067,
+        "face=floor,facing=east": 3068,
+        "face=floor,facing=west": 3068,
+        "face=wall,facing=north": 3069,
+        "face=wall,facing=east": 3070,
+        "face=wall,facing=south": 3071,
+        "face=wall,facing=west": 3072
     },
     "spruce_door": {
-        "facing=east,half=lower,hinge=left,open=false": 3076
+        "facing=north": 3073,
+	"facing=east": 3074,
+	"facing=south": 3075,
+        "facing=west": 3076
     },
     "spruce_fence": 3077,
     "spruce_fence_gate": {
-        "facing=east,in_wall=false,open=false": 3079
+        "facing=north": 3078,
+	"facing=south": 3078,
+	"facing=east": 3079,
+        "facing=west": 3079
     },
     "spruce_hanging_sign": {
-        "": 3083
+        "facing=north": 3080,
+	"facing=east": 3081,
+	"facing=south": 3082,
+        "facing=west": 3083
     },
     "spruce_leaves": 3084,
     "spruce_log": {
-        "axis=x": 3087
+        "axis=x": 3085,
+	"axis=y": 3086,
+	"axis=z": 3087
     },
     "spruce_planks": 3088,
     "spruce_pressure_plate": 3089,
     "spruce_sapling": 3090,
     "spruce_sign": 3091,
     "spruce_slab": {
-        "type=bottom": 3093
+        "type=bottom": 3092,
+	"type=top": 3093
     },
     "spruce_stairs": {
         "facing=north,half=bottom,shape=straight": 3094,
@@ -3284,28 +3624,45 @@
         "facing=west,half=top,shape=inner_right": 3133
     },
     "spruce_trapdoor": {
-        "facing=north,half=bottom,open=false": 3135,
-        "facing=north,half=top,open=false": 3137,
-        "facing=east,half=bottom,open=false": 3139,
-        "facing=east,half=top,open=false": 3141,
-        "facing=south,half=bottom,open=false": 3143,
-        "facing=south,half=top,open=false": 3145,
-        "facing=west,half=bottom,open=false": 3147,
-        "facing=west,half=top,open=false": 3149
+        "facing=north,half=bottom,open=false": 3134,
+        "facing=north,half=bottom,open=true": 3135,
+        "facing=north,half=top,open=false": 3136,
+        "facing=north,half=top,open=true": 3137,
+        "facing=east,half=bottom,open=false": 3138,
+        "facing=east,half=bottom,open=true": 3139,
+        "facing=east,half=top,open=false": 3140,
+        "facing=east,half=top,open=true": 3141,
+        "facing=south,half=bottom,open=false": 3142,
+        "facing=south,half=bottom,open=true": 3143,
+        "facing=south,half=top,open=false": 3144,
+        "facing=south,half=top,open=true": 3145,
+        "facing=west,half=bottom,open=false": 3146,
+	"facing=west,half=bottom,open=true": 3147,
+        "facing=west,half=top,open=false": 3148,
+        "facing=west,half=top,open=true": 3149
     },
     "spruce_wall_hanging_sign": {
-        "": 3153
+        "facing=north": 3150,
+	"facing=east": 3151,
+	"facing=south": 3152,
+        "facing=west": 3153
     },
     "spruce_wall_sign": {
-        "": 3157
+        "facing=north": 3154,
+	"facing=east": 3155,
+	"facing=south": 3156,
+        "facing=west": 3157
     },
     "spruce_wood": {
-        "axis=x": 3160
+        "axis=x": 3158,
+	"axis=y": 3159,
+	"axis=z": 3160
     },
     "sticky_piston": 3161,
     "stone": 3162,
     "stone_brick_slab": {
-        "type=bottom": 3164
+	"type=bottom": 3163,
+        "type=top": 3164
     },
     "stone_brick_stairs": {
         "facing=north,half=bottom,shape=straight": 3165,
@@ -3352,16 +3709,23 @@
     "stone_brick_wall": 3205,
     "stone_bricks": 3206,
     "stone_button": {
-        "face=ceiling,facing=east,powered=false": 3208,
-        "face=floor,facing=east,powered=false": 3210,
-        "face=wall,facing=north,powered=false": 3211,
-        "face=wall,facing=east,powered=false": 3212,
-        "face=wall,facing=south,powered=false": 3213,
-        "face=wall,facing=west,powered=false": 3214
+        "face=ceiling,facing=north": 3207,
+        "face=ceiling,facing=south": 3207,
+        "face=ceiling,facing=east": 3208,
+        "face=ceiling,facing=west": 3208,
+        "face=floor,facing=north": 3209,
+        "face=floor,facing=south": 3209,
+        "face=floor,facing=east": 3210,
+        "face=floor,facing=west": 3210,
+        "face=wall,facing=north": 3211,
+        "face=wall,facing=east": 3212,
+        "face=wall,facing=south": 3213,
+        "face=wall,facing=west": 3214
     },
     "stone_pressure_plate": 3215,
     "stone_slab": {
-        "type=bottom": 3217
+	"type=bottom": 3216,
+        "type=top": 3217
     },
     "stone_stairs": {
         "facing=north,half=bottom,shape=straight": 3218,
@@ -3406,70 +3770,115 @@
         "facing=west,half=top,shape=inner_right": 3257
     },
     "stonecutter": {
-        "facing=east": 3259
+	"facing=north": 3258,
+	"facing=south": 3258,
+	"facing=east": 3259,
+        "facing=west": 3259
     },
     "stripped_acacia_log": {
-        "axis=x": 3262
+        "axis=x": 3260,
+	"axis=y": 3261,
+	"axis=z": 3262
     },
     "stripped_acacia_wood": {
-        "axis=x": 3265
+        "axis=x": 3263,
+	"axis=y": 3264,
+	"axis=z": 3265
     },
     "stripped_bamboo_block": {
-        "axis=x": 3268
+        "axis=x": 3266,
+	"axis=y": 3267,
+	"axis=z": 3268
     },
     "stripped_birch_log": {
-        "axis=x": 3271
+        "axis=x": 3269,
+	"axis=y": 3270,
+	"axis=z": 3271
     },
     "stripped_birch_wood": {
-        "axis=x": 3274
+        "axis=x": 3272,
+	"axis=y": 3273,
+	"axis=z": 3274
     },
     "stripped_cherry_log": {
-        "axis=x": 3277
+        "axis=x": 3275,
+	"axis=y": 3276,
+	"axis=z": 3277
     },
     "stripped_cherry_wood": {
-        "axis=x": 3280
+        "axis=x": 3278,
+	"axis=y": 3279,
+	"axis=z": 3280
     },
     "stripped_crimson_hyphae": {
-        "axis=x": 3283
+        "axis=x": 3281,
+	"axis=y": 3282,
+	"axis=z": 3283
     },
     "stripped_crimson_stem": {
-        "axis=x": 3286
+        "axis=x": 3284,
+	"axis=y": 3285,
+	"axis=z": 3286
     },
     "stripped_dark_oak_log": {
-        "axis=x": 3289
+        "axis=x": 3287,
+	"axis=y": 3288,
+	"axis=z": 3289
     },
     "stripped_dark_oak_wood": {
-        "axis=x": 3292
+        "axis=x": 3290,
+	"axis=y": 3291,
+	"axis=z": 3292
     },
     "stripped_jungle_log": {
-        "axis=x": 3295
+        "axis=x": 3293,
+	"axis=y": 3294,
+	"axis=z": 3295
     },
     "stripped_jungle_wood": {
-        "axis=x": 3298
+        "axis=x": 3296,
+	"axis=y": 3297,
+	"axis=z": 3298
     },
     "stripped_mangrove_log": {
-        "axis=x": 3301
+        "axis=x": 3299,
+	"axis=y": 3300,
+	"axis=z": 3301
     },
     "stripped_mangrove_wood": {
-        "axis=x": 3304
+        "axis=x": 3302,
+	"axis=y": 3303,
+	"axis=z": 3304
     },
     "stripped_oak_log": {
-        "axis=x": 3307
+        "axis=x": 3305,
+	"axis=y": 3306,
+	"axis=z": 3307
     },
     "stripped_oak_wood": {
-        "axis=x": 3310
+        "axis=x": 3308,
+	"axis=y": 3309,
+	"axis=z": 3310
     },
     "stripped_spruce_log": {
-        "axis=x": 3313
+        "axis=x": 3311,
+	"axis=y": 3312,
+	"axis=z": 3313
     },
     "stripped_spruce_wood": {
-        "axis=x": 3316
+        "axis=x": 3314,
+	"axis=y": 3315,
+	"axis=z": 3316
     },
     "stripped_warped_hyphae": {
-        "axis=x": 3319
+        "axis=x": 3317,
+	"axis=y": 3318,
+	"axis=z": 3319
     },
     "stripped_warped_stem": {
-        "axis=x": 3322
+        "axis=x": 3320,
+	"axis=y": 3321,
+	"axis=z": 3322
     },
     "structure_block": 3323,
     "structure_void": 3324,
@@ -3487,387 +3896,426 @@
     "torchflower": 3336,
     "torchflower_crop": 3337,
     "trapped_chest": 3338,
-    "tripwire": {
-        "attached=false,east=false,north=false,south=false,west=false": 3340
-    },
+    "tripwire": 3339,
     "tripwire_hook": {
-        "attached=false,facing=east,powered=false": 3342
+        "facing=north": 3340,
+	"facing=south": 3340,
+	"facing=east": 3341,
+	"facing=west": 3341
     },
-    "tube_coral": 3343,
-    "tube_coral_block": 3344,
-    "tube_coral_fan": 3345,
-    "tube_coral_wall_fan": 3346,
-    "tuff": 3347,
-    "turtle_egg": 3348,
-    "twisting_vines": 3349,
-    "twisting_vines_plant": 3350,
-    "verdant_froglight": 3351,
-    "vine": 3352,
-    "void_air": 3353,
-    "wall_torch": 3354,
+    "tube_coral": 3342,
+    "tube_coral_block": 3343,
+    "tube_coral_fan": 3344,
+    "tube_coral_wall_fan": 3345,
+    "tuff": 3346,
+    "turtle_egg": 3347,
+    "twisting_vines": 3348,
+    "twisting_vines_plant": 3349,
+    "verdant_froglight": 3350,
+    "vine": 3351,
+    "void_air": 3352,
+    "wall_torch": 3353,
     "warped_button": {
-        "face=ceiling,facing=east,powered=false": 3356,
-        "face=floor,facing=east,powered=false": 3358,
-        "face=wall,facing=north,powered=false": 3359,
-        "face=wall,facing=east,powered=false": 3360,
-        "face=wall,facing=south,powered=false": 3361,
-        "face=wall,facing=west,powered=false": 3362
+        "face=ceiling,facing=north": 3354,
+        "face=ceiling,facing=south": 3354,
+        "face=ceiling,facing=east": 3355,
+        "face=ceiling,facing=west": 3355,
+        "face=floor,facing=north": 3356,
+        "face=floor,facing=south": 3356,
+        "face=floor,facing=east": 3357,
+        "face=floor,facing=west": 3357,
+        "face=wall,facing=north": 3358,
+        "face=wall,facing=east": 3359,
+        "face=wall,facing=south": 3360,
+        "face=wall,facing=west": 3361
     },
     "warped_door": {
-        "facing=east,half=lower,hinge=left,open=false": 3366
+        "facing=north": 3362,
+	"facing=east": 3363,
+	"facing=south": 3364,
+	"facing=west": 3365
     },
-    "warped_fence": 3367,
+    "warped_fence": 3366,
     "warped_fence_gate": {
-        "facing=east,in_wall=false,open=false": 3369
+        "facing=north": 3367,
+	"facing=south": 3367,
+	"facing=east": 3368,
+	"facing=west": 3368
     },
-    "warped_fungus": 3370,
+    "warped_fungus": 3369,
     "warped_hanging_sign": {
-        "": 3374
+        "facing=north": 3370,
+	"facing=east": 3371,
+	"facing=south": 3372,
+	"facing=west": 3373
     },
     "warped_hyphae": {
-        "axis=x": 3377
+        "axis=x": 3374,
+	"axis=y": 3375,
+	"axis=z": 3376
     },
-    "warped_nylium": 3378,
-    "warped_planks": 3379,
-    "warped_pressure_plate": 3380,
-    "warped_roots": 3381,
-    "warped_sign": 3382,
+    "warped_nylium": 3377,
+    "warped_planks": 3378,
+    "warped_pressure_plate": 3379,
+    "warped_roots": 3380,
+    "warped_sign": 3381,
     "warped_slab": {
-        "type=bottom": 3384
+	"type=bottom": 3382,
+        "type=top": 3383
     },
     "warped_stairs": {
-        "facing=north,half=bottom,shape=straight": 3385,
-        "facing=east,half=bottom,shape=straight": 3386,
-        "facing=south,half=bottom,shape=straight": 3387,
-        "facing=west,half=bottom,shape=straight": 3388,
-        "facing=north,half=top,shape=straight": 3389,
-        "facing=east,half=top,shape=straight": 3390,
-        "facing=south,half=top,shape=straight": 3391,
-        "facing=west,half=top,shape=straight": 3392,
-        "facing=north,half=bottom,shape=outer_left": 3393,
-        "facing=east,half=bottom,shape=outer_left": 3394,
-        "facing=south,half=bottom,shape=outer_left": 3395,
-        "facing=west,half=bottom,shape=outer_left": 3396,
-        "facing=north,half=top,shape=outer_left": 3397,
-        "facing=east,half=top,shape=outer_left": 3398,
-        "facing=south,half=top,shape=outer_left": 3399,
-        "facing=west,half=top,shape=outer_left": 3400,
-        "facing=north,half=bottom,shape=outer_right": 3401,
-        "facing=east,half=bottom,shape=outer_right": 3402,
-        "facing=south,half=bottom,shape=outer_right": 3403,
-        "facing=west,half=bottom,shape=outer_right": 3404,
-        "facing=north,half=top,shape=outer_right": 3405,
-        "facing=east,half=top,shape=outer_right": 3406,
-        "facing=south,half=top,shape=outer_right": 3407,
-        "facing=west,half=top,shape=outer_right": 3408,
-        "facing=north,half=bottom,shape=inner_left": 3409,
-        "facing=east,half=bottom,shape=inner_left": 3410,
-        "facing=south,half=bottom,shape=inner_left": 3411,
-        "facing=west,half=bottom,shape=inner_left": 3412,
-        "facing=north,half=top,shape=inner_left": 3413,
-        "facing=east,half=top,shape=inner_left": 3414,
-        "facing=south,half=top,shape=inner_left": 3415,
-        "facing=west,half=top,shape=inner_left": 3416,
-        "facing=north,half=bottom,shape=inner_right": 3417,
-        "facing=east,half=bottom,shape=inner_right": 3418,
-        "facing=south,half=bottom,shape=inner_right": 3419,
-        "facing=west,half=bottom,shape=inner_right": 3420,
-        "facing=north,half=top,shape=inner_right": 3421,
-        "facing=east,half=top,shape=inner_right": 3422,
-        "facing=south,half=top,shape=inner_right": 3423,
-        "facing=west,half=top,shape=inner_right": 3424
+        "facing=north,half=bottom,shape=straight": 3384,
+        "facing=east,half=bottom,shape=straight": 3385,
+        "facing=south,half=bottom,shape=straight": 3386,
+        "facing=west,half=bottom,shape=straight": 3387,
+        "facing=north,half=top,shape=straight": 3388,
+        "facing=east,half=top,shape=straight": 3389,
+        "facing=south,half=top,shape=straight": 3390,
+        "facing=west,half=top,shape=straight": 3391,
+        "facing=north,half=bottom,shape=outer_left": 3392,
+        "facing=east,half=bottom,shape=outer_left": 3393,
+        "facing=south,half=bottom,shape=outer_left": 3394,
+        "facing=west,half=bottom,shape=outer_left": 3395,
+        "facing=north,half=top,shape=outer_left": 3396,
+        "facing=east,half=top,shape=outer_left": 3397,
+        "facing=south,half=top,shape=outer_left": 3398,
+        "facing=west,half=top,shape=outer_left": 3399,
+        "facing=north,half=bottom,shape=outer_right": 3400,
+        "facing=east,half=bottom,shape=outer_right": 3401,
+        "facing=south,half=bottom,shape=outer_right": 3402,
+        "facing=west,half=bottom,shape=outer_right": 3403,
+        "facing=north,half=top,shape=outer_right": 3404,
+        "facing=east,half=top,shape=outer_right": 3405,
+        "facing=south,half=top,shape=outer_right": 3406,
+        "facing=west,half=top,shape=outer_right": 3407,
+        "facing=north,half=bottom,shape=inner_left": 3408,
+        "facing=east,half=bottom,shape=inner_left": 3409,
+        "facing=south,half=bottom,shape=inner_left": 3410,
+        "facing=west,half=bottom,shape=inner_left": 3411,
+        "facing=north,half=top,shape=inner_left": 3412,
+        "facing=east,half=top,shape=inner_left": 3413,
+        "facing=south,half=top,shape=inner_left": 3414,
+        "facing=west,half=top,shape=inner_left": 3415,
+        "facing=north,half=bottom,shape=inner_right": 3416,
+        "facing=east,half=bottom,shape=inner_right": 3417,
+        "facing=south,half=bottom,shape=inner_right": 3418,
+        "facing=west,half=bottom,shape=inner_right": 3419,
+        "facing=north,half=top,shape=inner_right": 3420,
+        "facing=east,half=top,shape=inner_right": 3421,
+        "facing=south,half=top,shape=inner_right": 3422,
+        "facing=west,half=top,shape=inner_right": 3423
     },
-    "warped_stem": 3425,
+    "warped_stem": 3424,
     "warped_trapdoor": {
-        "facing=north,half=bottom,open=false": 3427,
-        "facing=north,half=top,open=false": 3429,
-        "facing=east,half=bottom,open=false": 3431,
-        "facing=east,half=top,open=false": 3433,
-        "facing=south,half=bottom,open=false": 3435,
-        "facing=south,half=top,open=false": 3437,
-        "facing=west,half=bottom,open=false": 3439,
-        "facing=west,half=top,open=false": 3441
+	"facing=north,half=bottom,open=false": 3425,
+        "facing=north,half=bottom,open=true": 3426,
+        "facing=north,half=top,open=false": 3427,
+        "facing=north,half=top,open=true": 3428,
+        "facing=east,half=bottom,open=false": 3429,
+        "facing=east,half=bottom,open=true": 3430,
+        "facing=east,half=top,open=false": 3431,
+        "facing=east,half=top,open=true": 3432,
+        "facing=south,half=bottom,open=false": 3433,
+        "facing=south,half=bottom,open=true": 3434,
+        "facing=south,half=top,open=false": 3435,
+        "facing=south,half=top,open=true": 3436,
+        "facing=west,half=bottom,open=false": 3437,
+	"facing=west,half=bottom,open=true": 3438,
+        "facing=west,half=top,open=false": 3439,
+        "facing=west,half=top,open=true": 3440
     },
     "warped_wall_hanging_sign": {
-        "": 3445
+        "facing=north": 3441,
+	"facing=east": 3442,
+	"facing=south": 3443,
+	"facing=west": 3444
     },
     "warped_wall_sign": {
-        "": 3449
+        "facing=north": 3445,
+	"facing=east": 3446,
+	"facing=south": 3447,
+	"facing=west": 3448
     },
-    "warped_wart_block": 3450,
-    "water": 3451,
-    "water_cauldron": 3452,
-    "waxed_copper_block": 3453,
-    "waxed_cut_copper": 3454,
+    "warped_wart_block": 3449,
+    "water": 3450,
+    "water_cauldron": 3451,
+    "waxed_copper_block": 3452,
+    "waxed_cut_copper": 3453,
     "waxed_cut_copper_slab": {
-        "type=bottom": 3456
+        "type=bottom": 3454,
+	"type=top": 3455
     },
     "waxed_cut_copper_stairs": {
-        "facing=north,half=bottom,shape=straight": 3457,
-        "facing=east,half=bottom,shape=straight": 3458,
-        "facing=south,half=bottom,shape=straight": 3459,
-        "facing=west,half=bottom,shape=straight": 3460,
-        "facing=north,half=top,shape=straight": 3461,
-        "facing=east,half=top,shape=straight": 3462,
-        "facing=south,half=top,shape=straight": 3463,
-        "facing=west,half=top,shape=straight": 3464,
-        "facing=north,half=bottom,shape=outer_left": 3465,
-        "facing=east,half=bottom,shape=outer_left": 3466,
-        "facing=south,half=bottom,shape=outer_left": 3467,
-        "facing=west,half=bottom,shape=outer_left": 3468,
-        "facing=north,half=top,shape=outer_left": 3469,
-        "facing=east,half=top,shape=outer_left": 3470,
-        "facing=south,half=top,shape=outer_left": 3471,
-        "facing=west,half=top,shape=outer_left": 3472,
-        "facing=north,half=bottom,shape=outer_right": 3473,
-        "facing=east,half=bottom,shape=outer_right": 3474,
-        "facing=south,half=bottom,shape=outer_right": 3475,
-        "facing=west,half=bottom,shape=outer_right": 3476,
-        "facing=north,half=top,shape=outer_right": 3477,
-        "facing=east,half=top,shape=outer_right": 3478,
-        "facing=south,half=top,shape=outer_right": 3479,
-        "facing=west,half=top,shape=outer_right": 3480,
-        "facing=north,half=bottom,shape=inner_left": 3481,
-        "facing=east,half=bottom,shape=inner_left": 3482,
-        "facing=south,half=bottom,shape=inner_left": 3483,
-        "facing=west,half=bottom,shape=inner_left": 3484,
-        "facing=north,half=top,shape=inner_left": 3485,
-        "facing=east,half=top,shape=inner_left": 3486,
-        "facing=south,half=top,shape=inner_left": 3487,
-        "facing=west,half=top,shape=inner_left": 3488,
-        "facing=north,half=bottom,shape=inner_right": 3489,
-        "facing=east,half=bottom,shape=inner_right": 3490,
-        "facing=south,half=bottom,shape=inner_right": 3491,
-        "facing=west,half=bottom,shape=inner_right": 3492,
-        "facing=north,half=top,shape=inner_right": 3493,
-        "facing=east,half=top,shape=inner_right": 3494,
-        "facing=south,half=top,shape=inner_right": 3495,
-        "facing=west,half=top,shape=inner_right": 3496
+        "facing=north,half=bottom,shape=straight": 3456,
+        "facing=east,half=bottom,shape=straight": 3457,
+        "facing=south,half=bottom,shape=straight": 3458,
+        "facing=west,half=bottom,shape=straight": 3459,
+        "facing=north,half=top,shape=straight": 3460,
+        "facing=east,half=top,shape=straight": 3461,
+        "facing=south,half=top,shape=straight": 3462,
+        "facing=west,half=top,shape=straight": 3463,
+        "facing=north,half=bottom,shape=outer_left": 3464,
+        "facing=east,half=bottom,shape=outer_left": 3465,
+        "facing=south,half=bottom,shape=outer_left": 3466,
+        "facing=west,half=bottom,shape=outer_left": 3467,
+        "facing=north,half=top,shape=outer_left": 3468,
+        "facing=east,half=top,shape=outer_left": 3469,
+        "facing=south,half=top,shape=outer_left": 3470,
+        "facing=west,half=top,shape=outer_left": 3471,
+        "facing=north,half=bottom,shape=outer_right": 3472,
+        "facing=east,half=bottom,shape=outer_right": 3473,
+        "facing=south,half=bottom,shape=outer_right": 3474,
+        "facing=west,half=bottom,shape=outer_right": 3475,
+        "facing=north,half=top,shape=outer_right": 3476,
+        "facing=east,half=top,shape=outer_right": 3477,
+        "facing=south,half=top,shape=outer_right": 3478,
+        "facing=west,half=top,shape=outer_right": 3479,
+        "facing=north,half=bottom,shape=inner_left": 3480,
+        "facing=east,half=bottom,shape=inner_left": 3481,
+        "facing=south,half=bottom,shape=inner_left": 3482,
+        "facing=west,half=bottom,shape=inner_left": 3483,
+        "facing=north,half=top,shape=inner_left": 3484,
+        "facing=east,half=top,shape=inner_left": 3485,
+        "facing=south,half=top,shape=inner_left": 3486,
+        "facing=west,half=top,shape=inner_left": 3487,
+        "facing=north,half=bottom,shape=inner_right": 3488,
+        "facing=east,half=bottom,shape=inner_right": 3489,
+        "facing=south,half=bottom,shape=inner_right": 3490,
+        "facing=west,half=bottom,shape=inner_right": 3491,
+        "facing=north,half=top,shape=inner_right": 3492,
+        "facing=east,half=top,shape=inner_right": 3493,
+        "facing=south,half=top,shape=inner_right": 3494,
+        "facing=west,half=top,shape=inner_right": 3495
     },
-    "waxed_exposed_copper": 3497,
-    "waxed_exposed_cut_copper": 3498,
+    "waxed_exposed_copper": 3496,
+    "waxed_exposed_cut_copper": 3497,
     "waxed_exposed_cut_copper_slab": {
-        "type=bottom": 3500
+        "type=bottom": 3498,
+	"type=top": 3499
     },
     "waxed_exposed_cut_copper_stairs": {
-        "facing=north,half=bottom,shape=straight": 3501,
-        "facing=east,half=bottom,shape=straight": 3502,
-        "facing=south,half=bottom,shape=straight": 3503,
-        "facing=west,half=bottom,shape=straight": 3504,
-        "facing=north,half=top,shape=straight": 3505,
-        "facing=east,half=top,shape=straight": 3506,
-        "facing=south,half=top,shape=straight": 3507,
-        "facing=west,half=top,shape=straight": 3508,
-        "facing=north,half=bottom,shape=outer_left": 3509,
-        "facing=east,half=bottom,shape=outer_left": 3510,
-        "facing=south,half=bottom,shape=outer_left": 3511,
-        "facing=west,half=bottom,shape=outer_left": 3512,
-        "facing=north,half=top,shape=outer_left": 3513,
-        "facing=east,half=top,shape=outer_left": 3514,
-        "facing=south,half=top,shape=outer_left": 3515,
-        "facing=west,half=top,shape=outer_left": 3516,
-        "facing=north,half=bottom,shape=outer_right": 3517,
-        "facing=east,half=bottom,shape=outer_right": 3518,
-        "facing=south,half=bottom,shape=outer_right": 3519,
-        "facing=west,half=bottom,shape=outer_right": 3520,
-        "facing=north,half=top,shape=outer_right": 3521,
-        "facing=east,half=top,shape=outer_right": 3522,
-        "facing=south,half=top,shape=outer_right": 3523,
-        "facing=west,half=top,shape=outer_right": 3524,
-        "facing=north,half=bottom,shape=inner_left": 3525,
-        "facing=east,half=bottom,shape=inner_left": 3526,
-        "facing=south,half=bottom,shape=inner_left": 3527,
-        "facing=west,half=bottom,shape=inner_left": 3528,
-        "facing=north,half=top,shape=inner_left": 3529,
-        "facing=east,half=top,shape=inner_left": 3530,
-        "facing=south,half=top,shape=inner_left": 3531,
-        "facing=west,half=top,shape=inner_left": 3532,
-        "facing=north,half=bottom,shape=inner_right": 3533,
-        "facing=east,half=bottom,shape=inner_right": 3534,
-        "facing=south,half=bottom,shape=inner_right": 3535,
-        "facing=west,half=bottom,shape=inner_right": 3536,
-        "facing=north,half=top,shape=inner_right": 3537,
-        "facing=east,half=top,shape=inner_right": 3538,
-        "facing=south,half=top,shape=inner_right": 3539,
-        "facing=west,half=top,shape=inner_right": 3540
+
+        "facing=north,half=bottom,shape=straight": 3500,
+        "facing=east,half=bottom,shape=straight": 3501,
+        "facing=south,half=bottom,shape=straight": 3502,
+        "facing=west,half=bottom,shape=straight": 3503,
+        "facing=north,half=top,shape=straight": 3504,
+        "facing=east,half=top,shape=straight": 3505,
+        "facing=south,half=top,shape=straight": 3506,
+        "facing=west,half=top,shape=straight": 3507,
+        "facing=north,half=bottom,shape=outer_left": 3508,
+        "facing=east,half=bottom,shape=outer_left": 3509,
+        "facing=south,half=bottom,shape=outer_left": 3510,
+        "facing=west,half=bottom,shape=outer_left": 3511,
+        "facing=north,half=top,shape=outer_left": 3512,
+        "facing=east,half=top,shape=outer_left": 3513,
+        "facing=south,half=top,shape=outer_left": 3514,
+        "facing=west,half=top,shape=outer_left": 3515,
+        "facing=north,half=bottom,shape=outer_right": 3516,
+        "facing=east,half=bottom,shape=outer_right": 3517,
+        "facing=south,half=bottom,shape=outer_right": 3518,
+        "facing=west,half=bottom,shape=outer_right": 3519,
+        "facing=north,half=top,shape=outer_right": 3520,
+        "facing=east,half=top,shape=outer_right": 3521,
+        "facing=south,half=top,shape=outer_right": 3522,
+        "facing=west,half=top,shape=outer_right": 3523,
+        "facing=north,half=bottom,shape=inner_left": 3524,
+        "facing=east,half=bottom,shape=inner_left": 3525,
+        "facing=south,half=bottom,shape=inner_left": 3526,
+        "facing=west,half=bottom,shape=inner_left": 3527,
+        "facing=north,half=top,shape=inner_left": 3528,
+        "facing=east,half=top,shape=inner_left": 3529,
+        "facing=south,half=top,shape=inner_left": 3530,
+        "facing=west,half=top,shape=inner_left": 3531,
+        "facing=north,half=bottom,shape=inner_right": 3532,
+        "facing=east,half=bottom,shape=inner_right": 3533,
+        "facing=south,half=bottom,shape=inner_right": 3534,
+        "facing=west,half=bottom,shape=inner_right": 3535,
+        "facing=north,half=top,shape=inner_right": 3536,
+        "facing=east,half=top,shape=inner_right": 3537,
+        "facing=south,half=top,shape=inner_right": 3538,
+        "facing=west,half=top,shape=inner_right": 3539
     },
-    "waxed_oxidized_copper": 3541,
-    "waxed_oxidized_cut_copper": 3542,
+    "waxed_oxidized_copper": 3540,
+    "waxed_oxidized_cut_copper": 3541,
     "waxed_oxidized_cut_copper_slab": {
-        "type=bottom": 3544
+        "type=bottom": 3542,
+	"type=top": 3543
     },
     "waxed_oxidized_cut_copper_stairs": {
-        "facing=north,half=bottom,shape=straight": 3545,
-        "facing=east,half=bottom,shape=straight": 3546,
-        "facing=south,half=bottom,shape=straight": 3547,
-        "facing=west,half=bottom,shape=straight": 3548,
-        "facing=north,half=top,shape=straight": 3549,
-        "facing=east,half=top,shape=straight": 3550,
-        "facing=south,half=top,shape=straight": 3551,
-        "facing=west,half=top,shape=straight": 3552,
-        "facing=north,half=bottom,shape=outer_left": 3553,
-        "facing=east,half=bottom,shape=outer_left": 3554,
-        "facing=south,half=bottom,shape=outer_left": 3555,
-        "facing=west,half=bottom,shape=outer_left": 3556,
-        "facing=north,half=top,shape=outer_left": 3557,
-        "facing=east,half=top,shape=outer_left": 3558,
-        "facing=south,half=top,shape=outer_left": 3559,
-        "facing=west,half=top,shape=outer_left": 3560,
-        "facing=north,half=bottom,shape=outer_right": 3561,
-        "facing=east,half=bottom,shape=outer_right": 3562,
-        "facing=south,half=bottom,shape=outer_right": 3563,
-        "facing=west,half=bottom,shape=outer_right": 3564,
-        "facing=north,half=top,shape=outer_right": 3565,
-        "facing=east,half=top,shape=outer_right": 3566,
-        "facing=south,half=top,shape=outer_right": 3567,
-        "facing=west,half=top,shape=outer_right": 3568,
-        "facing=north,half=bottom,shape=inner_left": 3569,
-        "facing=east,half=bottom,shape=inner_left": 3570,
-        "facing=south,half=bottom,shape=inner_left": 3571,
-        "facing=west,half=bottom,shape=inner_left": 3572,
-        "facing=north,half=top,shape=inner_left": 3573,
-        "facing=east,half=top,shape=inner_left": 3574,
-        "facing=south,half=top,shape=inner_left": 3575,
-        "facing=west,half=top,shape=inner_left": 3576,
-        "facing=north,half=bottom,shape=inner_right": 3577,
-        "facing=east,half=bottom,shape=inner_right": 3578,
-        "facing=south,half=bottom,shape=inner_right": 3579,
-        "facing=west,half=bottom,shape=inner_right": 3580,
-        "facing=north,half=top,shape=inner_right": 3581,
-        "facing=east,half=top,shape=inner_right": 3582,
-        "facing=south,half=top,shape=inner_right": 3583,
-        "facing=west,half=top,shape=inner_right": 3584
+        "facing=north,half=bottom,shape=straight": 3544,
+        "facing=east,half=bottom,shape=straight": 3545,
+        "facing=south,half=bottom,shape=straight": 3546,
+        "facing=west,half=bottom,shape=straight": 3547,
+        "facing=north,half=top,shape=straight": 3548,
+        "facing=east,half=top,shape=straight": 3549,
+        "facing=south,half=top,shape=straight": 3550,
+        "facing=west,half=top,shape=straight": 3551,
+        "facing=north,half=bottom,shape=outer_left": 3552,
+        "facing=east,half=bottom,shape=outer_left": 3553,
+        "facing=south,half=bottom,shape=outer_left": 3554,
+        "facing=west,half=bottom,shape=outer_left": 3555,
+        "facing=north,half=top,shape=outer_left": 3556,
+        "facing=east,half=top,shape=outer_left": 3557,
+        "facing=south,half=top,shape=outer_left": 3558,
+        "facing=west,half=top,shape=outer_left": 3559,
+        "facing=north,half=bottom,shape=outer_right": 3560,
+        "facing=east,half=bottom,shape=outer_right": 3561,
+        "facing=south,half=bottom,shape=outer_right": 3562,
+        "facing=west,half=bottom,shape=outer_right": 3563,
+        "facing=north,half=top,shape=outer_right": 3564,
+        "facing=east,half=top,shape=outer_right": 3565,
+        "facing=south,half=top,shape=outer_right": 3566,
+        "facing=west,half=top,shape=outer_right": 3567,
+        "facing=north,half=bottom,shape=inner_left": 3568,
+        "facing=east,half=bottom,shape=inner_left": 3569,
+        "facing=south,half=bottom,shape=inner_left": 3570,
+        "facing=west,half=bottom,shape=inner_left": 3571,
+        "facing=north,half=top,shape=inner_left": 3572,
+        "facing=east,half=top,shape=inner_left": 3573,
+        "facing=south,half=top,shape=inner_left": 3574,
+        "facing=west,half=top,shape=inner_left": 3575,
+        "facing=north,half=bottom,shape=inner_right": 3576,
+        "facing=east,half=bottom,shape=inner_right": 3577,
+        "facing=south,half=bottom,shape=inner_right": 3578,
+        "facing=west,half=bottom,shape=inner_right": 3579,
+        "facing=north,half=top,shape=inner_right": 3580,
+        "facing=east,half=top,shape=inner_right": 3581,
+        "facing=south,half=top,shape=inner_right": 3582,
+        "facing=west,half=top,shape=inner_right": 3583
     },
-    "waxed_weathered_copper": 3585,
-    "waxed_weathered_cut_copper": 3586,
+    "waxed_weathered_copper": 3584,
+    "waxed_weathered_cut_copper": 3585,
     "waxed_weathered_cut_copper_slab": {
-        "type=bottom": 3588
+        "type=bottom": 3586,
+	"type=top": 3587
     },
     "waxed_weathered_cut_copper_stairs": {
-        "facing=north,half=bottom,shape=straight": 3589,
-        "facing=east,half=bottom,shape=straight": 3590,
-        "facing=south,half=bottom,shape=straight": 3591,
-        "facing=west,half=bottom,shape=straight": 3592,
-        "facing=north,half=top,shape=straight": 3593,
-        "facing=east,half=top,shape=straight": 3594,
-        "facing=south,half=top,shape=straight": 3595,
-        "facing=west,half=top,shape=straight": 3596,
-        "facing=north,half=bottom,shape=outer_left": 3597,
-        "facing=east,half=bottom,shape=outer_left": 3598,
-        "facing=south,half=bottom,shape=outer_left": 3599,
-        "facing=west,half=bottom,shape=outer_left": 3600,
-        "facing=north,half=top,shape=outer_left": 3601,
-        "facing=east,half=top,shape=outer_left": 3602,
-        "facing=south,half=top,shape=outer_left": 3603,
-        "facing=west,half=top,shape=outer_left": 3604,
-        "facing=north,half=bottom,shape=outer_right": 3605,
-        "facing=east,half=bottom,shape=outer_right": 3606,
-        "facing=south,half=bottom,shape=outer_right": 3607,
-        "facing=west,half=bottom,shape=outer_right": 3608,
-        "facing=north,half=top,shape=outer_right": 3609,
-        "facing=east,half=top,shape=outer_right": 3610,
-        "facing=south,half=top,shape=outer_right": 3611,
-        "facing=west,half=top,shape=outer_right": 3612,
-        "facing=north,half=bottom,shape=inner_left": 3613,
-        "facing=east,half=bottom,shape=inner_left": 3614,
-        "facing=south,half=bottom,shape=inner_left": 3615,
-        "facing=west,half=bottom,shape=inner_left": 3616,
-        "facing=north,half=top,shape=inner_left": 3617,
-        "facing=east,half=top,shape=inner_left": 3618,
-        "facing=south,half=top,shape=inner_left": 3619,
-        "facing=west,half=top,shape=inner_left": 3620,
-        "facing=north,half=bottom,shape=inner_right": 3621,
-        "facing=east,half=bottom,shape=inner_right": 3622,
-        "facing=south,half=bottom,shape=inner_right": 3623,
-        "facing=west,half=bottom,shape=inner_right": 3624,
-        "facing=north,half=top,shape=inner_right": 3625,
-        "facing=east,half=top,shape=inner_right": 3626,
-        "facing=south,half=top,shape=inner_right": 3627,
-        "facing=west,half=top,shape=inner_right": 3628
+        "facing=north,half=bottom,shape=straight": 3588,
+        "facing=east,half=bottom,shape=straight": 3589,
+        "facing=south,half=bottom,shape=straight": 3590,
+        "facing=west,half=bottom,shape=straight": 3591,
+        "facing=north,half=top,shape=straight": 3592,
+        "facing=east,half=top,shape=straight": 3593,
+        "facing=south,half=top,shape=straight": 3594,
+        "facing=west,half=top,shape=straight": 3595,
+        "facing=north,half=bottom,shape=outer_left": 3596,
+        "facing=east,half=bottom,shape=outer_left": 3597,
+        "facing=south,half=bottom,shape=outer_left": 3598,
+        "facing=west,half=bottom,shape=outer_left": 3599,
+        "facing=north,half=top,shape=outer_left": 3600,
+        "facing=east,half=top,shape=outer_left": 3601,
+        "facing=south,half=top,shape=outer_left": 3602,
+        "facing=west,half=top,shape=outer_left": 3603,
+        "facing=north,half=bottom,shape=outer_right": 3604,
+        "facing=east,half=bottom,shape=outer_right": 3605,
+        "facing=south,half=bottom,shape=outer_right": 3606,
+        "facing=west,half=bottom,shape=outer_right": 3607,
+        "facing=north,half=top,shape=outer_right": 3608,
+        "facing=east,half=top,shape=outer_right": 3609,
+        "facing=south,half=top,shape=outer_right": 3610,
+        "facing=west,half=top,shape=outer_right": 3611,
+        "facing=north,half=bottom,shape=inner_left": 3612,
+        "facing=east,half=bottom,shape=inner_left": 3613,
+        "facing=south,half=bottom,shape=inner_left": 3614,
+        "facing=west,half=bottom,shape=inner_left": 3615,
+        "facing=north,half=top,shape=inner_left": 3616,
+        "facing=east,half=top,shape=inner_left": 3617,
+        "facing=south,half=top,shape=inner_left": 3618,
+        "facing=west,half=top,shape=inner_left": 3619,
+        "facing=north,half=bottom,shape=inner_right": 3620,
+        "facing=east,half=bottom,shape=inner_right": 3621,
+        "facing=south,half=bottom,shape=inner_right": 3622,
+        "facing=west,half=bottom,shape=inner_right": 3623,
+        "facing=north,half=top,shape=inner_right": 3624,
+        "facing=east,half=top,shape=inner_right": 3625,
+        "facing=south,half=top,shape=inner_right": 3626,
+        "facing=west,half=top,shape=inner_right": 3627
     },
-    "weathered_copper": 3629,
-    "weathered_cut_copper": 3630,
+    "weathered_copper": 3628,
+    "weathered_cut_copper": 3629,
     "weathered_cut_copper_slab": {
-        "type=bottom": 3632
+        "type=bottom": 3630,
+	"type=top": 3631
     },
     "weathered_cut_copper_stairs": {
-        "facing=north,half=bottom,shape=straight": 3633,
-        "facing=east,half=bottom,shape=straight": 3634,
-        "facing=south,half=bottom,shape=straight": 3635,
-        "facing=west,half=bottom,shape=straight": 3636,
-        "facing=north,half=top,shape=straight": 3637,
-        "facing=east,half=top,shape=straight": 3638,
-        "facing=south,half=top,shape=straight": 3639,
-        "facing=west,half=top,shape=straight": 3640,
-        "facing=north,half=bottom,shape=outer_left": 3641,
-        "facing=east,half=bottom,shape=outer_left": 3642,
-        "facing=south,half=bottom,shape=outer_left": 3643,
-        "facing=west,half=bottom,shape=outer_left": 3644,
-        "facing=north,half=top,shape=outer_left": 3645,
-        "facing=east,half=top,shape=outer_left": 3646,
-        "facing=south,half=top,shape=outer_left": 3647,
-        "facing=west,half=top,shape=outer_left": 3648,
-        "facing=north,half=bottom,shape=outer_right": 3649,
-        "facing=east,half=bottom,shape=outer_right": 3650,
-        "facing=south,half=bottom,shape=outer_right": 3651,
-        "facing=west,half=bottom,shape=outer_right": 3652,
-        "facing=north,half=top,shape=outer_right": 3653,
-        "facing=east,half=top,shape=outer_right": 3654,
-        "facing=south,half=top,shape=outer_right": 3655,
-        "facing=west,half=top,shape=outer_right": 3656,
-        "facing=north,half=bottom,shape=inner_left": 3657,
-        "facing=east,half=bottom,shape=inner_left": 3658,
-        "facing=south,half=bottom,shape=inner_left": 3659,
-        "facing=west,half=bottom,shape=inner_left": 3660,
-        "facing=north,half=top,shape=inner_left": 3661,
-        "facing=east,half=top,shape=inner_left": 3662,
-        "facing=south,half=top,shape=inner_left": 3663,
-        "facing=west,half=top,shape=inner_left": 3664,
-        "facing=north,half=bottom,shape=inner_right": 3665,
-        "facing=east,half=bottom,shape=inner_right": 3666,
-        "facing=south,half=bottom,shape=inner_right": 3667,
-        "facing=west,half=bottom,shape=inner_right": 3668,
-        "facing=north,half=top,shape=inner_right": 3669,
-        "facing=east,half=top,shape=inner_right": 3670,
-        "facing=south,half=top,shape=inner_right": 3671,
-        "facing=west,half=top,shape=inner_right": 3672
+        "facing=north,half=bottom,shape=straight": 3632,
+        "facing=east,half=bottom,shape=straight": 3633,
+        "facing=south,half=bottom,shape=straight": 3634,
+        "facing=west,half=bottom,shape=straight": 3635,
+        "facing=north,half=top,shape=straight": 3636,
+        "facing=east,half=top,shape=straight": 3637,
+        "facing=south,half=top,shape=straight": 3638,
+        "facing=west,half=top,shape=straight": 3639,
+        "facing=north,half=bottom,shape=outer_left": 3640,
+        "facing=east,half=bottom,shape=outer_left": 3641,
+        "facing=south,half=bottom,shape=outer_left": 3642,
+        "facing=west,half=bottom,shape=outer_left": 3643,
+        "facing=north,half=top,shape=outer_left": 3644,
+        "facing=east,half=top,shape=outer_left": 3645,
+        "facing=south,half=top,shape=outer_left": 3646,
+        "facing=west,half=top,shape=outer_left": 3647,
+        "facing=north,half=bottom,shape=outer_right": 3648,
+        "facing=east,half=bottom,shape=outer_right": 3649,
+        "facing=south,half=bottom,shape=outer_right": 3650,
+        "facing=west,half=bottom,shape=outer_right": 3651,
+        "facing=north,half=top,shape=outer_right": 3652,
+        "facing=east,half=top,shape=outer_right": 3653,
+        "facing=south,half=top,shape=outer_right": 3654,
+        "facing=west,half=top,shape=outer_right": 3655,
+        "facing=north,half=bottom,shape=inner_left": 3656,
+        "facing=east,half=bottom,shape=inner_left": 3657,
+        "facing=south,half=bottom,shape=inner_left": 3658,
+        "facing=west,half=bottom,shape=inner_left": 3659,
+        "facing=north,half=top,shape=inner_left": 3660,
+        "facing=east,half=top,shape=inner_left": 3661,
+        "facing=south,half=top,shape=inner_left": 3662,
+        "facing=west,half=top,shape=inner_left": 3663,
+        "facing=north,half=bottom,shape=inner_right": 3664,
+        "facing=east,half=bottom,shape=inner_right": 3665,
+        "facing=south,half=bottom,shape=inner_right": 3666,
+        "facing=west,half=bottom,shape=inner_right": 3667,
+        "facing=north,half=top,shape=inner_right": 3668,
+        "facing=east,half=top,shape=inner_right": 3669,
+        "facing=south,half=top,shape=inner_right": 3670,
+        "facing=west,half=top,shape=inner_right": 3671
     },
-    "weeping_vines": 3673,
-    "weeping_vines_plant": 3674,
-    "wet_sponge": 3675,
-    "wheat": 3676,
-    "white_banner": 3677,
-    "white_bed": 3678,
-    "white_candle": 3679,
-    "white_candle_cake": 3680,
-    "white_carpet": 3681,
-    "white_concrete": 3682,
-    "white_concrete_powder": 3683,
-    "white_glazed_terracotta": 3684,
-    "white_shulker_box": 3685,
-    "white_stained_glass": 3686,
-    "white_stained_glass_pane": 3687,
-    "white_terracotta": 3688,
-    "white_tulip": 3689,
-    "white_wall_banner": 3690,
-    "white_wool": 3691,
-    "wither_rose": 3692,
-    "wither_skeleton_skull": 3693,
-    "wither_skeleton_wall_skull": 3694,
-    "yellow_banner": 3695,
-    "yellow_bed": 3696,
-    "yellow_candle": 3697,
-    "yellow_candle_cake": 3698,
-    "yellow_carpet": 3699,
-    "yellow_concrete": 3700,
-    "yellow_concrete_powder": 3701,
-    "yellow_glazed_terracotta": 3702,
-    "yellow_shulker_box": 3703,
-    "yellow_stained_glass": 3704,
-    "yellow_stained_glass_pane": 3705,
-    "yellow_terracotta": 3706,
-    "yellow_wall_banner": 3707,
-    "yellow_wool": 3708,
-    "zombie_head": 3709,
-    "zombie_wall_head": 3710
+    "weeping_vines": 3672,
+    "weeping_vines_plant": 3673,
+    "wet_sponge": 3674,
+    "wheat": 3675,
+    "white_banner": 3676,
+    "white_bed": 3677,
+    "white_candle": 3678,
+    "white_candle_cake": 3679,
+    "white_carpet": 3680,
+    "white_concrete": 3681,
+    "white_concrete_powder": 3682,
+    "white_glazed_terracotta": 3683,
+    "white_shulker_box": 3684,
+    "white_stained_glass": 3685,
+    "white_stained_glass_pane": 3686,
+    "white_terracotta": 3687,
+    "white_tulip": 3688,
+    "white_wall_banner": 3689,
+    "white_wool": 3690,
+    "wither_rose": 3691,
+    "wither_skeleton_skull": 3692,
+    "wither_skeleton_wall_skull": 3693,
+    "yellow_banner": 3694,
+    "yellow_bed": 3695,
+    "yellow_candle": 3696,
+    "yellow_candle_cake": 3697,
+    "yellow_carpet": 3698,
+    "yellow_concrete": 3699,
+    "yellow_concrete_powder": 3700,
+    "yellow_glazed_terracotta": 3701,
+    "yellow_shulker_box": 3702,
+    "yellow_stained_glass": 3703,
+    "yellow_stained_glass_pane": 3704,
+    "yellow_terracotta": 3705,
+    "yellow_wall_banner": 3706,
+    "yellow_wool": 3707,
+    "zombie_head": 3708,
+    "zombie_wall_head": 3709
 }
