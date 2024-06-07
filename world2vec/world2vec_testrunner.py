@@ -12,6 +12,7 @@ import sys
 import subprocess
 import traceback
 import zipfile
+from loguru import logger
 import numpy as np
 import h5py
 import glob
@@ -25,17 +26,28 @@ NIV_TOK = 4000
 
 # Load the blockname -> integer lookup dictionary
 cwd = os.getcwd() 
-block2tok_filepath = os.path.join(cwd, "block2tok_mc.json") 
+block2tok_filepath = os.path.join(cwd, "block2tok.json") 
 with open(block2tok_filepath, 'r') as file:
     block2tok = json.load(file)
 
-def has_blockstates(blockname: str): 
-    regex_square_brackets = r'\[.*?\]'
+""" Find closest matching string to given query out of options by number of common words """
+def find_closest_match(query, options): 
+    query_words = set(query)
+   
+    best_option = None
+    max_matching = 0
 
-    if re.search(regex_square_brackets, blockname):
-        return True
+    for option in options:
+        option_words = set(option.split(','))
+        shared_words = query_words.intersection(option_words)
+        matching = len(shared_words)
+       
+        if (matching > max_matching): 
+            best_option = option
+            max_matching = matching
     
-    return False 
+    return best_option
+    
 
 def convert_block_names_to_integers(build_array: np.ndarray):
     x_dim, y_dim, z_dim = build_array.shape
@@ -43,29 +55,35 @@ def convert_block_names_to_integers(build_array: np.ndarray):
 
     for x, y, z in product(range(0, x_dim), range(0, y_dim), range(0, z_dim)): 
         blockname = build_array[x, y, z]
-        value = block2tok.get(blockname)
-       
-        if (value is None): 
-            blockname_and_states = blockname.split('[')
-            split_blockname = blockname_and_states[0]
-            value = block2tok.get(split_blockname)
+        token = None 
 
-            if value is None: 
-                print("Couldn't find " + split_blockname + " aka " + blockname + " in block2tok")
-                integerized_build[x, y, z] = NIV_TOK
-            else: 
-                if (isinstance(value, dict)): 
-                    block_states = blockname_and_states[1].replace(']', "")
-                    token = value.get(block_states)
-                    if (token is None): 
-                        print("For block: \"" + split_blockname + "\", couldn't find state string: \"" + block_states + "\" in block2tok_mc.json")
-                        integerized_build[x, y, z] = NIV_TOK
-                    else: 
-                        integerized_build[x, y, z] = token
-                else: 
-                    integerized_build[x, y, z] = value
-        else : 
-            integerized_build[x, y, z] = block2tok.get(blockname)
+        # If there are block states, separate from block name
+        if '[' in blockname: 
+            blockstates = blockname.replace('[', ',').replace(']', '').split(',')
+            blockname = blockstates.pop(0) 
+
+        value = block2tok.get(blockname)
+
+        # Blockname maps to nothing  
+        if value is None: 
+            logger.error("Couldn't find: \"" + blockname + "\" in block2tok")
+            token = NIV_TOK
+
+        # Blockname maps to dictionary
+        elif (isinstance(value, dict)):
+            standard_blockstates = find_closest_match(blockstates, value.keys())
+        
+            if (standard_blockstates is None): 
+                standard_blockstates = list(value.keys())[0] 
+                logger.warning("Couldn't find blockstates for blockname: " + blockname + " with blockstates: " + str(blockstates) + " . Using default: " + str(standard_blockstates))
+
+            token = value.get(standard_blockstates)
+
+        # Blockname maps directly to token 
+        else: 
+            token = value 
+    
+        integerized_build[x, y, z] = token
         
     return integerized_build
 
@@ -110,9 +128,9 @@ def main():
         World2Vec.get_build(region_dir, schem_dir, build_name, natural_blocks_path)
 
     if not os.path.exists(schem_dir):
-        print("Error: schem file for " + build_name + " was not created.")
+        logger.error("schem file for " + build_name + " was not created.")
     else: 
-        print("Schem file for " + build_name + " is ready.")
+        logger.info("Schem file for " + build_name + " is ready.")
 
     # Get json file from schematic file
     subprocess.call(
@@ -126,25 +144,25 @@ def main():
     )
 
     if not os.path.exists(json_filepath):
-        print("Error: JSON for " + build_name + " was not created.")
+        logger.error("JSON for " + build_name + " was not created.")
     else: 
-        print("JSON for " + build_name  + " is ready.")
+        logger.info("JSON for " + build_name  + " is ready.")
         
     # Get numpy array from json file
     build_npy_array = World2Vec.export_json_to_npy(json_filepath)
-    print("Build npy array for " + build_name  + " is ready.")
+    logger.info("Build npy array for " + build_name  + " is ready.")
 
     # Integerize the numpy array, instead of doing back-and-forth conversion 
     integerized_build = convert_block_names_to_integers(build_npy_array) 
-    print("Integerized build npy array for " + build_name  + " is ready.")
+    logger.info("Integerized build npy array for " + build_name  + " is ready.")
 
     # Get HDF5 file from numpy array
     with h5py.File(hdf5_filepath, "w") as file:
         file.create_dataset(os.path.split(hdf5_filepath)[-1], data=build_npy_array)
     if not os.path.exists(hdf5_filepath):
-        print("Error: HDF5 for " + build_name + " was not created.")
+        logger.error("HDF5 for " + build_name + " was not created.")
     else: 
-        print("HDF5 for " + build_name  + " is ready.")
+        logger.info("HDF5 for " + build_name  + " is ready.")
     
 
 if __name__ == "__main__":
