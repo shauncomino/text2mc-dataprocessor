@@ -7,9 +7,12 @@ from sklearn.cluster import DBSCAN
 from typing import Union
 import numpy as np
 import json
+import h5py
 import math
 import glob
+
 # Now you can use mcschematic
+
 
 # Class to parse data files and vectorize them into information the model can train on
 class World2Vec:
@@ -23,7 +26,7 @@ class World2Vec:
             except:
                 return None
         return block
-    
+
     # Finds the subdirectory containing region files
     def find_regions_dir(dir: str) -> list:
         dirs = glob.glob("**/*.mca", root_dir=dir, recursive=True)
@@ -31,10 +34,14 @@ class World2Vec:
         for d in dirs:
             if "region" in d:
                 path = dir + "/"
-                for folder in d.split('\\'):
+                for folder in d.split("\\"):
                     path += folder
                     if folder == "region":
-                        if path not in paths and "DIM-1" not in path and "DIM1" not in path:
+                        if (
+                            path not in paths
+                            and "DIM-1" not in path
+                            and "DIM1" not in path
+                        ):
                             paths.append(path)
                         break
                     else:
@@ -42,13 +49,13 @@ class World2Vec:
         return paths
 
     @staticmethod
-    def find_inhabited_time_exists(dir:str) -> bool:
+    def find_inhabited_time_exists(dir: str) -> bool:
         for filename in os.listdir(dir):
             if filename.endswith(".mca"):
                 # Retrieve the region
                 region = anvil.Region.from_file(os.path.join(dir, filename))
                 # Only search the region file if it is not empty (because apparently sometimes they are empty?)
-                if (region.data):
+                if region.data:
                     # Set search sections
                     # Retrieve each chunk in the region
                     for x in range(0, 32):
@@ -57,19 +64,28 @@ class World2Vec:
                             chunk_data = region.chunk_data(x, z)
                             if chunk_data:
                                 # Calculate the time the chunk has been inhabited
-                                if 'Level' in chunk_data and 'InhabitedTime' in chunk_data['Level']:
-                                    inhabited_time = chunk_data['Level']['InhabitedTime'].value / 20
-                                elif 'InhabitedTime' in chunk_data:
-                                    inhabited_time = chunk_data['InhabitedTime'].value / 20
+                                if (
+                                    "Level" in chunk_data
+                                    and "InhabitedTime" in chunk_data["Level"]
+                                ):
+                                    inhabited_time = (
+                                        chunk_data["Level"]["InhabitedTime"].value / 20
+                                    )
+                                elif "InhabitedTime" in chunk_data:
+                                    inhabited_time = (
+                                        chunk_data["InhabitedTime"].value / 20
+                                    )
                                 else:
                                     return False
-                                
+
                                 if inhabited_time > 0:
                                     return True
         return False
 
     @staticmethod
-    def find_surface_section(chunk:anvil.Chunk, low_section:int, high_section:int, superflat:bool) -> Union[bool, int]:
+    def find_surface_section(
+        chunk: anvil.Chunk, low_section: int, high_section: int, superflat: bool
+    ) -> Union[bool, int]:
         surface_section = None
         for s in range(high_section, low_section, -1):
             good_section = False
@@ -84,9 +100,12 @@ class World2Vec:
                     if surface_section is not None and air_count == 1024:
                         surface_section = section
                         good_section = True
-                        print("Superflat detected!")
 
-                    if surface_section is not None and air_count == 4096 and s <= low_section + 4:
+                    if (
+                        surface_section is not None
+                        and air_count == 4096
+                        and s <= low_section + 4
+                    ):
                         surface_section = anvil.Chunk.get_section(chunk, s + 1)
                         superflat_void = True
                         superflat = True
@@ -100,10 +119,15 @@ class World2Vec:
         return True, low_section + 1
 
     # Reads all region files in dir and returns a Generator of Chunks, all of which contain blocks that are not in natural_blocks.txt
-    def get_build(dir: str, save_dir:str, build_name: str)-> List[str]:
+    def get_build(
+        dir: str, save_dir: str, build_name: str, natural_blocks_path: str = None
+    ) -> List[str]:
         print("Searching directory " + dir + "...")
         # Read in the natural blocks to an array
-        nb_file = open("natural_blocks.txt", 'r')
+        if natural_blocks_path is None:
+            nb_file = open("natural_blocks.txt", "r")
+        else:
+            nb_file = open(natural_blocks_path, "r")
         natural_blocks = nb_file.read().splitlines()
         nb_file.close()
         # This is the list of all the build chunks
@@ -120,11 +144,11 @@ class World2Vec:
             inhabited_time_check = 1.5
         for filename in os.listdir(dir):
             if filename.endswith(".mca"):
-                #print("Now in:" +  filename + "\n")
+                # print("Now in:" +  filename + "\n")
                 # Retrieve the region
                 region = anvil.Region.from_file(os.path.join(dir, filename))
                 # Only search the region file if it is not empty (because apparently sometimes they are empty?)
-                if (region.data):
+                if region.data:
                     # Set search sections
                     inhabited_time_exist = True
                     search_sections = range(16, -5, -1)
@@ -137,59 +161,139 @@ class World2Vec:
                                 try:
                                     chunk = anvil.Region.get_chunk(region, x, z)
                                 except Exception as e:
-                                    print("Error: Could not read chunk", x, z, "in", filename, "due to", e)
+                                    print(
+                                        "Error: Could not read chunk",
+                                        x,
+                                        z,
+                                        "in",
+                                        filename,
+                                        "due to",
+                                        e,
+                                    )
                                     return
                                 # Calculate the time the chunk has been inhabited
-                                if 'Level' in chunk_data and 'InhabitedTime' in chunk_data['Level']:
-                                    inhabited_time = chunk_data['Level']['InhabitedTime'].value / 20
-                                elif 'InhabitedTime' in chunk_data:
-                                    inhabited_time = chunk_data['InhabitedTime'].value / 20
+                                if (
+                                    "Level" in chunk_data
+                                    and "InhabitedTime" in chunk_data["Level"]
+                                ):
+                                    inhabited_time = (
+                                        chunk_data["Level"]["InhabitedTime"].value / 20
+                                    )
+                                elif "InhabitedTime" in chunk_data:
+                                    inhabited_time = (
+                                        chunk_data["InhabitedTime"].value / 20
+                                    )
                                 else:
                                     inhabited_time_exist = False
                                 # Check whether the chunk has been visited at all, if not we can skip checking it
-                                if(inhabited_time >= inhabited_time_check or inhabited_time_exist == False):
-                                    
+                                if (
+                                    inhabited_time >= inhabited_time_check
+                                    or inhabited_time_exist == False
+                                ):
+
                                     superflat_mode = False
                                     if len(superflat_markers) != 0:
-                                        superflat_mode = max(set(superflat_markers), key=superflat_markers.count)
+                                        superflat_mode = max(
+                                            set(superflat_markers),
+                                            key=superflat_markers.count,
+                                        )
 
-                                    superflat, surface_section = World2Vec.find_surface_section(chunk, search_sections.stop, search_sections.start + 1, superflat_mode)
+                                    superflat, surface_section = (
+                                        World2Vec.find_surface_section(
+                                            chunk,
+                                            search_sections.stop,
+                                            search_sections.start,
+                                            superflat_mode,
+                                        )
+                                    )
 
                                     superflat_markers.append(superflat)
                                     # Search the relevant sections
                                     chunk_added = False
-                                    for s in range(surface_section, surface_section + 4):
+                                    for s in range(
+                                        surface_section, surface_section + 4
+                                    ):
                                         section = anvil.Chunk.get_section(chunk, s)
                                         # Check each block in the section
-                                        for block in anvil.Chunk.stream_blocks(chunk, section=section):
+                                        for block in anvil.Chunk.stream_blocks(
+                                            chunk, section=section
+                                        ):
                                             block = World2Vec.convert_if_old(block)
-                                            if not anvil.Block.name(block).startswith("minecraft"):
+                                            if not anvil.Block.name(block).startswith(
+                                                "minecraft"
+                                            ):
                                                 # This is a modded block, and we should skip the build
-                                                print("Modded block found in build. Skipping...")
+                                                print(
+                                                    "Modded block found in build. Skipping..."
+                                                )
                                                 return
                                             # If it's not a natural block, add this chunk to the list
-                                            if block != None and anvil.Block.name(block) not in natural_blocks:
-                                                #print(anvil.Block.name(block) + "at " + str(chunk.x) + ", " + str(chunk.z) + " added to build!")
+                                            if (
+                                                block != None
+                                                and anvil.Block.name(block)
+                                                not in natural_blocks
+                                            ):
+                                                # print(anvil.Block.name(block) + "at " + str(chunk.x) + ", " + str(chunk.z) + " added to build!")
                                                 build_chunks.append(chunk)
                                                 if filename not in relevant_regions:
-                                                    region_x = int(filename.split("r.")[1].split(".")[0])
-                                                    region_z = int(filename.split("r.")[1].split(".")[1])
+                                                    region_x = int(
+                                                        filename.split("r.")[1].split(
+                                                            "."
+                                                        )[0]
+                                                    )
+                                                    region_z = int(
+                                                        filename.split("r.")[1].split(
+                                                            "."
+                                                        )[1]
+                                                    )
                                                     if chunk.x == 0:
-                                                        new_file = "r." + str(region_x - 1) + "." + str(region_z) + ".mca"
+                                                        new_file = (
+                                                            "r."
+                                                            + str(region_x - 1)
+                                                            + "."
+                                                            + str(region_z)
+                                                            + ".mca"
+                                                        )
                                                         if new_file in os.listdir(dir):
-                                                            relevant_regions.append(new_file)
+                                                            relevant_regions.append(
+                                                                new_file
+                                                            )
                                                     elif chunk.x == 31:
-                                                        new_file = "r." + str(region_x + 1) + "." + str(region_z) + ".mca"
+                                                        new_file = (
+                                                            "r."
+                                                            + str(region_x + 1)
+                                                            + "."
+                                                            + str(region_z)
+                                                            + ".mca"
+                                                        )
                                                         if new_file in os.listdir(dir):
-                                                            relevant_regions.append(new_file)
+                                                            relevant_regions.append(
+                                                                new_file
+                                                            )
                                                     if chunk.z == 0:
-                                                        new_file = "r." + str(region_x) + "." + str(region_z - 1) + ".mca"
+                                                        new_file = (
+                                                            "r."
+                                                            + str(region_x)
+                                                            + "."
+                                                            + str(region_z - 1)
+                                                            + ".mca"
+                                                        )
                                                         if new_file in os.listdir(dir):
-                                                            relevant_regions.append(new_file)
+                                                            relevant_regions.append(
+                                                                new_file
+                                                            )
                                                     elif chunk.z == 31:
-                                                        new_file = "r." + str(region_x) + "." + str(region_z + 1) + ".mca"
+                                                        new_file = (
+                                                            "r."
+                                                            + str(region_x)
+                                                            + "."
+                                                            + str(region_z + 1)
+                                                            + ".mca"
+                                                        )
                                                         if new_file in os.listdir(dir):
-                                                            relevant_regions.append(new_file)
+                                                            relevant_regions.append(
+                                                                new_file
+                                                            )
                                                     relevant_regions.append(filename)
                                                 chunk_added = True
                                                 break
@@ -199,14 +303,14 @@ class World2Vec:
         if len(build_chunks) == 0:
             print("Error: Build could not be found in region files")
             return
-        
+
         if build_chunks:
             data = np.array([(chunk.x, chunk.z) for chunk in build_chunks])
 
             # Apply DBSCAN clustering
-            dbscan = DBSCAN(eps=3, min_samples=3).fit(data)
+            dbscan = DBSCAN(eps = 5, min_samples = 5).fit(data)
             labels = dbscan.labels_
-            
+
             # Get the label of the main cluster
             unique_labels = set(labels)
             unique_labels.discard(-1)
@@ -226,7 +330,11 @@ class World2Vec:
                 builds_extracted += 1
 
                 # Extract all the chunks from that cluster
-                cluster_chunks = [chunk for chunk, label in zip(build_chunks, labels) if label == cluster]
+                cluster_chunks = [
+                    chunk
+                    for chunk, label in zip(build_chunks, labels)
+                    if label == cluster
+                ]
 
                 low_x = min(chunk.x for chunk in cluster_chunks)
                 high_x = max(chunk.x for chunk in cluster_chunks)
@@ -251,7 +359,7 @@ class World2Vec:
                         # Retrieve the region
                         region = anvil.Region.from_file(os.path.join(dir, filename))
                         # Only search the region file if it is not empty (because apparently sometimes they are empty?)
-                        if (region.data):
+                        if region.data:
                             # Retrieve each chunk in the region
                             for x in range(0, 32):
                                 for z in range(0, 32):
@@ -259,19 +367,36 @@ class World2Vec:
                                     if region.chunk_data(x, z):
                                         chunk = anvil.Region.get_chunk(region, x, z)
                                         if chunk not in cluster_chunks:
-                                            if (chunk.x >= low_x and chunk.x <= high_x) and (chunk.z >= low_z and chunk.z <= high_z):
+                                            if (
+                                                chunk.x >= low_x and chunk.x <= high_x
+                                            ) and (
+                                                chunk.z >= low_z and chunk.z <= high_z
+                                            ):
                                                 cluster_chunks.append(chunk)
                 print("Build chunks found!")
-                World2Vec.extract_build(cluster_chunks, superflat, save_dir, build_name, builds_extracted, schem_paths)
+                World2Vec.extract_build(
+                    cluster_chunks,
+                    superflat,
+                    save_dir,
+                    build_name,
+                    builds_extracted,
+                    schem_paths,
+                )
 
                 # Call the extract_build function on cluster_chunks, pass in the builds_extracted integer
             return schem_paths
             # Iterate through .mca files in dir to fill in missing chunks
-            
-            
+
     # Extracts a build from a list of chunks and writes a file containing block info and coordinates
-    def extract_build(chunks: List, superflat: bool,  save_dir:str, build_name: str, build_no: int, schem_paths: List[str]):
-        print("Extracting build from chunks into " + build_name +  "_" + ".schematic...")
+    def extract_build(
+        chunks: List,
+        superflat: bool,
+        save_dir: str,
+        build_name: str,
+        build_no: int,
+        schem_paths: List[str],
+    ):
+        print("Extracting build from chunks into " + build_name + "_" + ".schematic...")
         # Open the output file
         schem = mcschematic.MCSchematic()
         # Part of this process is finding the lowest y-value that can be considered the "surface"
@@ -285,14 +410,18 @@ class World2Vec:
         all_surface_sections = []
         surface_section_mode = None
         # If it's a superflat world, we need to search the lower sections
-        if(superflat):
+        if superflat:
             lowest_surface_y = -100
             level = -100
         for chunk in chunks:
-            superflat, surface_section = World2Vec.find_surface_section(chunk, min_range, 16, superflat)
+            superflat, surface_section = World2Vec.find_surface_section(
+                chunk, min_range, 16, superflat
+            )
             all_surface_sections.append(surface_section)
         # Find the mode (most common) surface section among the build chunks
-        surface_section_mode = max(set(all_surface_sections), key = all_surface_sections.count)
+        surface_section_mode = max(
+            set(all_surface_sections), key=all_surface_sections.count
+        )
         all_ys = []
         start_y = -8
         if superflat:
@@ -300,7 +429,7 @@ class World2Vec:
         for chunk in chunks:
             chunk_lowest_y = level
             # Iterate through the surface section and find the lowest surface block
-            # Because we are specifying the section, we are using relative coordinates in the 0-16 range, rather than global coordinates 
+            # Because we are specifying the section, we are using relative coordinates in the 0-16 range, rather than global coordinates
             # (this is better for us, as it is world-agnostic)
             # We start at -8 in the y level just in case the surface block is close to the section border (if it is not superflat)
             for x in range(0, 16):
@@ -308,14 +437,23 @@ class World2Vec:
                     for y in range(start_y, 16):
                         # Here we calculate the true y value, in order to compare against other sections
                         true_y = y + (surface_section_mode * 16)
-                        block = World2Vec.convert_if_old(anvil.Chunk.get_block(chunk, x, true_y, z))
-                        block_above = World2Vec.convert_if_old(anvil.Chunk.get_block(chunk, x, true_y+1, z))
+                        block = World2Vec.convert_if_old(
+                            anvil.Chunk.get_block(chunk, x, true_y, z)
+                        )
+                        block_above = World2Vec.convert_if_old(
+                            anvil.Chunk.get_block(chunk, x, true_y + 1, z)
+                        )
                         # Check if there is an air block above it, to confirm it is a surface block
-                        if block != None and block_above != None and anvil.Block.name(block) != "minecraft:air" and anvil.Block.name(block_above) == "minecraft:air":
+                        if (
+                            block != None
+                            and block_above != None
+                            and anvil.Block.name(block) != "minecraft:air"
+                            and anvil.Block.name(block_above) == "minecraft:air"
+                        ):
                             if chunk_lowest_y == level or true_y < chunk_lowest_y:
                                 chunk_lowest_y = true_y
             all_ys.append(chunk_lowest_y)
-        
+
         lowest_surface_y = int(sum(all_ys) / len(all_ys))
         if surface_section_mode != min_range + 1:
             lowest_surface_y -= 1
@@ -330,7 +468,7 @@ class World2Vec:
         # We also need a stopping point, so we need a flag to tell us when to stop searching for blocks (we don't want to spend time searching the sky)
         searching = True
         empty_layers = 0
-        while (searching):
+        while searching:
             empty_layer = True
             for chunk in chunks:
                 relative_chunk_x = chunk.x - origin_x
@@ -338,7 +476,9 @@ class World2Vec:
                 for x in range(0, 16):
                     for z in range(0, 16):
                         # This function CAN take global y values, so we don't have to worry about finding specific sections
-                        block = World2Vec.convert_if_old(anvil.Chunk.get_block(chunk, x, current_y, z))
+                        block = World2Vec.convert_if_old(
+                            anvil.Chunk.get_block(chunk, x, current_y, z)
+                        )
                         # We're going to ignore air blocks, as we can just fill in empty coordinates later with air blocks
                         # This just cleans up the output file for better readability
                         if block != None and anvil.Block.name(block) != "minecraft:air":
@@ -356,50 +496,75 @@ class World2Vec:
                             block_properties = "["
                             if len(block.properties) > 0:
                                 for prop in sorted(block.properties):
-                                    block_properties = block_properties + prop + "=" + str(block.properties.get(prop)) + ","
+                                    block_properties = (
+                                        block_properties
+                                        + prop
+                                        + "="
+                                        + str(block.properties.get(prop))
+                                        + ","
+                                    )
                             block_properties = block_properties[:-1] + "]"
                             # Finally, we write to the output file
                             if len(block.properties) > 0:
-                                schem.setBlock((int(new_x), int(new_y), int(new_z)),anvil.Block.name(block) + block_properties)
+                                schem.setBlock(
+                                    (int(new_x), int(new_y), int(new_z)),
+                                    anvil.Block.name(block) + block_properties,
+                                )
                             else:
-                                schem.setBlock((int(new_x), int(new_y), int(new_z)),anvil.Block.name(block))
+                                schem.setBlock(
+                                    (int(new_x), int(new_y), int(new_z)),
+                                    anvil.Block.name(block),
+                                )
             # If this layer is empty, stop searching
-            if (empty_layer):
+            if empty_layer:
                 empty_layers += 1
                 if empty_layers == 3:
                     searching = False
             # Otherwise, increase to the next y layer
             else:
                 current_y += 1
-        # Extract path of code file, and add to with testbuilds
-            
-        # Now that the folder exists, you can save the schematic file
-        schem.save(save_dir, build_name +  "_" + str(build_no), mcschematic.Version.JE_1_20_1)
-        schem_file_path = os.path.join(save_dir, build_name +  "_" + str(build_no) + ".schematic")
+
+        schem.save(
+            save_dir, build_name + "_" + str(build_no), mcschematic.Version.JE_1_20_1
+        )
+        schem_file_path = os.path.join(
+            save_dir, build_name + "_" + str(build_no) + ".schematic"
+        )
 
         schem_paths.append(schem_file_path)
 
-        print("Build extracted to " + build_name + "_" + str(build_no) + ".schematic...!\n")
+        print(
+            "Build extracted to "
+            + build_name
+            + "_"
+            + str(build_no)
+            + ".schematic...!\n"
+        )
 
-    def export_json_to_npy(input_file_path: str, output_file_path: str):
+    def export_json_to_npy(input_file_path: str):
         # Load JSON data
         with open(input_file_path) as f:
             data = json.load(f)
 
         # Extract dimensions from JSON
-        dimensions = data['worldDimensions']
-        width = dimensions['width']
-        height = dimensions['height']
-        length = dimensions['length']
+        dimensions = data["worldDimensions"]
+        width = dimensions["width"]
+        height = dimensions["height"]
+        length = dimensions["length"]
 
         # Create a 3D array with dimensions from JSON
         world_array = np.zeros((width, height, length), dtype=object)
 
         # Fill the array with block names based on JSON data
-        for block in data['blocks']:
-            x, y, z = block['x'], block['y'], block['z']
-            block_name = block['name']
+        for block in data["blocks"]:
+            x, y, z = block["x"], block["y"], block["z"]
+            block_name = block["name"]
             world_array[x, y, z] = block_name
 
-        # Save 3D array to a .npy file
-        np.save(output_file_path, world_array)
+        return world_array
+
+    def export_npy_to_hdf5(output_file_prefix: str, world_array: np.ndarray):
+        # Open HDF5 file in write mode
+        with h5py.File(f"{output_file_prefix}.h5", "w") as f:
+            # Create a dataset in the HDF5 file with the same name as the file name and write the array data
+            f.create_dataset(output_file_prefix, data=world_array)

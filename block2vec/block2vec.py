@@ -40,22 +40,20 @@ class Block2VecArgs(Tap):
 
 class Block2Vec(pl.LightningModule):
     
-    def __init__(self, build, **kwargs):
+    def __init__(self, builds, **kwargs):
         super().__init__()
         self.args: Block2VecArgs = Block2VecArgs().from_dict(kwargs)
         self.save_hyperparameters()
-        self.build = build 
+        self.builds = builds
         self.dataset = Block2VecDataset(
-            self.build,
+            self.builds,
+            tok2block_filename=self.args.token_to_block_filename, 
             neighbor_radius=self.args.neighbor_radius,
         )
         with open(self.args.token_to_block_filename, "r") as file:
             self.tok2block = json.load(file)
-
-        # Convert string keys back to integers
-        self.tok2block = {int(key): value for key, value in self.tok2block.items()}
                
-        self.emb_size = len(self.dataset.block2idx)
+        self.emb_size = 32
         self.model = SkipGramModel(self.emb_size, self.args.emb_dimension)
         self.textures = dict()
         self.learning_rate = self.args.initial_lr
@@ -93,9 +91,9 @@ class Block2Vec(pl.LightningModule):
         embedding_dict = self.save_embedding(
             self.dataset.idx2block, self.args.output_path
         )
-        self.create_confusion_matrix(
-            self.dataset.idx2block, self.args.output_path)
-        self.plot_embeddings(embedding_dict, self.args.output_path)
+        #self.create_confusion_matrix(
+            #self.dataset.idx2block, self.args.output_path)
+        #self.plot_embeddings(embedding_dict, self.args.output_path)
 
     """ Reads texture .png file for a given token """
     def read_texture(self, block: str):
@@ -123,11 +121,16 @@ class Block2Vec(pl.LightningModule):
         with open(os.path.join(output_path, self.args.embeddings_txt_filename), "w") as f:
 
             f.write("%d %d\n" % (len(id2block), self.args.emb_dimension))
+            
             for wid, w in id2block.items():
+                print("wid")
+                print(wid) #number
+                print("w")
+                print(w) #name
                 e = " ".join(map(lambda x: str(x), embeddings[wid]))
-                embedding_dict[self.tok2block[w]] = torch.from_numpy(embeddings[wid])
-                f.write("%s %s\n" % (self.tok2block[w], e))
-        
+                embedding_dict[self.tok2block[str(wid)]] = torch.from_numpy(embeddings[wid])
+                f.write("%s %s\n" % (self.tok2block[str(wid)], e))
+        print(embedding_dict)
         np.save(os.path.join(output_path, self.args.embeddings_npy_filename), embeddings)
         
         with open(os.path.join(output_path, self.args.embeddings_pkl_filename), "wb") as f:
@@ -156,6 +159,7 @@ class Block2Vec(pl.LightningModule):
         plt.savefig(os.path.join(output_path, self.args.embeddings_scatterplot_filename), dpi=300)
         plt.close("all")
 
+
     def create_confusion_matrix(self, id2block: Dict[int, str], output_path: str):
         rcParams.update({"font.size": 6})
         names = []
@@ -175,3 +179,4 @@ class Block2Vec(pl.LightningModule):
         plt.tight_layout()
         plt.savefig(os.path.join(output_path, self.args.embeddings_dist_matrix_filename))
         plt.close()
+ 
