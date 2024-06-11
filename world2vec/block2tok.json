@@ -44,7 +44,8 @@
     "minecraft:acacia_sign": 26,
     "minecraft:acacia_slab": {
         "type=bottom": 27,
-        "type=top": 28
+        "type=top": 28,
+        "type=double": 23
     },
     "minecraft:acacia_stairs": {
         "facing=north,half=bottom,shape=straight": 29,
@@ -146,7 +147,8 @@
     "minecraft:andesite": 112,
     "minecraft:andesite_slab": {
         "type=bottom": 113,
-        "type=top": 114
+        "type=top": 114,
+        "type=double": 112
     },
     "minecraft:andesite_stairs": {
         "facing=north,half=bottom,shape=straight": 115,
@@ -244,7 +246,8 @@
     "minecraft:bamboo_mosaic": 188,
     "minecraft:bamboo_mosaic_slab": {
         "type=bottom": 189,
-        "type=top": 190
+        "type=top": 190,
+        "type=double": 188
     },
     "minecraft:bamboo_mosaic_stairs": {
         "facing=north,half=bottom,shape=straight": 191,
@@ -294,7 +297,8 @@
     "minecraft:bamboo_sign": 234,
     "minecraft:bamboo_slab": {
         "type=bottom": 235,
-        "type=top": 236
+        "type=top": 236,
+        "type=double": 231
     },
     "minecraft:bamboo_stairs": {
         "facing=north,half=bottom,shape=straight": 237,
@@ -428,7 +432,8 @@
     "minecraft:birch_sign": 340,
     "minecraft:birch_slab": {
         "type=bottom": 341,
-        "type=top": 342
+        "type=top": 342,
+        "type=double": 337
     },
     "minecraft:birch_stairs": {
         "facing=north,half=bottom,shape=straight": 343,
@@ -524,7 +529,8 @@
     "minecraft:blackstone": 424,
     "minecraft:blackstone_slab": {
         "type=bottom": 425,
-        "type=top": 426
+        "type=top": 426,
+        "type=double": 424
     },
     "minecraft:blackstone_stairs": {
         "facing=north,half=bottom,shape=straight": 427,
@@ -604,7 +610,8 @@
     "minecraft:brewing_stand": 496,
     "minecraft:brick_slab": {
         "type=bottom": 497,
-        "type=top": 498
+        "type=top": 498,
+        "type=double": 540
     },
     "minecraft:brick_stairs": {
         "facing=north,half=bottom,shape=straight": 499,
@@ -741,7 +748,8 @@
     "minecraft:cherry_sign": 609,
     "minecraft:cherry_slab": {
         "type=bottom": 610,
-        "type=top": 611
+        "type=top": 611,
+        "type=double": 606
     },
     "minecraft:cherry_stairs": {
         "facing=north,half=bottom,shape=straight": 612,
@@ -844,7 +852,8 @@
     "minecraft:cobbled_deepslate": 696,
     "minecraft:cobbled_deepslate_slab": {
         "type=bottom": 697,
-        "type=top": 698
+        "type=top": 698,
+        "type=double": 696
     },
     "minecraft:cobbled_deepslate_stairs": {
         "facing=north,half=bottom,shape=straight": 699,
@@ -892,7 +901,8 @@
     "minecraft:cobblestone": 740,
     "minecraft:cobblestone_slab": {
         "type=bottom": 741,
-        "type=top": 742
+        "type=top": 742,
+        "type=double": 740
     },
     "minecraft:cobblestone_stairs": {
         "facing=north,half=bottom,shape=straight": 743,
@@ -1000,7 +1010,8 @@
     "minecraft:crimson_sign": 828,
     "minecraft:crimson_slab": {
         "type=bottom": 829,
-        "type=top": 830
+        "type=top": 830,
+        "type=double": 825
     },
     "minecraft:crimson_stairs": {
         "facing=north,half=bottom,shape=straight": 831,
@@ -1083,7 +1094,8 @@
     "minecraft:cut_copper": 899,
     "minecraft:cut_copper_slab": {
         "type=bottom": 900,
-        "type=top": 901
+        "type=top": 901,
+        "type=double": 899
     },
     "minecraft:cut_copper_stairs": {
         "facing=north,half=bottom,shape=straight": 902,
@@ -1130,12 +1142,14 @@
     "minecraft:cut_red_sandstone": 942,
     "minecraft:cut_red_sandstone_slab": {
         "type=bottom": 943,
-        "type=top": 944
+        "type=top": 944,
+        "type=double": 942
     },
     "minecraft:cut_sandstone": 945,
     "minecraft:cut_sandstone_slab": {
         "type=bottom": 946,
-        "type=top": 947
+        "type=top": 947,
+        "type=double": 945
     },
     "minecraft:cyan_banner": 948,
     "minecraft:cyan_bed": 949,
@@ -1203,7 +1217,8 @@
     "minecraft:dark_oak_sign": 991,
     "minecraft:dark_oak_slab": {
         "type=bottom": 992,
-        "type=top": 993
+        "type=top": 993,
+        "type=double": 988
     },
     "minecraft:dark_oak_stairs": {
         "facing=north,half=bottom,shape=straight": 994,
@@ -1285,7 +1300,8 @@
     "minecraft:dark_prismarine": 1061,
     "minecraft:dark_prismarine_slab": {
         "type=bottom": 1062,
-        "type=top": 1063
+        "type=top": 1063,
+        "type=double": 1061
     },
     "minecraft:dark_prismarine_stairs": {
         "facing=north,half=bottom,shape=straight": 1064,
@@ -1355,7 +1371,8 @@
     "minecraft:deepslate": 1127,
     "minecraft:deepslate_brick_slab": {
         "type=bottom": 1128,
-        "type=top": 1129
+        "type=top": 1129,
+        "type=double": 1171
     },
     "minecraft:deepslate_brick_stairs": {
         "facing=north,half=bottom,shape=straight": 1130,
@@ -1411,7 +1428,8 @@
     "minecraft:deepslate_redstone_ore": 1179,
     "minecraft:deepslate_tile_slab": {
         "type=bottom": 1180,
-        "type=top": 1181
+        "type=top": 1181,
+        "type=double": 1223
     },
     "minecraft:deepslate_tile_stairs": {
         "facing=north,half=bottom,shape=straight": 1182,
@@ -1470,7 +1488,8 @@
     "minecraft:diorite": 1232,
     "minecraft:diorite_slab": {
         "type=bottom": 1233,
-        "type=top": 1234
+        "type=top": 1234,
+        "type=double": 1232
     },
     "minecraft:diorite_stairs": {
         "facing=north,half=bottom,shape=straight": 1235,
@@ -1541,7 +1560,8 @@
     "minecraft:end_stone": 1297,
     "minecraft:end_stone_brick_slab": {
         "type=bottom": 1298,
-        "type=top": 1299
+        "type=top": 1299,
+        "type=double": 1341
     },
     "minecraft:end_stone_brick_stairs": {
         "facing=north,half=bottom,shape=straight": 1300,
@@ -1592,7 +1612,8 @@
     "minecraft:exposed_cut_copper": 1344,
     "minecraft:exposed_cut_copper_slab": {
         "type=bottom": 1345,
-        "type=top": 1346
+        "type=top": 1346,
+        "type=double": 1344
     },
     "minecraft:exposed_cut_copper_stairs": {
         "facing=north,half=bottom,shape=straight": 1347,
@@ -1661,7 +1682,8 @@
     "minecraft:granite": 1409,
     "minecraft:granite_slab": {
         "type=bottom": 1410,
-        "type=top": 1411
+        "type=top": 1411,
+        "type=double": 1409
     },
     "minecraft:granite_stairs": {
         "facing=north,half=bottom,shape=straight": 1412,
@@ -1853,7 +1875,8 @@
     "minecraft:jungle_sign": 1567,
     "minecraft:jungle_slab": {
         "type=bottom": 1568,
-        "type=top": 1569
+        "type=top": 1569,
+        "type=double": 1564
     },
     "minecraft:jungle_stairs": {
         "facing=north,half=bottom,shape=straight": 1570,
@@ -2082,7 +2105,8 @@
     "minecraft:mangrove_sign": 1756,
     "minecraft:mangrove_slab": {
         "type=bottom": 1757,
-        "type=top": 1758
+        "type=top": 1758,
+        "type=double": 1752
     },
     "minecraft:mangrove_stairs": {
         "facing=north,half=bottom,shape=straight": 1759,
@@ -2176,7 +2200,8 @@
     "minecraft:mossy_cobblestone": 1836,
     "minecraft:mossy_cobblestone_slab": {
         "type=bottom": 1837,
-        "type=top": 1838
+        "type=top": 1838,
+        "type=double": 1836
     },
     "minecraft:mossy_cobblestone_stairs": {
         "facing=north,half=bottom,shape=straight": 1839,
@@ -2223,7 +2248,8 @@
     "minecraft:mossy_cobblestone_wall": 1879,
     "minecraft:mossy_stone_brick_slab": {
         "type=bottom": 1880,
-        "type=top": 1881
+        "type=top": 1881,
+        "type=double": 1923
     },
     "minecraft:mossy_stone_brick_stairs": {
         "facing=north,half=bottom,shape=straight": 1882,
@@ -2273,7 +2299,8 @@
     "minecraft:mud": 1925,
     "minecraft:mud_brick_slab": {
         "type=bottom": 1926,
-        "type=top": 1927
+        "type=top": 1927,
+        "type=double": 1969
     },
     "minecraft:mud_brick_stairs": {
         "facing=north,half=bottom,shape=straight": 1928,
@@ -2325,7 +2352,8 @@
     "minecraft:nether_brick_fence": 1973,
     "minecraft:nether_brick_slab": {
         "type=bottom": 1974,
-        "type=top": 1975
+        "type=top": 1975,
+        "type=double": 2017
     },
     "minecraft:nether_brick_stairs": {
         "facing=north,half=bottom,shape=straight": 1976,
@@ -2425,7 +2453,8 @@
     "minecraft:oak_sign": 2053,
     "minecraft:oak_slab": {
         "type=bottom": 2054,
-        "type=top": 2055
+        "type=top": 2055,
+        "type=double": 2050
     },
     "minecraft:oak_stairs": {
         "facing=north,half=bottom,shape=straight": 2056,
@@ -2527,7 +2556,8 @@
     "minecraft:oxidized_cut_copper": 2143,
     "minecraft:oxidized_cut_copper_slab": {
         "type=bottom": 2144,
-        "type=top": 2145
+        "type=top": 2145,
+        "type=double": 2143
     },
     "minecraft:oxidized_cut_copper_stairs": {
         "facing=north,half=bottom,shape=straight": 2146,
@@ -2609,7 +2639,8 @@
     "minecraft:polished_andesite": 2217,
     "minecraft:polished_andesite_slab": {
         "type=bottom": 2218,
-        "type=top": 2219
+        "type=top": 2219,
+        "type=double": 2217
     },
     "minecraft:polished_andesite_stairs": {
         "facing=north,half=bottom,shape=straight": 2220,
@@ -2657,7 +2688,8 @@
     "minecraft:polished_blackstone": 2261,
     "minecraft:polished_blackstone_brick_slab": {
         "type=bottom": 2262,
-        "type=top": 2263
+        "type=top": 2263,
+        "type=double": 2305
     },
     "minecraft:polished_blackstone_brick_stairs": {
         "facing=north,half=bottom,shape=straight": 2264,
@@ -2720,7 +2752,8 @@
     "minecraft:polished_blackstone_pressure_plate": 2314,
     "minecraft:polished_blackstone_slab": {
         "type=bottom": 2315,
-        "type=top": 2316
+        "type=top": 2316,
+        "type=double": 2261
     },
     "minecraft:polished_blackstone_stairs": {
         "facing=north,half=bottom,shape=straight": 2317,
@@ -2768,7 +2801,8 @@
     "minecraft:polished_deepslate": 2358,
     "minecraft:polished_deepslate_slab": {
         "type=bottom": 2359,
-        "type=top": 2360
+        "type=top": 2360,
+        "type=double": 2358
     },
     "minecraft:polished_deepslate_stairs": {
         "facing=north,half=bottom,shape=straight": 2361,
@@ -2816,7 +2850,8 @@
     "minecraft:polished_diorite": 2402,
     "minecraft:polished_diorite_slab": {
         "type=bottom": 2403,
-        "type=top": 2404
+        "type=top": 2404,
+        "type=double": 2402
     },
     "minecraft:polished_diorite_stairs": {
         "facing=north,half=bottom,shape=straight": 2405,
@@ -2863,7 +2898,8 @@
     "minecraft:polished_granite": 2445,
     "minecraft:polished_granite_slab": {
         "type=bottom": 2446,
-        "type=top": 2447
+        "type=top": 2447,
+        "type=double": 2445
     },
     "minecraft:polished_granite_stairs": {
         "facing=north,half=bottom,shape=straight": 2448,
@@ -2956,7 +2992,8 @@
     "minecraft:prismarine": 2532,
     "minecraft:prismarine_brick_slab": {
         "type=bottom": 2533,
-        "type=top": 2534
+        "type=top": 2534,
+        "type=double": 2575
     },
     "minecraft:prismarine_brick_stairs": {
         "facing=north,half=bottom,shape=straight": 2535,
@@ -3003,7 +3040,8 @@
     "minecraft:prismarine_bricks": 2575,
     "minecraft:prismarine_slab": {
         "type=bottom": 2576,
-        "type=top": 2577
+        "type=top": 2577,
+        "type=double": 2532
     },
     "minecraft:prismarine_stairs": {
         "facing=north,half=bottom,shape=straight": 2578,
@@ -3068,7 +3106,8 @@
     "minecraft:purpur_pillar": 2636,
     "minecraft:purpur_slab": {
         "type=bottom": 2637,
-        "type=top": 2638
+        "type=top": 2638,
+        "type=double": 2635
     },
     "minecraft:purpur_stairs": {
         "facing=north,half=bottom,shape=straight": 2639,
@@ -3117,7 +3156,8 @@
     "minecraft:quartz_pillar": 2681,
     "minecraft:quartz_slab": {
         "type=bottom": 2682,
-        "type=top": 2683
+        "type=top": 2683,
+        "type=double": 2679
     },
     "minecraft:quartz_stairs": {
         "facing=north,half=bottom,shape=straight": 2684,
@@ -3184,7 +3224,8 @@
     "minecraft:red_mushroom_block": 2742,
     "minecraft:red_nether_brick_slab": {
         "type=bottom": 2743,
-        "type=top": 2744
+        "type=top": 2744,
+        "type=double": 2786
     },
     "minecraft:red_nether_brick_stairs": {
         "facing=north,half=bottom,shape=straight": 2745,
@@ -3234,7 +3275,8 @@
     "minecraft:red_sandstone": 2788,
     "minecraft:red_sandstone_slab": {
         "type=bottom": 2789,
-        "type=top": 2790
+        "type=top": 2790,
+        "type=double": 2788
     },
     "minecraft:red_sandstone_stairs": {
         "facing=north,half=bottom,shape=straight": 2791,
@@ -3302,7 +3344,8 @@
     "minecraft:sandstone": 2852,
     "minecraft:sandstone_slab": {
         "type=bottom": 2853,
-        "type=top": 2854
+        "type=top": 2854,
+        "type=double": 2852
     },
     "minecraft:sandstone_stairs": {
         "facing=north,half=bottom,shape=straight": 2855,
@@ -3376,7 +3419,8 @@
     "minecraft:smooth_quartz": 2920,
     "minecraft:smooth_quartz_slab": {
         "type=bottom": 2921,
-        "type=top": 2922
+        "type=top": 2922,
+        "type=double": 2920
     },
     "minecraft:smooth_quartz_stairs": {
         "facing=north,half=bottom,shape=straight": 2923,
@@ -3423,7 +3467,8 @@
     "minecraft:smooth_red_sandstone": 2963,
     "minecraft:smooth_red_sandstone_slab": {
         "type=bottom": 2964,
-        "type=top": 2965
+        "type=top": 2965,
+        "type=double": 2963
     },
     "minecraft:smooth_red_sandstone_stairs": {
         "facing=north,half=bottom,shape=straight": 2966,
@@ -3470,7 +3515,8 @@
     "minecraft:smooth_sandstone": 3006,
     "minecraft:smooth_sandstone_slab": {
         "type=bottom": 3007,
-        "type=top": 3008
+        "type=top": 3008,
+        "type=double": 3006
     },
     "minecraft:smooth_sandstone_stairs": {
         "facing=north,half=bottom,shape=straight": 3009,
@@ -3517,7 +3563,8 @@
     "minecraft:smooth_stone": 3049,
     "minecraft:smooth_stone_slab": {
         "type=bottom": 3050,
-        "type=top": 3051
+        "type=top": 3051,
+        "type=double": 3049
     },
     "minecraft:snow": 3052,
     "minecraft:snow_block": 3053,
@@ -3579,7 +3626,8 @@
     "minecraft:spruce_sign": 3091,
     "minecraft:spruce_slab": {
         "type=bottom": 3092,
-        "type=top": 3093
+        "type=top": 3093,
+        "type=double": 3088
     },
     "minecraft:spruce_stairs": {
         "facing=north,half=bottom,shape=straight": 3094,
@@ -3662,7 +3710,8 @@
     "minecraft:stone": 3162,
     "minecraft:stone_brick_slab": {
         "type=bottom": 3163,
-        "type=top": 3164
+        "type=top": 3164,
+        "type=double": 3206
     },
     "minecraft:stone_brick_stairs": {
         "facing=north,half=bottom,shape=straight": 3165,
@@ -3725,7 +3774,8 @@
     "minecraft:stone_pressure_plate": 3215,
     "minecraft:stone_slab": {
         "type=bottom": 3216,
-        "type=top": 3217
+        "type=top": 3217,
+        "type=double": 3162
     },
     "minecraft:stone_stairs": {
         "facing=north,half=bottom,shape=straight": 3218,
@@ -3961,7 +4011,8 @@
     "minecraft:warped_sign": 3381,
     "minecraft:warped_slab": {
         "type=bottom": 3382,
-        "type=top": 3383
+        "type=top": 3383,
+        "type=double": 3378
     },
     "minecraft:warped_stairs": {
         "facing=north,half=bottom,shape=straight": 3384,
@@ -4043,7 +4094,8 @@
     "minecraft:waxed_cut_copper": 3453,
     "minecraft:waxed_cut_copper_slab": {
         "type=bottom": 3454,
-        "type=top": 3455
+        "type=top": 3455,
+        "type=double": 3453
     },
     "minecraft:waxed_cut_copper_stairs": {
         "facing=north,half=bottom,shape=straight": 3456,
@@ -4091,7 +4143,8 @@
     "minecraft:waxed_exposed_cut_copper": 3497,
     "minecraft:waxed_exposed_cut_copper_slab": {
         "type=bottom": 3498,
-        "type=top": 3499
+        "type=top": 3499,
+        "type=double": 3497
     },
     "minecraft:waxed_exposed_cut_copper_stairs": {
         "facing=north,half=bottom,shape=straight": 3500,
@@ -4139,7 +4192,8 @@
     "minecraft:waxed_oxidized_cut_copper": 3541,
     "minecraft:waxed_oxidized_cut_copper_slab": {
         "type=bottom": 3542,
-        "type=top": 3543
+        "type=top": 3543,
+        "type=double": 3541
     },
     "minecraft:waxed_oxidized_cut_copper_stairs": {
         "facing=north,half=bottom,shape=straight": 3544,
@@ -4187,7 +4241,8 @@
     "minecraft:waxed_weathered_cut_copper": 3585,
     "minecraft:waxed_weathered_cut_copper_slab": {
         "type=bottom": 3586,
-        "type=top": 3587
+        "type=top": 3587,
+        "type=double": 3585
     },
     "minecraft:waxed_weathered_cut_copper_stairs": {
         "facing=north,half=bottom,shape=straight": 3588,
@@ -4235,7 +4290,8 @@
     "minecraft:weathered_cut_copper": 3629,
     "minecraft:weathered_cut_copper_slab": {
         "type=bottom": 3630,
-        "type=top": 3631
+        "type=top": 3631,
+        "type=double": 3629
     },
     "minecraft:weathered_cut_copper_stairs": {
         "facing=north,half=bottom,shape=straight": 3632,
