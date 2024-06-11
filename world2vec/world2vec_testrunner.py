@@ -1,22 +1,15 @@
 import pandas as pd
 import json
-import time
-import os, shutil
+import os
 from dataclasses import dataclass, field
 from typing import Optional, List
 from itertools import product
-import re
-import traceback
 from world2vec import World2Vec
-import sys
 import subprocess
 import traceback
-import zipfile
 from loguru import logger
 import numpy as np
 import h5py
-import glob
-import patoolib
 import json
 import h5py
 import sys 
@@ -153,12 +146,17 @@ def main():
     logger.info("Build npy array for " + build_name  + " is ready.")
 
     # Integerize the numpy array, instead of doing back-and-forth conversion 
-    integerized_build = convert_block_names_to_integers(build_npy_array) 
+    integerized_build = convert_block_names_to_integers(build_npy_array)
+    for x in integerized_build:
+        for y in x:
+            for z in y:
+                if z != 102:
+                    print(z)
     logger.info("Integerized build npy array for " + build_name  + " is ready.")
 
     # Get HDF5 file from numpy array
     with h5py.File(hdf5_filepath, "w") as file:
-        file.create_dataset(os.path.split(hdf5_filepath)[-1], data=build_npy_array)
+        file.create_dataset(os.path.split(hdf5_filepath)[-1], data=integerized_build)
     if not os.path.exists(hdf5_filepath):
         logger.error("HDF5 for " + build_name + " was not created.")
     else: 
