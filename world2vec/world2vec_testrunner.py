@@ -158,7 +158,7 @@ def main():
 
     # Get HDF5 file from numpy array
     with h5py.File(hdf5_filepath, "w") as file:
-        file.create_dataset(os.path.split(hdf5_filepath)[-1], data=build_npy_array)
+        file.create_dataset(os.path.split(hdf5_filepath)[-1], data=integerized_build)
     if not os.path.exists(hdf5_filepath):
         logger.error("HDF5 for " + build_name + " was not created.")
     else: 
