@@ -308,7 +308,7 @@ class World2Vec:
             data = np.array([(chunk.x, chunk.z) for chunk in build_chunks])
 
             # Apply DBSCAN clustering
-            dbscan = DBSCAN(eps = 5, min_samples = 5).fit(data)
+            dbscan = DBSCAN(eps=5, min_samples=5).fit(data)
             labels = dbscan.labels_
 
             # Get the label of the main cluster
