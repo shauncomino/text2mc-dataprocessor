@@ -5,6 +5,8 @@ import os, shutil
 from dataclasses import dataclass, field
 from typing import Optional, List
 import re
+from loguru import logger
+from itertools import product
 import traceback
 from world2vec import World2Vec
 import sys
@@ -16,7 +18,6 @@ import h5py
 import glob
 import patoolib
 import json
-import h5py
 
 
 @dataclass
@@ -27,14 +28,26 @@ class world2vecDriverConfig:
     PROCESSED_BUILDS_FOLDER: str = None
     """ Processed .hdf5 builds """
 
-    BLOCK_JSON_PATH: str = None
-    """ Path to the JSON blocks path """
-
     BLOCK_TO_TOKEN_JSON_PATH: str = None
     """ Path to the JSON block name to token lookup file """
 
+    NATURAL_BLOCKS_PATH: str = None
+    """ Path to the .txt file that delineates the naturally spawning blocks """
+
+    JAR_RUNNER_PATH: str = None
+
+    cwd: str = os.path.dirname(os.path.abspath(__file__))
+
+    # Not in vocab token
+    NIV_TOK = 4000
+
     def __post_init__(self):
 
+        if not self.NATURAL_BLOCKS_PATH or not os.path.exists(self.NATURAL_BLOCKS_PATH):
+            self.NATURAL_BLOCKS_PATH = os.path.join(self.cwd, "natural_blocks.txt")
+
+        if not self.JAR_RUNNER_PATH or not os.path.exists(self.JAR_RUNNER_PATH):
+            self.JAR_RUNNER_PATH = os.path.join(self.cwd, "schematic-loader.jar")
         if not self.DOWNLOADED_BUILDS_FOLDER or not os.path.exists(
             self.DOWNLOADED_BUILDS_FOLDER
         ):
@@ -50,18 +63,18 @@ class world2vecDriverConfig:
                 os.path.abspath("./"), "vectorized_builds"
             )
 
-        if self.BLOCK_JSON_PATH is None or not os.path.exists(self.BLOCK_JSON_PATH):
-            print("Block JSON not passed or invalid path, making new .json")
-
         if self.BLOCK_TO_TOKEN_JSON_PATH is None or not os.path.exists(
             self.BLOCK_TO_TOKEN_JSON_PATH
         ):
-            print("Block to token JSON not passed or invalid path.")
-
-        if self.BLOCK_TO_TOKEN_JSON_PATH is None or not os.path.exists(
-            self.BLOCK_TO_TOKEN_JSON_PATH
-        ):
-            print("Block to token JSON not passed or invalid path.")
+            try:
+                this_running_python_file_path = os.path.abspath(__file__)
+                cwd = os.path.dirname(this_running_python_file_path)
+                block2tok_filepath = os.path.join(cwd, "block2tok.json")
+                with open(block2tok_filepath, "r") as file:
+                    self.block2tok = json.load(file)
+            except:
+                print("Couldn't load block2tok.json file")
+                exit(1)
 
         os.makedirs(self.PROCESSED_BUILDS_FOLDER, exist_ok=True)
 
@@ -181,8 +194,7 @@ class world2vecDriver:
                         print(f"Schempaths: {path}")
                         self.convert_schemfile_to_json(path, temp_json_path)
                         npy_array = self.convert_json_to_npy(temp_json_path)
-                        vfunc_integerize = np.vectorize(self.integerize_build)
-                        npy_array = vfunc_integerize(npy_array)
+                        npy_array = self.convert_block_names_to_integers(npy_array)
                         self.convert_vector_to_hdf5(npy_array, hdf5_path)
                         if os.path.exists(hdf5_path):
                             new_paths.append(hdf5_path)
@@ -222,31 +234,13 @@ class world2vecDriver:
             except Exception as e:
                 print("Failed to delete %s. Reason: %s" % (file_path, e))
 
-    def integerize_build(self, block_name_array):
-        block2tok_lookup = dict()
-
-        integerized_array = np.empty(block_name_array.shape, dtype=int)
-        with open(self.cfg.BLOCK_TO_TOKEN_JSON_PATH, "r") as file:
-            block2tok_lookup = json.load(file)
-
-        for i in range(block_name_array.shape[0]):
-            for j in range(block_name_array.shape[1]):
-                for k in range(block_name_array.shape[2]):
-                    block_name = block_name_array[i, j, k]
-
-                    token = block2tok_lookup.get(block_name, -1)
-                    integerized_array[i, j, k] = token
-                    print("Block name: {}, Token: {}".format(block_name, token))
-
-        return integerized_array
-
     def convert_build_to_schemfile(self, folder_or_build_path, processed_file_prefix):
         regions_dir = World2Vec.find_regions_dir(folder_or_build_path)[0]
         return World2Vec.get_build(
             regions_dir,
             self.cfg.PROCESSED_BUILDS_FOLDER,
             processed_file_prefix,
-            natural_blocks_path=r"C:\Projects\text2mc\SCRUM-whatever\text2mc-dataprocessor\world2vec\natural_blocks.txt",
+            natural_blocks_path=self.cfg.NATURAL_BLOCKS_PATH,
         )
 
     def convert_schemfile_to_json(self, schem_file_path: str, json_export_path: str):
@@ -255,7 +249,7 @@ class world2vecDriver:
             [
                 "java",
                 "-jar",
-                r"C:\Projects\text2mc\New folder\text2mc-dataprocessor\world2vec\schematic-loader.jar",
+                self.cfg.JAR_RUNNER_PATH,
                 schem_file_path,
                 json_export_path,
             ]
@@ -266,7 +260,13 @@ class world2vecDriver:
 
     def convert_vector_to_hdf5(self, vector, path):
         with h5py.File(path, "w") as file:
-            file.create_dataset(os.path.split(path)[-1], data=vector)
+            file.create_dataset(
+                os.path.split(path)[-1],
+                data=vector,
+                dtype="uint16",  # Specify the data type as unsigned 16-bit integer
+                compression="gzip",  # Use gzip compression
+                compression_opts=9,  # Maximum compression level
+            )
 
     # Used to create processed and temporary directories
     def create_directory(self, dir_path: str):
@@ -314,6 +314,71 @@ class world2vecDriver:
             # Create a dataset in the HDF5 file with the same name as the file name and write the array data
             f.create_dataset(output_file_prefix, data=world_array)
 
+    def find_closest_match(self, query, options):
+        query_words = set(query)
+
+        best_option = None
+        max_matching = 0
+
+        for option in options:
+            option_words = set(option.split(","))
+            shared_words = query_words.intersection(option_words)
+            matching = len(shared_words)
+
+            if matching > max_matching:
+                best_option = option
+                max_matching = matching
+
+        return best_option
+
+    def convert_block_names_to_integers(self, build_array: np.ndarray):
+        block2tok = self.cfg.block2tok
+        x_dim, y_dim, z_dim = build_array.shape
+        integerized_build = np.zeros((x_dim, y_dim, z_dim), dtype=np.uint16)
+
+        for x, y, z in product(range(0, x_dim), range(0, y_dim), range(0, z_dim)):
+            blockname = build_array[x, y, z]
+            token = None
+
+            # If there are block states, separate from block name
+            if "[" in blockname:
+                blockstates = blockname.replace("[", ",").replace("]", "").split(",")
+                blockname = blockstates.pop(0)
+
+            value = block2tok.get(blockname)
+
+            # Blockname maps to nothing
+            if value is None:
+                logger.error("Couldn't find: \"" + blockname + '" in block2tok')
+                token = self.cfg.NIV_TOK
+
+            # Blockname maps to dictionary
+            elif isinstance(value, dict):
+                standard_blockstates = self.find_closest_match(
+                    blockstates, value.keys()
+                )
+
+                if standard_blockstates is None:
+                    standard_blockstates = list(value.keys())[0]
+                    logger.warning(
+                        "Couldn't find blockstates for blockname: "
+                        + blockname
+                        + " with blockstates: "
+                        + str(blockstates)
+                        + " . Using default: "
+                        + str(standard_blockstates)
+                    )
+
+                token = value.get(standard_blockstates)
+
+            # Blockname maps directly to token
+            else:
+                token = value
+
+            integerized_build[x, y, z] = token
+
+        return integerized_build
+
 
 def main():
     # Code to load from command line parameters
@@ -337,15 +402,6 @@ def main():
 
     # world2vecdriver.process_batch(source_df_path, start_index, end_index, batch_num)
 
-    # Code to test the driver manually
-
-    config = world2vecDriverConfig(
-        DOWNLOADED_BUILDS_FOLDER=r"C:\Projects\text2mc\builds",
-        PROCESSED_BUILDS_FOLDER=r"C:\Projects\text2mc\processed_builds",
-        BLOCK_JSON_PATH=r"C:\Projects\text2mc\SCRUM-whatever\text2mc-dataprocessor\world2vec\block_ints.json",
-    )
-    world2vecdriver = world2vecDriver(cfg=config)
-
     # world2vecdriver.process_batch(
     #     dataframe_path=r"C:\Users\shaun\OneDrive\Desktop\personal\CS classes\CS classes\COP4934\text2mc\text2mc-dataprocessor\projects_df_processed.csv",
     #     start_index=0,
@@ -353,8 +409,16 @@ def main():
     #     batch_num=1,
     # )
 
+    # Code to test the driver manually
+
+    config = world2vecDriverConfig(
+        DOWNLOADED_BUILDS_FOLDER=r"D:\builds",
+        PROCESSED_BUILDS_FOLDER=r"D:\processed_builds_compressed",
+    )
+    world2vecdriver = world2vecDriver(cfg=config)
+
     projects_df = pd.read_csv(
-        r"C:\Projects\text2mc\SCRUM-whatever\text2mc-dataprocessor\projects_df_processed.csv"
+        r"C:\Users\shaun\OneDrive\Desktop\personal\CS classes\CS classes\COP4934\text2mc\text2mc-dataprocessor\projects_df_processed.csv"
     )
 
     num_to_process = 20
@@ -366,7 +430,6 @@ def main():
         world2vecdriver.process_build(
             row["FILENAME"],
             f"schem_test_{i}",
-            r"C:\Projects\text2mc\SCRUM-whatever\text2mc-dataprocessor\world2vec",
             straight_to_hdf5=True,
         )
     """
