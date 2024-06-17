@@ -151,7 +151,7 @@ class World2Vec:
                 if region.data:
                     # Set search sections
                     inhabited_time_exist = True
-                    search_sections = range(16, -5, -1)
+                    search_sections = range(15, -5, -1)
                     # Retrieve each chunk in the region
                     for x in range(0, 32):
                         for z in range(0, 32):
