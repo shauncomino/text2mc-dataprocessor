@@ -113,13 +113,6 @@ class world2vecDriver:
                     temp_dir_path=temp_dir_path,
                 )
                 dataframe.at[i, "PROCESSED_PATHS"] = processed_paths
-                for path in processed_paths:
-                    self.convert_schemfile_to_hdf5(
-                        path,
-                        temp_dir_path,
-                        os.path.join(temp_dir_path, unique_name),
-                        unique_name,
-                    )
             except Exception as e:
                 print(e)
                 traceback.format_exc()
