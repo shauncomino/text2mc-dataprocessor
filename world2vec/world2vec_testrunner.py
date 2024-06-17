@@ -1,25 +1,13 @@
-import pandas as pd
 import json
-import time
-import os, shutil
-from dataclasses import dataclass, field
-from typing import Optional, List
+import os
 from itertools import product
-import re
-import traceback
 from world2vec import World2Vec
-import sys
 import subprocess
-import traceback
-import zipfile
 from loguru import logger
 import numpy as np
 import h5py
-import glob
-import patoolib
 import json
 import h5py
-import sys
 
 # Not in vocab token
 NIV_TOK = 4000
@@ -107,7 +95,7 @@ def main():
     """
 
     builds_raw_dir = os.path.join(cwd, "builds_raw")
-    build_name = "Boulevardier's_Sanctuary_of_All_Times"  # This is the name of the build folder for your current run
+    build_name = "Boulevardier's_Shophouse"  # This is the name of the build folder for your current run
     region_dir = os.path.join(builds_raw_dir, build_name, "region")
     print("region dir: " + region_dir)
 

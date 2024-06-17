@@ -528,7 +528,7 @@ class World2Vec:
             save_dir, build_name + "_" + str(build_no), mcschematic.Version.JE_1_20_1
         )
         schem_file_path = os.path.join(
-            save_dir, build_name + "_" + str(build_no) + ".schematic"
+            save_dir, build_name + "_" + str(build_no) + ".schem"
         )
 
         schem_paths.append(schem_file_path)

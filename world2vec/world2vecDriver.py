@@ -146,6 +146,10 @@ class world2vecDriver:
                 self.cfg.DOWNLOADED_BUILDS_FOLDER, filename
             )
             if filename.endswith(".zip") or filename.endswith(".rar"):
+                # Names of .zip and .rar files have '+' instead of spaces, which causes them not to be found
+                #unprocessed_build_path = os.path.join(
+                #    self.cfg.DOWNLOADED_BUILDS_FOLDER, filename.replace('+', ' ')
+                #)
                 self.extract_archive_to_temporary_directory(
                     unprocessed_build_path, temp_dir_path
                 )
@@ -412,13 +416,13 @@ def main():
     # Code to test the driver manually
 
     config = world2vecDriverConfig(
-        DOWNLOADED_BUILDS_FOLDER=r"D:\builds",
-        PROCESSED_BUILDS_FOLDER=r"D:\processed_builds_compressed",
+        DOWNLOADED_BUILDS_FOLDER=r"C:\Users\skepp\source\repos\text2mc-dataprocessor\world2vec\builds_raw",
+        PROCESSED_BUILDS_FOLDER=r"C:\Users\skepp\source\repos\text2mc-dataprocessor\world2vec\builds_hdf5",
     )
     world2vecdriver = world2vecDriver(cfg=config)
 
     projects_df = pd.read_csv(
-        r"C:\Users\shaun\OneDrive\Desktop\personal\CS classes\CS classes\COP4934\text2mc\text2mc-dataprocessor\projects_df_processed.csv"
+        r"C:\Users\skepp\source\repos\text2mc-dataprocessor\projects_df_processed.csv"
     )
 
     num_to_process = 5
