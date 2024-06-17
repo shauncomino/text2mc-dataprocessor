@@ -140,9 +140,9 @@ class world2vecDriver:
             )
             if filename.endswith(".zip") or filename.endswith(".rar"):
                 # Names of .zip and .rar files have '+' instead of spaces, which causes them not to be found
-                #unprocessed_build_path = os.path.join(
-                #    self.cfg.DOWNLOADED_BUILDS_FOLDER, filename.replace('+', ' ')
-                #)
+                unprocessed_build_path = os.path.join(
+                    self.cfg.DOWNLOADED_BUILDS_FOLDER, filename.replace('+', ' ')
+                )
                 self.extract_archive_to_temporary_directory(
                     unprocessed_build_path, temp_dir_path
                 )
