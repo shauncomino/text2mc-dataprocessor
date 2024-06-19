@@ -191,7 +191,7 @@ class world2vecDriver:
                         print(f"Schempaths: {path}")
                         self.convert_schemfile_to_json(path, temp_json_path)
                         npy_array = self.convert_json_to_npy(temp_json_path)
-                        npy_array = self.convert_block_names_to_integers(npy_array)
+                        npy_array = self.convert_block_names_to_integers(npy_array, processed_file_name)
                         self.convert_vector_to_hdf5(npy_array, hdf5_path)
                         if os.path.exists(hdf5_path):
                             new_paths.append(hdf5_path)
@@ -328,10 +328,12 @@ class world2vecDriver:
 
         return best_option
 
-    def convert_block_names_to_integers(self, build_array: np.ndarray):
+    def convert_block_names_to_integers(self, build_array: np.ndarray, filename):
         block2tok = self.cfg.block2tok
         x_dim, y_dim, z_dim = build_array.shape
         integerized_build = np.zeros((x_dim, y_dim, z_dim), dtype=np.uint16)
+        missing_blocks = []
+        count = 0
 
         for x, y, z in product(range(0, x_dim), range(0, y_dim), range(0, z_dim)):
             blockname = build_array[x, y, z]
@@ -348,7 +350,10 @@ class world2vecDriver:
             if value is None:
                 logger.error("Couldn't find: \"" + blockname + '" in block2tok')
                 token = self.cfg.NIV_TOK
-
+                if blockname not in missing_blocks:
+                    missing_blocks.append(blockname)
+                    count += 1                  
+            
             # Blockname maps to dictionary
             elif isinstance(value, dict):
                 standard_blockstates = self.find_closest_match(
@@ -373,31 +378,34 @@ class world2vecDriver:
                 token = value
 
             integerized_build[x, y, z] = token
-
+        if(count != 0):
+            with open("/lustre/fs1/groups/jaedo/world2vec/missing_blocks/" + filename + ".json",'w') as f:
+                json.dump(missing_blocks,f)
         return integerized_build
 
 
 def main():
     # Code to load from command line parameters
 
-    # args = sys.argv
-    # source_df_path = args[1]
-    # source_builds_dir = args[2]
-    # processed_builds_folder = args[3]
-    # start_index = args[4]
-    # end_index = args[5]
-    # batch_num = args[6]
-    # print(f"Source Dataframe Path: {source_df_path}")
-    # print(f"Source Unprocessed Builds Directory: {source_builds_dir}")
-    # print(f"Processed Builds Directory: {processed_builds_folder}")
-    # print(f"Starting Index: {start_index}")
-    # print(f"Ending Index: {end_index}")
-    # print(f"Batch Number: {batch_num}")
+    args = sys.argv
+    source_df_path = args[1]
+    source_builds_dir = args[2]
+    processed_builds_folder = args[3]
+    batch_num = args[4]
+    start_index = (int(batch_num) - 1) * 100
+    end_index =  int(batch_num) * 100 - 1
+    
+    print(f"Source Dataframe Path: {source_df_path}")
+    print(f"Source Unprocessed Builds Directory: {source_builds_dir}")
+    print(f"Processed Builds Directory: {processed_builds_folder}")
+    print(f"Starting Index: {start_index}")
+    print(f"Ending Index: {end_index}")
+    print(f"Batch Number: {batch_num}")
 
-    # config = world2vecDriverConfig(DOWNLOADED_BUILDS_FOLDER=source_builds_dir, PROCESSED_BUILDS_FOLDER=processed_builds_folder)
-    # world2vecdriver = world2vecDriver(cfg=config)
+    config = world2vecDriverConfig(DOWNLOADED_BUILDS_FOLDER=source_builds_dir, PROCESSED_BUILDS_FOLDER=processed_builds_folder)
+    world2vecdriver = world2vecDriver(cfg=config)
 
-    # world2vecdriver.process_batch(source_df_path, start_index, end_index, batch_num)
+    world2vecdriver.process_batch(source_df_path, start_index, end_index, batch_num)
 
     # world2vecdriver.process_batch(
     #     dataframe_path=r"C:\Users\shaun\OneDrive\Desktop\personal\CS classes\CS classes\COP4934\text2mc\text2mc-dataprocessor\projects_df_processed.csv",
@@ -408,17 +416,17 @@ def main():
 
     # Code to test the driver manually
 
-    config = world2vecDriverConfig(
-        DOWNLOADED_BUILDS_FOLDER=r"C:\Users\skepp\source\repos\text2mc-dataprocessor\world2vec\builds_raw",
-        PROCESSED_BUILDS_FOLDER=r"C:\Users\skepp\source\repos\text2mc-dataprocessor\world2vec\builds_hdf5",
-    )
-    world2vecdriver = world2vecDriver(cfg=config)
+    # config = world2vecDriverConfig(
+    #     DOWNLOADED_BUILDS_FOLDER=r"C:\Users\skepp\source\repos\text2mc-dataprocessor\world2vec\builds_raw",
+    #     PROCESSED_BUILDS_FOLDER=r"C:\Users\skepp\source\repos\text2mc-dataprocessor\world2vec\builds_hdf5",
+    # )
+    # world2vecdriver = world2vecDriver(cfg=config)
 
-    projects_df = pd.read_csv(
-        r"C:\Users\skepp\source\repos\text2mc-dataprocessor\projects_df_processed.csv"
-    )
+    # projects_df = pd.read_csv(
+    #     r"C:\Users\skepp\source\repos\text2mc-dataprocessor\projects_df_processed.csv"
+    # )
 
-    num_to_process = 5
+    # num_to_process = 5
 
     # Process .schem files
     # print("Processings .schem files")
@@ -431,12 +439,12 @@ def main():
     #     )
 
     # Process .zip archives
-    print("Processing .zip files")
-    zip_df = projects_df[projects_df["SUFFIX"] == ".zip"]
-    for i, row in zip_df[0:num_to_process].iterrows():
-        world2vecdriver.process_build(
-            row["FILENAME"], f"zip_test_{i}", straight_to_hdf5=True
-        )
+    # print("Processing .zip files")
+    # zip_df = projects_df[projects_df["SUFFIX"] == ".zip"]
+    # for i, row in zip_df[0:num_to_process].iterrows():
+    #     world2vecdriver.process_build(
+    #         row["FILENAME"], f"zip_test_{i}", straight_to_hdf5=True
+    #     )
 
     # Process .schematic files
     # print("Processing .schematic files")
@@ -447,14 +455,14 @@ def main():
     #     )
 
     # Process .rar archives
-    print("Processing .rar files")
-    rar_df = projects_df[projects_df["SUFFIX"] == ".rar"]
-    for i, row in rar_df[0:num_to_process].iterrows():
-        world2vecdriver.process_build(
-            row["FILENAME"],
-            f"rar_test{i}",
-            straight_to_hdf5=True,
-        )
+    # print("Processing .rar files")
+    # rar_df = projects_df[projects_df["SUFFIX"] == ".rar"]
+    # for i, row in rar_df[0:num_to_process].iterrows():
+    #     world2vecdriver.process_build(
+    #         row["FILENAME"],
+    #         f"rar_test{i}",
+    #         straight_to_hdf5=True,
+    #     )
 
 
 if __name__ == "__main__":
