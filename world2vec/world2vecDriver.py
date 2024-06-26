@@ -5,7 +5,6 @@ import os, shutil
 from dataclasses import dataclass, field
 from typing import Optional, List
 import re
-from loguru import logger
 from itertools import product
 import traceback
 from world2vec import World2Vec
@@ -97,7 +96,7 @@ class world2vecDriver:
         """
         dataframe = pd.read_csv(dataframe_path, on_bad_lines="warn")
         dataframe["PROCESSED_PATHS"] = pd.Series(dtype="object")
-        temp_dir_name = f"temp"
+        temp_dir_name = f"temp" + str(batch_num)
         temp_dir_path = os.path.join(
             os.path.dirname(self.cfg.PROCESSED_BUILDS_FOLDER), temp_dir_name
         )
@@ -122,7 +121,7 @@ class world2vecDriver:
         filename: str,
         processed_file_name: str = "temp_schem",
         temp_dir_path: str = "temp",
-        straight_to_hdf5=False,
+        straight_to_hdf5=True,
     ) -> List[str]:
         """
         Process a single build file and return the processed paths.
@@ -140,16 +139,17 @@ class world2vecDriver:
             )
             if filename.endswith(".zip") or filename.endswith(".rar"):
                 # Names of .zip and .rar files have '+' instead of spaces, which causes them not to be found
-                unprocessed_build_path = os.path.join(
-                    self.cfg.DOWNLOADED_BUILDS_FOLDER, filename.replace('+', ' ')
-                )
+                # unprocessed_build_path = os.path.join(
+                #     self.cfg.DOWNLOADED_BUILDS_FOLDER, filename.replace('+', ' ')
+                # )
+                temp_extract = os.path.join(temp_dir_path, "extract")
                 self.extract_archive_to_temporary_directory(
-                    unprocessed_build_path, temp_dir_path
+                    unprocessed_build_path, temp_extract
                 )
 
                 # Search all files within the temporary directory once
                 all_files = glob.glob(
-                    os.path.join(temp_dir_path, "**/*"), recursive=True
+                    os.path.join(temp_extract, "**/*"), recursive=True
                 )
 
                 schems_paths = []
@@ -168,7 +168,7 @@ class world2vecDriver:
                 # If neither '.schem' nor '.schematic' files are found, but '.mca' files are, convert them
                 if len(mca_paths) > 0 and len(schems_paths) == 0:
                     schem_paths = self.convert_build_to_schemfile(
-                        temp_dir_path, f"build_{processed_file_name}"
+                        temp_extract, f"build_{processed_file_name}"
                     )
                     processed_paths = schem_paths
 
@@ -205,7 +205,7 @@ class world2vecDriver:
                 processed_paths = new_paths
 
             print(f"Processed paths: {processed_paths}")
-            self.delete_directory_contents(temp_dir_path)
+            #self.delete_directory_contents(temp_dir_path)
 
         except Exception as e:
             print(f"Error processing build {filename}: {e}")
@@ -232,13 +232,15 @@ class world2vecDriver:
                 print("Failed to delete %s. Reason: %s" % (file_path, e))
 
     def convert_build_to_schemfile(self, folder_or_build_path, processed_file_prefix):
-        regions_dir = World2Vec.find_regions_dir(folder_or_build_path)[0]
-        return World2Vec.get_build(
-            regions_dir,
-            self.cfg.PROCESSED_BUILDS_FOLDER,
-            processed_file_prefix,
-            natural_blocks_path=self.cfg.NATURAL_BLOCKS_PATH,
-        )
+        try:
+            regions_dir = World2Vec.find_regions_dir(folder_or_build_path)[0]
+            if not regions_dir:
+                raise ValueError("No region files found.")
+            else:
+                return World2Vec.get_build(regions_dir,self.cfg.PROCESSED_BUILDS_FOLDER,processed_file_prefix,natural_blocks_path=self.cfg.NATURAL_BLOCKS_PATH,)
+        except Exception as e:
+            print("Found no region files:", str(e))
+
 
     def convert_schemfile_to_json(self, schem_file_path: str, json_export_path: str):
         print("Calling subprocess")
@@ -348,7 +350,6 @@ class world2vecDriver:
 
             # Blockname maps to nothing
             if value is None:
-                logger.error("Couldn't find: \"" + blockname + '" in block2tok')
                 token = self.cfg.NIV_TOK
                 if blockname not in missing_blocks:
                     missing_blocks.append(blockname)
@@ -362,14 +363,6 @@ class world2vecDriver:
 
                 if standard_blockstates is None:
                     standard_blockstates = list(value.keys())[0]
-                    logger.warning(
-                        "Couldn't find blockstates for blockname: "
-                        + blockname
-                        + " with blockstates: "
-                        + str(blockstates)
-                        + " . Using default: "
-                        + str(standard_blockstates)
-                    )
 
                 token = value.get(standard_blockstates)
 
@@ -392,8 +385,8 @@ def main():
     source_builds_dir = args[2]
     processed_builds_folder = args[3]
     batch_num = args[4]
-    start_index = (int(batch_num) - 1) * 100
-    end_index =  int(batch_num) * 100 - 1
+    start_index = (int(batch_num) - 1) * 10
+    end_index =  int(batch_num) * 10 - 1
     
     print(f"Source Dataframe Path: {source_df_path}")
     print(f"Source Unprocessed Builds Directory: {source_builds_dir}")
