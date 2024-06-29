@@ -115,13 +115,14 @@ class world2vecDriver:
             except Exception as e:
                 print(e)
                 traceback.format_exc()
+        self.delete_directory(temp_dir_path)
 
     def process_build(
         self,
         filename: str,
         processed_file_name: str = "temp_schem",
         temp_dir_path: str = "temp",
-        straight_to_hdf5=True,
+        straight_to_hdf5=False,
     ) -> List[str]:
         """
         Process a single build file and return the processed paths.
@@ -142,14 +143,13 @@ class world2vecDriver:
                 # unprocessed_build_path = os.path.join(
                 #     self.cfg.DOWNLOADED_BUILDS_FOLDER, filename.replace('+', ' ')
                 # )
-                temp_extract = os.path.join(temp_dir_path, "extract")
                 self.extract_archive_to_temporary_directory(
-                    unprocessed_build_path, temp_extract
+                    unprocessed_build_path, temp_dir_path
                 )
 
                 # Search all files within the temporary directory once
                 all_files = glob.glob(
-                    os.path.join(temp_extract, "**/*"), recursive=True
+                    os.path.join(temp_dir_path, "**/*"), recursive=True
                 )
 
                 schems_paths = []
@@ -168,7 +168,7 @@ class world2vecDriver:
                 # If neither '.schem' nor '.schematic' files are found, but '.mca' files are, convert them
                 if len(mca_paths) > 0 and len(schems_paths) == 0:
                     schem_paths = self.convert_build_to_schemfile(
-                        temp_extract, f"build_{processed_file_name}"
+                        temp_dir_path, f"build_{processed_file_name}"
                     )
                     processed_paths = schem_paths
 
@@ -232,14 +232,13 @@ class world2vecDriver:
                 print("Failed to delete %s. Reason: %s" % (file_path, e))
 
     def convert_build_to_schemfile(self, folder_or_build_path, processed_file_prefix):
-        try:
-            regions_dir = World2Vec.find_regions_dir(folder_or_build_path)[0]
-            if not regions_dir:
-                raise ValueError("No region files found.")
-            else:
-                return World2Vec.get_build(regions_dir,self.cfg.PROCESSED_BUILDS_FOLDER,processed_file_prefix,natural_blocks_path=self.cfg.NATURAL_BLOCKS_PATH,)
-        except Exception as e:
-            print("Found no region files:", str(e))
+        regions_dir = World2Vec.find_regions_dir(folder_or_build_path)[0]
+        return World2Vec.get_build(
+            regions_dir,
+            self.cfg.PROCESSED_BUILDS_FOLDER,
+            processed_file_prefix,
+            natural_blocks_path=self.cfg.NATURAL_BLOCKS_PATH,
+        )
 
 
     def convert_schemfile_to_json(self, schem_file_path: str, json_export_path: str):
