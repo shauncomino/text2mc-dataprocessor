@@ -115,7 +115,7 @@ class world2vecDriver:
             except Exception as e:
                 print(e)
                 traceback.format_exc()
-        self.delete_directory(temp_dir_path)
+        shutil.rmtree(temp_dir_path)
 
     def process_build(
         self,
@@ -134,6 +134,9 @@ class world2vecDriver:
         processed_paths = []
         if not os.path.exists(temp_dir_path):
             os.mkdir(temp_dir_path)
+
+        temp_extract = os.path.join(temp_dir_path, "extract")
+
         try:
             unprocessed_build_path = os.path.join(
                 self.cfg.DOWNLOADED_BUILDS_FOLDER, filename
@@ -144,12 +147,12 @@ class world2vecDriver:
                 #     self.cfg.DOWNLOADED_BUILDS_FOLDER, filename.replace('+', ' ')
                 # )
                 self.extract_archive_to_temporary_directory(
-                    unprocessed_build_path, temp_dir_path
+                    unprocessed_build_path, temp_extract
                 )
 
                 # Search all files within the temporary directory once
                 all_files = glob.glob(
-                    os.path.join(temp_dir_path, "**/*"), recursive=True
+                    os.path.join(temp_extract, "**/*"), recursive=True
                 )
 
                 schems_paths = []
@@ -168,7 +171,7 @@ class world2vecDriver:
                 # If neither '.schem' nor '.schematic' files are found, but '.mca' files are, convert them
                 if len(mca_paths) > 0 and len(schems_paths) == 0:
                     schem_paths = self.convert_build_to_schemfile(
-                        temp_dir_path, f"build_{processed_file_name}"
+                        temp_extract, f"build_{processed_file_name}"
                     )
                     processed_paths = schem_paths
 
@@ -205,7 +208,7 @@ class world2vecDriver:
                 processed_paths = new_paths
 
             print(f"Processed paths: {processed_paths}")
-            #self.delete_directory_contents(temp_dir_path)
+            self.delete_directory_contents(temp_extract)
 
         except Exception as e:
             print(f"Error processing build {filename}: {e}")
@@ -239,7 +242,6 @@ class world2vecDriver:
             processed_file_prefix,
             natural_blocks_path=self.cfg.NATURAL_BLOCKS_PATH,
         )
-
 
     def convert_schemfile_to_json(self, schem_file_path: str, json_export_path: str):
         print("Calling subprocess")

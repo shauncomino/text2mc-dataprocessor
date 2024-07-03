@@ -28,25 +28,18 @@ class World2Vec:
         return block
 
     # Finds the subdirectory containing region files
-    def find_regions_dir(dir: str) -> list:
-        dirs = glob.glob("**/*.mca", root_dir=dir, recursive=True)
-        paths = []
-        for d in dirs:
-            if "region" in d:
-                path = dir + "/"
-                for folder in d.split("\\"):
-                    path += folder
-                    if folder == "region":
-                        if (
-                            path not in paths
-                            and "DIM-1" not in path
-                            and "DIM1" not in path
-                        ):
-                            paths.append(path)
-                        break
-                    else:
-                        path += "/"
-        return paths
+    def find_regions_dir(directory: str) -> list:
+        folders_with_mca = []
+        # Walk through all directories and files in the given directory
+        for root, dirs, files in os.walk(directory):
+            # Skip Nether and End dimension folders
+            if "DIM-1" in root or "DIM1" in root:
+                continue
+            # Check if any file ends with .mca in the current directory
+            if any(file.endswith('.mca') for file in files):
+                # If so, add the current directory to the list
+                folders_with_mca.append(root)
+        return folders_with_mca
 
     @staticmethod
     def find_inhabited_time_exists(dir: str) -> bool:
@@ -122,8 +115,7 @@ class World2Vec:
     def get_build(
         dir: str, save_dir: str, build_name: str, natural_blocks_path: str = None
     ) -> List[str]:
-        print("Searching directory " + dir + "...")
-        # Read in the natural blocks to an array
+        print("Searching directories: " + dir)        # Read in the natural blocks to an array
         if natural_blocks_path is None:
             nb_file = open("natural_blocks.txt", "r")
         else:
