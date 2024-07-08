@@ -102,6 +102,8 @@ class world2vecDriver:
         )
         self.create_directory(temp_dir_path)
 
+        successes = 0
+
         for i, row in dataframe.iloc[start_index:end_index].iterrows():
             try:
                 unique_name = f"batch_{batch_num}_{str(i)}"
@@ -114,10 +116,12 @@ class world2vecDriver:
                 if not processed_paths:
                     continue
                 dataframe.at[i, "PROCESSED_PATHS"] = processed_paths
+                successes += 1
             except Exception as e:
                 print(e)
                 traceback.format_exc()
         shutil.rmtree(temp_dir_path)
+        print("Batch %d: %d builds successfully processed out of %d\n" % (batch_num, successes, end_index - start_index))
 
     def process_build(
         self,
