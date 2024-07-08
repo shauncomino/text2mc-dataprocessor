@@ -33,7 +33,7 @@ class World2Vec:
         # Walk through all directories and files in the given directory
         for root, dirs, files in os.walk(directory):
             # Skip Nether and End dimension folders
-            if "DIM-1" in root or "DIM1" in root:
+            if "DIM-1" in root or "DIM1" in root or "poi" in root:
                 continue
             # Check if any file ends with .mca in the current directory
             if any(file.endswith('.mca') for file in files):
