@@ -409,7 +409,7 @@ class World2Vec:
             level = -100
         for chunk in chunks:
             superflat, surface_section = World2Vec.find_surface_section(
-                chunk, min_range, 16, superflat
+                chunk, min_range, 15, superflat
             )
             all_surface_sections.append(surface_section)
         # Find the mode (most common) surface section among the build chunks
