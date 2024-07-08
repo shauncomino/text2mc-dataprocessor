@@ -111,6 +111,8 @@ class world2vecDriver:
                     processed_file_name=unique_name,
                     temp_dir_path=temp_dir_path,
                 )
+                if not processed_paths:
+                    continue
                 dataframe.at[i, "PROCESSED_PATHS"] = processed_paths
             except Exception as e:
                 print(e)
@@ -173,6 +175,8 @@ class world2vecDriver:
                     schem_paths = self.convert_build_to_schemfile(
                         temp_extract, f"build_{processed_file_name}"
                     )
+                    if schem_paths is None:
+                        return []
                     processed_paths = schem_paths
 
             elif filename.endswith(".schematic") or filename.endswith(".schem"):
