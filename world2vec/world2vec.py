@@ -213,7 +213,7 @@ class World2Vec:
                                             chunk, section=section
                                         ):
                                             block = World2Vec.convert_if_old(block)
-                                            if not anvil.Block.name(block).startswith(
+                                            if block != None and not anvil.Block.name(block).startswith(
                                                 "minecraft"
                                             ):
                                                 # This is a modded block, and we should skip the build
