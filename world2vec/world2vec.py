@@ -152,6 +152,8 @@ class World2Vec:
                             if chunk_data:
                                 try:
                                     chunk = anvil.Region.get_chunk(region, x, z)
+                                    if chunk.version and chunk.version < 2844:
+                                        search_sections = range(15, -1, -1)
                                 except Exception as e:
                                     print(
                                         "Error: Could not read chunk",
