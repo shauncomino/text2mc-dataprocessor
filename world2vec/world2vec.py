@@ -449,6 +449,8 @@ class World2Vec:
             all_ys.append(chunk_lowest_y)
 
         lowest_surface_y = int(sum(all_ys) / len(all_ys))
+        if lowest_surface_y < -64:
+            lowest_surface_y = -64
         if surface_section_mode != min_range + 1:
             lowest_surface_y -= 1
 
