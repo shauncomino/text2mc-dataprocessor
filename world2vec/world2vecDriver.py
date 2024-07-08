@@ -241,6 +241,7 @@ class world2vecDriver:
         return integerized_array
 
     def convert_build_to_schemfile(self, folder_or_build_path, processed_file_prefix):
+        print(folder_or_build_path)
         regions_dir = World2Vec.find_regions_dir(folder_or_build_path)[0]
         return World2Vec.get_build(
             regions_dir,

@@ -157,6 +157,8 @@ class World2Vec:
                         for z in range(0, 32):
                             # Region files need not contain 32x32 chunks, so we must check if the chunk exists
                             chunk_data = region.chunk_data(x, z)
+                            if chunk.version and chunk.version < 2844:
+                                search_sections = range(15, -1, -1)
                             if chunk_data:
                                 try:
                                     chunk = anvil.Region.get_chunk(region, x, z)
