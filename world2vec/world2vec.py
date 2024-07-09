@@ -181,8 +181,7 @@ class World2Vec:
                                     inhabited_time_exist = False
                                 # Check whether the chunk has been visited at all, if not we can skip checking it
                                 if (
-                                    inhabited_time >= inhabited_time_check
-                                    or inhabited_time_exist == False
+                                    inhabited_time_exist == False or inhabited_time >= inhabited_time_check
                                 ):
 
                                     superflat_mode = False
