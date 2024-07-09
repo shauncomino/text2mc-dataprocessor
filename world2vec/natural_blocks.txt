@@ -215,6 +215,7 @@ minecraft:crimson_roots
 minecraft:sand
 minecraft:red_sand
 minecraft:soul_sand
+minecraft:soul_lantern
 minecraft:sandstone
 minecraft:cut_sandstone
 minecraft:red_sandstone
