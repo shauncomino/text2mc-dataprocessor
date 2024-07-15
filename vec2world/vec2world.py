@@ -15,6 +15,13 @@ def create_schematic_file(data, schem_file_path):
 
     schem.save(schem_file_path, "build", mcschematic.Version.JE_1_20_1)
 
+def convert_hdf5_file_to_numpy_array(hdf5_file: str):
+    with h5py.File(hdf5_file, 'r') as file:
+        # Access a specific dataset
+        dataset = file[hdf5_file]
+        data = dataset[:]  # Read the data into a NumPy array        
+        return data
+
 # # Initialize a 3D array with empty strings
 # array = np.full((10, 4, 10), "minecraft:air", dtype=object)
 
