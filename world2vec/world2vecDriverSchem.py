@@ -121,7 +121,8 @@ class world2vecDriver:
                 print(e)
                 traceback.format_exc()
         shutil.rmtree(temp_dir_path)
-        print("Batch %d: %d builds successfully processed out of %d\n"(batch_num, successes, end_index - start_index))
+        print(f"Batch {batch_num}: {successes} builds successfully processed out of {end_index - start_index}\n")
+
 
     def process_build(
         self,
@@ -167,21 +168,10 @@ class world2vecDriver:
                 for path in all_files:
                     if path.endswith(".schem") or path.endswith(".schematic"):
                         schems_paths.append(path)
-                    if path.endswith(".mca"):
-                        mca_paths.append(path)
 
                 # If '.schem' files or '.schematic' files are present, use them
                 if len(schems_paths) > 0:
                     processed_paths = schems_paths
-
-                # If neither '.schem' nor '.schematic' files are found, but '.mca' files are, convert them
-                if len(mca_paths) > 0 and len(schems_paths) == 0:
-                    schem_paths = self.convert_build_to_schemfile(
-                        temp_extract, f"build_{processed_file_name}"
-                    )
-                    if schem_paths is None:
-                        return []
-                    processed_paths = schem_paths
 
             elif filename.endswith(".schematic") or filename.endswith(".schem"):
                 processed_paths = [
@@ -396,8 +386,8 @@ def main():
     source_builds_dir = args[2]
     processed_builds_folder = args[3]
     batch_num = args[4]
-    start_index = (int(batch_num) - 1) * 10
-    end_index =  int(batch_num) * 10 - 1
+    start_index = (int(batch_num) - 1) * 500
+    end_index =  int(batch_num) * 500 - 1
     
     print(f"Source Dataframe Path: {source_df_path}")
     print(f"Source Unprocessed Builds Directory: {source_builds_dir}")
