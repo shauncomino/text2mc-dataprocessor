@@ -6,7 +6,6 @@ import os
 import sys
 
 def create_schematic_file(data, schem_file_path):
-
     schem = mcschematic.MCSchematic()
     # Iterate over the elements of the array
     for i in range(data.shape[0]):
@@ -29,10 +28,9 @@ def convert_numpy_array_to_blocks(world_array):
     world_array_blocks = np.empty_like(world_array).astype(object)
 
     for coordinate in np.ndindex(world_array.shape):
-        x, y, z = coordinate[0], coordinate[1], coordinate[2]
         block_integer = world_array[coordinate]
         block_string = data[str(block_integer)]
-        world_array_blocks[x, y, z] = block_string
+        world_array_blocks[coordinate] = block_string
 
     return world_array_blocks
 
