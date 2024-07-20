@@ -24,4 +24,4 @@ with open("tok2block.json", "w") as f:
     block2tok_file = open("block2tok.json")
     data = json.load(block2tok_file)
     data_reversed = reverse_block2tok(data)
-    json.dump(reverse_block2tok(data_reversed), f, ensure_ascii=False, indent=4)
+    json.dump(data_reversed, f, ensure_ascii=False, indent=4)
