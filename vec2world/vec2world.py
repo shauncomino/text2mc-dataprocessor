@@ -28,9 +28,9 @@ def convert_numpy_array_to_blocks(world_array):
     data = json.load(json_file)
     world_array_blocks = np.empty_like(world_array).astype(object)
 
-    for i in np.ndindex(world_array.shape):
-        x, y, z = i[0], i[1], i[2]
-        block_integer = world_array[i]
+    for coordinate in np.ndindex(world_array.shape):
+        x, y, z = coordinate[0], coordinate[1], coordinate[2]
+        block_integer = world_array[coordinate]
         block_string = data[str(block_integer)]
         world_array_blocks[x, y, z] = block_string
 
@@ -38,6 +38,7 @@ def convert_numpy_array_to_blocks(world_array):
 
 integer_world_array = convert_hdf5_file_to_numpy_array("batch_1_310.h5")
 string_world_array = convert_numpy_array_to_blocks(integer_world_array)
+create_schematic_file(string_world_array, "")
 
 # # Initialize a 3D array with empty strings
 # array = np.full((10, 4, 10), "minecraft:air", dtype=object)
