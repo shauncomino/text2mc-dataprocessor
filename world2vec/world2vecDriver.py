@@ -257,7 +257,7 @@ class world2vecDriver:
             [
                 "java",
                 '-Xms512m',  # Set initial Java heap size
-                '-Xmx1024m',
+                '-Xmx4096m',
                 "-jar",
                 self.cfg.JAR_RUNNER_PATH,
                 schem_file_path,

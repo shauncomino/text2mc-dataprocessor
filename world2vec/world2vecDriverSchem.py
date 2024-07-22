@@ -247,7 +247,7 @@ class world2vecDriver:
             [
                 "java",
                 '-Xms512m',  # Set initial Java heap size
-                '-Xmx1024m',
+                '-Xmx4096m',
                 "-jar",
                 self.cfg.JAR_RUNNER_PATH,
                 schem_file_path,
@@ -336,46 +336,49 @@ class world2vecDriver:
         x_dim, y_dim, z_dim = build_array.shape
         integerized_build = np.zeros((x_dim, y_dim, z_dim), dtype=np.uint16)
         missing_blocks = []
-        count = 0
-
+    
         for x, y, z in product(range(0, x_dim), range(0, y_dim), range(0, z_dim)):
             blockname = build_array[x, y, z]
             token = None
-
+    
             # If there are block states, separate from block name
             if "[" in blockname:
                 blockstates = blockname.replace("[", ",").replace("]", "").split(",")
                 blockname = blockstates.pop(0)
-
+    
             value = block2tok.get(blockname)
-
+    
             # Blockname maps to nothing
             if value is None:
+                
                 token = self.cfg.NIV_TOK
                 if blockname not in missing_blocks:
+                    print("Blockname:"+blockname)
                     missing_blocks.append(blockname)
-                    count += 1                  
-            
+    
             # Blockname maps to dictionary
             elif isinstance(value, dict):
                 standard_blockstates = self.find_closest_match(
                     blockstates, value.keys()
                 )
-
+    
                 if standard_blockstates is None:
                     standard_blockstates = list(value.keys())[0]
-
+    
                 token = value.get(standard_blockstates)
-
+    
             # Blockname maps directly to token
             else:
                 token = value
-
+    
             integerized_build[x, y, z] = token
-        if(count != 0):
-            with open("/lustre/fs1/groups/jaedo/world2vec/missing_blocks/" + filename + ".json",'w') as f:
-                json.dump(missing_blocks,f)
+    
+        if missing_blocks[0] != "":
+            with open(f"/lustre/fs1/groups/jaedo/world2vec/missing_blocks/{filename}.json", 'w') as f:
+                json.dump(missing_blocks, f)
+    
         return integerized_build
+
 
 
 def main():
