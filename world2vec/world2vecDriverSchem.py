@@ -123,7 +123,6 @@ class world2vecDriver:
         shutil.rmtree(temp_dir_path)
         print(f"Batch {batch_num}: {successes} builds successfully processed out of {end_index - start_index}\n")
 
-
     def process_build(
         self,
         filename: str,
@@ -248,6 +247,7 @@ class world2vecDriver:
                 "java",
                 '-Xms512m',  # Set initial Java heap size
                 '-Xmx4096m',
+                '-d64',
                 "-jar",
                 self.cfg.JAR_RUNNER_PATH,
                 schem_file_path,
@@ -353,7 +353,6 @@ class world2vecDriver:
                 
                 token = self.cfg.NIV_TOK
                 if blockname not in missing_blocks:
-                    print("Blockname:"+blockname)
                     missing_blocks.append(blockname)
     
             # Blockname maps to dictionary
