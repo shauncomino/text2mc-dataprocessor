@@ -179,8 +179,6 @@ class world2vecDriver:
                     schem_paths = self.convert_build_to_schemfile(
                         temp_extract, f"build_{processed_file_name}"
                     )
-                    if schem_paths is None:
-                        return []
                     processed_paths = schem_paths
 
             elif filename.endswith(".schematic") or filename.endswith(".schem"):
@@ -258,7 +256,6 @@ class world2vecDriver:
                 "java",
                 '-Xms512m',  # Set initial Java heap size
                 '-Xmx4096m',
-                '-d64',
                 "-jar",
                 self.cfg.JAR_RUNNER_PATH,
                 schem_file_path,
@@ -384,7 +381,7 @@ class world2vecDriver:
             integerized_build[x, y, z] = token
     
         if missing_blocks[0] != "":
-            with open(f"/lustre/fs1/groups/jaedo/world2vec/missing_blocks/{filename}.json", 'w') as f:
+            with open(f"/lustre/fs1/groups/jaedo/world2vec/missing_blocks_builds/{filename}.json", 'w') as f:
                 json.dump(missing_blocks, f)
     
         return integerized_build
