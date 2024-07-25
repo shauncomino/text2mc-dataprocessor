@@ -448,9 +448,12 @@ class World2Vec:
             all_ys.append(chunk_lowest_y)
 
         lowest_surface_y = int(sum(all_ys) / len(all_ys))
-        if lowest_surface_y < -64:
-            lowest_surface_y = -64
-        if surface_section_mode != min_range + 1:
+        min_y = 0
+        if chunks[0].version is not None and chunks[0].version > 1451:
+            min_y = -64
+        if lowest_surface_y < min_y:
+            lowest_surface_y = min_y
+        elif surface_section_mode != min_range + 1:
             lowest_surface_y -= 1
 
         # Again, we don't need global coordinates, but we do need the blocks to be in the right places relative to each other
