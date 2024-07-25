@@ -557,6 +557,8 @@ class World2Vec:
         for block in data["blocks"]:
             x, y, z = block["x"], block["y"], block["z"]
             block_name = block["name"]
+            if not block_name.startswith("minecraft"):
+                return None
             world_array[x, y, z] = block_name
 
         return world_array

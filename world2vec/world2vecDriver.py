@@ -200,6 +200,8 @@ class world2vecDriver:
                         print(f"Schempaths: {path}")
                         self.convert_schemfile_to_json(path, temp_json_path)
                         npy_array = self.convert_json_to_npy(temp_json_path)
+                        if npy_array is None:
+                            continue
                         npy_array = self.convert_block_names_to_integers(npy_array, processed_file_name)
                         self.convert_vector_to_hdf5(npy_array, hdf5_path)
                         if os.path.exists(hdf5_path):
@@ -254,9 +256,9 @@ class world2vecDriver:
         subprocess.call(
             [
                 "java",
-                '-Xms512m',  # Set initial Java heap size
-                '-Xmx4096m',
                 "-jar",
+                '-Xms512m',  # Set initial Java heap size
+                '-Xmx30G',
                 self.cfg.JAR_RUNNER_PATH,
                 schem_file_path,
                 json_export_path,
