@@ -41,7 +41,7 @@ hdf5_file = sys.argv[1]
 schem_folder_path = "" if len(sys.argv) <= 2 else trim_folder_path(sys.argv[2])
 schem_file_name = hdf5_file.removesuffix(".h5")
 
-if schem_folder_path != "" and not os.path.exists(schem_folder_path):
+if schem_folder_path != "" and not os.path.isdir(schem_folder_path):
     os.makedirs(schem_folder_path)
 
 integer_world_array = convert_hdf5_file_to_numpy_array(hdf5_file)
