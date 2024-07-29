@@ -38,10 +38,22 @@ class Block2VecDataset(Dataset):
         
         x_max, y_max, z_max = build.shape
 
+        for x in range(0, x_max):
+            if build[x][0][0] == 65535:
+                x_max = x
+                break
+        for y in range(0, y_max):
+            if build[0][y][0] == 65535:
+                y_max = y
+                break
+        for z in range(0, z_max):
+            if build[0][0][z] == 65535:
+                z_max = z
+                break
+
         # All valid coordinates
         coords = np.array([(x, y, z) for x, y, z in product(range(0, x_max),
             range(0, y_max), range(0, z_max))])
-        
 
         # Need to come back to this: this may be faster 
         """
@@ -85,8 +97,12 @@ class Block2VecDataset(Dataset):
     def _store_sizes(self, blocks): 
         # Collect counts for each block 
   
-        for block_tok in blocks: 
-            block_name = self.tok2block[str(block_tok)]
+        for block_tok in blocks:
+            block_name = "unknown block"
+            if str(block_tok) in self.tok2block:
+                block_name = self.tok2block[str(block_tok)]
+            else:
+                block_name = block_name + " (%d)" % block_tok
 
             self.block_frequency[block_name] += 1
 
