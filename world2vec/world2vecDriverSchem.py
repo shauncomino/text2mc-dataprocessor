@@ -190,10 +190,13 @@ class world2vecDriver:
                         )
                         print(f"Schempaths: {path}")
                         self.convert_schemfile_to_json(path, temp_json_path)
+                        print("Converted schem to json")
                         npy_array = self.convert_json_to_npy(temp_json_path)
                         if npy_array is None:
                             continue
+                        print("Converted json to npy")
                         npy_array = self.convert_block_names_to_integers(npy_array, processed_file_name)
+                        print("Converted block names to integers")
                         self.convert_vector_to_hdf5(npy_array, hdf5_path)
                         if os.path.exists(hdf5_path):
                             new_paths.append(hdf5_path)
@@ -255,6 +258,8 @@ class world2vecDriver:
                 json_export_path,
             ]
         )
+        print("Subprocess finished")
+
 
     def convert_json_to_npy(self, json_file_path) -> np.ndarray:
         return World2Vec.export_json_to_npy(json_file_path)
