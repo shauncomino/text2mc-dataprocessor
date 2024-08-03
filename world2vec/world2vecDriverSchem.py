@@ -316,9 +316,11 @@ class world2vecDriver:
             token = None
     
             # If there are block states, separate from block name
-            if "[" in blockname:
+            if blockname.instance(str) and "[" in blockname:
                 blockstates = blockname.replace("[", ",").replace("]", "").split(",")
                 blockname = blockstates.pop(0)
+            else:
+                continue
     
             value = block2tok.get(blockname)
     
@@ -355,8 +357,6 @@ class world2vecDriver:
             traceback.print_exc()
         print("Completed missing blocks")
         return integerized_build
-
-
 
 def main():
     # Code to load from command line parameters
