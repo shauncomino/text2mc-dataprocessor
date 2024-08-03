@@ -181,18 +181,15 @@ class world2vecDriver:
                 new_paths = list()
                 for path in processed_paths:
                     try:
-                        print("Starting conversion to hdf5")
                         temp_json_path = os.path.join(
                             temp_dir_path, f"{processed_file_name}.json"
                         )
-                        print("Made temp json path")
                         hdf5_path = os.path.join(
                             self.cfg.PROCESSED_BUILDS_FOLDER,
                             f"{processed_file_name}.h5",
                         )
                         print(f"Schempaths: {path}")
                         self.convert_schemfile_to_json(path, temp_json_path)
-                        print("Converted schem to json")
                         npy_array = self.convert_json_to_npy(temp_json_path)
                         if npy_array is None:
                             continue
@@ -212,8 +209,6 @@ class world2vecDriver:
                 processed_paths = new_paths
                 print(f"Processed paths: {processed_paths}")
                 self.delete_directory_contents(temp_extract)
-
-            
 
         except Exception as e:
             print(f"Error processing build {filename}: {e}")
@@ -249,7 +244,6 @@ class world2vecDriver:
         )
 
     def convert_schemfile_to_json(self, schem_file_path: str, json_export_path: str):
-        print("Calling subprocess")
         subprocess.call(
             [
                 "java",
@@ -261,7 +255,6 @@ class world2vecDriver:
                 json_export_path,
             ]
         )
-        print("Subprocess finished")
 
 
     def convert_json_to_npy(self, json_file_path) -> np.ndarray:
@@ -317,7 +310,7 @@ class world2vecDriver:
         x_dim, y_dim, z_dim = build_array.shape
         integerized_build = np.zeros((x_dim, y_dim, z_dim), dtype=np.uint16)
         missing_blocks = []
-    
+        print("Initilizating ")
         for x, y, z in product(range(0, x_dim), range(0, y_dim), range(0, z_dim)):
             blockname = build_array[x, y, z]
             token = None
@@ -352,11 +345,11 @@ class world2vecDriver:
                 token = value
     
             integerized_build[x, y, z] = token
-    
+        print("Completed tokenization")
         if missing_blocks[0] != "":
             with open(f"/lustre/fs1/groups/jaedo/world2vec/missing_blocks/{filename}.json", 'w') as f:
                 json.dump(missing_blocks, f)
-    
+        print("Completed missing blocks")
         return integerized_build
 
 

@@ -543,37 +543,33 @@ class World2Vec:
         # Load JSON data
         with open(input_file_path) as f:
             data = json.load(f)
-        print("JSON data loaded successfully!")
         # Extract dimensions from JSON
         dimensions = data["worldDimensions"]
         width = dimensions["width"]
         height = dimensions["height"]
         length = dimensions["length"]
-        print("World dimensions extracted successfully!")
         # Create a 3D array with dimensions from JSON
         world_array = np.zeros((width, height, length), dtype=object)
-        print("3D array created successfully!")
         # Initialize counters for skipped and modded blocks
-        skipped_blocks = 0
-        modded_blocks = 0
     
         # Fill the array with block names based on JSON data
         for block in data["blocks"]:
             x, y, z = block["x"], block["y"], block["z"]
             block_name = block["name"]
+            
+            try:
+                if block_name[0].isupper():
+                    continue
+                elif not block_name.startswith("minecraft:"):
+                    return None
+                
+                world_array[x, y, z] = block_name
 
-            if not block_name.startswith("minecraft"):
-                modded_blocks += 1
-                print(f"Encountered modded blocks.")
+            except IndexError:
+                world_array[x, y, z] = "minecraft:air"
+            except Exception as e:
+                print(f"An unexpected error occurred: {e}")
                 return None
-            elif block_name[0].isupper():
-                skipped_blocks += 1
-                continue
-            world_array[x, y, z] = block_name
-        
-        print(f"Skipped {skipped_blocks} blocks with uppercase names.")
-        print("3D array filled successfully!")
-    
         return world_array
 
     def export_npy_to_hdf5(output_file_prefix: str, world_array: np.ndarray):
