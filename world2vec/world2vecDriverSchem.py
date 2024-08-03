@@ -204,7 +204,7 @@ class world2vecDriver:
                             f"Error processing schem to hdf5: {os.path.split(path)[-1]}"
                         )
                         print(e)
-                        traceback.format_exc()
+                        traceback.print_exc()
 
                 processed_paths = new_paths
                 print(f"Processed paths: {processed_paths}")
@@ -346,9 +346,13 @@ class world2vecDriver:
     
             integerized_build[x, y, z] = token
         print("Completed tokenization")
-        if missing_blocks[0] != "":
-            with open(f"/lustre/fs1/groups/jaedo/world2vec/missing_blocks/{filename}.json", 'w') as f:
-                json.dump(missing_blocks, f)
+        try:
+            if len(missing_blocks) > 0 and missing_blocks[0] != "":
+                with open(f"/lustre/fs1/groups/jaedo/world2vec/missing_blocks/{filename}.json", 'w') as f:
+                    json.dump(missing_blocks, f)
+        except Exception as e:
+            print(f"Error writing missing blocks to file: {e}")
+            traceback.print_exc()
         print("Completed missing blocks")
         return integerized_build
 
