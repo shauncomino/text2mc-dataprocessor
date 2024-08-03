@@ -103,7 +103,6 @@ class world2vecDriver:
         self.create_directory(temp_dir_path)
 
         successes = 0
-        np_fails = 0
 
         for i, row in dataframe.iloc[start_index:end_index].iterrows():
             try:
@@ -113,7 +112,6 @@ class world2vecDriver:
                     filename,
                     processed_file_name=unique_name,
                     temp_dir_path=temp_dir_path,
-                    np_fails=np_fails,
                 )
                 if not processed_paths:
                     continue
@@ -123,12 +121,11 @@ class world2vecDriver:
                 print(e)
                 traceback.format_exc()
         shutil.rmtree(temp_dir_path)
-        print(f"Batch {batch_num}: {successes} builds successfully processed out of {end_index - start_index} and failed np conversions:{np_fails}\n")
+        print(f"Batch {batch_num}: {successes} builds successfully processed out of {end_index - start_index}\n")
 
     def process_build(
         self,
         filename: str,
-        np_fails: int,
         processed_file_name: str = "temp_schem",
         temp_dir_path: str = "temp",
         straight_to_hdf5=True,
@@ -140,7 +137,6 @@ class world2vecDriver:
         :param processed_file_name: A suffix for the temporary directory to avoid conflicts.
         :return: A list of processed file paths.
         """
-        np_fails = 0
         processed_paths = []
         if not os.path.exists(temp_dir_path):
             os.mkdir(temp_dir_path)
@@ -185,9 +181,11 @@ class world2vecDriver:
                 new_paths = list()
                 for path in processed_paths:
                     try:
+                        print("Starting conversion to hdf5")
                         temp_json_path = os.path.join(
                             temp_dir_path, f"{processed_file_name}.json"
                         )
+                        print("Made temp json path")
                         hdf5_path = os.path.join(
                             self.cfg.PROCESSED_BUILDS_FOLDER,
                             f"{processed_file_name}.h5",
@@ -197,7 +195,6 @@ class world2vecDriver:
                         print("Converted schem to json")
                         npy_array = self.convert_json_to_npy(temp_json_path)
                         if npy_array is None:
-                            np_fails += 1
                             continue
                         print("Converted json to npy")
                         npy_array = self.convert_block_names_to_integers(npy_array, processed_file_name)
