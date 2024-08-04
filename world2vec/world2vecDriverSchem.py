@@ -94,7 +94,10 @@ class world2vecDriver:
         :param end_index: The end index of the batch.
         :param batch_num: The batch number for this processing batch, used for temporary directory naming.
         """
-        dataframe = pd.read_csv(dataframe_path, on_bad_lines="warn")
+        copied_dataframe_path = dataframe_path.replace(".csv", f"_batch{batch_num}.csv")
+        shutil.copy(dataframe_path, copied_dataframe_path)
+
+        dataframe = pd.read_csv(copied_dataframe_path, on_bad_lines="warn")
         dataframe["PROCESSED_PATHS"] = pd.Series(dtype="object")
         temp_dir_name = f"temp" + str(batch_num)
         temp_dir_path = os.path.join(
