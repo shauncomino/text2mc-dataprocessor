@@ -177,28 +177,37 @@ class world2vecDriver:
                     os.path.join(self.cfg.DOWNLOADED_BUILDS_FOLDER, filename)
                 ]
 
-            if straight_to_hdf5:
+            if straight_to_hdf5 & len(processed_paths) > 0:
                 new_paths = list()
-                for path in processed_paths:
+                for index,path in enumerate(processed_paths):
                     try:
-                        temp_json_path = os.path.join(
-                            temp_dir_path, f"{processed_file_name}.json"
-                        )
-                        hdf5_path = os.path.join(
-                            self.cfg.PROCESSED_BUILDS_FOLDER,
-                            f"{processed_file_name}.h5",
-                        )
+                        if len(processed_paths) > 1:
+                            temp_json_path = os.path.join(
+                                temp_dir_path, f"{processed_file_name}_{index}.json"
+                            )
+                            hdf5_path = os.path.join(
+                                self.cfg.PROCESSED_BUILDS_FOLDER,
+                                f"{processed_file_name}_{index}.h5",
+                            )
+                        else:  
+                            temp_json_path = os.path.join(
+                                temp_dir_path, f"{processed_file_name}.json"
+                            )
+                            hdf5_path = os.path.join(
+                                self.cfg.PROCESSED_BUILDS_FOLDER,
+                                f"{processed_file_name}.h5",
+                            )
                         print(f"Schempaths: {path}")
                         self.convert_schemfile_to_json(path, temp_json_path)
                         npy_array = self.convert_json_to_npy(temp_json_path)
                         if npy_array is None:
                             continue
-                        print("Converted json to npy")
                         npy_array = self.convert_block_names_to_integers(npy_array, processed_file_name)
-                        print("Converted block names to integers")
                         self.convert_vector_to_hdf5(npy_array, hdf5_path)
+                        print("Converted to hdf5")
                         if os.path.exists(hdf5_path):
                             new_paths.append(hdf5_path)
+                        print("Finished Processing Build") 
                     except Exception as e:
                         print(
                             f"Error processing schem to hdf5: {os.path.split(path)[-1]}"
@@ -214,7 +223,10 @@ class world2vecDriver:
             print(f"Error processing build {filename}: {e}")
             traceback.print_exc()
 
-        return processed_paths
+        if processed_paths > 0:
+            return processed_paths
+        else:
+            return None
 
     def extract_archive_to_temporary_directory(
         self, source_archive_path: str = None, outfolder_path: str = None
@@ -316,7 +328,7 @@ class world2vecDriver:
             token = None
     
             # If there are block states, separate from block name
-            if blockname.instance(str) and "[" in blockname:
+            if isinstance(blockname,str) and "[" in blockname:
                 blockstates = blockname.replace("[", ",").replace("]", "").split(",")
                 blockname = blockstates.pop(0)
             else:
