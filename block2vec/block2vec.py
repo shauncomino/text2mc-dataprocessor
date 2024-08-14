@@ -28,7 +28,6 @@ class Block2VecArgs(Tap):
     batch_size: int = 256
     initial_lr: float = 1e-3
     neighbor_radius: int = 1
-
     output_path: str = os.path.join("output", "block2vec") 
     token_to_block_filename: str = "tok_to_block.json"
     textures_directory: str = os.path.join("textures") 
@@ -52,9 +51,8 @@ class Block2Vec(pl.LightningModule):
         )
         with open(self.args.token_to_block_filename, "r") as file:
             self.tok2block = json.load(file)
-               
-        self.emb_size = 32
-        self.model = SkipGramModel(self.emb_size, self.args.emb_dimension)
+        
+        self.model = SkipGramModel(len(self.tok2block), self.args.emb_dimension)
         self.textures = dict()
         self.learning_rate = self.args.initial_lr
 

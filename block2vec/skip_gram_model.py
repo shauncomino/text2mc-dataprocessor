@@ -5,13 +5,13 @@ from torch.nn import init
 
 
 class SkipGramModel(nn.Module):
-    def __init__(self, emb_size: int, emb_dimension: int):
+    def __init__(self, num_embeddings: int, emb_dimension: int):
         super().__init__()
-        self.emb_size = emb_size
+        self.num_embeddings = num_embeddings
         self.emb_dimension = emb_dimension
         
-        self.target_embeddings = nn.Embedding(emb_size, emb_dimension)
-        self.output = nn.Linear(emb_dimension, emb_size)
+        self.target_embeddings = nn.Embedding(num_embeddings, emb_dimension)
+        self.output = nn.Linear(emb_dimension, num_embeddings)
 
         initrange = 1.0 / self.emb_dimension
         init.uniform_(self.target_embeddings.weight.data, -
