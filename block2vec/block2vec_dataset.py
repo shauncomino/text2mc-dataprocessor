@@ -12,14 +12,11 @@ from torch.utils.data.dataset import Dataset
 
 class Block2VecDataset(Dataset):
 
-    def __init__(self, builds, tok2block_filename: str, neighbor_radius: int):
+    def __init__(self, builds, tok2block: dict, neighbor_radius: int):
         super().__init__()
         self.builds = builds
         self.neighbor_radius = neighbor_radius
-        print(tok2block_filename)
-        print(neighbor_radius)
-        with open(tok2block_filename, 'r') as file:
-            self.tok2block = json.load(file)
+        self.tok2block = tok2block
         logger.info("Received {} builds in dataset.", builds.shape[0])
 
     """ Store discard probabilities for each token """
@@ -32,8 +29,6 @@ class Block2VecDataset(Dataset):
     
     """ Return context and target blocks of build """
     def _get_coords(self, build):
-        print("type is: " )
-        print(type(build))
         self.block_frequency = defaultdict(int)
         
         x_max, y_max, z_max = build.shape
@@ -122,8 +117,6 @@ class Block2VecDataset(Dataset):
         build = self.builds[index]
         coords, target_coords, context_coords = self._get_coords(build) 
         blocks, target_blocks, context_blocks = self._get_blocks(build, coords, target_coords, context_coords)
-        print("blocks are")
-        print(blocks)
 
         print("target blocks are")
         print(target_blocks)

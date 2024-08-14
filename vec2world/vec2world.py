@@ -23,7 +23,7 @@ def convert_hdf5_file_to_numpy_array(hdf5_file: str):
         return data
 
 def convert_numpy_array_to_blocks(world_array):
-    json_file = open("tok2block.json")
+    json_file = open("../world2vec/tok2block.json")
     data = json.load(json_file)
     world_array_blocks = np.empty_like(world_array).astype(object)
 

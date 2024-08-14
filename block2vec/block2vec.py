@@ -29,7 +29,7 @@ class Block2VecArgs(Tap):
     initial_lr: float = 1e-3
     neighbor_radius: int = 1
     output_path: str = os.path.join("output", "block2vec") 
-    token_to_block_filename: str = "tok_to_block.json"
+    tok2block_filepath: str = "../world2vec/tok2block.json"
     textures_directory: str = os.path.join("textures") 
     embeddings_txt_filename: str = "embeddings.txt"
     embeddings_npy_filename: str = "embeddings.npy"
@@ -43,13 +43,15 @@ class Block2Vec(pl.LightningModule):
         super().__init__()
         self.args: Block2VecArgs = Block2VecArgs().from_dict(kwargs)
         self.save_hyperparameters()
+        with open(self.args.tok2block_filepath, "r") as file:
+            self.tok2block = json.load(file)
         self.builds = builds
         self.dataset = Block2VecDataset(
-            self.builds,
-            tok2block_filename=self.args.token_to_block_filename, 
+            builds=self.builds,
+            tok2block=self.tok2block, 
             neighbor_radius=self.args.neighbor_radius,
         )
-        with open(self.args.token_to_block_filename, "r") as file:
+        with open(self.args.tok2block_filepath, "r") as file:
             self.tok2block = json.load(file)
         
         self.model = SkipGramModel(len(self.tok2block), self.args.emb_dimension)
@@ -121,10 +123,6 @@ class Block2Vec(pl.LightningModule):
             f.write("%d %d\n" % (len(id2block), self.args.emb_dimension))
             
             for wid, w in id2block.items():
-                print("wid")
-                print(wid) #number
-                print("w")
-                print(w) #name
                 e = " ".join(map(lambda x: str(x), embeddings[wid]))
                 embedding_dict[self.tok2block[str(wid)]] = torch.from_numpy(embeddings[wid])
                 f.write("%s %s\n" % (self.tok2block[str(wid)], e))
