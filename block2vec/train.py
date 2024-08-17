@@ -1,5 +1,4 @@
 import os
-import sys
 import numpy as np
 import h5py
 import pytorch_lightning as pl
@@ -45,8 +44,8 @@ def get_builds(builds_dir):
                     print("%s failed, no keys" % filename)
     padded_builds = []
     for build in builds: 
-        build = slice_to_fixed_dim(build, 3)
-        build = pad_to_fixed_dim(build, 3)
+        build = slice_to_fixed_dim(build, 4)
+        build = pad_to_fixed_dim(build, 4)
         padded_builds.append(build)
         
     return np.stack([build for build in padded_builds])

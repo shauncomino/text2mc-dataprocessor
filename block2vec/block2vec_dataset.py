@@ -26,7 +26,17 @@ class Block2VecDataset(Dataset):
         freq = np.array(token_frequencies) / sum(token_frequencies)
         self.discards = 1.0 - (np.sqrt(freq / threshold) + 1) * (threshold / freq)
 
-    
+    """ Check if a given build has big enough dimensions to support neighbor radius. """
+    def has_valid_dims(self, build): 
+        # Minimum build (in every dimension) supports 1 target block with the number of blocks on either side of the target at least the neighbor radius. 
+        min_dimension = self.neighbor_radius*2 + 1
+        
+        # Check all build dimensions are big enough to accomodate the neighbor radius 
+        if (build.shape[0] < min_dimension or build.shape[1] < min_dimension or build.shape[2] < min_dimension): 
+            return False
+        
+        return True
+            
     """ Return context and target blocks of build """
     def _get_coords(self, build):
         self.block_frequency = defaultdict(int)
@@ -60,8 +70,10 @@ class Block2VecDataset(Dataset):
         # All valid target block coordinates
         target_coords = [(x, y, z) for x, y, z in product(range(self.neighbor_radius, x_max - self.neighbor_radius),
             range(self.neighbor_radius, y_max - self.neighbor_radius), range(self.neighbor_radius, z_max - self.neighbor_radius))]
+       
         target_coords = np.array(target_coords) 
-        
+        print("target coords are: ")
+        print(target_coords)
         # All valid context block coordiantes 
         context_coords = []
         for target_coord in target_coords:
@@ -113,8 +125,8 @@ class Block2VecDataset(Dataset):
 
     """ Returns target and context block lists """
     def __getitem__(self, index):
-        # Abort forward pass with context window too small here 
         build = self.builds[index]
+        
         coords, target_coords, context_coords = self._get_coords(build) 
         blocks, target_blocks, context_blocks = self._get_blocks(build, coords, target_coords, context_coords)
 
@@ -123,8 +135,32 @@ class Block2VecDataset(Dataset):
 
         print("context blocks are")
         print(context_blocks)
-        self._store_sizes(blocks) 
 
+        self._store_sizes(blocks) 
+        
+        # Abort forward pass with invalid build dimensions 
+        if not self.has_valid_dims(build): 
+            print("Build of shape %dx%dx%d does not meet minimum dimensions required for neighbor radius %d. Skipping." % (build.shape[0], build.shape[1], build.shape[2], self.neighbor_radius))
+            return None, None 
+        
+        return target_blocks, context_blocks
+   
+    @staticmethod
+    def custom_collate_fn(batch):
+        # Filter out None values from the batch
+        print("Item type is: ")
+        for item in batch: 
+            print(type(item[0]))
+        # Targets are item[0] and context are item[1]
+        batch = [item for item in batch if item[0] is not None]
+    
+        # If the entire batch is filtered out, return None 
+        if len(batch) == 0:
+            return None, None
+
+        # Unpack the remaining items (assuming each item is a tuple)
+        target_blocks, context_blocks = zip(*batch)
+        
         return target_blocks, context_blocks
     
     """ Visalization of target and neighbor block context for documentation """

@@ -27,7 +27,7 @@ class Block2VecArgs(Tap):
     epochs: int = 30
     batch_size: int = 256
     initial_lr: float = 1e-3
-    neighbor_radius: int = 1
+    neighbor_radius: int = 2
     output_path: str = os.path.join("output", "block2vec") 
     tok2block_filepath: str = "../world2vec/tok2block.json"
     textures_directory: str = os.path.join("textures") 
@@ -83,7 +83,8 @@ class Block2Vec(pl.LightningModule):
             pin_memory=True,
             # This needs to be fixed. 
             #num_workers=os.cpu_count() or 1,
-            num_workers = 0
+            num_workers = 0, 
+            collate_fn=self.dataset.custom_collate_fn
         )
 
     """ Plot and save embeddings at end of each training epoch """

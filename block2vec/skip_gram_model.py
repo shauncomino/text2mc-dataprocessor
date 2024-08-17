@@ -20,6 +20,12 @@ class SkipGramModel(nn.Module):
     
     def forward(self, target_blocks, context_blocks):
         total_batch_loss = 0
+       
+        if target_blocks == None or context_blocks == None or len(target_blocks) == 0 or len(context_blocks) == 0: 
+            print("Error. Did not receive target or context blocks in foward pass.")
+            # Return 0 loss, using tensor to make sure backward pass can still do its thing 
+            return torch.tensor(0.0, requires_grad=True)
+        
         for idx in range (0, len(target_blocks)): 
             target = target_blocks[idx]
             emb_target = self.target_embeddings(target)
