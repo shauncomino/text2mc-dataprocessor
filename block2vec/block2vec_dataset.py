@@ -1,8 +1,8 @@
 import os
+import traceback
 from collections import defaultdict
 from itertools import product
-from typing import Tuple
-import json
+import h5py
 from loguru import logger
 import numpy as np
 from tqdm import tqdm
@@ -11,13 +11,20 @@ from torch.utils.data.dataset import Dataset
 
 
 class Block2VecDataset(Dataset):
-
-    def __init__(self, builds, tok2block: dict, neighbor_radius: int):
+    def __init__(self, directory, tok2block: dict, context_radius: int):
         super().__init__()
-        self.builds = builds
-        self.neighbor_radius = neighbor_radius
         self.tok2block = tok2block
-        logger.info("Received {} builds in dataset.", builds.shape[0])
+        self.block_frequency = dict()
+        self.context_radius = context_radius
+        self.directory = directory
+        self.files = []
+        for filename in os.listdir(directory):
+            if filename.endswith(".h5"):
+                self.files.append(filename)
+        logger.info("Found {} .h5 builds.", len(self.files))
+   
+    def __len__(self):
+        return len(self.files)
 
     """ Store discard probabilities for each token """
     def _init_discards(self):
@@ -26,21 +33,8 @@ class Block2VecDataset(Dataset):
         freq = np.array(token_frequencies) / sum(token_frequencies)
         self.discards = 1.0 - (np.sqrt(freq / threshold) + 1) * (threshold / freq)
 
-    """ Check if a given build has big enough dimensions to support neighbor radius. """
-    def has_valid_dims(self, build): 
-        # Minimum build (in every dimension) supports 1 target block with the number of blocks on either side of the target at least the neighbor radius. 
-        min_dimension = self.neighbor_radius*2 + 1
-        
-        # Check all build dimensions are big enough to accomodate the neighbor radius 
-        if (build.shape[0] < min_dimension or build.shape[1] < min_dimension or build.shape[2] < min_dimension): 
-            return False
-        
-        return True
-            
-    """ Return context and target blocks of build """
-    def _get_coords(self, build):
-        self.block_frequency = defaultdict(int)
-        
+    """ Size stuff"""
+    def _store_sizes(self, build): 
         x_max, y_max, z_max = build.shape
 
         for x in range(0, x_max):
@@ -59,109 +53,50 @@ class Block2VecDataset(Dataset):
         # All valid coordinates
         coords = np.array([(x, y, z) for x, y, z in product(range(0, x_max),
             range(0, y_max), range(0, z_max))])
-
-        # Need to come back to this: this may be faster 
-        """
-        x, y, z = np.arange(x_max), np.arange(y_max), np.arange(z_max)
-        xx, yy, zz = np.meshgrid(x, y, z, indexing='ij')  # Create 3D grid
-        coords_array = np.vstack([xx.ravel(), yy.ravel(), zz.ravel()]).T
-        """
         
-        # All valid target block coordinates
-        target_coords = [(x, y, z) for x, y, z in product(range(self.neighbor_radius, x_max - self.neighbor_radius),
-            range(self.neighbor_radius, y_max - self.neighbor_radius), range(self.neighbor_radius, z_max - self.neighbor_radius))]
-       
-        target_coords = np.array(target_coords) 
-        print("target coords are: ")
-        print(target_coords)
-        # All valid context block coordiantes 
-        context_coords = []
-        for target_coord in target_coords:
-            neighbors = [
-                (target_coord[0] + i, target_coord[1] + j, target_coord[2] + k)
-                for i, j, k in product(range(-self.neighbor_radius, self.neighbor_radius + 1), repeat=3)
-                if (i, j, k) != (0, 0, 0)
-            ]
-            context_coords.append(np.array(neighbors))
-
-        return coords, np.array(target_coords), np.array(context_coords)
-
-    """ Get blocks from build """
-    def _get_blocks(self, build, coords, target_coords, context_coords): 
-        logger.info("Found {} blocks in build", len(coords))
-
-        blocks = [build[coord[0], coord[1], coord[2]] for coord in coords]
-
-        target_blocks = [build[target_coord[0], target_coord[1], target_coord[2]] for target_coord in target_coords]
-
-        context_blocks = []
-        for context_coord_list in context_coords: 
-            context_blocks.append([build[context_coord[0], context_coord[1], context_coord[2]] for context_coord in context_coord_list])
-
-        return blocks, target_blocks, context_blocks
-
-    """ Size stuff"""
-    def _store_sizes(self, blocks): 
         # Collect counts for each block 
-  
-        for block_tok in blocks:
+        for coord in coords:
+            block_tok = build[coord[0], coord[1], coord[2]]
             block_name = "unknown block"
             if str(block_tok) in self.tok2block:
                 block_name = self.tok2block[str(block_tok)]
             else:
                 block_name = block_name + " (%d)" % block_tok
 
-            self.block_frequency[block_name] += 1
-
+            if block_name in self.block_frequency: 
+                self.block_frequency[block_name] += 1
+            else: 
+                self.block_frequency[block_name] = 1
+              
         logger.info("Found the following blocks {blocks}", blocks=dict(self.block_frequency))
-       
-        self.block2idx = dict()
-        self.idx2block = dict()
 
-        for tok in self.block_frequency.keys():
-            block_idx = len(self.block2idx)
-            self.block2idx[tok] = block_idx
-            self.idx2block[block_idx] = tok
-
-    """ Returns target and context block lists """
-    def __getitem__(self, index):
-        build = self.builds[index]
-        
-        coords, target_coords, context_coords = self._get_coords(build) 
-        blocks, target_blocks, context_blocks = self._get_blocks(build, coords, target_coords, context_coords)
-
-        print("target blocks are")
-        print(target_blocks)
-
-        print("context blocks are")
-        print(context_blocks)
-
-        self._store_sizes(blocks) 
-        
-        # Abort forward pass with invalid build dimensions 
-        if not self.has_valid_dims(build): 
-            print("Build of shape %dx%dx%d does not meet minimum dimensions required for neighbor radius %d. Skipping." % (build.shape[0], build.shape[1], build.shape[2], self.neighbor_radius))
-            return None, None 
-        
-        return target_blocks, context_blocks
-   
-    @staticmethod
-    def custom_collate_fn(batch):
-        # Filter out None values from the batch
-        print("Item type is: ")
-        for item in batch: 
-            print(type(item[0]))
-        # Targets are item[0] and context are item[1]
-        batch = [item for item in batch if item[0] is not None]
-    
-        # If the entire batch is filtered out, return None 
-        if len(batch) == 0:
-            return None, None
-
-        # Unpack the remaining items (assuming each item is a tuple)
-        target_blocks, context_blocks = zip(*batch)
-        
-        return target_blocks, context_blocks
+    """ Lazy-loads each build into memory. """
+    """ Returns tuple: (target [], context []) """
+    def __getitem__(self, idx):
+        context_radius = 2
+        file_path = os.path.join(self.directory, self.files[idx])
+        try: 
+            with h5py.File(file_path, "r") as file:
+                keys = file.keys()
+                if len(keys) == 0:
+                    print("%s failed loading: no keys." % self.files[idx])
+                    return ([], [])
+                else: 
+                    build_array = np.array(file[list(keys)[0]][()], dtype=np.int32)
+                    print("%s loaded." % self.files[idx])
+                    
+                    if not has_valid_dims(build_array, context_radius): 
+                        print("%s: build of shape %dx%dx%d does not meet minimum dimensions required for context radius %d Skipping." % (self.files[idx], build_array.shape[0], build_array.shape[1], build_array.shape[2], context_radius))
+                        return ([], [])
+                    else:
+                        target, context = get_target_context_blocks(build_array, context_radius)
+                        self._store_sizes(build_array) 
+                        return (target, context)
+                
+        except Exception as e: 
+            print(traceback.format_exc())
+            print(f"{self.files[idx]} failed loading due to error: \"{e}\"")
+            return ([], [])
     
     """ Visalization of target and neighbor block context for documentation """
     def plot_coords(self, target_coord, context_coords): 
@@ -179,5 +114,59 @@ class Block2VecDataset(Dataset):
 
         plt.show()
 
-    def __len__(self):
-        return self.builds.shape[0]
+# Batch contains one or more builds
+def custom_collate_fn(batch):
+    filtered_batch = []
+    for item in batch: 
+        target_blocks, context_blocks = item[0], item[1]
+        if not (len(target_blocks) == 0): 
+            filtered_batch.append((target_blocks, context_blocks))
+
+    return filtered_batch
+
+def get_target_context_blocks(build, context_radius=2):
+    print("build shape is: ", build.shape)
+    target_blocks = []
+    context_blocks = []
+    
+    x_dim, y_dim, z_dim = build.shape
+    
+    # Step size should be the diameter of the sub-cube (2 * radius + 1)
+    step_size = 2 * context_radius + 1
+    
+    # Iterate over the cube, ensuring non-overlapping sub-cubes
+    for x in range(context_radius, x_dim - context_radius, step_size):
+        for y in range(context_radius, y_dim - context_radius, step_size):
+            for z in range(context_radius, z_dim - context_radius, step_size):
+                # The center block (target block)
+                center_block = build[(x, y, z)]
+                if (str(center_block) == "4000"): 
+                    center_block = 3714
+
+                target_blocks.append(center_block)
+                
+                # The surrounding context blocks
+                context = []
+                for i in range(-context_radius, context_radius + 1):
+                    for j in range(-context_radius, context_radius + 1):
+                        for k in range(-context_radius, context_radius + 1):
+                            # Skip the center block itself
+                            if i == 0 and j == 0 and k == 0:
+                                continue
+                            context_block = build[(x + i, y + j, z + k)]
+                            if (str(context_block) == "4000"): 
+                                context_block = 3714
+                            context.append(context_block)
+                
+                context_blocks.append(context)
+    return target_blocks, context_blocks
+
+
+""" Check if a given build has big enough dimensions to support neighbor radius. """
+def has_valid_dims(build, context_radius): 
+    # Minimum build (in every dimension) supports 1 target block with the number of blocks on either side of the target at least the neighbor radius. 
+    min_dimension = context_radius*2 + 1
+
+    if (build.shape[0] < min_dimension or build.shape[1] < min_dimension or build.shape[2] < min_dimension): 
+        return False
+    return True

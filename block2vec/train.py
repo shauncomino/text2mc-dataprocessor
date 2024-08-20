@@ -11,6 +11,7 @@ class TrainBlock2VecArgs(Block2VecArgs):
         super().process_args()
         os.makedirs(self.output_path, exist_ok=True)
 
+"""
 def get_random_builds(x_dim, y_dim, z_dim, max_token_val, num_builds):
     builds = [np.random.randint(1, max_token_val, size=(x_dim, y_dim, z_dim)) for _ in range(num_builds)]
     return np.stack([build for build in builds])
@@ -49,11 +50,10 @@ def get_builds(builds_dir):
         padded_builds.append(build)
         
     return np.stack([build for build in padded_builds])
+"""
 
 def main():
-    #random_builds = get_random_builds(4, 4, 4, 5, 6)
-    real_builds = get_builds("hdf5s")
-    block2vec = Block2Vec(builds=real_builds)
+    block2vec = Block2Vec()
     trainer = pl.Trainer(max_epochs=3, log_every_n_steps=1)
     trainer.fit(block2vec)
 
