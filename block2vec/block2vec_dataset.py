@@ -90,6 +90,8 @@ class Block2VecDataset(Dataset):
                         return ([], [])
                     else:
                         target, context = get_target_context_blocks(build_array, context_radius)
+                        print("%d targets found." % len(target))
+
                         self._store_sizes(build_array) 
                         return (target, context)
                 
@@ -118,6 +120,7 @@ class Block2VecDataset(Dataset):
 def custom_collate_fn(batch):
     filtered_batch = []
     for item in batch: 
+        print("item is: ", len(item[0]))
         target_blocks, context_blocks = item[0], item[1]
         if not (len(target_blocks) == 0): 
             filtered_batch.append((target_blocks, context_blocks))

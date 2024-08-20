@@ -53,7 +53,7 @@ def get_builds(builds_dir):
 """
 
 def main():
-    block2vec = Block2Vec()
+    block2vec = Block2Vec(epochs=3)
     trainer = pl.Trainer(max_epochs=3, log_every_n_steps=1)
     trainer.fit(block2vec)
 

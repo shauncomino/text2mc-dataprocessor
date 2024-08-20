@@ -26,8 +26,8 @@ import umap
 """ Arguments for Block2Vec """
 class Block2VecArgs(Tap):
     emb_dimension: int = 32
-    epochs: int = 30
-    batch_size: int = 1
+    epochs: int = 3
+    batch_size: int = 2
     num_workers: int = 2
     initial_lr: float = 1e-3
     context_radius: int = 2
@@ -60,16 +60,34 @@ class Block2Vec(pl.LightningModule):
         self.textures = dict()
         self.learning_rate = self.args.initial_lr
 
-    def forward(self, *args, **kwargs) -> torch.Tensor:
-        target_blocks = torch.tensor((args[0])[0])
-        context_blocks =  torch.tensor((args[0])[1]) 
-        print(target_blocks)
+    def forward(self, target_blocks, context_blocks, **kwargs) -> torch.Tensor:
+        
+        target_blocks = torch.tensor(target_blocks)
+        context_blocks =  torch.tensor(context_blocks) 
+        print("moving forward")
+        print(len(target_blocks))
+        #print(target_blocks)
         return self.model(target_blocks, context_blocks, **kwargs)
 
     def training_step(self, batch, *args, **kwargs):
-        loss = self.forward(*batch)
-        self.log("loss", loss)
-        return loss
+        print("The length of the batch is: %d" % len(batch))
+        
+        total_batch_loss = 0.0  # Initialize total loss
+
+        for item in batch: 
+            target_blocks, context_blocks = item  # Unpack the tuple
+            loss = self.forward(target_blocks, context_blocks)  # Calculate loss for each (target, context) pair
+            total_batch_loss += loss  # Accumulate the loss
+        
+        # Option 1: Average the loss across the batch
+        average_loss = total_batch_loss / len(batch)
+        self.log("loss", average_loss)
+        return average_loss
+        
+        # Option 2: Sum the loss across the batch (uncomment to use this option)
+        # self.log("loss", total_batch_loss)
+        # return total_batch_loss
+
 
     def configure_optimizers(self):
         optimizer = optim.AdamW(self.model.parameters(), lr=self.learning_rate)
@@ -85,6 +103,7 @@ class Block2Vec(pl.LightningModule):
 
     """ Plot and save embeddings at end of each training epoch """
     def on_train_epoch_end(self):
+        print("here")
         embedding_dict = self.save_embedding(
             self.tok2block, self.args.output_path
         )
@@ -120,12 +139,14 @@ class Block2Vec(pl.LightningModule):
             f.write("%d %d\n" % (len(id2block), self.args.emb_dimension))
             
             for wid, w in id2block.items():
+                """
                 print("wid: ")
                 print(wid)
                 print("w: ")
                 print(w)
                 print("embeddings")
                 print(embeddings.shape)
+                """
                 e = " ".join(map(lambda x: str(x), embeddings[int(wid)]))
                 embedding_dict[self.tok2block[str(wid)]] = torch.from_numpy(embeddings[int(wid)])
                 f.write("%s %s\n" % (self.tok2block[str(wid)], e))
