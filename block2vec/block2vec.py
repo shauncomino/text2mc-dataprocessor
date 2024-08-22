@@ -3,6 +3,7 @@ import os
 import pickle
 from pathlib import Path
 from typing import Dict, Tuple
+import re 
 import json
 import numpy as np
 import pytorch_lightning as pl
@@ -33,8 +34,9 @@ class Block2VecArgs(Tap):
     context_radius: int = 2
     output_path: str = os.path.join("output", "block2vec") 
     tok2block_filepath: str = "../world2vec/tok2block.json"
+    block2texture_filepath: str = "../world2vec/block2texture.json"
     hdf5s_directory = "hdf5s"
-    extures_directory: str = os.path.join("textures") 
+    textures_directory: str = os.path.join("textures") 
     embeddings_txt_filename: str = "embeddings.txt"
     embeddings_npy_filename: str = "embeddings.npy"
     embeddings_pkl_filename: str = "representations.pkl"
@@ -49,8 +51,13 @@ class Block2Vec(pl.LightningModule):
         super().__init__()
         self.args: Block2VecArgs = Block2VecArgs().from_dict(kwargs)
         self.save_hyperparameters()
+        
         with open(self.args.tok2block_filepath, "r") as file:
             self.tok2block = json.load(file)
+        
+        with open(self.args.block2texture_filepath, "r") as file:
+            self.block2texture = json.load(file)
+        
         self.dataset = Block2VecDataset(
             directory=self.args.hdf5s_directory,
             tok2block=self.tok2block, 
@@ -61,22 +68,25 @@ class Block2Vec(pl.LightningModule):
         self.learning_rate = self.args.initial_lr
 
     def forward(self, target_blocks, context_blocks, **kwargs) -> torch.Tensor:
-        
         target_blocks = torch.tensor(target_blocks)
         context_blocks =  torch.tensor(context_blocks) 
-        print("moving forward")
-        print(len(target_blocks))
-        #print(target_blocks)
+
         return self.model(target_blocks, context_blocks, **kwargs)
 
     def training_step(self, batch, *args, **kwargs):
         print("The length of the batch is: %d" % len(batch))
-        
-        total_batch_loss = 0.0  # Initialize total loss
 
+        total_batch_loss = torch.tensor(0.0, requires_grad=True) # Initialize total batch loss
+
+        if (len(batch)) == 0: 
+            #return torch.tensor(0.0, requires_grad=True)
+            logger.info("Zero eligible builds in batch. Returing None for batch loss.")
+            return None 
+        
+        # For each item in the batch, which is the tuple: (target_blocks_list, context_blocks_list) for ONE build
         for item in batch: 
-            target_blocks, context_blocks = item  # Unpack the tuple
-            loss = self.forward(target_blocks, context_blocks)  # Calculate loss for each (target, context) pair
+            target_blocks, context_blocks = item  # The target and context block lists for ONE build
+            loss = self.forward(target_blocks, context_blocks)  # Loss returned from the SkipGram model for that entire build
             total_batch_loss += loss  # Accumulate the loss
         
         # Option 1: Average the loss across the batch
@@ -84,10 +94,9 @@ class Block2Vec(pl.LightningModule):
         self.log("loss", average_loss)
         return average_loss
         
-        # Option 2: Sum the loss across the batch (uncomment to use this option)
+        # Option 2: Sum the loss across the batch 
         # self.log("loss", total_batch_loss)
         # return total_batch_loss
-
 
     def configure_optimizers(self):
         optimizer = optim.AdamW(self.model.parameters(), lr=self.learning_rate)
@@ -109,14 +118,19 @@ class Block2Vec(pl.LightningModule):
         )
         #self.create_confusion_matrix(
             #self.dataset.idx2block, self.args.output_path)
-        #self.plot_embeddings(embedding_dict, self.args.output_path)
+        # self.plot_embeddings(embedding_dict, self.args.output_path)
 
     """ Reads texture .png file for a given token """
     def read_texture(self, block: str):
-        if block not in self.textures and block != "air":
+        if block not in self.block2texture:
+            self.textures[block] = np.ones(shape=[16, 16, 3])
+        else: 
+            self.textures[block] = plt.imread(self.block2texture[block])
+        """
+        if block not in self.block and block != "air":
             texture_candidates = Path(self.args.textures_directory).glob("*.png")
-
-            match = process.extractOne(block, texture_candidates)
+            cleaned_text = re.sub(r'\[.*?\]', '', block)
+            match = process.extractOne(cleaned_text, texture_candidates)
             
             if match is not None:
                 logger.info("Matches {} with {} texture file", block, match[0])
@@ -124,7 +138,7 @@ class Block2Vec(pl.LightningModule):
 
         if block not in self.textures:
             self.textures[block] = np.ones(shape=[16, 16, 3])
-        
+        """
         return self.textures[block]
     
     """ Save generated embeddings to a file """
@@ -139,14 +153,6 @@ class Block2Vec(pl.LightningModule):
             f.write("%d %d\n" % (len(id2block), self.args.emb_dimension))
             
             for wid, w in id2block.items():
-                """
-                print("wid: ")
-                print(wid)
-                print("w: ")
-                print(w)
-                print("embeddings")
-                print(embeddings.shape)
-                """
                 e = " ".join(map(lambda x: str(x), embeddings[int(wid)]))
                 embedding_dict[self.tok2block[str(wid)]] = torch.from_numpy(embeddings[int(wid)])
                 f.write("%s %s\n" % (self.tok2block[str(wid)], e))
@@ -160,28 +166,44 @@ class Block2Vec(pl.LightningModule):
 
     """ Plot generated block embeddings """
     def plot_embeddings(self, embedding_dict: Dict[str, np.ndarray], output_path: str):
-        fig = plt.figure(figsize=(10, 10))
+        # Increase the figure size for better visibility
+        fig = plt.figure(figsize=(55, 55))
         ax = fig.add_subplot(111, projection="3d")
-        legend = [label
-                  for label in embedding_dict.keys()]
+        
+        # Prepare the legend and corresponding textures
+        legend = [label for label in embedding_dict.keys()]
         texture_imgs = [self.read_texture(block) for block in legend]
+        
+        # Convert embeddings to numpy array
         embeddings = torch.stack(list(embedding_dict.values())).numpy()
+        
+        # If embeddings are not 3-dimensional, reduce them to 3D using UMAP
         if embeddings.shape[-1] != 3:
             embeddings_3d = umap.UMAP(
-                n_neighbors=2, min_dist=0.3, n_components=3
+                n_neighbors=10, min_dist=0.9, n_components=3
             ).fit_transform(embeddings)
         else:
             embeddings_3d = embeddings
-        for embedding in embeddings_3d:
-            ax.scatter(*embedding, alpha=0)
+        
+        # Adjust scatter plot details
+        scatter = ax.scatter(
+            embeddings_3d[:, 0], embeddings_3d[:, 1], embeddings_3d[:, 2],
+            c=np.arange(len(embeddings_3d)), cmap='Spectral', s=2, alpha=0.6
+        )
+        
+        # Add color bar for better visualization of different clusters
+        fig.colorbar(scatter, ax=ax, shrink=0.5, aspect=5)
+        
+        # If texture images are necessary, use the ImageAnnotations3D class
         ia = ImageAnnotations3D(embeddings_3d, texture_imgs, legend, ax, fig)
+        
+        # Tightly layout the plot and save it
         plt.tight_layout()
         plt.savefig(os.path.join(output_path, self.args.embeddings_scatterplot_filename), dpi=300)
         plt.close("all")
 
-
     def create_confusion_matrix(self, id2block: Dict[int, str], output_path: str):
-        rcParams.update({"font.size": 6})
+        rcParams.update({"font.size": 1})
         names = []
         dists = np.zeros((len(id2block), len(id2block)))
         for i, b1 in id2block.items():
