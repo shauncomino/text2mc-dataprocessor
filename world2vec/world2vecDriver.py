@@ -94,7 +94,10 @@ class world2vecDriver:
         :param end_index: The end index of the batch.
         :param batch_num: The batch number for this processing batch, used for temporary directory naming.
         """
-        dataframe = pd.read_csv(dataframe_path, on_bad_lines="warn")
+        copied_dataframe_path = dataframe_path.replace(".csv", f"_batch{batch_num}.csv")
+        shutil.copy(dataframe_path, copied_dataframe_path)
+
+        dataframe = pd.read_csv(copied_dataframe_path, on_bad_lines="warn")
         dataframe["PROCESSED_PATHS"] = pd.Series(dtype="object")
         temp_dir_name = f"temp" + str(batch_num)
         temp_dir_path = os.path.join(
@@ -120,7 +123,14 @@ class world2vecDriver:
             except Exception as e:
                 print(e)
                 traceback.format_exc()
+        
+        batch_csvs_dir = os.path.join(os.path.dirname(self.cfg.PROCESSED_BUILDS_FOLDER), "batch_csvs")
+        os.makedirs(batch_csvs_dir, exist_ok=True)
+
+        output_csv_path = os.path.join(batch_csvs_dir, f"batch_{batch_num}.csv")
+        dataframe.to_csv(output_csv_path, index=False)
         shutil.rmtree(temp_dir_path)
+
         print(f"Batch {batch_num}: {successes} builds successfully processed out of {end_index - start_index}\n")
 
     def process_build(
@@ -173,53 +183,81 @@ class world2vecDriver:
                 # If '.schem' files or '.schematic' files are present, use them
                 if len(schems_paths) > 0:
                     processed_paths = schems_paths
+                    print("Processing schem")
 
                 # If neither '.schem' nor '.schematic' files are found, but '.mca' files are, convert them
                 if len(mca_paths) > 0 and len(schems_paths) == 0:
                     schem_paths = self.convert_build_to_schemfile(
                         temp_extract, f"build_{processed_file_name}"
                     )
-                    processed_paths = schem_paths
+                    if schem_paths is not None:
+                        processed_paths = schem_paths
+                        print("Processed mca files")
+                    else:
+                        self.delete_directory_contents(temp_extract)
+                        return None
 
             elif filename.endswith(".schematic") or filename.endswith(".schem"):
                 processed_paths = [
                     os.path.join(self.cfg.DOWNLOADED_BUILDS_FOLDER, filename)
                 ]
-
-            if straight_to_hdf5:
+                print("Processing schem")
+            if len(processed_paths) == 0:
+                self.delete_directory_contents(temp_extract)
+                return None
+            if straight_to_hdf5 & len(processed_paths) > 0:
+                
                 new_paths = list()
+                temp_json_path = None
+                hdf5_path = None
+                temp_processed_file_name = processed_file_name
+
+                index = 0
                 for path in processed_paths:
+                    processed_file_name = temp_processed_file_name
                     try:
-                        temp_json_path = os.path.join(
-                            temp_dir_path, f"{processed_file_name}.json"
-                        )
-                        hdf5_path = os.path.join(
-                            self.cfg.PROCESSED_BUILDS_FOLDER,
-                            f"{processed_file_name}.h5",
-                        )
+                        if index > 0:
+                            temp_json_path = os.path.join(
+                                temp_dir_path, f"{processed_file_name}_{index}.json"
+                            )
+                            hdf5_path = os.path.join(
+                                self.cfg.PROCESSED_BUILDS_FOLDER,
+                                f"{processed_file_name}_{index}.h5",
+                            )
+                            processed_file_name = processed_file_name + "_" + str(index)
+                        else:  
+                            temp_json_path = os.path.join(
+                                temp_dir_path, f"{processed_file_name}.json"
+                            )
+                            hdf5_path = os.path.join(
+                                self.cfg.PROCESSED_BUILDS_FOLDER,
+                                f"{processed_file_name}.h5",
+                            )
                         print(f"Schempaths: {path}")
                         self.convert_schemfile_to_json(path, temp_json_path)
-                        print("Converted json to npy")
+                        print("Converted to json")
                         npy_array = self.convert_json_to_npy(temp_json_path)
+                        print("Converted to npy")
                         if npy_array is None:
                             continue
-                        print("Converted npy to hdf5")
                         npy_array = self.convert_block_names_to_integers(npy_array, processed_file_name)
                         print("Converted block names to integers")
                         self.convert_vector_to_hdf5(npy_array, hdf5_path)
+                        print("Converted to hdf5")
                         if os.path.exists(hdf5_path):
                             new_paths.append(hdf5_path)
+                        print("Finished Processing Build")
+                        index += 1
                     except Exception as e:
                         print(
                             f"Error processing schem to hdf5: {os.path.split(path)[-1]}"
                         )
                         print(e)
-                        traceback.format_exc()
+                        traceback.print_exc()
 
                 processed_paths = new_paths
-
-            print(f"Processed paths: {processed_paths}")
-            self.delete_directory_contents(temp_extract)
+                print(f"Processed paths: {processed_paths}")
+                self.delete_directory_contents(temp_extract)
 
         except Exception as e:
             print(f"Error processing build {filename}: {e}")
@@ -255,7 +293,6 @@ class world2vecDriver:
         )
 
     def convert_schemfile_to_json(self, schem_file_path: str, json_export_path: str):
-        print("Calling subprocess")
         subprocess.call(
             [
                 "java",
@@ -267,7 +304,7 @@ class world2vecDriver:
                 json_export_path,
             ]
         )
-        print("Subprocess finished")
+
 
     def convert_json_to_npy(self, json_file_path) -> np.ndarray:
         return World2Vec.export_json_to_npy(json_file_path)
@@ -300,34 +337,6 @@ class world2vecDriver:
             if os.path.isdir(dir_path):
                 os.rmdir(dir_path)
 
-    def export_json_to_npy(input_file_path: str):
-        # Load JSON data
-        with open(input_file_path) as f:
-            data = json.load(f)
-
-        # Extract dimensions from JSON
-        dimensions = data["worldDimensions"]
-        width = dimensions["width"]
-        height = dimensions["height"]
-        length = dimensions["length"]
-
-        # Create a 3D array with dimensions from JSON
-        world_array = np.zeros((width, height, length), dtype=object)
-
-        # Fill the array with block names based on JSON data
-        for block in data["blocks"]:
-            x, y, z = block["x"], block["y"], block["z"]
-            block_name = block["name"]
-            world_array[x, y, z] = block_name
-
-        return world_array
-
-    def export_npy_to_hdf5(output_file_prefix: str, world_array: np.ndarray):
-        # Open HDF5 file in write mode
-        with h5py.File(f"{output_file_prefix}.h5", "w") as f:
-            # Create a dataset in the HDF5 file with the same name as the file name and write the array data
-            f.create_dataset(output_file_prefix, data=world_array)
-
     def find_closest_match(self, query, options):
         query_words = set(query)
 
@@ -350,15 +359,19 @@ class world2vecDriver:
         x_dim, y_dim, z_dim = build_array.shape
         integerized_build = np.zeros((x_dim, y_dim, z_dim), dtype=np.uint16)
         missing_blocks = []
-    
+        missing = 0
         for x, y, z in product(range(0, x_dim), range(0, y_dim), range(0, z_dim)):
             blockname = build_array[x, y, z]
             token = None
+
+            blockname = World2Vec.convert_if_old(blockname)
     
             # If there are block states, separate from block name
-            if "[" in blockname:
+            if isinstance(blockname,str) and "[" in blockname:
                 blockstates = blockname.replace("[", ",").replace("]", "").split(",")
                 blockname = blockstates.pop(0)
+            else:
+                continue
     
             value = block2tok.get(blockname)
     
@@ -368,6 +381,8 @@ class world2vecDriver:
                 token = self.cfg.NIV_TOK
                 if blockname not in missing_blocks:
                     missing_blocks.append(blockname)
+                    missing += 1
+                    print("No Value Found for Block: ", blockname)
     
             # Blockname maps to dictionary
             elif isinstance(value, dict):
@@ -385,13 +400,14 @@ class world2vecDriver:
                 token = value
     
             integerized_build[x, y, z] = token
-    
-        if missing_blocks[0] != "":
-            with open(f"/lustre/fs1/groups/jaedo/world2vec/missing_blocks_builds/{filename}.json", 'w') as f:
-                json.dump(missing_blocks, f)
-    
+        try:
+            if missing > 0:
+                with open(f"/lustre/fs1/groups/jaedo/world2vec/missing_blocks/{filename}.json", 'w') as f:
+                    json.dump(missing_blocks, f)
+        except Exception as e:
+            print(f"Error writing missing blocks to file: {e}")
+            traceback.print_exc()
         return integerized_build
-
 
 def main():
     # Code to load from command line parameters
@@ -401,8 +417,8 @@ def main():
     source_builds_dir = args[2]
     processed_builds_folder = args[3]
     batch_num = args[4]
-    start_index = (int(batch_num) - 1) * 10
-    end_index =  int(batch_num) * 10 - 1
+    start_index = (int(batch_num) - 1) * 100
+    end_index =  int(batch_num) * 100 - 1
     
     print(f"Source Dataframe Path: {source_df_path}")
     print(f"Source Unprocessed Builds Directory: {source_builds_dir}")
