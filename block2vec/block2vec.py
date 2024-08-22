@@ -27,6 +27,7 @@ import umap
 """ Arguments for Block2Vec """
 class Block2VecArgs(Tap):
     max_build_dim: int = 100
+    max_num_targets: int = 8000
     emb_dimension: int = 32
     epochs: int = 3
     batch_size: int = 2
@@ -64,7 +65,8 @@ class Block2Vec(pl.LightningModule):
             directory=self.args.hdf5s_directory,
             tok2block=self.tok2block, 
             context_radius=self.args.context_radius,
-            max_build_dim=self.args.max_build_dim
+            max_build_dim=self.args.max_build_dim,
+            max_num_targets=self.args.max_num_targets
         )
         self.model = SkipGramModel(len(self.tok2block), self.args.emb_dimension)
         self.textures = dict()

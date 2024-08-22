@@ -11,10 +11,11 @@ from torch.utils.data.dataset import Dataset
 
 
 class Block2VecDataset(Dataset):
-    def __init__(self, directory, tok2block: dict, context_radius: int, max_build_dim: int):
+    def __init__(self, directory, tok2block: dict, context_radius: int, max_build_dim: int, max_num_targets: int):
         super().__init__()
         self.tok2block = tok2block
         self.max_build_dim = max_build_dim
+        self.max_num_targets = max_num_targets
         self.block_frequency = dict()
         self.context_radius = context_radius
         self.directory = directory
@@ -85,7 +86,7 @@ class Block2VecDataset(Dataset):
                     return ([], [], self.files[idx])
                 else: 
                     build_array = np.array(file[list(keys)[0]][()], dtype=np.int32)
-                    build_array = slice_to_max_dim(build_array, self.max_build_dim)
+                    #build_array = slice_to_max_dim(build_array, self.max_build_dim)
 
                     logger.info("%s loaded." % build_name)
                     
@@ -93,7 +94,8 @@ class Block2VecDataset(Dataset):
                         logger.info("%s: build of shape %dx%dx%d does not meet minimum dimensions required for context radius %d Skipping." % (self.files[idx], build_array.shape[0], build_array.shape[1], build_array.shape[2], self.context_radius))
                         return ([], [], self.files[idx])
                     else:
-                        target, context = get_target_context_blocks(build_array, self.context_radius)
+                        #target, context = get_target_context_blocks(build_array, self.context_radius)
+                        target, context = get_target_context_blocks_spaced(build_array, self.context_radius, self.max_num_targets)
                         logger.info("%s: %d targets found." % (build_name, len(target)))
 
                         self._store_sizes(build_array) 
@@ -202,3 +204,45 @@ def slice_to_max_dim(arr, max_dim):
 def pad_to_fixed_dim(arr, fixed_dim):
     return np.pad(arr, [(0, fixed_dim - arr.shape[0]), (0, fixed_dim - arr.shape[1]), (0, fixed_dim - arr.shape[2])],
                                     'constant', constant_values=[(-1, -1), (-1, -1), (-1, -1)])
+
+def get_target_context_blocks_spaced(build, context_radius, max_subcubes):
+    target_coords = []
+    context_coords = []
+    
+    x_dim, y_dim, z_dim = build.shape
+    
+    # Calculate the number of sub-cubes per dimension based on max_subcubes
+    subcubes_per_dim = int(np.round((max_subcubes ** (1/3))))
+    
+    # Calculate the new step size to space out the sub-cubes
+    step_size_x = max(1, (x_dim - 2 * context_radius) // subcubes_per_dim)
+    step_size_y = max(1, (y_dim - 2 * context_radius) // subcubes_per_dim)
+    step_size_z = max(1, (z_dim - 2 * context_radius) // subcubes_per_dim)
+    
+    # Iterate over the cube, spacing out the sub-cubes
+    for x in range(context_radius, x_dim - context_radius, step_size_x):
+        for y in range(context_radius, y_dim - context_radius, step_size_y):
+            for z in range(context_radius, z_dim - context_radius, step_size_z):
+                # Stop if we exceed the max number of sub-cubes
+                if len(target_coords) >= max_subcubes:
+                    break
+
+                # The center block (target block)
+                center_block = (x, y, z)
+                target_coords.append(center_block)
+                
+                # The surrounding context blocks
+                context = []
+                for i in range(-context_radius, context_radius + 1):
+                    for j in range(-context_radius, context_radius + 1):
+                        for k in range(-context_radius, context_radius + 1):
+                            # Skip the center block itself
+                            if i == 0 and j == 0 and k == 0:
+                                continue
+                            context.append((x + i, y + j, z + k))
+                
+                context_coords.append(context)
+    
+    return target_coords, context_coords
+
+
