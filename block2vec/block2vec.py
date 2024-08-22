@@ -14,6 +14,8 @@ from loguru import logger
 from matplotlib import pyplot as plt
 from matplotlib import rcParams
 from block2vec_dataset import Block2VecDataset
+
+from block2vec_dataset import custom_collate_fn
 from image_annotations_3d import ImageAnnotations3D
 from skip_gram_model import SkipGramModel
 from sklearn.metrics import ConfusionMatrixDisplay
@@ -21,50 +23,71 @@ from tap import Tap
 from torch.utils.data import DataLoader
 import umap
 
-""" Default arguments for Block2Vec """
+""" Arguments for Block2Vec """
 class Block2VecArgs(Tap):
     emb_dimension: int = 32
-    epochs: int = 30
-    batch_size: int = 256
+    epochs: int = 3
+    batch_size: int = 2
+    num_workers: int = 2
     initial_lr: float = 1e-3
-    neighbor_radius: int = 1
-
+    context_radius: int = 2
     output_path: str = os.path.join("output", "block2vec") 
-    token_to_block_filename: str = "tok_to_block.json"
-    textures_directory: str = os.path.join("textures") 
+    tok2block_filepath: str = "../world2vec/tok2block.json"
+    hdf5s_directory = "hdf5s"
+    extures_directory: str = os.path.join("textures") 
     embeddings_txt_filename: str = "embeddings.txt"
     embeddings_npy_filename: str = "embeddings.npy"
     embeddings_pkl_filename: str = "representations.pkl"
     embeddings_scatterplot_filename: str = "scatter_3d.png"
     embeddings_dist_matrix_filename: str = "dist_matrix.png"
+      
+
 
 class Block2Vec(pl.LightningModule):
     
-    def __init__(self, builds, **kwargs):
+    def __init__(self, **kwargs):
         super().__init__()
         self.args: Block2VecArgs = Block2VecArgs().from_dict(kwargs)
         self.save_hyperparameters()
-        self.builds = builds
-        self.dataset = Block2VecDataset(
-            self.builds,
-            tok2block_filename=self.args.token_to_block_filename, 
-            neighbor_radius=self.args.neighbor_radius,
-        )
-        with open(self.args.token_to_block_filename, "r") as file:
+        with open(self.args.tok2block_filepath, "r") as file:
             self.tok2block = json.load(file)
-               
-        self.emb_size = 32
-        self.model = SkipGramModel(self.emb_size, self.args.emb_dimension)
+        self.dataset = Block2VecDataset(
+            directory=self.args.hdf5s_directory,
+            tok2block=self.tok2block, 
+            context_radius=self.args.context_radius,
+        )
+        self.model = SkipGramModel(len(self.tok2block), self.args.emb_dimension)
         self.textures = dict()
         self.learning_rate = self.args.initial_lr
 
-    def forward(self, *args, **kwargs) -> torch.Tensor:
-        return self.model(*args, **kwargs)
+    def forward(self, target_blocks, context_blocks, **kwargs) -> torch.Tensor:
+        
+        target_blocks = torch.tensor(target_blocks)
+        context_blocks =  torch.tensor(context_blocks) 
+        print("moving forward")
+        print(len(target_blocks))
+        #print(target_blocks)
+        return self.model(target_blocks, context_blocks, **kwargs)
 
     def training_step(self, batch, *args, **kwargs):
-        loss = self.forward(*batch)
-        self.log("loss", loss)
-        return loss
+        print("The length of the batch is: %d" % len(batch))
+        
+        total_batch_loss = 0.0  # Initialize total loss
+
+        for item in batch: 
+            target_blocks, context_blocks = item  # Unpack the tuple
+            loss = self.forward(target_blocks, context_blocks)  # Calculate loss for each (target, context) pair
+            total_batch_loss += loss  # Accumulate the loss
+        
+        # Option 1: Average the loss across the batch
+        average_loss = total_batch_loss / len(batch)
+        self.log("loss", average_loss)
+        return average_loss
+        
+        # Option 2: Sum the loss across the batch (uncomment to use this option)
+        # self.log("loss", total_batch_loss)
+        # return total_batch_loss
+
 
     def configure_optimizers(self):
         optimizer = optim.AdamW(self.model.parameters(), lr=self.learning_rate)
@@ -76,20 +99,13 @@ class Block2Vec(pl.LightningModule):
         return [optimizer], [scheduler]
 
     def train_dataloader(self) -> DataLoader:
-        return DataLoader(
-            self.dataset,
-            batch_size=self.args.batch_size,
-            shuffle=True,
-            pin_memory=True,
-            # This needs to be fixed. 
-            #num_workers=os.cpu_count() or 1,
-            num_workers = 0
-        )
+        return DataLoader(dataset=self.dataset, batch_size=self.args.batch_size, collate_fn=custom_collate_fn, num_workers=self.args.num_workers, persistent_workers=True)
 
     """ Plot and save embeddings at end of each training epoch """
     def on_train_epoch_end(self):
+        print("here")
         embedding_dict = self.save_embedding(
-            self.dataset.idx2block, self.args.output_path
+            self.tok2block, self.args.output_path
         )
         #self.create_confusion_matrix(
             #self.dataset.idx2block, self.args.output_path)
@@ -123,14 +139,18 @@ class Block2Vec(pl.LightningModule):
             f.write("%d %d\n" % (len(id2block), self.args.emb_dimension))
             
             for wid, w in id2block.items():
-                print("wid")
-                print(wid) #number
-                print("w")
-                print(w) #name
-                e = " ".join(map(lambda x: str(x), embeddings[wid]))
-                embedding_dict[self.tok2block[str(wid)]] = torch.from_numpy(embeddings[wid])
+                """
+                print("wid: ")
+                print(wid)
+                print("w: ")
+                print(w)
+                print("embeddings")
+                print(embeddings.shape)
+                """
+                e = " ".join(map(lambda x: str(x), embeddings[int(wid)]))
+                embedding_dict[self.tok2block[str(wid)]] = torch.from_numpy(embeddings[int(wid)])
                 f.write("%s %s\n" % (self.tok2block[str(wid)], e))
-        print(embedding_dict)
+        #print(embedding_dict)
         np.save(os.path.join(output_path, self.args.embeddings_npy_filename), embeddings)
         
         with open(os.path.join(output_path, self.args.embeddings_pkl_filename), "wb") as f:

@@ -3708,5 +3708,10 @@
     "3706": "minecraft:yellow_wall_banner",
     "3707": "minecraft:yellow_wool",
     "3708": "minecraft:zombie_head",
-    "3709": "minecraft:zombie_wall_head"
+    "3709": "minecraft:zombie_wall_head", 
+    "3710": "minecraft:calibrated_sculk_sensor",
+    "3711": "minecraft:pitcher_crop[half=lower]", 
+    "3712": "minecraft:pitcher_crop[half=upper]", 
+    "3713": "minecraft:pitcher_plant", 
+    "3714": "UNKNOWN_BLOCK"
 }
