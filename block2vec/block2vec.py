@@ -26,6 +26,7 @@ import umap
 
 """ Arguments for Block2Vec """
 class Block2VecArgs(Tap):
+    max_build_dim: int = 100
     emb_dimension: int = 32
     epochs: int = 3
     batch_size: int = 2
@@ -38,6 +39,7 @@ class Block2VecArgs(Tap):
     hdf5s_directory = "hdf5s"
     textures_directory: str = os.path.join("textures") 
     embeddings_txt_filename: str = "embeddings.txt"
+    embeddings_json_filename: str = "embeddings.json"
     embeddings_npy_filename: str = "embeddings.npy"
     embeddings_pkl_filename: str = "representations.pkl"
     embeddings_scatterplot_filename: str = "scatter_3d.png"
@@ -62,6 +64,7 @@ class Block2Vec(pl.LightningModule):
             directory=self.args.hdf5s_directory,
             tok2block=self.tok2block, 
             context_radius=self.args.context_radius,
+            max_build_dim=self.args.max_build_dim
         )
         self.model = SkipGramModel(len(self.tok2block), self.args.emb_dimension)
         self.textures = dict()
@@ -85,9 +88,10 @@ class Block2Vec(pl.LightningModule):
         
         # For each item in the batch, which is the tuple: (target_blocks_list, context_blocks_list) for ONE build
         for item in batch: 
-            target_blocks, context_blocks = item  # The target and context block lists for ONE build
+            target_blocks, context_blocks, build_name = item  # The target and context block lists for ONE build
+            print("Calculating loss for %s" % build_name)
             loss = self.forward(target_blocks, context_blocks)  # Loss returned from the SkipGram model for that entire build
-            total_batch_loss += loss  # Accumulate the loss
+            total_batch_loss =  total_batch_loss + loss  # Accumulate the loss
         
         # Option 1: Average the loss across the batch
         average_loss = total_batch_loss / len(batch)
@@ -147,7 +151,7 @@ class Block2Vec(pl.LightningModule):
         # embeddings = embeddings / torch.norm(embeddings, p=2, dim=-1, keepdim=True)
         embeddings = embeddings.cpu().data.numpy()
         embedding_dict = {}
-        
+
         with open(os.path.join(output_path, self.args.embeddings_txt_filename), "w") as f:
 
             f.write("%d %d\n" % (len(id2block), self.args.emb_dimension))
@@ -158,6 +162,16 @@ class Block2Vec(pl.LightningModule):
                 f.write("%s %s\n" % (self.tok2block[str(wid)], e))
         #print(embedding_dict)
         np.save(os.path.join(output_path, self.args.embeddings_npy_filename), embeddings)
+        
+        # Create a copy of the embedding_dict with tensors converted to lists
+        embedding_dict_copy = {
+            key: value.tolist() if isinstance(value, torch.Tensor) else value
+            for key, value in embedding_dict.items()
+        }
+    
+        # Write the modified copy to the JSON file
+        with open(os.path.join(output_path, self.args.embeddings_json_filename), 'w') as f:
+            json.dump(embedding_dict_copy, f, indent=4)
         
         with open(os.path.join(output_path, self.args.embeddings_pkl_filename), "wb") as f:
             pickle.dump(embedding_dict, f)

@@ -11,9 +11,10 @@ from torch.utils.data.dataset import Dataset
 
 
 class Block2VecDataset(Dataset):
-    def __init__(self, directory, tok2block: dict, context_radius: int):
+    def __init__(self, directory, tok2block: dict, context_radius: int, max_build_dim: int):
         super().__init__()
         self.tok2block = tok2block
+        self.max_build_dim = max_build_dim
         self.block_frequency = dict()
         self.context_radius = context_radius
         self.directory = directory
@@ -73,32 +74,35 @@ class Block2VecDataset(Dataset):
     """ Lazy-loads each build into memory. """
     """ Returns tuple: (target [], context []) """
     def __getitem__(self, idx):
-        context_radius = 2
+        build_name = self.files[idx]
+
         file_path = os.path.join(self.directory, self.files[idx])
         try: 
             with h5py.File(file_path, "r") as file:
                 keys = file.keys()
                 if len(keys) == 0:
                     print("%s failed loading: no keys." % self.files[idx])
-                    return ([], [])
+                    return ([], [], self.files[idx])
                 else: 
                     build_array = np.array(file[list(keys)[0]][()], dtype=np.int32)
+                    build_array = slice_to_max_dim(build_array, self.max_build_dim)
+
                     print("%s loaded." % self.files[idx])
                     
-                    if not has_valid_dims(build_array, context_radius): 
-                        print("%s: build of shape %dx%dx%d does not meet minimum dimensions required for context radius %d Skipping." % (self.files[idx], build_array.shape[0], build_array.shape[1], build_array.shape[2], context_radius))
-                        return ([], [])
+                    if not has_valid_dims(build_array, self.context_radius): 
+                        print("%s: build of shape %dx%dx%d does not meet minimum dimensions required for context radius %d Skipping." % (self.files[idx], build_array.shape[0], build_array.shape[1], build_array.shape[2], self.context_radius))
+                        return ([], [], self.files[idx])
                     else:
-                        target, context = get_target_context_blocks(build_array, context_radius)
+                        target, context = get_target_context_blocks(build_array, self.context_radius)
                         print("%d targets found." % len(target))
 
                         self._store_sizes(build_array) 
-                        return (target, context)
+                        return (target, context, self.files[idx])
                 
         except Exception as e: 
             print(traceback.format_exc())
             print(f"{self.files[idx]} failed loading due to error: \"{e}\"")
-            return ([], [])
+            return ([], [], self.files[idx])
     
     """ Visalization of target and neighbor block context for documentation """
     def plot_coords(self, target_coord, context_coords): 
@@ -121,13 +125,13 @@ def custom_collate_fn(batch):
     filtered_batch = []
     for item in batch: 
         print("item is: ", len(item[0]))
-        target_blocks, context_blocks = item[0], item[1]
+        target_blocks, context_blocks, build_name = item[0], item[1], item[2]
         if not (len(target_blocks) == 0): 
-            filtered_batch.append((target_blocks, context_blocks))
+            filtered_batch.append((target_blocks, context_blocks, build_name))
 
     return filtered_batch
 
-def get_target_context_blocks(build, context_radius=2):
+def get_target_context_blocks(build, context_radius):
     print("build shape is: ", build.shape)
     target_blocks = []
     context_blocks = []
@@ -173,3 +177,29 @@ def has_valid_dims(build, context_radius):
     if (build.shape[0] < min_dimension or build.shape[1] < min_dimension or build.shape[2] < min_dimension): 
         return False
     return True
+
+def trim_build(build, max_dim): 
+    x_dim, y_dim, z_dim = build.shape
+
+    x_slice = slice(0, min(x_dim, max_dim))
+    y_slice = slice(0, min(y_dim, max_dim))
+    z_slice = slice(0, min(z_dim, max_dim))
+
+    # Slice the array
+    return build[x_slice, y_slice, z_slice]
+
+def slice_to_max_dim(arr, max_dim):
+    # Obtain the current dimensions of the array
+    x_dim, y_dim, z_dim = arr.shape
+
+    # Calculate the slice ranges for each dimension
+    x_slice = slice(0, min(x_dim, max_dim))
+    y_slice = slice(0, min(y_dim, max_dim))
+    z_slice = slice(0, min(z_dim, max_dim))
+
+    # Slice the array
+    return arr[x_slice, y_slice, z_slice]
+
+def pad_to_fixed_dim(arr, fixed_dim):
+    return np.pad(arr, [(0, fixed_dim - arr.shape[0]), (0, fixed_dim - arr.shape[1]), (0, fixed_dim - arr.shape[2])],
+                                    'constant', constant_values=[(-1, -1), (-1, -1), (-1, -1)])
