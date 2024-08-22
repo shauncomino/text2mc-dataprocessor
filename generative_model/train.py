@@ -8,47 +8,26 @@ from text2mcVAE import text2mcVAE
 from text2mcVAEDataset import text2mcVAEDataset
 from torch.utils.data import DataLoader
 
-# Prediction functions
-# Convert the predicted embeddings to their tokens
-def embeddings_to_tokens(pred_embeddings, token_to_embedding):
-    embeddings_array = np.array(list(token_to_embedding.values()))
-    tokens_array = np.array(list(token_to_embedding.keys()))
-
-    def nearest_token(embedding):
-        distances = np.linalg.norm(embeddings_array - embedding, axis=1)
-        return tokens_array[np.argmin(distances)]
-
-    # Assuming pred_embeddings is a PyTorch tensor
-    token_tensor = torch.zeros_like(pred_embeddings[..., 0], dtype=torch.long)
-    for idx, embedding in np.ndenumerate(pred_embeddings):
-        token_tensor[idx] = nearest_token(embedding.cpu().numpy())
-
-    return token_tensor
-
-# Convert token array to block name array
-def tokens_to_block_names(pred_tokens, tok2block):
-    # Vectorized conversion of tokens to block names
-    vectorized_conversion = np.vectorize(lambda token: tok2block[token])
-    block_names = vectorized_conversion(pred_tokens)
-    return block_names
-
-# Generate a full Minecraft build
-def generate_minecraft_builds(model, input_data, token_to_embedding, tok2block):
-    model.eval()
-    with torch.no_grad():
-        pred_embeddings = model(input_data)
-        pred_tokens = embeddings_to_tokens(pred_embeddings, token_to_embedding)
-        pred_block_names = tokens_to_block_names(pred_tokens.numpy(), tok2block)
-    return pred_block_names
-
-
 # Training functionality
 def loss_function(recon_x, x, mu, logvar, mask):
-    recon_x_masked = recon_x * mask.unsqueeze(1)
-    x_masked = x * mask.unsqueeze(1)
+    # Ensure mask is expanded to match the dimensions of recon_x
+    # recon_x shape: [batch_size, C, D, H, W], we want mask to be [batch_size, 1, D, H, W]
+    mask_expanded = mask.unsqueeze(1)  # Add a singleton dimension for channels
+
+    # Ensure the mask is broadcastable across the channel dimension
+    # recon_x might have more than one channel, replicate mask across channels
+    mask_expanded = mask_expanded.expand_as(recon_x)  
+
+    # Apply the mask
+    recon_x_masked = recon_x * mask_expanded
+    x_masked = x * mask_expanded
+
+    # Calculate the Binary Cross-Entropy loss and KL Divergence
     BCE = nn.functional.binary_cross_entropy(recon_x_masked, x_masked, reduction='sum')
     KLD = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp())
+
     return BCE + KLD
+
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 model = text2mcVAE().to(device)
@@ -70,17 +49,50 @@ def train(epoch, data_loader):
     print(f'====> Epoch: {epoch} Average loss: {total_loss / len(data_loader.dataset):.4f}')
 
 # Training function call
-training_df = pd.read_csv(r'projects_df_processed.csv')
-tok2embedding = json.loads(r'tok2embedding.json')
+tok2block = None
+block2embedding = None
+block2embedding_file_path = r'block2vec/output/block2vec/embeddings.json'
+tok2block_file_path = r'world2vec/tok2block.json'
+with open(block2embedding_file_path, 'r') as j:
+    block2embedding = json.loads(j.read())
 
-hdf5_filepaths = list(training_df['FILEPATHS'])
-dataset = text2mcVAEDataset(file_paths=hdf5_filepaths, token_to_embeddings=tok2embedding, block_ignore_list=["minecraft:air"])
+with open(tok2block_file_path, 'r') as j:
+    tok2block = json.loads(j.read())
 
+# Create a new dictionary mapping tokens directly to embeddings
+tok2embedding = {}
 
-data_loader = DataLoader(dataset, batch_size=4, shuffle=True)
-num_epochs = 10
+for token, block_name in tok2block.items():
+    # Ensure that the block name exists in the block2embedding dictionary before assigning
+    if block_name in block2embedding:
+        tok2embedding[token] = block2embedding[block_name]
+    else:
+        print(f"Warning: Block name '{block_name}' not found in embeddings. Skipping token '{token}'.")
+
+hdf5_filepaths = [
+    r'/mnt/d/processed_builds_compressed/rar_test5_Desert+Tavern+2.h5',
+    r'/mnt/d/processed_builds_compressed/rar_test6_Desert_Tavern.h5',
+    r'/mnt/d/processed_builds_compressed/zip_test_0_LargeSandDunes.h5'
+]
+
+dataset = text2mcVAEDataset(file_paths=hdf5_filepaths, tok2embedding=tok2embedding, block_ignore_list=[102])
+
+data_loader = DataLoader(dataset, batch_size=2, shuffle=True)
+
+build, mask = next(iter(data_loader))
+num_epochs = 1
 for epoch in range(1, num_epochs + 1):
     train(epoch, data_loader)
+# Convert tensors to numpy arrays
+# build_np = build.numpy()
+# mask_np = mask.numpy()
 
+# # Find unique values and their counts in the build and mask arrays
+# unique_build, counts_build = np.unique(build_np, return_counts=True)
+# unique_mask, counts_mask = np.unique(mask_np, return_counts=True)
+
+# # Output the results
+# print("Build unique values and counts:", list(zip(unique_build, counts_build)))
+# print("Mask unique values and counts:", list(zip(unique_mask, counts_mask)))
 
 

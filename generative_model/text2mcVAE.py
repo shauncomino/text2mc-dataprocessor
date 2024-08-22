@@ -3,19 +3,22 @@ import torch.nn as nn
 import torch.optim as optim
 
 class text2mcVAE(nn.Module):
-    def __init__(self, embedding_dim=16, latent_dim=128):
+    def __init__(self, embedding_dim=32, latent_dim=128):
         super(text2mcVAE, self).__init__()
         self.encoder = nn.Sequential(
-            nn.Conv3d(embedding_dim, 32, kernel_size=3, stride=2, padding=1),
+            nn.Conv3d(embedding_dim, 32, kernel_size=3, stride=2, padding=1),  # Reduces each dimension by half
             nn.ReLU(),
-            nn.Conv3d(32, 64, kernel_size=3, stride=2, padding=1),
+            nn.Conv3d(32, 64, kernel_size=3, stride=2, padding=1),  # Again reduces by half
             nn.ReLU(),
-            nn.Conv3d(64, 128, kernel_size=3, stride=2, padding=1),
+            nn.Conv3d(64, 128, kernel_size=3, stride=2, padding=1),  # Again reduces by half
             nn.ReLU(),
+            nn.AdaptiveAvgPool3d((4, 4, 4)),  # Reduces everything to a fixed size (4, 4, 4)
             nn.Flatten()
         )
-        self.fc_mu = nn.Linear(128 * 8 * 8 * 8, latent_dim)
-        self.fc_logvar = nn.Linear(128 * 8 * 8 * 8, latent_dim)
+
+        self.fc_mu = nn.Linear(128 * 4 * 4 * 4, latent_dim)
+        self.fc_logvar = nn.Linear(128 * 4 * 4 * 4, latent_dim)
+
         self.decoder = nn.Sequential(
             nn.Unflatten(1, (latent_dim, 1, 1, 1)),
             nn.ConvTranspose3d(latent_dim, 128, kernel_size=3, stride=2),
@@ -35,6 +38,7 @@ class text2mcVAE(nn.Module):
 
     def forward(self, x):
         encoded = self.encoder(x)
+        print(f"Encoded shape: {encoded.shape}")  # Check the output shape
         mu = self.fc_mu(encoded)
         logvar = self.fc_logvar(encoded)
         z = self.reparameterize(mu, logvar)
