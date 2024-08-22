@@ -61,7 +61,6 @@ def custom_collate_fn(batch):
     return filtered_batch
 
 def get_target_context_blocks(build, context_radius=2):
-    print("build shape is: ", build.shape)
     target_coords = []
     context_coords = []
     

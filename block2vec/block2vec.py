@@ -77,8 +77,6 @@ class Block2Vec(pl.LightningModule):
         return self.model(target_blocks, context_blocks, **kwargs)
 
     def training_step(self, batch, *args, **kwargs):
-        print("The length of the batch is: %d" % len(batch))
-
         total_batch_loss = torch.tensor(0.0, requires_grad=True) # Initialize total batch loss
 
         if (len(batch)) == 0: 
@@ -89,13 +87,14 @@ class Block2Vec(pl.LightningModule):
         # For each item in the batch, which is the tuple: (target_blocks_list, context_blocks_list) for ONE build
         for item in batch: 
             target_blocks, context_blocks, build_name = item  # The target and context block lists for ONE build
-            print("Calculating loss for %s" % build_name)
+            logger.info("Passing %s forward: target blocks = %d" % (build_name, len(target_blocks)))
+            
             loss = self.forward(target_blocks, context_blocks)  # Loss returned from the SkipGram model for that entire build
             total_batch_loss =  total_batch_loss + loss  # Accumulate the loss
         
         # Option 1: Average the loss across the batch
         average_loss = total_batch_loss / len(batch)
-        self.log("loss", average_loss)
+        logger.info("Batch loss: %f" % average_loss)
         return average_loss
         
         # Option 2: Sum the loss across the batch 
@@ -116,7 +115,6 @@ class Block2Vec(pl.LightningModule):
 
     """ Plot and save embeddings at end of each training epoch """
     def on_train_epoch_end(self):
-        print("here")
         embedding_dict = self.save_embedding(
             self.tok2block, self.args.output_path
         )
@@ -160,7 +158,6 @@ class Block2Vec(pl.LightningModule):
                 e = " ".join(map(lambda x: str(x), embeddings[int(wid)]))
                 embedding_dict[self.tok2block[str(wid)]] = torch.from_numpy(embeddings[int(wid)])
                 f.write("%s %s\n" % (self.tok2block[str(wid)], e))
-        #print(embedding_dict)
         np.save(os.path.join(output_path, self.args.embeddings_npy_filename), embeddings)
         
         # Create a copy of the embedding_dict with tensors converted to lists

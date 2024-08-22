@@ -81,28 +81,28 @@ class Block2VecDataset(Dataset):
             with h5py.File(file_path, "r") as file:
                 keys = file.keys()
                 if len(keys) == 0:
-                    print("%s failed loading: no keys." % self.files[idx])
+                    logger.info("%s failed loading: no keys." % build_name)
                     return ([], [], self.files[idx])
                 else: 
                     build_array = np.array(file[list(keys)[0]][()], dtype=np.int32)
                     build_array = slice_to_max_dim(build_array, self.max_build_dim)
 
-                    print("%s loaded." % self.files[idx])
+                    logger.info("%s loaded." % build_name)
                     
                     if not has_valid_dims(build_array, self.context_radius): 
-                        print("%s: build of shape %dx%dx%d does not meet minimum dimensions required for context radius %d Skipping." % (self.files[idx], build_array.shape[0], build_array.shape[1], build_array.shape[2], self.context_radius))
+                        logger.info("%s: build of shape %dx%dx%d does not meet minimum dimensions required for context radius %d Skipping." % (self.files[idx], build_array.shape[0], build_array.shape[1], build_array.shape[2], self.context_radius))
                         return ([], [], self.files[idx])
                     else:
                         target, context = get_target_context_blocks(build_array, self.context_radius)
-                        print("%d targets found." % len(target))
+                        logger.info("%s: %d targets found." % (build_name, len(target)))
 
                         self._store_sizes(build_array) 
                         return (target, context, self.files[idx])
                 
         except Exception as e: 
             print(traceback.format_exc())
-            print(f"{self.files[idx]} failed loading due to error: \"{e}\"")
-            return ([], [], self.files[idx])
+            print(f"{build_name} failed loading due to error: \"{e}\"")
+            return ([], [], build_name)
     
     """ Visalization of target and neighbor block context for documentation """
     def plot_coords(self, target_coord, context_coords): 
@@ -124,15 +124,14 @@ class Block2VecDataset(Dataset):
 def custom_collate_fn(batch):
     filtered_batch = []
     for item in batch: 
-        print("item is: ", len(item[0]))
         target_blocks, context_blocks, build_name = item[0], item[1], item[2]
         if not (len(target_blocks) == 0): 
+            logger.info("%s added to batch." % build_name)
             filtered_batch.append((target_blocks, context_blocks, build_name))
 
     return filtered_batch
 
 def get_target_context_blocks(build, context_radius):
-    print("build shape is: ", build.shape)
     target_blocks = []
     context_blocks = []
     

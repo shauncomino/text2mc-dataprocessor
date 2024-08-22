@@ -20,7 +20,6 @@ class SkipGramModel(nn.Module):
     
     def forward(self, target_blocks, context_blocks):
         total_batch_loss = 0.0
-        print("Processing %d targets" % (len(target_blocks)))
         
         if target_blocks is None or context_blocks is None or len(target_blocks) == 0 or len(context_blocks) == 0:
             print("Error: Did not receive target or context blocks in forward pass.")
