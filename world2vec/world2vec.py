@@ -36,7 +36,7 @@ class World2Vec:
             if "DIM-1" in root or "DIM1" in root or "poi" in root:
                 continue
             # Check if any file ends with .mca in the current directory
-            if any(file.endswith('.mca') for file in files):
+            if any(file.endswith(".mca") for file in files):
                 # If so, add the current directory to the list
                 folders_with_mca.append(root)
         return folders_with_mca
@@ -115,7 +115,7 @@ class World2Vec:
     def get_build(
         dir: str, save_dir: str, build_name: str, natural_blocks_path: str = None
     ) -> List[str]:
-        print("Searching directories: " + dir)        # Read in the natural blocks to an array
+        print("Searching directories: " + dir)  # Read in the natural blocks to an array
         if natural_blocks_path is None:
             nb_file = open("natural_blocks.txt", "r")
         else:
@@ -181,7 +181,8 @@ class World2Vec:
                                     inhabited_time_exist = False
                                 # Check whether the chunk has been visited at all, if not we can skip checking it
                                 if (
-                                    inhabited_time_exist == False or inhabited_time >= inhabited_time_check
+                                    inhabited_time_exist == False
+                                    or inhabited_time >= inhabited_time_check
                                 ):
 
                                     superflat_mode = False
@@ -212,9 +213,9 @@ class World2Vec:
                                             chunk, section=section
                                         ):
                                             block = World2Vec.convert_if_old(block)
-                                            if block != None and not anvil.Block.name(block).startswith(
-                                                "minecraft"
-                                            ):
+                                            if block != None and not anvil.Block.name(
+                                                block
+                                            ).startswith("minecraft"):
                                                 # This is a modded block, and we should skip the build
                                                 print(
                                                     "Modded block found in build. Skipping..."
@@ -551,18 +552,18 @@ class World2Vec:
         # Create a 3D array with dimensions from JSON
         world_array = np.zeros((width, height, length), dtype=object)
         # Initialize counters for skipped and modded blocks
-    
+
         # Fill the array with block names based on JSON data
         for block in data["blocks"]:
             x, y, z = block["x"], block["y"], block["z"]
             block_name = block["name"]
-            
+
             try:
                 if block_name[0].isupper():
                     continue
                 elif not block_name.startswith("minecraft:"):
                     return None
-                
+
                 world_array[x, y, z] = block_name
 
             except IndexError:
