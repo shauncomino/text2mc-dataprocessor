@@ -123,15 +123,19 @@ class world2vecDriver:
             except Exception as e:
                 print(e)
                 traceback.format_exc()
-        
-        batch_csvs_dir = os.path.join(os.path.dirname(self.cfg.PROCESSED_BUILDS_FOLDER), "batch_csvs")
+
+        batch_csvs_dir = os.path.join(
+            os.path.dirname(self.cfg.PROCESSED_BUILDS_FOLDER), "batch_csvs"
+        )
         os.makedirs(batch_csvs_dir, exist_ok=True)
 
         output_csv_path = os.path.join(batch_csvs_dir, f"batch_{batch_num}.csv")
         dataframe.to_csv(output_csv_path, index=False)
         shutil.rmtree(temp_dir_path)
 
-        print(f"Batch {batch_num}: {successes} builds successfully processed out of {end_index - start_index}\n")
+        print(
+            f"Batch {batch_num}: {successes} builds successfully processed out of {end_index - start_index}\n"
+        )
 
     def process_build(
         self,
@@ -206,7 +210,7 @@ class world2vecDriver:
                 self.delete_directory_contents(temp_extract)
                 return None
             if straight_to_hdf5 & len(processed_paths) > 0:
-                
+
                 new_paths = list()
                 temp_json_path = None
                 hdf5_path = None
@@ -225,7 +229,7 @@ class world2vecDriver:
                                 f"{processed_file_name}_{index}.h5",
                             )
                             processed_file_name = processed_file_name + "_" + str(index)
-                        else:  
+                        else:
                             temp_json_path = os.path.join(
                                 temp_dir_path, f"{processed_file_name}.json"
                             )
@@ -240,7 +244,9 @@ class world2vecDriver:
                         print("Converted to npy")
                         if npy_array is None:
                             continue
-                        npy_array = self.convert_block_names_to_integers(npy_array, processed_file_name)
+                        npy_array = self.convert_block_names_to_integers(
+                            npy_array, processed_file_name
+                        )
                         print("Converted block names to integers")
                         self.convert_vector_to_hdf5(npy_array, hdf5_path)
                         print("Converted to hdf5")
@@ -297,14 +303,13 @@ class world2vecDriver:
             [
                 "java",
                 "-jar",
-                '-Xms512m',  # Set initial Java heap size
-                '-Xmx30G',
+                "-Xms512m",  # Set initial Java heap size
+                "-Xmx30G",
                 self.cfg.JAR_RUNNER_PATH,
                 schem_file_path,
                 json_export_path,
             ]
         )
-
 
     def convert_json_to_npy(self, json_file_path) -> np.ndarray:
         return World2Vec.export_json_to_npy(json_file_path)
@@ -365,49 +370,53 @@ class world2vecDriver:
             token = None
 
             blockname = World2Vec.convert_if_old(blockname)
-    
+
             # If there are block states, separate from block name
-            if isinstance(blockname,str) and "[" in blockname:
+            if isinstance(blockname, str) and "[" in blockname:
                 blockstates = blockname.replace("[", ",").replace("]", "").split(",")
                 blockname = blockstates.pop(0)
             else:
                 continue
-    
+
             value = block2tok.get(blockname)
-    
+
             # Blockname maps to nothing
             if value is None:
-                
+
                 token = self.cfg.NIV_TOK
                 if blockname not in missing_blocks:
                     missing_blocks.append(blockname)
                     missing += 1
                     print("No Value Found for Block: ", blockname)
-    
+
             # Blockname maps to dictionary
             elif isinstance(value, dict):
                 standard_blockstates = self.find_closest_match(
                     blockstates, value.keys()
                 )
-    
+
                 if standard_blockstates is None:
                     standard_blockstates = list(value.keys())[0]
-    
+
                 token = value.get(standard_blockstates)
-    
+
             # Blockname maps directly to token
             else:
                 token = value
-    
+
             integerized_build[x, y, z] = token
         try:
             if missing > 0:
-                with open(f"/lustre/fs1/groups/jaedo/world2vec/missing_blocks/{filename}.json", 'w') as f:
+                with open(
+                    f"/lustre/fs1/groups/jaedo/world2vec/missing_blocks/{filename}.json",
+                    "w",
+                ) as f:
                     json.dump(missing_blocks, f)
         except Exception as e:
             print(f"Error writing missing blocks to file: {e}")
             traceback.print_exc()
         return integerized_build
+
 
 def main():
     # Code to load from command line parameters
@@ -418,8 +427,8 @@ def main():
     processed_builds_folder = args[3]
     batch_num = args[4]
     start_index = (int(batch_num) - 1) * 100
-    end_index =  int(batch_num) * 100 - 1
-    
+    end_index = int(batch_num) * 100 - 1
+
     print(f"Source Dataframe Path: {source_df_path}")
     print(f"Source Unprocessed Builds Directory: {source_builds_dir}")
     print(f"Processed Builds Directory: {processed_builds_folder}")
@@ -427,7 +436,10 @@ def main():
     print(f"Ending Index: {end_index}")
     print(f"Batch Number: {batch_num}")
 
-    config = world2vecDriverConfig(DOWNLOADED_BUILDS_FOLDER=source_builds_dir, PROCESSED_BUILDS_FOLDER=processed_builds_folder)
+    config = world2vecDriverConfig(
+        DOWNLOADED_BUILDS_FOLDER=source_builds_dir,
+        PROCESSED_BUILDS_FOLDER=processed_builds_folder,
+    )
     world2vecdriver = world2vecDriver(cfg=config)
 
     world2vecdriver.process_batch(source_df_path, start_index, end_index, batch_num)
