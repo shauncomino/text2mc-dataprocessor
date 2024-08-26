@@ -27,17 +27,18 @@ import umap
 """ Arguments for Block2Vec """
 class Block2VecArgs(Tap):
     max_build_dim: int = 100
-    max_num_targets: int = 8000
+    max_num_targets: int = 100
+    build_limit: int = 10
     emb_dimension: int = 32
     epochs: int = 3
     batch_size: int = 2
-    num_workers: int = 2
+    num_workers: int = 6
     initial_lr: float = 1e-3
     context_radius: int = 2
     output_path: str = os.path.join("output", "block2vec") 
     tok2block_filepath: str = "../world2vec/tok2block.json"
     block2texture_filepath: str = "../world2vec/block2texture.json"
-    hdf5s_directory = "hdf5s"
+    hdf5s_directory = "../processed_builds"
     textures_directory: str = os.path.join("textures") 
     embeddings_txt_filename: str = "embeddings.txt"
     embeddings_json_filename: str = "embeddings.json"
@@ -66,7 +67,8 @@ class Block2Vec(pl.LightningModule):
             tok2block=self.tok2block, 
             context_radius=self.args.context_radius,
             max_build_dim=self.args.max_build_dim,
-            max_num_targets=self.args.max_num_targets
+            max_num_targets=self.args.max_num_targets, 
+            build_limit=self.args.build_limit
         )
         self.model = SkipGramModel(len(self.tok2block), self.args.emb_dimension)
         self.textures = dict()
@@ -122,7 +124,7 @@ class Block2Vec(pl.LightningModule):
         )
         #self.create_confusion_matrix(
             #self.dataset.idx2block, self.args.output_path)
-        # self.plot_embeddings(embedding_dict, self.args.output_path)
+        #self.plot_embeddings(embedding_dict, self.args.output_path)
 
     """ Reads texture .png file for a given token """
     def read_texture(self, block: str):
@@ -180,7 +182,7 @@ class Block2Vec(pl.LightningModule):
     """ Plot generated block embeddings """
     def plot_embeddings(self, embedding_dict: Dict[str, np.ndarray], output_path: str):
         # Increase the figure size for better visibility
-        fig = plt.figure(figsize=(55, 55))
+        fig = plt.figure(figsize=(85, 55))
         ax = fig.add_subplot(111, projection="3d")
         
         # Prepare the legend and corresponding textures
@@ -193,7 +195,7 @@ class Block2Vec(pl.LightningModule):
         # If embeddings are not 3-dimensional, reduce them to 3D using UMAP
         if embeddings.shape[-1] != 3:
             embeddings_3d = umap.UMAP(
-                n_neighbors=10, min_dist=0.9, n_components=3
+                n_neighbors=30, min_dist=0.9, n_components=3
             ).fit_transform(embeddings)
         else:
             embeddings_3d = embeddings

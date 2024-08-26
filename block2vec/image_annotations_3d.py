@@ -50,7 +50,8 @@ class ImageAnnotations3D:
 
     def label(self, label, xy):
         # need mindescent = false
-        text = offsetbox.TextArea(label)
+        # text = offsetbox.TextArea(label)
+        text = offsetbox.TextArea(label, textprops={'fontsize': 2})
         ab = offsetbox.AnnotationBbox(text, xy,
                                       xybox=(0, 16),
                                       xycoords='data',
