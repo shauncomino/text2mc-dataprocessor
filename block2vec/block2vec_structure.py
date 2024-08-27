@@ -95,7 +95,7 @@ def get_target_context_blocks(build, context_radius=2):
 if __name__ == '__main__':
     directory = 'hdf5s'
     dataset = Block2VecDataset(directory)
-    dataloader = DataLoader(dataset, batch_size=2, collate_fn=custom_collate_fn, num_workers=2)
+    dataloader = DataLoader(dataset, batch_size=5, collate_fn=custom_collate_fn, num_workers=2)
 
     for batch in dataloader:
         

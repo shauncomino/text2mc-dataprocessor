@@ -11,8 +11,9 @@ from torch.utils.data.dataset import Dataset
 
 
 class Block2VecDataset(Dataset):
-    def __init__(self, directory, tok2block: dict, context_radius: int, max_build_dim: int, max_num_targets: int):
+    def __init__(self, directory, tok2block: dict, context_radius: int, max_build_dim: int, max_num_targets: int, build_limit: int):
         super().__init__()
+        self.build_limit = build_limit
         self.tok2block = tok2block
         self.max_build_dim = max_build_dim
         self.max_num_targets = max_num_targets
@@ -20,9 +21,14 @@ class Block2VecDataset(Dataset):
         self.context_radius = context_radius
         self.directory = directory
         self.files = []
+        count = 0
         for filename in os.listdir(directory):
             if filename.endswith(".h5"):
                 self.files.append(filename)
+                count += 1
+                if (self.build_limit != -1 and count >= build_limit): 
+                    break 
+                
         logger.info("Found {} .h5 builds.", len(self.files))
    
     def __len__(self):
@@ -34,8 +40,8 @@ class Block2VecDataset(Dataset):
         token_frequencies = list(self.block_frequency.values())
         freq = np.array(token_frequencies) / sum(token_frequencies)
         self.discards = 1.0 - (np.sqrt(freq / threshold) + 1) * (threshold / freq)
-
-    """ Size stuff"""
+ 
+    """ Size stuff
     def _store_sizes(self, build): 
         x_max, y_max, z_max = build.shape
 
@@ -71,7 +77,8 @@ class Block2VecDataset(Dataset):
                 self.block_frequency[block_name] = 1
               
         logger.info("Found the following blocks {blocks}", blocks=dict(self.block_frequency))
-
+    """
+    
     """ Lazy-loads each build into memory. """
     """ Returns tuple: (target [], context []) """
     def __getitem__(self, idx):
@@ -98,7 +105,7 @@ class Block2VecDataset(Dataset):
                         target, context = get_target_context_blocks_spaced(build_array, self.context_radius, self.max_num_targets)
                         logger.info("%s: %d targets found." % (build_name, len(target)))
 
-                        self._store_sizes(build_array) 
+                        #self._store_sizes(build_array) 
                         return (target, context, self.files[idx])
                 
         except Exception as e: 

@@ -3,7 +3,7 @@ import json
 import time
 import os, shutil
 from dataclasses import dataclass, field
-from typing import Optional, List
+from typing import Optional, List, Tuple
 import re
 from itertools import product
 import traceback
@@ -111,7 +111,7 @@ class world2vecDriver:
             try:
                 unique_name = f"batch_{batch_num}_{str(i)}"
                 filename = row["FILENAME"]
-                processed_paths = self.process_build(
+                processed_paths, file_type = self.process_build(
                     filename,
                     processed_file_name=unique_name,
                     temp_dir_path=temp_dir_path,
@@ -119,6 +119,7 @@ class world2vecDriver:
                 if not processed_paths:
                     continue
                 dataframe.at[i, "PROCESSED_PATHS"] = processed_paths
+                dataframe.at[i,"SUFFIX"] = file_type
                 successes += 1
             except Exception as e:
                 print(e)
@@ -143,7 +144,7 @@ class world2vecDriver:
         processed_file_name: str = "temp_schem",
         temp_dir_path: str = "temp",
         straight_to_hdf5=True,
-    ) -> List[str]:
+    ) -> Tuple[List[str], str]:
         """
         Process a single build file and return the processed paths.
 
@@ -152,6 +153,7 @@ class world2vecDriver:
         :return: A list of processed file paths.
         """
         processed_paths = []
+        file_type = None
         if not os.path.exists(temp_dir_path):
             os.mkdir(temp_dir_path)
 
@@ -188,9 +190,11 @@ class world2vecDriver:
                 if len(schems_paths) > 0:
                     processed_paths = schems_paths
                     print("Processing schem")
+                    file_type = "schem"
 
                 # If neither '.schem' nor '.schematic' files are found, but '.mca' files are, convert them
-                if len(mca_paths) > 0 and len(schems_paths) == 0:
+                elif len(mca_paths) > 0:
+                    file_type = "mca"
                     schem_paths = self.convert_build_to_schemfile(
                         temp_extract, f"build_{processed_file_name}"
                     )
@@ -202,6 +206,7 @@ class world2vecDriver:
                         return None
 
             elif filename.endswith(".schematic") or filename.endswith(".schem"):
+                file_type = "schem"
                 processed_paths = [
                     os.path.join(self.cfg.DOWNLOADED_BUILDS_FOLDER, filename)
                 ]
@@ -269,7 +274,7 @@ class world2vecDriver:
             print(f"Error processing build {filename}: {e}")
             traceback.print_exc()
 
-        return processed_paths
+        return processed_paths, file_type
 
     def extract_archive_to_temporary_directory(
         self, source_archive_path: str = None, outfolder_path: str = None
