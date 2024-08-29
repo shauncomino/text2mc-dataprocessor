@@ -368,7 +368,7 @@ class world2vecDriver:
     def convert_block_names_to_integers(self, build_array: np.ndarray, filename):
         block2tok = self.cfg.block2tok
         x_dim, y_dim, z_dim = build_array.shape
-        integerized_build = np.zeros((x_dim, y_dim, z_dim), dtype=np.uint16)
+        integerized_build = np.full((x_dim, y_dim, z_dim), 102, dtype=np.uint16)
         missing_blocks = []
         missing = 0
         for x, y, z in product(range(0, x_dim), range(0, y_dim), range(0, z_dim)):
