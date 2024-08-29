@@ -7,11 +7,9 @@ from decoder import (
 )
 
 
-class text2mcVAEEncoder(nn.Module):
+class text2mcVAEEncoder(nn.Sequential):
     def __init__(self):
-        super().__init__()
-        self.layers = nn.Sequential(
-            # First layer: Initial convolution without changing size, just increasing channels
+        super().__init__(
             nn.Conv3d(32, 128, kernel_size=3, padding=1),
 
             # Downsample
@@ -23,14 +21,14 @@ class text2mcVAEEncoder(nn.Module):
             text2mcVAEResidualBlock(256, 256),
             # Third layer: Second downsampling, reduce dimensions by half again
             nn.Conv3d(
-                256, 256, kernel_size=3, stride=2, padding=0
+                256, 256, kernel_size=3, stride=2, padding=1
             ),
            
             text2mcVAEResidualBlock(256, 512),
             text2mcVAEResidualBlock(512, 512),
             # Fourth layer: Third downsampling, reduce dimensions by half again
             nn.Conv3d(
-                512, 512, kernel_size=3, stride=2, padding=0
+                512, 512, kernel_size=3, stride=2, padding=1
             ),
             text2mcVAEResidualBlock(512, 512),
             text2mcVAEResidualBlock(512, 512),
@@ -45,20 +43,32 @@ class text2mcVAEEncoder(nn.Module):
         )
 
     def forward(self, x):
-        x = self.layers(x)
+        # x: (Batch_Size, Channel, Height, Width, Depth)
+        # noise: (Batch_Size, 4, Height / 8, Width / 8)
+        print("Encoder")
+        for module in self:
+            x = module(x)
+            print(x.shape)
 
-        # Splitting the channels into mean and log variance for VAE
+        # (Batch_Size, 8, Height / 8, Width / 8) -> two tensors of shape (Batch_Size, 4, Height / 8, Width / 8)
         mean, log_variance = torch.chunk(x, 2, dim=1)
+        # Clamp the log variance between -30 and 20, so that the variance is between (circa) 1e-14 and 1e8. 
+        # (Batch_Size, 4, Height / 8, Width / 8) -> (Batch_Size, 4, Height / 8, Width / 8)
         log_variance = torch.clamp(log_variance, -30, 20)
+        # (Batch_Size, 4, Height / 8, Width / 8) -> (Batch_Size, 4, Height / 8, Width / 8)
         variance = log_variance.exp()
+        # (Batch_Size, 4, Height / 8, Width / 8) -> (Batch_Size, 4, Height / 8, Width / 8)
         stdev = variance.sqrt()
+        
+        noise = torch.randn_like(variance)
 
-        # Generate noise with the same shape as mean and stdev
-        noise = torch.randn_like(mean)
-
-        # Reparameterization trick for VAE
+        # Transform N(0, 1) -> N(mean, stdev) 
+        # (Batch_Size, 4, Height / 8, Width / 8) -> (Batch_Size, 4, Height / 8, Width / 8)
         x = mean + stdev * noise
-        x *= 0.18215  # Scaling factor
-
-        return x, mean, log_variance
+        
+        # Scale by a constant
+        # Constant taken from: https://github.com/CompVis/stable-diffusion/blob/21f890f9da3cfbeaba8e2ac3c425ee9e998d5229/configs/stable-diffusion/v1-inference.yaml#L17C1-L17C1
+        x *= 0.18215
+        
+        return x
 

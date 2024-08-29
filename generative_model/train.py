@@ -69,12 +69,12 @@ for token, block_name in tok2block.items():
 
 hdf5_filepaths = [
     r'/mnt/d/processed_builds_compressed/rar_test5_Desert+Tavern+2.h5',
-    r'/mnt/d/processed_builds_compressed/rar_test6_Desert_Tavern.h5',
-    r'/mnt/d/processed_builds_compressed/zip_test_0_LargeSandDunes.h5'
+    # r'/mnt/d/processed_builds_compressed/rar_test6_Desert_Tavern.h5',
+    # r'/mnt/d/processed_builds_compressed/zip_test_0_LargeSandDunes.h5'
 ]
 
 dataset = text2mcVAEDataset(file_paths=hdf5_filepaths, tok2embedding=tok2embedding, block_ignore_list=[102])
-data_loader = DataLoader(dataset, batch_size=2, shuffle=True)
+data_loader = DataLoader(dataset, batch_size=1, shuffle=True)
 
 build, mask = next(iter(data_loader))
 num_epochs = 1
