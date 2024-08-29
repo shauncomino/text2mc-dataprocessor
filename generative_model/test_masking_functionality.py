@@ -1,57 +1,69 @@
 import torch
-import torch.optim as optim
-import torch.nn as nn
-import pandas as pd
 import numpy as np
 import json
-from text2mcVAE import text2mcVAE
 from text2mcVAEDataset import text2mcVAEDataset
-from encoder import text2mcVAEEncoder
-from decoder import text2mcVAEDecoder
 from torch.utils.data import DataLoader
-from torch.amp import autocast, GradScaler
-
-# Initialize the model components, optimizer, and gradient scaler
-
-# Change the following line to the commented line proceeding it when using a capable machine to train
-device_type = "cpu"
-# device_type = "cuda" if torch.cuda.is_available() else "cpu"
-
-device = torch.device(device_type)
-encoder = text2mcVAEEncoder().to(device)
-decoder = text2mcVAEDecoder().to(device)
-optimizer = optim.Adam(list(encoder.parameters()) + list(decoder.parameters()), lr=1e-3)
-scaler = GradScaler()  # Initialize the gradient scaler for mixed precision
-
-# Adjusted loss function remains the same
-def loss_function(recon_x, x, mu, logvar, mask):
-    # If recon_x has more channels, slice to match x's channels
-    recon_x = recon_x[:, :x.size(1), :, :, :]
-
-    # Adjust the mask to match the shape of recon_x
-    mask_expanded = mask.unsqueeze(1)  # Add a singleton dimension for channels
-    mask_expanded = mask_expanded.expand_as(recon_x)  # Expand to match recon_x's channel size
-
-    # Apply the mask
-    recon_x_masked = recon_x * mask_expanded
-    x_masked = x * mask_expanded
-
-    # Calculate the Binary Cross-Entropy loss with logits
-    BCE = nn.functional.binary_cross_entropy_with_logits(recon_x_masked, x_masked, reduction='sum')
-
-    # Calculate KL Divergence
-    KLD = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp())
-
-    return BCE + KLD
+import h5py
+import mcschematic
+import numpy as np
+import json
 
 
-
-
-# Training function call
 tok2block = None
 block2embedding = None
 block2embedding_file_path = r'block2vec/output/block2vec/embeddings.json'
 tok2block_file_path = r'world2vec/tok2block.json'
+
+def create_schematic_file(data, schem_folder_path, schem_file_name):
+    schem = mcschematic.MCSchematic()
+    # Iterate over the elements of the array
+    for i in range(data.shape[0]):
+        for j in range(data.shape[1]):
+            for k in range(data.shape[2]):
+                block = data[i, j, k]
+                schem.setBlock((i, j, k), data[i, j, k])
+
+    schem.save(schem_folder_path, schem_file_name, mcschematic.Version.JE_1_20_1)
+
+def convert_hdf5_file_to_numpy_array(hdf5_file: str):
+    with h5py.File(hdf5_file, 'r') as file:
+        # Access a specific dataset
+        dataset = file[hdf5_file]
+        data = dataset[:]  # Read the data into a NumPy array        
+        return data
+
+def convert_numpy_array_to_blocks(world_array):
+    json_file = open(tok2block_file_path)
+    data = json.load(json_file)
+    world_array_blocks = np.empty_like(world_array).astype(object)
+
+    for coordinate in np.ndindex(world_array.shape):
+        block_integer = world_array[coordinate]
+        block_string = data[str(block_integer)]
+        if block_integer == 4000 or block_integer == 3714 or block_integer == 0:
+            block_string = "minecraft:air"
+        world_array_blocks[coordinate] = block_string
+
+    return world_array_blocks
+
+def trim_folder_path(folder_path):
+    return folder_path.strip().lstrip('/').rstrip('/')
+
+# hdf5_file = sys.argv[1]
+# schem_folder_path = "" if len(sys.argv) <= 2 else trim_folder_path(sys.argv[2])
+# schem_file_name = hdf5_file.removesuffix(".h5")
+
+# if schem_folder_path != "" and not os.path.isdir(schem_folder_path):
+#     os.makedirs(schem_folder_path)
+
+# integer_world_array = convert_hdf5_file_to_numpy_array(hdf5_file)
+# string_world_array = convert_numpy_array_to_blocks(integer_world_array)
+# create_schematic_file(string_world_array, schem_folder_path, schem_file_name)
+
+
+
+# Training function call
+
 with open(block2embedding_file_path, 'r') as j:
     block2embedding = json.loads(j.read())
 
@@ -69,14 +81,37 @@ for token, block_name in tok2block.items():
 
 hdf5_filepaths = [
     r'/mnt/d/processed_builds_compressed/rar_test5_Desert+Tavern+2.h5',
-
+    r'/mnt/d/processed_builds_compressed/rar_test6_Desert_Tavern.h5',
+    r'/mnt/d/processed_builds_compressed/zip_test_0_LargeSandDunes.h5'
 ]
 
-dataset = text2mcVAEDataset(file_paths=hdf5_filepaths, tok2embedding=tok2embedding, block_ignore_list=[102])
+dataset = text2mcVAEDataset(file_paths=hdf5_filepaths, embed_builds=False, tok2embedding=tok2embedding, block_ignore_list=[0, 102], fixed_size=(64, 64, 64, 32))
 data_loader = DataLoader(dataset, batch_size=1, shuffle=True)
 
-build, mask = next(iter(data_loader))
+for i, (build, mask) in enumerate(data_loader):
+    build, mask = next(iter(data_loader))
+
+    mask = mask.numpy().astype(int)
+    masked_build = torch.clone(build).numpy().astype(int)
+    build = build.numpy().astype(int)
+
+    mask = mask.squeeze(0)
+    masked_build = masked_build.squeeze(1).squeeze(0)
+    build = build.squeeze(1).squeeze(0)
+
+    masked_build *= mask
+
+    build = convert_numpy_array_to_blocks(build)
+    masked_build = convert_numpy_array_to_blocks(masked_build)
+
+    testing_path = r'/mnt/c/Users/shaun/curseforge/minecraft/Instances/text2mc/config/worldedit/schematics'
+
+    create_schematic_file(build, testing_path, f"not_masked{i}")
+    create_schematic_file(build, testing_path, f"masked{i}")
 
 
+
+# WHERE TO MOVE SCHEMATIC FILES TO LOAD THEM IN WORLDEDIT:
+# C:\Users\shaun\curseforge\minecraft\Instances\text2mc\config\worldedit\schematics
 
 print("yay!")
