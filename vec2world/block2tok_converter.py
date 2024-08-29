@@ -21,7 +21,7 @@ def reverse_block2tok(data, outer_key=""):
     return reversed_dict
 
 with open("../world2vec/tok2block.json", "w") as f:
-    block2tok_file = open("block2tok.json")
+    block2tok_file = open("../world2vec/block2tok.json")
     data = json.load(block2tok_file)
     data_reversed = reverse_block2tok(data)
     json.dump(data_reversed, f, ensure_ascii=False, indent=4)

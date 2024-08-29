@@ -3822,7 +3822,6 @@
     },
     "minecraft:sticky_piston": 3161,
     "minecraft:stone": 3162,
-    "minecraft:double_stone_slab":3162,
     "minecraft:stone_brick_slab": {
         "type=bottom": 3163,
         "type=top": 3164,
@@ -4493,6 +4492,24 @@
         "half=lower": 3711,
         "half=upper": 3712
     },
+    "minecraft:double_stone_slab": 3162,
+    "minecraft:double_wooden_slab":2050,
+    "minecraft:flowing_lava":1652,
+    "minecraft:flowing_water":3450,
+    "minecraft:golden_rail":2526,
+    "minecraft:red_flower":2488,
+    "minecraft:reeds":3325,
+    "minecraft:soul_fire_lantern":3056,
+    "minecraft:stained_glass":3685, 
+    "minecraft:stained_glass_pane":3686,
+    "minecraft:stained_hardened_clay":3687,
+    "minecraft:stonebrick":3206, 
+    "minecraft:suspicious_gravel":3715,
+    "minecraft:tallgrass":3329,
+    "minecraft:wall_banner":3689,
+    "minecraft:wooden_button":2031, 
+    "minecraft:wooden_door":2035,
+    "minecraft:wool":3690,
     "minecraft:pitcher_plant": 3713,
     "UNKNOWN_BLOCK": 3714
 }
