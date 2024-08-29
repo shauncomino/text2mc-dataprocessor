@@ -157,6 +157,8 @@ class world2vecDriver:
             os.mkdir(temp_dir_path)
 
         temp_extract = os.path.join(temp_dir_path, "extract")
+        if not os.path.exists(temp_extract):
+            os.mkdir(temp_extract)
 
         try:
             unprocessed_build_path = os.path.join(

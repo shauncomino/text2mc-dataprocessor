@@ -2,7 +2,7 @@
 #!/bin/bash
 #SBATCH --job-name=run_world2vecDriver      # Job name
 #SBATCH --partition=normal                  # Partition (queue) name
-#SBATCH --array=2500-2600                          # Number of array jobs
+#SBATCH --array=1-100                         # Number of array jobs
 #SBATCH --cpus-per-task=4                   # Number of CPU cores per task
 #SBATCH --mem=20G                            # Memory per node (GB)
 #SBATCH --output=results-%A.out   # Output File
