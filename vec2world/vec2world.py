@@ -30,6 +30,8 @@ def convert_numpy_array_to_blocks(world_array):
     for coordinate in np.ndindex(world_array.shape):
         block_integer = world_array[coordinate]
         block_string = data[str(block_integer)]
+        if block_integer == 4000 or block_integer == 3714:
+            block_string = "minecraft:air"
         world_array_blocks[coordinate] = block_string
 
     return world_array_blocks
