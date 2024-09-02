@@ -227,7 +227,7 @@ class World2Vec:
                                                 and anvil.Block.name(block)
                                                 not in natural_blocks
                                             ):
-                                                # print(anvil.Block.name(block) + "at " + str(chunk.x) + ", " + str(chunk.z) + " added to build!")
+                                                print(anvil.Block.name(block) + "at " + str(chunk.x) + ", " + str(chunk.z) + " added to build!")
                                                 build_chunks.append(chunk)
                                                 if filename not in relevant_regions:
                                                     region_x = int(
@@ -305,75 +305,40 @@ class World2Vec:
             dbscan = DBSCAN(eps=5, min_samples=5).fit(data)
             labels = dbscan.labels_
 
-            # Get the label of the main cluster
-            unique_labels = set(labels)
-            unique_labels.discard(-1)
+            main_cluster_label = np.argmax(np.bincount(labels[labels != -1]))  # Exclude noise points labeled as -1
 
-            # Identify unique clusters
-            unique_clusters = set(labels)
-            unique_clusters.discard(-1)
+            # Remove chunks that are outside the main cluster
+            build_chunks = [chunk for chunk, label in zip(build_chunks, labels) if label == main_cluster_label]
 
-            # Initialize builds_extracted to keep track of numbers of build created
-            builds_extracted = 0
+            low_x = min(chunk.x for chunk in build_chunks)
+            high_x = max(chunk.x for chunk in build_chunks)
+            low_z = min(chunk.z for chunk in build_chunks)
+            high_z = max(chunk.z for chunk in build_chunks)
 
             # Loop through the clusters
             schem_paths = []
 
-            for cluster in unique_clusters:
-                # Increment the builds_extracted by 1
-                builds_extracted += 1
-
-                # Extract all the chunks from that cluster
-                cluster_chunks = [
-                    chunk
-                    for chunk, label in zip(build_chunks, labels)
-                    if label == cluster
-                ]
-
-                low_x = min(chunk.x for chunk in cluster_chunks)
-                high_x = max(chunk.x for chunk in cluster_chunks)
-                low_z = min(chunk.z for chunk in cluster_chunks)
-                high_z = max(chunk.z for chunk in cluster_chunks)
-
-                # Find the region files that contain the cluster_chunks from relevant_regions
-                if len(unique_clusters) > 1:
-                    region_files = set()
-                    for chunk in cluster_chunks:
-                        region_x = math.floor(chunk.x / 32)
-                        region_z = math.floor(chunk.z / 32)
-                        region_filename = f"r.{region_x}.{region_z}.mca"
-                        if region_filename in relevant_regions:
-                            region_files.add(region_filename)
-                    regions_to_process = list(region_files)
-                else:
-                    regions_to_process = relevant_regions
-
-                for filename in regions_to_process:
-                    if filename.endswith(".mca"):
-                        # Retrieve the region
-                        region = anvil.Region.from_file(os.path.join(dir, filename))
-                        # Only search the region file if it is not empty (because apparently sometimes they are empty?)
-                        if region.data:
-                            # Retrieve each chunk in the region
-                            for x in range(0, 32):
-                                for z in range(0, 32):
-                                    # Region files need not contain 32x32 chunks, so we must check if the chunk exists
-                                    if region.chunk_data(x, z):
-                                        chunk = anvil.Region.get_chunk(region, x, z)
-                                        if chunk not in cluster_chunks:
-                                            if (
-                                                chunk.x >= low_x and chunk.x <= high_x
-                                            ) and (
-                                                chunk.z >= low_z and chunk.z <= high_z
-                                            ):
-                                                cluster_chunks.append(chunk)
+            for filename in relevant_regions:
+                if filename.endswith(".mca"):
+                    # Retrieve the region
+                    region = anvil.Region.from_file(os.path.join(dir, filename))
+                    # Only search the region file if it is not empty (because apparently sometimes they are empty?)
+                    if (region.data):
+                        # Retrieve each chunk in the region
+                        for x in range(0, 32):
+                            for z in range(0, 32):
+                                # Region files need not contain 32x32 chunks, so we must check if the chunk exists
+                                if region.chunk_data(x, z):
+                                    chunk = anvil.Region.get_chunk(region, x, z)
+                                    if chunk not in build_chunks:
+                                        if (chunk.x >= low_x and chunk.x <= high_x) and (chunk.z >= low_z and chunk.z <= high_z):
+                                            build_chunks.append(chunk)
                 print("Build chunks found!")
                 World2Vec.extract_build(
-                    cluster_chunks,
+                    build_chunks,
                     superflat,
                     save_dir,
                     build_name,
-                    builds_extracted,
                     schem_paths,
                 )
 
@@ -387,7 +352,6 @@ class World2Vec:
         superflat: bool,
         save_dir: str,
         build_name: str,
-        build_no: int,
         schem_paths: List[str],
     ):
         print("Extracting build from chunks into " + build_name + "_" + ".schematic...")
@@ -524,10 +488,10 @@ class World2Vec:
                 current_y += 1
 
         schem.save(
-            save_dir, build_name + "_" + str(build_no), mcschematic.Version.JE_1_20_1
+            save_dir, build_name, mcschematic.Version.JE_1_20_1
         )
         schem_file_path = os.path.join(
-            save_dir, build_name + "_" + str(build_no) + ".schem"
+            save_dir, build_name + ".schem"
         )
 
         schem_paths.append(schem_file_path)
@@ -535,8 +499,6 @@ class World2Vec:
         print(
             "Build extracted to "
             + build_name
-            + "_"
-            + str(build_no)
             + ".schematic...!\n"
         )
 
