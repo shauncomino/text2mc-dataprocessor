@@ -8,11 +8,10 @@ from torch.utils.data.dataset import Dataset
 
 
 class Block2VecDataset(Dataset):
-    def __init__(self, directory, tok2block: dict, context_radius: int, max_build_dim: int, max_num_targets: int, build_limit: int):
+    def __init__(self, directory, tok2block: dict, context_radius: int, max_num_targets: int, build_limit: int):
         super().__init__()
         self.build_limit = build_limit
         self.tok2block = tok2block
-        self.max_build_dim = max_build_dim
         self.max_num_targets = max_num_targets
         self.block_frequency = dict()
         self.context_radius = context_radius
@@ -70,9 +69,13 @@ def has_valid_dims(build, context_radius):
     return True
 
 def get_target_context_blocks(build, context_radius, max_subcubes):
+    print("build dimensions: %d %d %d" % build.shape)
     target_blocks = []
     context_blocks = []
     
+    target_indexes = []
+    context_indexes_list = [] 
+
     x_dim, y_dim, z_dim = build.shape
     
     # Calculate the number of sub-cubes per dimension based on max_subcubes
@@ -92,6 +95,8 @@ def get_target_context_blocks(build, context_radius, max_subcubes):
                     break
 
                 # The center block (target block)
+                target_indexes.append((x, y, z))
+
                 center_block = build[(x, y, z)]
                 if (str(center_block) == "4000"): 
                     center_block = 3714
@@ -100,6 +105,7 @@ def get_target_context_blocks(build, context_radius, max_subcubes):
                 
                 # The surrounding context blocks
                 context = []
+                context_indexes = []
                 for i in range(-context_radius, context_radius + 1):
                     for j in range(-context_radius, context_radius + 1):
                         for k in range(-context_radius, context_radius + 1):
@@ -107,10 +113,15 @@ def get_target_context_blocks(build, context_radius, max_subcubes):
                             if i == 0 and j == 0 and k == 0:
                                 continue
                             context_block = build[(x + i, y + j, z + k)]
+                            context_indexes.append((x + i, y + j, z + k))
                             if (str(context_block) == "4000"): 
                                 context_block = 3714
                             context.append(context_block)
-                
+                #print("context subindex")
+                #print(context_indexes)
                 context_blocks.append(context)
-    
+                context_indexes_list.append(context_indexes)
+                
+    #print("context indexes:")
+    #print(context_indexes)
     return target_blocks, context_blocks

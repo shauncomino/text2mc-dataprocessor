@@ -20,7 +20,6 @@ from block2vec_dataset import Block2VecDataset
 from image_annotations_3d import ImageAnnotations3D
 from skip_gram_model import SkipGramModel
 from sklearn.metrics import ConfusionMatrixDisplay
-from tap import Tap
 from torch.utils.data import DataLoader
 import umap
 

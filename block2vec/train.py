@@ -6,45 +6,19 @@ import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import random_split, DataLoader
 from torch.nn.utils.rnn import pack_sequence, pad_packed_sequence
-from tap import Tap
+import math
 import json
 from block2vec_dataset import Block2VecDataset
 from skip_gram_model import SkipGramModel
+from block2vec_args import Block2VecArgs
 
-NIL_DATAPOINT_INDICATOR = 7000
-
-""" Arguments for Block2Vec """
-class Block2VecArgs(Tap):
-    max_build_dim: int = 100
-    max_num_targets: int = 20
-    build_limit: int = -1
-    emb_dimension: int = 32
-    epochs: int = 3
-    batch_size: int = 2
-    num_workers: int = 1
-    initial_lr: float = 1e-3
-    context_radius: int = 1
-    output_path: str = os.path.join("output", "block2vec") 
-    tok2block_filepath: str = "../world2vec/tok2block.json"
-    block2texture_filepath: str = "../world2vec/block2texture.json"
-    hdf5s_directory = "../processed_builds"
-    checkpoints_directory = "checkpoints"
-    model_savefile_name = "best_model.pth"
-    textures_directory: str = os.path.join("textures") 
-    embeddings_txt_filename: str = "embeddings.txt"
-    embeddings_json_filename: str = "embeddings.json"
-    embeddings_npy_filename: str = "embeddings.npy"
-    embeddings_pkl_filename: str = "representations.pkl"
-    embeddings_scatterplot_filename: str = "scatter_3d.png"
-    embeddings_dist_matrix_filename: str = "dist_matrix.png"
-
-    
 def custom_collate_fn(batch):
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     targets, contexts, build_names = zip(*batch)
 
     # Convert the targets and contexts to tensors
-    targets = [torch.tensor(target, dtype=torch.int64) for target in targets if len(target) > 0]
-    contexts = [torch.tensor(context, dtype=torch.int64) for context in contexts if len(context) > 0]
+    targets = [torch.tensor(target, dtype=torch.int64).to(device) for target in targets if len(target) > 0]
+    contexts = [torch.tensor(context, dtype=torch.int64).to(device) for context in contexts if len(context) > 0]
 
     print("Processing %d build(s) in batch." % (len(targets)))
 
@@ -59,7 +33,7 @@ def custom_collate_fn(batch):
     # Return the packed sequences, without the build names
     return packed_targets, packed_contexts, build_names
 
-def train(model, train_loader, val_loader, optimizer, criterion, num_epochs, device):
+def train(model, train_loader, val_loader, optimizer, scheduler, criterion, num_epochs, device):
     best_val_loss = float('inf')
     patience = 3
     epochs_no_improve = 0
@@ -97,6 +71,7 @@ def train(model, train_loader, val_loader, optimizer, criterion, num_epochs, dev
                     running_loss += build_loss.item()
                     build_loss.backward()  # Backpropagate
                     optimizer.step()  # Update internal model weights
+                    scheduler.step()
 
             except Exception as e: 
                 print("Error occured processing training batch:")
@@ -189,6 +164,27 @@ def test(model, test_loader, criterion, device):
     test_loss /= len(test_loader)
     print(f"Test Loss: {test_loss:.4f}")
 
+
+def save_embeddings(embeddings, tok2block: dict[int, str]):
+    embedding_dict = {}
+
+    with open(os.path.join(Block2VecArgs.output_path, Block2VecArgs.embeddings_txt_filename), "w") as f:
+        for tok, block_name in tok2block.items():
+            e = " ".join(map(lambda x: str(x), embeddings[int(tok)]))
+            embedding_dict[tok2block[str(tok)]] = torch.from_numpy(embeddings[int(tok)])
+            f.write("%s %s\n" % (tok2block[str(tok)], e))
+    np.save(os.path.join(Block2VecArgs.output_path, Block2VecArgs.embeddings_npy_filename), embeddings)
+    
+    # Create a copy of the embedding_dict with tensors converted to lists
+    embedding_dict_copy = {
+        key: value.tolist() if isinstance(value, torch.Tensor) else value
+        for key, value in embedding_dict.items()
+    }
+
+    # Write the modified copy to the JSON file
+    with open(os.path.join(Block2VecArgs.output_path, Block2VecArgs.embeddings_json_filename), 'w') as f:
+        json.dump(embedding_dict_copy, f)
+
     
 def main():
     with open(Block2VecArgs.tok2block_filepath, "r") as file:
@@ -199,7 +195,6 @@ def main():
         directory=Block2VecArgs.hdf5s_directory,
         tok2block=tok2block, 
         context_radius=Block2VecArgs.context_radius,
-        max_build_dim=Block2VecArgs.max_build_dim,
         max_num_targets=Block2VecArgs.max_num_targets, 
         build_limit=Block2VecArgs.build_limit
     )
@@ -220,15 +215,30 @@ def main():
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model.to(device)
 
-    optimizer = optim.Adam(model.parameters(), lr=Block2VecArgs.initial_lr)
+    optimizer = optim.AdamW(model.parameters(), lr=Block2VecArgs.initial_lr)
+    scheduler = optim.lr_scheduler.CosineAnnealingLR(
+            optimizer,
+            math.ceil(len(dataset) / Block2VecArgs.batch_size) *
+            Block2VecArgs.epochs,
+        )
+
+
+    #optimizer = optim.Adam(model.parameters(), lr=Block2VecArgs.initial_lr)
     criterion = nn.CrossEntropyLoss()
 
     # Training and validation  
-    train(model, train_loader, val_loader, optimizer, criterion, Block2VecArgs.epochs, device)
+    train(model, train_loader, val_loader, optimizer, scheduler, criterion, Block2VecArgs.epochs, device)
     model.load_state_dict(torch.load(os.path.join(Block2VecArgs.checkpoints_directory, Block2VecArgs.model_savefile_name)))
     
     # Testing 
     test(model, test_loader, criterion, device)
+
+    # File save embeddings  
+    embeddings = model.target_embeddings.weight
+    # embeddings = embeddings / torch.norm(embeddings, p=2, dim=-1, keepdim=True)
+    embeddings = embeddings.cpu().data.numpy()
+    save_embeddings(embeddings, tok2block)
+
 
 if __name__ == "__main__":
     main()
