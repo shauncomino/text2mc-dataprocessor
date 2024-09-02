@@ -3,6 +3,7 @@ import os
 import pickle
 from pathlib import Path
 from typing import Dict, Tuple
+import traceback
 import re 
 import json
 import numpy as np
@@ -16,29 +17,27 @@ from matplotlib import pyplot as plt
 from matplotlib import rcParams
 from block2vec_dataset import Block2VecDataset
 
-from block2vec_dataset import custom_collate_fn
 from image_annotations_3d import ImageAnnotations3D
 from skip_gram_model import SkipGramModel
 from sklearn.metrics import ConfusionMatrixDisplay
-from tap import Tap
 from torch.utils.data import DataLoader
 import umap
 
 """ Arguments for Block2Vec """
 class Block2VecArgs(Tap):
     max_build_dim: int = 100
-    max_num_targets: int = 100
-    build_limit: int = 10
+    max_num_targets: int = 8000
+    build_limit: int = -1
     emb_dimension: int = 32
     epochs: int = 3
-    batch_size: int = 2
-    num_workers: int = 6
+    batch_size: int = 20
+    num_workers: int = 12
     initial_lr: float = 1e-3
-    context_radius: int = 2
+    context_radius: int = 5
     output_path: str = os.path.join("output", "block2vec") 
     tok2block_filepath: str = "../world2vec/tok2block.json"
     block2texture_filepath: str = "../world2vec/block2texture.json"
-    hdf5s_directory = "../processed_builds"
+    hdf5s_directory = "../hdf5s"
     textures_directory: str = os.path.join("textures") 
     embeddings_txt_filename: str = "embeddings.txt"
     embeddings_json_filename: str = "embeddings.json"
@@ -56,21 +55,9 @@ class Block2Vec(pl.LightningModule):
         self.args: Block2VecArgs = Block2VecArgs().from_dict(kwargs)
         self.save_hyperparameters()
         
-        with open(self.args.tok2block_filepath, "r") as file:
-            self.tok2block = json.load(file)
-        
         with open(self.args.block2texture_filepath, "r") as file:
             self.block2texture = json.load(file)
-        
-        self.dataset = Block2VecDataset(
-            directory=self.args.hdf5s_directory,
-            tok2block=self.tok2block, 
-            context_radius=self.args.context_radius,
-            max_build_dim=self.args.max_build_dim,
-            max_num_targets=self.args.max_num_targets, 
-            build_limit=self.args.build_limit
-        )
-        self.model = SkipGramModel(len(self.tok2block), self.args.emb_dimension)
+      
         self.textures = dict()
         self.learning_rate = self.args.initial_lr
 
@@ -92,10 +79,13 @@ class Block2Vec(pl.LightningModule):
         for item in batch: 
             target_blocks, context_blocks, build_name = item  # The target and context block lists for ONE build
             logger.info("Passing %s forward: target blocks = %d" % (build_name, len(target_blocks)))
-            
-            loss = self.forward(target_blocks, context_blocks)  # Loss returned from the SkipGram model for that entire build
-            total_batch_loss =  total_batch_loss + loss  # Accumulate the loss
-        
+            try: 
+                loss = self.forward(target_blocks, context_blocks)  # Loss returned from the SkipGram model for that entire build
+                total_batch_loss =  total_batch_loss + loss  # Accumulate the loss
+            except Exception as e:
+                logger.error("%s: an error occured:" % (build_name))
+                print(traceback.format_exc())
+
         # Option 1: Average the loss across the batch
         average_loss = total_batch_loss / len(batch)
         logger.info("Batch loss: %f" % average_loss)
@@ -114,8 +104,7 @@ class Block2Vec(pl.LightningModule):
         )
         return [optimizer], [scheduler]
 
-    def train_dataloader(self) -> DataLoader:
-        return DataLoader(dataset=self.dataset, batch_size=self.args.batch_size, collate_fn=custom_collate_fn, num_workers=self.args.num_workers, persistent_workers=True)
+    
 
     """ Plot and save embeddings at end of each training epoch """
     def on_train_epoch_end(self):
