@@ -94,10 +94,8 @@ class world2vecDriver:
         :param end_index: The end index of the batch.
         :param batch_num: The batch number for this processing batch, used for temporary directory naming.
         """
-        copied_dataframe_path = dataframe_path.replace(".csv", f"_batch{batch_num}.csv")
-        shutil.copy(dataframe_path, copied_dataframe_path)
 
-        dataframe = pd.read_csv(copied_dataframe_path, on_bad_lines="warn")
+        dataframe = pd.read_csv(dataframe_path, on_bad_lines="warn")
         dataframe["PROCESSED_PATHS"] = pd.Series(dtype="object")
         temp_dir_name = f"temp" + str(batch_num)
         temp_dir_path = os.path.join(
@@ -124,6 +122,7 @@ class world2vecDriver:
             except Exception as e:
                 print(e)
                 traceback.format_exc()
+                self.delete_directory_contents(os.path.join(temp_dir_path, "extract"))
 
         batch_csvs_dir = os.path.join(
             os.path.dirname(self.cfg.PROCESSED_BUILDS_FOLDER), "batch_csvs"
@@ -158,6 +157,8 @@ class world2vecDriver:
             os.mkdir(temp_dir_path)
 
         temp_extract = os.path.join(temp_dir_path, "extract")
+        if not os.path.exists(temp_extract):
+            os.mkdir(temp_extract)
 
         try:
             unprocessed_build_path = os.path.join(
@@ -273,6 +274,8 @@ class world2vecDriver:
         except Exception as e:
             print(f"Error processing build {filename}: {e}")
             traceback.print_exc()
+            self.delete_directory_contents(temp_extract)
+
 
         return processed_paths, file_type
 
@@ -367,7 +370,7 @@ class world2vecDriver:
     def convert_block_names_to_integers(self, build_array: np.ndarray, filename):
         block2tok = self.cfg.block2tok
         x_dim, y_dim, z_dim = build_array.shape
-        integerized_build = np.zeros((x_dim, y_dim, z_dim), dtype=np.uint16)
+        integerized_build = np.full((x_dim, y_dim, z_dim), 102, dtype=np.uint16)
         missing_blocks = []
         missing = 0
         for x, y, z in product(range(0, x_dim), range(0, y_dim), range(0, z_dim)):
@@ -413,7 +416,7 @@ class world2vecDriver:
         try:
             if missing > 0:
                 with open(
-                    f"/lustre/fs1/groups/jaedo/world2vec/missing_blocks/{filename}.json",
+                    f"/lustre/fs1/groups/jaedo/world2vec/missing_blocks_builds/{filename}.json",
                     "w",
                 ) as f:
                     json.dump(missing_blocks, f)
@@ -431,8 +434,8 @@ def main():
     source_builds_dir = args[2]
     processed_builds_folder = args[3]
     batch_num = args[4]
-    start_index = (int(batch_num) - 1) * 100
-    end_index = int(batch_num) * 100 - 1
+    start_index = (int(batch_num) - 1) * 10
+    end_index = int(batch_num) * 10 - 1
 
     print(f"Source Dataframe Path: {source_df_path}")
     print(f"Source Unprocessed Builds Directory: {source_builds_dir}")
