@@ -33,37 +33,33 @@ class Block2VecDataset(Dataset):
 
     """ Lazy-loads each build into memory. """
     def __getitem__(self, idx):
+        target = []
+        context = []
         build_name = self.files[idx]
 
-        file_path = os.path.join(self.directory, self.files[idx])
+        file_path = os.path.join(self.directory, build_name)
         try: 
             with h5py.File(file_path, "r") as file:
                 keys = file.keys()
                 if len(keys) == 0:
                     logger.info("%s failed loading: no keys." % build_name)
-                    return None
                 else: 
                     build_array = np.array(file[list(keys)[0]][()], dtype=np.int32)
-
                     logger.info("%s loaded." % build_name)
-                    
+                
                     if not has_valid_dims(build_array, self.context_radius): 
-                        logger.info("%s: skipped (shape %dx%dx%d does not meet minimum dimensions required for context radius %d)." % (self.files[idx], build_array.shape[0], build_array.shape[1], build_array.shape[2], self.context_radius))
-                        return None
+                        logger.info("%s: skipped (shape %dx%dx%d does not meet minimum dimensions required for context radius %d)." % (build_name, build_array.shape[0], build_array.shape[1], build_array.shape[2], self.context_radius))
                     else:
                         #target, context = get_target_context_blocks(build_array, self.context_radius)
                         target, context = get_target_context_blocks(build_array, self.context_radius, self.max_num_targets)
                         logger.info("%s: %d targets found." % (build_name, len(target)))
-
-                        logger.info(target.shape)
-
-                        return (target, context, self.files[idx])
                 
         except Exception as e: 
             print(traceback.format_exc())
             print(f"{build_name} failed loading due to error: \"{e}\"")
-            return None
-
+        
+        return (target, context, build_name)
+    
 """ Check if a given build has big enough dimensions to support neighbor radius. """
 def has_valid_dims(build, context_radius): 
     # Minimum build (in every dimension) supports 1 target block with the number of blocks on either side of the target at least the neighbor radius. 
@@ -110,7 +106,6 @@ def get_target_context_blocks(build, context_radius, max_subcubes):
                             # Skip the center block itself
                             if i == 0 and j == 0 and k == 0:
                                 continue
-                            
                             context_block = build[(x + i, y + j, z + k)]
                             if (str(context_block) == "4000"): 
                                 context_block = 3714
@@ -118,4 +113,4 @@ def get_target_context_blocks(build, context_radius, max_subcubes):
                 
                 context_blocks.append(context)
     
-    return np.array(target_blocks), np.array(context_blocks)
+    return target_blocks, context_blocks

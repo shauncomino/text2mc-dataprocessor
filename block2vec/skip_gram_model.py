@@ -16,7 +16,7 @@ class SkipGramModel(nn.Module):
                       initrange, initrange)
 
     # Input: target_block: int, context_blocks: int[] 
-    # Output: torch.tensor 
+    # Output: mean loss: int 
     def forward(self, target_block, context_blocks):
         emb_target = self.target_embeddings(target_block)
 

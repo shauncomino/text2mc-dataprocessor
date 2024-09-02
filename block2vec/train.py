@@ -1,12 +1,14 @@
 import os
 import numpy as np
+import traceback 
 import torch
-from torch.utils.data import random_split, DataLoader
 import torch.nn as nn
 import torch.optim as optim
-from block2vec_dataset import Block2VecDataset
+from torch.utils.data import random_split, DataLoader
+from torch.nn.utils.rnn import pack_sequence, pad_packed_sequence
 from tap import Tap
 import json
+from block2vec_dataset import Block2VecDataset
 from skip_gram_model import SkipGramModel
 
 NIL_DATAPOINT_INDICATOR = 7000
@@ -21,7 +23,7 @@ class Block2VecArgs(Tap):
     batch_size: int = 2
     num_workers: int = 1
     initial_lr: float = 1e-3
-    context_radius: int = 5
+    context_radius: int = 1
     output_path: str = os.path.join("output", "block2vec") 
     tok2block_filepath: str = "../world2vec/tok2block.json"
     block2texture_filepath: str = "../world2vec/block2texture.json"
@@ -36,60 +38,26 @@ class Block2VecArgs(Tap):
     embeddings_scatterplot_filename: str = "scatter_3d.png"
     embeddings_dist_matrix_filename: str = "dist_matrix.png"
 
-def custom_collate_fn(batch):
-    targets, contexts, build_names = [], [], []
     
-    for item in batch:
-        if item:
-            target_blocks, context_blocks, build_name = item[0], item[1], item[2]
-            if len(target_blocks) > 0 and len(context_blocks) > 0:
+def custom_collate_fn(batch):
+    targets, contexts, build_names = zip(*batch)
 
-                # Pad target_blocks if necessary
-                try: 
-                    if len(target_blocks) < Block2VecArgs.max_num_targets:
-                        print("there are %d targets" % len(target_blocks))
-                        print("%d" % (Block2VecArgs.max_num_targets - len(target_blocks)))
-                        print("dafug")
-                        target = np.pad(
-                            np.array(target_blocks),
-                            pad_width=(0, Block2VecArgs.max_num_targets - len(target_blocks)),
-                            mode='constant',
-                            constant_values=-1)
-                        
-                        pad_arr = np.full((Block2VecArgs.max_num_targets - len(target_blocks), len(context_blocks[0])), 7)
-                        print(target)
-                        context = np.pad(
-                            np.array(context_blocks),
-                            pad_width=((0, Block2VecArgs.max_num_targets - len(target_blocks)), (0, 0), (0, 0)),
-                            mode='constant',
-                            constant_values=-1)
-                    else:
-                        target = np.array(target_blocks)
-                        context = np.array(context_blocks)
+    # Convert the targets and contexts to tensors
+    targets = [torch.tensor(target, dtype=torch.int64) for target in targets if len(target) > 0]
+    contexts = [torch.tensor(context, dtype=torch.int64) for context in contexts if len(context) > 0]
 
-                    targets.append(target)
-                    contexts.append(context)
-                    build_names.append(build_name)
-                except: 
-                    print("something messed up.")
-                    print("context blocks:")
-                    print(context_blocks)
-                    print("target blocks:")
-                    print(target_blocks)
-                    print("build name:")
-                    print(build_name)
+    print("Processing %d build(s) in batch." % (len(targets)))
 
-    target = np.array(targets)
-    context = np.array(contexts)
+    # Handle empty batch 
+    if len(targets) == 0 or len(contexts) == 0:
+        return None
 
+    # Pack the targets and contexts as variable-length sequences
+    packed_targets = pack_sequence(targets, enforce_sorted=False)
+    packed_contexts = pack_sequence(contexts, enforce_sorted=False)
 
-
-    print("target collate:")
-    print(target)
-    print("context collate:")
-    print(context)
-
-    return target, context, build_names
+    # Return the packed sequences, without the build names
+    return packed_targets, packed_contexts, build_names
 
 def train(model, train_loader, val_loader, optimizer, criterion, num_epochs, device):
     best_val_loss = float('inf')
@@ -102,31 +70,37 @@ def train(model, train_loader, val_loader, optimizer, criterion, num_epochs, dev
         running_loss = 0.0
 
         for batch in train_loader:
-            batch_targets, batch_contexts, _ = batch
+            try: 
+                if batch is None:
+                    continue 
 
-            # Move to device
-            batch_targets = torch.tensor(batch_targets).to(device)
-            batch_contexts = torch.tensor(batch_contexts).to(device)
+                batch_targets, batch_contexts, _ = batch
+                batch_targets, lengths = pad_packed_sequence(batch_targets, batch_first=True, padding_value=-1)
+                batch_contexts, lengths = pad_packed_sequence(batch_contexts, batch_first=True, padding_value=-1)
 
-            optimizer.zero_grad()  # Clear previous gradients
-            
-            for item_targets, item_contexts in zip(batch_targets, batch_contexts):
-                build_loss = 0.0
-                print("item targets")
-                print(item_targets)
-                print("Item contexts:")
-                print(item_contexts)
-                for target_block, context_blocks in zip(item_targets, item_contexts): 
-                    if target_block == -1: 
-                        break
-                    loss = model(target_block, context_blocks)  # Forward pass, returns loss
-                    #loss = criterion(output, target_block)  # Compute loss
-                    #running_loss += loss.item()
-                    build_loss += loss
+                # Move to device 
+                batch_targets.to(device)
+                batch_contexts.to(device)
 
-                running_loss += build_loss.item()
-                build_loss.backward()  # Backpropagate
-                optimizer.step()  # Update weights
+                optimizer.zero_grad()  # Clear previous gradients
+                
+                for item_targets, item_contexts in zip(batch_targets, batch_contexts):
+                    build_loss = 0.0
+                    for target_block, context_blocks in zip(item_targets, item_contexts): 
+                        if target_block == -1: 
+                            break
+                        loss = model(target_block, context_blocks)  # Forward pass, returns loss
+                        #loss = criterion(output, target_block)  # Compute loss
+                        #running_loss += loss.item()
+                        build_loss += loss
+
+                    running_loss += build_loss.item()
+                    build_loss.backward()  # Backpropagate
+                    optimizer.step()  # Update internal model weights
+
+            except Exception as e: 
+                print("Error occured processing training batch:")
+                traceback.print_exc()
 
         print(f"Epoch [{epoch+1}/{num_epochs}], Training Loss: {running_loss/len(train_loader):.4f}")
 
@@ -136,29 +110,36 @@ def train(model, train_loader, val_loader, optimizer, criterion, num_epochs, dev
         with torch.no_grad():
             
             for batch in val_loader:
-                batch_targets, batch_contexts, _ = batch
+                try: 
+                    if batch is None: 
+                        continue 
+                    
+                    batch_targets, batch_contexts, _ = batch
+                    batch_targets, lengths = pad_packed_sequence(batch_targets, batch_first=True, padding_value=-1)
+                    batch_contexts, lengths = pad_packed_sequence(batch_contexts, batch_first=True, padding_value=-1)
 
-                batch_targets = torch.tensor(batch_targets).to(device)
-                batch_contexts = torch.tensor(batch_contexts).to(device)
+                    batch_targets.to(device)
+                    batch_contexts.to(device)
 
-                for item_targets, item_contexts in zip(batch_targets, batch_contexts):
-                    build_loss = 0.0
-                    for target_block, context_blocks in zip(item_targets, item_contexts): 
-                        if (target_block) == -1: 
-                            break 
+                    for item_targets, item_contexts in zip(batch_targets, batch_contexts):
+                        build_loss = 0.0
+                        for target_block, context_blocks in zip(item_targets, item_contexts): 
+                            if target_block == -1: 
+                                break 
+                            loss = model(target_block, context_blocks)  # Forward pass, returns loss
+                            #loss = criterion(output, target_block)  # Compute loss
+                            #running_loss += loss.item()
+                            build_loss += loss
 
-                        loss = model(target_block, context_blocks)  # Forward pass, returns loss
-                        #loss = criterion(output, target_block)  # Compute loss
-                        #running_loss += loss.item()
-                        build_loss += loss
-                      
+                        #build_loss.backward()  # Backpropagate
+                        # optimizer.step()  # Update weights
+                        val_loss += build_loss.item()
+                except Exception as e: 
+                    print("Error occured processing validation batch:")
+                    traceback.print_exc()
 
-                    #build_loss.backward()  # Backpropagate
-                    # optimizer.step()  # Update weights
-                    val_loss += build_loss.item()
-
-        val_loss /= len(val_loader)
-        print(f"Epoch [{epoch+1}/{num_epochs}], Validation Loss: {val_loss:.4f}")
+            val_loss /= len(val_loader)
+            print(f"Epoch [{epoch+1}/{num_epochs}], Validation Loss: {val_loss:.4f}")
 
         # Checkpointing
         if val_loss < best_val_loss:
@@ -179,26 +160,31 @@ def test(model, test_loader, criterion, device):
     with torch.no_grad():
             
         for batch in test_loader:
-            batch_targets, batch_contexts, _ = batch
+            try: 
+                if batch is None: 
+                    continue 
+                batch_targets, batch_contexts, _ = batch
+                batch_targets, lengths = pad_packed_sequence(batch_targets, batch_first=True, padding_value=-1)
+                batch_contexts, lengths = pad_packed_sequence(batch_contexts, batch_first=True, padding_value=-1)
 
-            batch_targets = torch.tensor(batch_targets).to(device)
-            batch_contexts = torch.tensor(batch_contexts).to(device)
-            
-            
-            for item_targets, item_contexts in zip(batch_targets, batch_contexts):
-                build_loss = 0.0
-                for target_block, context_blocks in zip(item_targets, item_contexts): 
-                    if target_block == -1: 
-                        break 
-                    loss = model(target_block, context_blocks)  # Forward pass, returns loss
-                    #loss = criterion(output, target_block)  # Compute loss
-                    #running_loss += loss.item()
-                    build_loss += loss
-                    
-
-                #build_loss.backward()  # Backpropagate
-                # optimizer.step()  # Update weights
-                test_loss += build_loss.item()
+                batch_targets.to(device)
+                batch_contexts.to(device)
+                
+                for item_targets, item_contexts in zip(batch_targets, batch_contexts):
+                    build_loss = 0.0
+                    for target_block, context_blocks in zip(item_targets, item_contexts): 
+                        if target_block == -1: 
+                            break 
+                        loss = model(target_block, context_blocks)  # Forward pass, returns loss
+                        #loss = criterion(output, target_block)  # Compute loss
+                        #running_loss += loss.item()
+                        build_loss += loss
+                    #build_loss.backward()  # Backpropagate
+                    # optimizer.step()  # Update weights
+                    test_loss += build_loss.item()
+            except Exception as e: 
+                print("Error occured processing test batch:")
+                traceback.print_exc()
 
     test_loss /= len(test_loader)
     print(f"Test Loss: {test_loss:.4f}")
@@ -218,33 +204,30 @@ def main():
         build_limit=Block2VecArgs.build_limit
     )
 
-    # Split the dataset
+    # Divide dataset
     train_size = int(0.7 * len(dataset))
     val_size = int(0.1 * len(dataset))
     test_size = len(dataset) - train_size - val_size
     train_dataset, val_dataset, test_dataset = random_split(dataset, [train_size, val_size, test_size])
 
-    # Create DataLoaders
+    # Dataloaders
     train_loader = DataLoader(train_dataset, batch_size=Block2VecArgs.batch_size, collate_fn=custom_collate_fn, shuffle=True, num_workers=Block2VecArgs.num_workers)
     val_loader = DataLoader(val_dataset, batch_size=Block2VecArgs.batch_size, collate_fn=custom_collate_fn, shuffle=False, num_workers=Block2VecArgs.num_workers)
     test_loader = DataLoader(test_dataset, batch_size=Block2VecArgs.batch_size, collate_fn=custom_collate_fn, shuffle=False, num_workers=Block2VecArgs.num_workers)
 
-    # Initialize the model
+    # Initialize model
     model = SkipGramModel(len(tok2block), Block2VecArgs.emb_dimension)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model.to(device)
 
-    # Define optimizer and loss function
     optimizer = optim.Adam(model.parameters(), lr=Block2VecArgs.initial_lr)
     criterion = nn.CrossEntropyLoss()
 
-    # Train the model
+    # Training and validation  
     train(model, train_loader, val_loader, optimizer, criterion, Block2VecArgs.epochs, device)
-
-    # Load the best model for testing
     model.load_state_dict(torch.load(os.path.join(Block2VecArgs.checkpoints_directory, Block2VecArgs.model_savefile_name)))
-
-    # Test the model
+    
+    # Testing 
     test(model, test_loader, criterion, device)
 
 if __name__ == "__main__":
