@@ -33,6 +33,9 @@ class world2vecDriverConfig:
     NATURAL_BLOCKS_PATH: str = None
     """ Path to the .txt file that delineates the naturally spawning blocks """
 
+    BEDROCK_BLOCKS_PATH: str = None
+    """ Path to the .txt file that lists bedrock blocks """
+
     JAR_RUNNER_PATH: str = None
 
     cwd: str = os.path.dirname(os.path.abspath(__file__))
@@ -44,6 +47,9 @@ class world2vecDriverConfig:
 
         if not self.NATURAL_BLOCKS_PATH or not os.path.exists(self.NATURAL_BLOCKS_PATH):
             self.NATURAL_BLOCKS_PATH = os.path.join(self.cwd, "natural_blocks.txt")
+        
+        if not self.BEDROCK_BLOCKS_PATH or not os.path.exists(self.BEDROCK_BLOCKS_PATH):
+            self.BEDROCK_BLOCKS_PATH = os.path.join(self.cwd, "bedrock_blocks.txt")
 
         if not self.JAR_RUNNER_PATH or not os.path.exists(self.JAR_RUNNER_PATH):
             self.JAR_RUNNER_PATH = os.path.join(self.cwd, "schematic-loader.jar")
@@ -253,6 +259,8 @@ class world2vecDriver:
                         npy_array = self.convert_block_names_to_integers(
                             npy_array, processed_file_name
                         )
+                        if npy_array is None:
+                            continue
                         print("Converted block names to integers")
                         self.convert_vector_to_hdf5(npy_array, hdf5_path)
                         print("Converted to hdf5")
@@ -304,6 +312,7 @@ class world2vecDriver:
             self.cfg.PROCESSED_BUILDS_FOLDER,
             processed_file_prefix,
             natural_blocks_path=self.cfg.NATURAL_BLOCKS_PATH,
+            bedrock_blocks_path=self.cfg.BEDROCK_BLOCKS_PATH,
         )
 
     def convert_schemfile_to_json(self, schem_file_path: str, json_export_path: str):
@@ -396,6 +405,7 @@ class world2vecDriver:
                     missing_blocks.append(blockname)
                     missing += 1
                     print("No Value Found for Block: ", blockname)
+                    return None
 
             # Blockname maps to dictionary
             elif isinstance(value, dict):
