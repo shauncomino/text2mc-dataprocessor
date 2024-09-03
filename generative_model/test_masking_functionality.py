@@ -85,7 +85,7 @@ hdf5_filepaths = [
     r'/mnt/d/processed_builds_compressed/zip_test_0_LargeSandDunes.h5'
 ]
 
-dataset = text2mcVAEDataset(file_paths=hdf5_filepaths, embed_builds=False, tok2embedding=tok2embedding, block_ignore_list=[0, 102], fixed_size=(64, 64, 64, 32))
+dataset = text2mcVAEDataset(file_paths=hdf5_filepaths, tok2embedding=tok2embedding, block_ignore_list=[0, 102], fixed_size=(64, 64, 64, 32))
 data_loader = DataLoader(dataset, batch_size=1, shuffle=True)
 
 for i, (build, mask) in enumerate(data_loader):
@@ -96,10 +96,13 @@ for i, (build, mask) in enumerate(data_loader):
     build = build.numpy().astype(int)
 
     mask = mask.squeeze(0)
-    masked_build = masked_build.squeeze(1).squeeze(0)
-    build = build.squeeze(1).squeeze(0)
+    masked_build = masked_build.squeeze(0)
+    build = build.squeeze(0)
 
     masked_build *= mask
+
+    # INSERT FUNCTIONALITY
+    # Convert embeddings back to blocks using Nearest Neighbors Algorithm
 
     build = convert_numpy_array_to_blocks(build)
     masked_build = convert_numpy_array_to_blocks(masked_build)
