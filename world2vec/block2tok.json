@@ -382,7 +382,6 @@
     "minecraft:beacon": 306,
     "minecraft:bedrock": 307,
     "minecraft:bee_nest": 308,
-    "minecraft:beehive": 309,
     "minecraft:bee_hive": 309,
     "minecraft:beetroots": 310,
     "minecraft:bell": 311,
@@ -4499,9 +4498,7 @@
         "half=lower": 3711,
         "half=upper": 3712
     },
-    "minecraft:golden_rail":2526,
-    "minecraft:reeds":3325,
-    "minecraft:soul_fire_lantern":3056,
+    "minecraft:soul_fire_lantern":3716,
     "minecraft:stained_glass":3685, 
     "minecraft:stained_glass_pane":3686,
     "minecraft:stained_hardened_clay":3687,

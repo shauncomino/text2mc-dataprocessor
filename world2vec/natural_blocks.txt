@@ -585,6 +585,5 @@ minecraft:dark_prismarine
 minecraft:grass_path
 minecraft:oak_wall_sign
 minecraft:spruce_wall_sign
-minecraft:reeds
 minecraft:pitcher_plant
 minecraft:pitcher_crop

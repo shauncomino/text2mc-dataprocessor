@@ -46,3 +46,6 @@ minecraft:unpowered_comparator
 minecraft:unpowered_repeater
 minecraft:wooden_button
 minecraft:wooden_door
+minecraft:beehive
+minecraft:reeds
+minecraft:golden_rail
