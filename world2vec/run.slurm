@@ -4,7 +4,7 @@
 #SBATCH --partition=normal                  # Partition (queue) name
 #SBATCH --array=1-984                         # Number of array jobs
 #SBATCH --cpus-per-task=4                   # Number of CPU cores per task
-#SBATCH --mem=25G                            # Memory per node (GB)
+#SBATCH --mem=128G                            # Memory per node (GB)
 #SBATCH --output=results-%A.out   # Output File
 #SBATCH --time=86:00:00                     # Time limit (HH:MM:SS)
 
