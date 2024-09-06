@@ -121,6 +121,7 @@ class world2vecDriver:
                     temp_dir_path=temp_dir_path,
                 )
                 if not processed_paths:
+                    self.delete_directory_contents(os.path.join(temp_dir_path, "extract"))
                     continue
                 dataframe.at[i, "PROCESSED_PATHS"] = processed_paths
                 dataframe.at[i,"SUFFIX"] = file_type
@@ -392,7 +393,7 @@ class world2vecDriver:
             if isinstance(blockname, str) and "[" in blockname:
                 blockstates = blockname.replace("[", ",").replace("]", "").split(",")
                 blockname = blockstates.pop(0)
-            else:
+            elif not isinstance(blockname, str):
                 continue
 
             value = block2tok.get(blockname)
@@ -444,8 +445,8 @@ def main():
     source_builds_dir = args[2]
     processed_builds_folder = args[3]
     batch_num = args[4]
-    start_index = (int(batch_num) - 1) * 10
-    end_index = int(batch_num) * 10 - 1
+    start_index = (int(batch_num) - 1) * 26
+    end_index = int(batch_num) * 26 - 1
 
     print(f"Source Dataframe Path: {source_df_path}")
     print(f"Source Unprocessed Builds Directory: {source_builds_dir}")
