@@ -113,7 +113,7 @@ class World2Vec:
 
     # Reads all region files in dir and returns a Generator of Chunks, all of which contain blocks that are not in natural_blocks.txt
     def get_build(
-        dir: str, save_dir: str, build_name: str, natural_blocks_path: str = None
+        dir: str, save_dir: str, build_name: str, natural_blocks_path: str = None, bedrock_blocks_path: str = None
     ) -> List[str]:
         print("Searching directories: " + dir)  # Read in the natural blocks to an array
         if natural_blocks_path is None:
@@ -122,6 +122,12 @@ class World2Vec:
             nb_file = open(natural_blocks_path, "r")
         natural_blocks = nb_file.read().splitlines()
         nb_file.close()
+        if bedrock_blocks_path is None:
+            bedrock_file = open("bedrock_blocks.txt", "r")
+        else:
+            bedrock_file = open(bedrock_blocks_path, "r")
+        bedrock_blocks = bedrock_file.read().splitlines()
+        bedrock_file.close()
         # This is the list of all the build chunks
         build_chunks = []
         relevant_regions = []
@@ -220,6 +226,10 @@ class World2Vec:
                                                 print(
                                                     "Modded block found in build. Skipping..."
                                                 )
+                                                return
+                                            # If it is a bedrock block, we should skip this build
+                                            if block != None and anvil.Block.name in bedrock_blocks:
+                                                print("Bedrock block found in build. Skipping...")
                                                 return
                                             # If it's not a natural block, add this chunk to the list
                                             if (

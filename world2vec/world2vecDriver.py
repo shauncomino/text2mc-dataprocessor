@@ -33,6 +33,9 @@ class world2vecDriverConfig:
     NATURAL_BLOCKS_PATH: str = None
     """ Path to the .txt file that delineates the naturally spawning blocks """
 
+    BEDROCK_BLOCKS_PATH: str = None
+    """ Path to the .txt file that lists bedrock blocks """
+
     JAR_RUNNER_PATH: str = None
 
     cwd: str = os.path.dirname(os.path.abspath(__file__))
@@ -44,6 +47,9 @@ class world2vecDriverConfig:
 
         if not self.NATURAL_BLOCKS_PATH or not os.path.exists(self.NATURAL_BLOCKS_PATH):
             self.NATURAL_BLOCKS_PATH = os.path.join(self.cwd, "natural_blocks.txt")
+        
+        if not self.BEDROCK_BLOCKS_PATH or not os.path.exists(self.BEDROCK_BLOCKS_PATH):
+            self.BEDROCK_BLOCKS_PATH = os.path.join(self.cwd, "bedrock_blocks.txt")
 
         if not self.JAR_RUNNER_PATH or not os.path.exists(self.JAR_RUNNER_PATH):
             self.JAR_RUNNER_PATH = os.path.join(self.cwd, "schematic-loader.jar")
@@ -115,6 +121,7 @@ class world2vecDriver:
                     temp_dir_path=temp_dir_path,
                 )
                 if not processed_paths:
+                    self.delete_directory_contents(os.path.join(temp_dir_path, "extract"))
                     continue
                 dataframe.at[i, "PROCESSED_PATHS"] = processed_paths
                 dataframe.at[i,"SUFFIX"] = file_type
@@ -253,6 +260,8 @@ class world2vecDriver:
                         npy_array = self.convert_block_names_to_integers(
                             npy_array, processed_file_name
                         )
+                        if npy_array is None:
+                            continue
                         print("Converted block names to integers")
                         self.convert_vector_to_hdf5(npy_array, hdf5_path)
                         print("Converted to hdf5")
@@ -304,6 +313,7 @@ class world2vecDriver:
             self.cfg.PROCESSED_BUILDS_FOLDER,
             processed_file_prefix,
             natural_blocks_path=self.cfg.NATURAL_BLOCKS_PATH,
+            bedrock_blocks_path=self.cfg.BEDROCK_BLOCKS_PATH,
         )
 
     def convert_schemfile_to_json(self, schem_file_path: str, json_export_path: str):
@@ -383,7 +393,7 @@ class world2vecDriver:
             if isinstance(blockname, str) and "[" in blockname:
                 blockstates = blockname.replace("[", ",").replace("]", "").split(",")
                 blockname = blockstates.pop(0)
-            else:
+            elif not isinstance(blockname, str):
                 continue
 
             value = block2tok.get(blockname)
@@ -396,6 +406,7 @@ class world2vecDriver:
                     missing_blocks.append(blockname)
                     missing += 1
                     print("No Value Found for Block: ", blockname)
+                    return None
 
             # Blockname maps to dictionary
             elif isinstance(value, dict):
@@ -434,8 +445,8 @@ def main():
     source_builds_dir = args[2]
     processed_builds_folder = args[3]
     batch_num = args[4]
-    start_index = (int(batch_num) - 1) * 10
-    end_index = int(batch_num) * 10 - 1
+    start_index = (int(batch_num) - 1) * 26
+    end_index = int(batch_num) * 26 - 1
 
     print(f"Source Dataframe Path: {source_df_path}")
     print(f"Source Unprocessed Builds Directory: {source_builds_dir}")

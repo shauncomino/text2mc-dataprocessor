@@ -2,11 +2,11 @@
 #!/bin/bash
 #SBATCH --job-name=run_world2vecDriver      # Job name
 #SBATCH --partition=normal                  # Partition (queue) name
-#SBATCH --array=1-100                         # Number of array jobs
+#SBATCH --array=1-984                         # Number of array jobs
 #SBATCH --cpus-per-task=4                   # Number of CPU cores per task
-#SBATCH --mem=20G                            # Memory per node (GB)
+#SBATCH --mem=128G                            # Memory per node (GB)
 #SBATCH --output=results-%A.out   # Output File
-#SBATCH --time=72:00:00                     # Time limit (HH:MM:SS)
+#SBATCH --time=86:00:00                     # Time limit (HH:MM:SS)
 
 # Workaround to ensure conda initializes the shell
 source /lustre/fs1/groups/jaedo/miniconda3/etc/profile.d/conda.sh
