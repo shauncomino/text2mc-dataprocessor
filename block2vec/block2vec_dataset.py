@@ -69,7 +69,7 @@ def has_valid_dims(build, context_radius):
     return True
 
 def get_target_context_blocks(build, context_radius, max_subcubes):
-    print("build dimensions: %d %d %d" % build.shape)
+    logger.info("dimensions: %d %d %d" % build.shape)
     target_blocks = []
     context_blocks = []
     
