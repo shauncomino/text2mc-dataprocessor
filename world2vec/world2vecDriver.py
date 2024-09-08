@@ -112,7 +112,12 @@ class world2vecDriver:
         successes = 0
 
         for i, row in dataframe.iloc[start_index:end_index].iterrows():
+
             try:
+                extract_dir_path = os.path.join(temp_dir_path, "extract")
+        
+                if os.path.exists(extract_dir_path):
+                    shutil.rmtree(extract_dir_path)
                 unique_name = f"batch_{batch_num}_{str(i)}"
                 filename = row["FILENAME"]
                 processed_paths, file_type = self.process_build(
@@ -120,12 +125,13 @@ class world2vecDriver:
                     processed_file_name=unique_name,
                     temp_dir_path=temp_dir_path,
                 )
+                
                 if not processed_paths:
-                    self.delete_directory_contents(os.path.join(temp_dir_path, "extract"))
                     continue
                 dataframe.at[i, "PROCESSED_PATHS"] = processed_paths
                 dataframe.at[i,"SUFFIX"] = file_type
                 successes += 1
+                
             except Exception as e:
                 print(e)
                 traceback.format_exc()
