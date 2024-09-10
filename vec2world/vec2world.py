@@ -4,6 +4,7 @@ import numpy as np
 import json
 import sys
 import os
+import glob
 
 def create_schematic_file(data, schem_folder_path, schem_file_name):
     schem = mcschematic.MCSchematic()
@@ -30,7 +31,7 @@ def convert_numpy_array_to_blocks(world_array):
     for coordinate in np.ndindex(world_array.shape):
         block_integer = world_array[coordinate]
         block_string = data[str(block_integer)]
-        if block_integer == 4000 or block_integer == 3714:
+        if block_integer == 4000 or block_integer == 3714 or block_integer == 102:
             block_string = "minecraft:air"
         world_array_blocks[coordinate] = block_string
 
@@ -39,13 +40,19 @@ def convert_numpy_array_to_blocks(world_array):
 def trim_folder_path(folder_path):
     return folder_path.strip().lstrip('/').rstrip('/')
 
-hdf5_file = sys.argv[1]
+hdf5_folder = sys.argv[1]
+hdf5_files = glob.glob(os.path.join(hdf5_folder, "*.h5"))
+
 schem_folder_path = "" if len(sys.argv) <= 2 else trim_folder_path(sys.argv[2])
-schem_file_name = hdf5_file.removesuffix(".h5")
+
+for path in hdf5_files:
+    print("Processing " + path)
+    schem_file_name = path.removesuffix(".h5")
+    integer_world_array = convert_hdf5_file_to_numpy_array(path)
+    string_world_array = convert_numpy_array_to_blocks(integer_world_array)
+    create_schematic_file(string_world_array, schem_folder_path, schem_file_name)
 
 if schem_folder_path != "" and not os.path.isdir(schem_folder_path):
     os.makedirs(schem_folder_path)
 
-integer_world_array = convert_hdf5_file_to_numpy_array(hdf5_file)
-string_world_array = convert_numpy_array_to_blocks(integer_world_array)
-create_schematic_file(string_world_array, schem_folder_path, schem_file_name)
+
