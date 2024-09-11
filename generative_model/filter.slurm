@@ -1,8 +1,8 @@
 #!/bin/bash
 #SBATCH --job-name=run_world2vecDriver      # Job name
 #SBATCH --partition=normal                  # Partition (queue) name
-#SBATCH --cpus-per-task=4                   # Number of CPU cores per task
-#SBATCH --mem=8G                            # Memory per node (GB)
+#SBATCH --cpus-per-task=30                   # Number of CPU cores per task
+#SBATCH --mem=128G                            # Memory per node (GB)
 #SBATCH --output=results-%A.out             # Output File
 #SBATCH --time=01:00:00                     # Time limit (HH:MM:SS)
 
