@@ -24,20 +24,20 @@ optimizer = optim.Adam(list(encoder.parameters()) + list(decoder.parameters()), 
 scaler = GradScaler()  # Initialize the gradient scaler for mixed precision
 
 # Adjusted loss function remains the same
-def loss_function(recon_x, x, mu, logvar, mask):
+def loss_function(recon_x, x, mu, logvar):
     # If recon_x has more channels, slice to match x's channels
     recon_x = recon_x[:, :x.size(1), :, :, :]
 
     # Adjust the mask to match the shape of recon_x
-    mask_expanded = mask.unsqueeze(1)  # Add a singleton dimension for channels
-    mask_expanded = mask_expanded.expand_as(recon_x)  # Expand to match recon_x's channel size
+    #mask_expanded = mask.unsqueeze(1)  # Add a singleton dimension for channels
+    #mask_expanded = mask_expanded.expand_as(recon_x)  # Expand to match recon_x's channel size
 
     # Apply the mask
-    recon_x_masked = recon_x * mask_expanded
-    x_masked = x * mask_expanded
+    #recon_x_masked = recon_x * mask_expanded
+    #x_masked = x * mask_expanded
 
     # Calculate the Binary Cross-Entropy loss with logits
-    BCE = nn.functional.binary_cross_entropy_with_logits(recon_x_masked, x_masked, reduction='sum')
+    BCE = nn.functional.binary_cross_entropy_with_logits(recon_x, x, reduction='sum')
 
     # Calculate KL Divergence
     KLD = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp())
@@ -49,23 +49,23 @@ def loss_function(recon_x, x, mu, logvar, mask):
 
 # Training function call
 tok2block = None
-block2embedding = None
-block2embedding_file_path = r'block2vec/output/block2vec/embeddings.json'
+#block2embedding = None
+#block2embedding_file_path = r'block2vec/output/block2vec/embeddings.json'
 tok2block_file_path = r'world2vec/tok2block.json'
-with open(block2embedding_file_path, 'r') as j:
-    block2embedding = json.loads(j.read())
+#with open(block2embedding_file_path, 'r') as j:
+    #block2embedding = json.loads(j.read())
 
 with open(tok2block_file_path, 'r') as j:
     tok2block = json.loads(j.read())
 
 # Create a new dictionary mapping tokens directly to embeddings
-tok2embedding = {}
+#tok2embedding = {}
 
-for token, block_name in tok2block.items():
-    if block_name in block2embedding:
-        tok2embedding[token] = block2embedding[block_name]
-    else:
-        print(f"Warning: Block name '{block_name}' not found in embeddings. Skipping token '{token}'.")
+#for token, block_name in tok2block.items():
+    #if block_name in block2embedding:
+        #tok2embedding[token] = block2embedding[block_name]
+    #else:
+        #print(f"Warning: Block name '{block_name}' not found in embeddings. Skipping token '{token}'.")
 
 hdf5_filepaths = [
     r'/mnt/d/processed_builds_compressed/rar_test5_Desert+Tavern+2.h5',
@@ -73,10 +73,10 @@ hdf5_filepaths = [
     # r'/mnt/d/processed_builds_compressed/zip_test_0_LargeSandDunes.h5'
 ]
 
-dataset = text2mcVAEDataset(file_paths=hdf5_filepaths, tok2embedding=tok2embedding, block_ignore_list=[102])
+dataset = text2mcVAEDataset(file_paths=hdf5_filepaths, tok2block=tok2block)
 data_loader = DataLoader(dataset, batch_size=1, shuffle=True)
 
-build, mask = next(iter(data_loader))
+build = next(iter(data_loader))
 num_epochs = 1
 
 # Training loop accessible at the end of the file
@@ -85,8 +85,8 @@ for epoch in range(1, num_epochs + 1):
     decoder.train()
     total_loss = 0
     
-    for batch_idx, (data, mask) in enumerate(data_loader):
-        data, mask = data.to(device), mask.to(device)
+    for batch_idx, data in enumerate(data_loader):
+        data = data.to(device)
         optimizer.zero_grad()
 
         # Mixed precision context
@@ -98,7 +98,7 @@ for epoch in range(1, num_epochs + 1):
             recon_batch = decoder(z)
 
             # Compute the loss
-            loss = loss_function(recon_batch, data, mu, logvar, mask)
+            loss = loss_function(recon_batch, data, mu, logvar)
 
         # Scale loss and perform backpropagation
         scaler.scale(loss).backward()

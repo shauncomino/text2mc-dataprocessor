@@ -10,6 +10,10 @@ from decoder import (
 class text2mcVAEEncoder(nn.Sequential):
     def __init__(self):
         super().__init__(
+
+
+            # Implement token embedding here
+
             nn.Conv3d(32, 128, kernel_size=3, padding=1),
 
             # Downsample
