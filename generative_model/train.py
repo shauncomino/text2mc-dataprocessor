@@ -24,7 +24,7 @@ optimizer = optim.Adam(list(encoder.parameters()) + list(decoder.parameters()), 
 scaler = GradScaler()  # Initialize the gradient scaler for mixed precision
 
 # Adjusted loss function remains the same
-def loss_function(recon_x, x, mu, logvar):
+def loss_function(recon_x, x, mu, logvar, target, context):
     # If recon_x has more channels, slice to match x's channels
     recon_x = recon_x[:, :x.size(1), :, :, :]
 
@@ -76,7 +76,7 @@ hdf5_filepaths = [
 dataset = text2mcVAEDataset(file_paths=hdf5_filepaths, tok2block=tok2block)
 data_loader = DataLoader(dataset, batch_size=1, shuffle=True)
 
-build = next(iter(data_loader))
+build, target, context = next(iter(data_loader))
 num_epochs = 1
 
 # Training loop accessible at the end of the file
@@ -85,20 +85,22 @@ for epoch in range(1, num_epochs + 1):
     decoder.train()
     total_loss = 0
     
-    for batch_idx, data in enumerate(data_loader):
+    for batch_idx, data, target, context in enumerate(data_loader):
         data = data.to(device)
+        target = target.to(device)
+        context = context.to(device)
         optimizer.zero_grad()
 
         # Mixed precision context
         with autocast(device_type=device_type):
             # Encode the data to get latent representation, mean, and log variance
-            z, mu, logvar = encoder(data)
+            z, mu, logvar = encoder(data, target, context)
 
             # Decode the latent variable to reconstruct the input
             recon_batch = decoder(z)
 
             # Compute the loss
-            loss = loss_function(recon_batch, data, mu, logvar)
+            loss = loss_function(recon_batch, data, mu, logvar, target, context)
 
         # Scale loss and perform backpropagation
         scaler.scale(loss).backward()

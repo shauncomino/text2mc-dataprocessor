@@ -110,8 +110,6 @@ class text2mcVAEDecoder(nn.Sequential):
             nn.SiLU(),
             # The following "32" corresponds to the channel size, which is the length of the embedding dimension for the blocks
             nn.Conv3d(128, 32, kernel_size=3, padding=1),
-
-            # Convert embeddings to blocks here
         )
 
     def forward(self, x):
