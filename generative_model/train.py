@@ -23,7 +23,6 @@ decoder = text2mcVAEDecoder().to(device)
 optimizer = optim.Adam(list(encoder.parameters()) + list(decoder.parameters()), lr=1e-3)
 scaler = GradScaler()  # Initialize the gradient scaler for mixed precision
 
-# Adjusted loss function remains the same
 def loss_function(recon_x, x, mu, logvar, mask):
     # If recon_x has more channels, slice to match x's channels
     recon_x = recon_x[:, :x.size(1), :, :, :]
@@ -36,15 +35,13 @@ def loss_function(recon_x, x, mu, logvar, mask):
     recon_x_masked = recon_x * mask_expanded
     x_masked = x * mask_expanded
 
-    # Calculate the Binary Cross-Entropy loss with logits
-    BCE = nn.functional.binary_cross_entropy_with_logits(recon_x_masked, x_masked, reduction='sum')
+    # Calculate the reconstruction loss (could use MSELoss or BCEWithLogitsLoss depending on your data)
+    recon_loss = nn.functional.mse_loss(recon_x_masked, x_masked, reduction='sum')
 
     # Calculate KL Divergence
-    KLD = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp())
+    kld_loss = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp())
 
-    return BCE + KLD
-
-
+    return recon_loss + kld_loss
 
 
 # Training function call
@@ -78,12 +75,12 @@ data_loader = DataLoader(dataset, batch_size=1, shuffle=True)
 build, mask = next(iter(data_loader))
 num_epochs = 1
 
-# Training loop accessible at the end of the file
+# Training loop
 for epoch in range(1, num_epochs + 1):
     encoder.train()
     decoder.train()
     total_loss = 0
-    
+
     for batch_idx, (data, mask) in enumerate(data_loader):
         data, mask = data.to(device), mask.to(device)
         optimizer.zero_grad()
@@ -106,5 +103,7 @@ for epoch in range(1, num_epochs + 1):
 
         total_loss += loss.item()
         if batch_idx % 10 == 0:
-            print(f'Epoch: {epoch} [{batch_idx * len(data)}/{len(data_loader.dataset)} ({100. * batch_idx / len(data_loader):.0f}%)] Loss: {loss.item() / len(data):.6f}')
+            print(f'Epoch: {epoch} [{batch_idx * len(data)}/{len(data_loader.dataset)} '
+                  f'({100. * batch_idx / len(data_loader):.0f}%)] Loss: {loss.item() / len(data):.6f}')
     print(f'====> Epoch: {epoch} Average loss: {total_loss / len(data_loader.dataset):.4f}')
+
