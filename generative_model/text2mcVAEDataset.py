@@ -125,4 +125,4 @@ def get_target_context_blocks(build, context_radius, max_subcubes):
                 
     #print("context indexes:")
     #print(context_indexes)
-    return target_blocks, context_blocks
+    return np.array(target_blocks), np.array(context_blocks)

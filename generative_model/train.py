@@ -1,3 +1,4 @@
+import os
 import torch
 import torch.optim as optim
 import torch.nn as nn
@@ -6,6 +7,7 @@ import numpy as np
 import json
 from text2mcVAE import text2mcVAE
 from text2mcVAEDataset import text2mcVAEDataset
+from embedder import text2mcVAEEmbedder
 from encoder import text2mcVAEEncoder
 from decoder import text2mcVAEDecoder
 from torch.utils.data import DataLoader
@@ -17,14 +19,20 @@ from torch.amp import autocast, GradScaler
 device_type = "cpu"
 # device_type = "cuda" if torch.cuda.is_available() else "cpu"
 
+tok2block = None
+tok2block_file_path = r'../world2vec/tok2block.json'
+with open(tok2block_file_path, 'r') as j:
+    tok2block = json.loads(j.read())
+
 device = torch.device(device_type)
+embedder = text2mcVAEEmbedder(emb_size=len(tok2block), emb_dimension=32).to(device)
 encoder = text2mcVAEEncoder().to(device)
 decoder = text2mcVAEDecoder().to(device)
-optimizer = optim.Adam(list(encoder.parameters()) + list(decoder.parameters()), lr=1e-3)
+optimizer = optim.Adam(list(embedder.parameters()) + list(encoder.parameters()) + list(decoder.parameters()), lr=1e-3)
 scaler = GradScaler()  # Initialize the gradient scaler for mixed precision
 
 # Adjusted loss function remains the same
-def loss_function(recon_x, x, mu, logvar, target, context):
+def loss_function(recon_x, x, mu, logvar):
     # If recon_x has more channels, slice to match x's channels
     recon_x = recon_x[:, :x.size(1), :, :, :]
 
@@ -44,19 +52,32 @@ def loss_function(recon_x, x, mu, logvar, target, context):
 
     return BCE + KLD
 
+def save_embeddings(embeddings, tok2block: dict[int, str]):
+    embedding_dict = {}
 
+    with open(os.path.join("embeddings", "embeddings.txt"), "w") as f:
+        for tok, block_name in tok2block.items():
+            e = " ".join(map(lambda x: str(x), embeddings[int(tok)]))
+            embedding_dict[tok2block[str(tok)]] = torch.from_numpy(embeddings[int(tok)])
+            f.write("%s %s\n" % (tok2block[str(tok)], e))
+    np.save(os.path.join("embeddings", "embeddings.npy"), embeddings)
+
+    # Create a copy of the embedding_dict with tensors converted to lists
+    embedding_dict_copy = {
+        key: value.tolist() if isinstance(value, torch.Tensor) else value
+        for key, value in embedding_dict.items()
+    }
+
+    # Write the modified copy to the JSON file
+    with open(os.path.join("embeddings", "embeddings.json"), 'w') as f:
+        json.dump(embedding_dict_copy, f)
 
 
 # Training function call
-tok2block = None
 #block2embedding = None
 #block2embedding_file_path = r'block2vec/output/block2vec/embeddings.json'
-tok2block_file_path = r'world2vec/tok2block.json'
 #with open(block2embedding_file_path, 'r') as j:
     #block2embedding = json.loads(j.read())
-
-with open(tok2block_file_path, 'r') as j:
-    tok2block = json.loads(j.read())
 
 # Create a new dictionary mapping tokens directly to embeddings
 #tok2embedding = {}
@@ -68,9 +89,7 @@ with open(tok2block_file_path, 'r') as j:
         #print(f"Warning: Block name '{block_name}' not found in embeddings. Skipping token '{token}'.")
 
 hdf5_filepaths = [
-    r'/mnt/d/processed_builds_compressed/rar_test5_Desert+Tavern+2.h5',
-    # r'/mnt/d/processed_builds_compressed/rar_test6_Desert_Tavern.h5',
-    # r'/mnt/d/processed_builds_compressed/zip_test_0_LargeSandDunes.h5'
+    'batch_400_10391.h5',
 ]
 
 dataset = text2mcVAEDataset(file_paths=hdf5_filepaths, tok2block=tok2block)
@@ -81,26 +100,38 @@ num_epochs = 1
 
 # Training loop accessible at the end of the file
 for epoch in range(1, num_epochs + 1):
+    embedder.train()
     encoder.train()
     decoder.train()
     total_loss = 0
     
-    for batch_idx, data, target, context in enumerate(data_loader):
-        data = data.to(device)
-        target = target.to(device)
-        context = context.to(device)
+    for batch_idx, data in enumerate(data_loader):
+        build_data, targets, contexts = data
+        build_data = build_data.to(device)
+        targets = target.to(device)
+        contexts = context.to(device)
         optimizer.zero_grad()
 
         # Mixed precision context
         with autocast(device_type=device_type):
+            # Embed the data
+            embedding_loss = 0
+            index = 0
+            for target_block in targets:
+                embedding_loss += embedder(target_block, contexts[index])
+                index += 1
+            embedding_loss /= index + 1
+            embedded_data = embedder.target_embeddings.weight.cpu().data.numpy()
+            save_embeddings(embedded_data, tok2block)
+
             # Encode the data to get latent representation, mean, and log variance
-            z, mu, logvar = encoder(data, target, context)
+            z, mu, logvar = encoder(embedded_data)
 
             # Decode the latent variable to reconstruct the input
             recon_batch = decoder(z)
 
             # Compute the loss
-            loss = loss_function(recon_batch, data, mu, logvar, target, context)
+            loss = embedding_loss + loss_function(recon_batch, build_data, mu, logvar)
 
         # Scale loss and perform backpropagation
         scaler.scale(loss).backward()
