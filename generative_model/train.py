@@ -24,6 +24,8 @@ tok2block_file_path = r'../world2vec/tok2block.json'
 with open(tok2block_file_path, 'r') as j:
     tok2block = json.loads(j.read())
 
+embeddings = None
+
 device = torch.device(device_type)
 embedder = text2mcVAEEmbedder(emb_size=len(tok2block), emb_dimension=32).to(device)
 encoder = text2mcVAEEncoder().to(device)
@@ -72,6 +74,10 @@ def save_embeddings(embeddings, tok2block: dict[int, str]):
     with open(os.path.join("embeddings", "embeddings.json"), 'w') as f:
         json.dump(embedding_dict_copy, f)
 
+def embed_block(block):
+    print(torch.tensor(embeddings[tok2block[str(int(block))]]))
+    return torch.tensor(embeddings[tok2block[str(int(block))]])
+
 
 # Training function call
 #block2embedding = None
@@ -108,8 +114,8 @@ for epoch in range(1, num_epochs + 1):
     for batch_idx, data in enumerate(data_loader):
         build_data, targets, contexts = data
         build_data = build_data.to(device)
-        targets = target.to(device)
-        contexts = context.to(device)
+        targets = [torch.tensor(target, dtype=torch.int64).to(device) for target in targets if len(target) > 0]
+        contexts = [torch.tensor(context, dtype=torch.int64).to(device) for context in contexts if len(context) > 0]
         optimizer.zero_grad()
 
         # Mixed precision context
@@ -117,15 +123,27 @@ for epoch in range(1, num_epochs + 1):
             # Embed the data
             embedding_loss = 0
             index = 0
-            for target_block in targets:
-                embedding_loss += embedder(target_block, contexts[index])
+            for target_block in targets[0]:
+                embedding_loss += embedder(target_block, contexts[0][index])
                 index += 1
             embedding_loss /= index + 1
-            embedded_data = embedder.target_embeddings.weight.cpu().data.numpy()
-            save_embeddings(embedded_data, tok2block)
+            embeddings_array = embedder.target_embeddings.weight.cpu().data.numpy()
+            save_embeddings(embeddings_array, tok2block)
+
+            with open(os.path.join("embeddings", "embeddings.json"), 'r') as f:
+                embeddings = json.loads(f.read())
+            
+            np.vectorize(embed_block)(build_data)
+
+            #embedded_data = build_data[:, :, :, :, None].expand(-1, -1, -1, -1, 32).clone()
+            #for x in range(0, 256):
+                #for y in range(0, 256):
+                    #for z in range(0, 256):
+                        #embedded_data[0][x][y][z] = torch.tensor(embeddings[int(embedded_data[0][x][y][z][0])])
+                        #print(x, y, z)
 
             # Encode the data to get latent representation, mean, and log variance
-            z, mu, logvar = encoder(embedded_data)
+            z, mu, logvar = encoder(build_data)
 
             # Decode the latent variable to reconstruct the input
             recon_batch = decoder(z)

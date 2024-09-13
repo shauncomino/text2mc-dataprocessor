@@ -45,7 +45,7 @@ class text2mcVAEDataset(Dataset):
         #mask = mask[:crop_sizes[0], :crop_sizes[1], :crop_sizes[2]]
 
         # Pad the data and the mask to fixed size
-        padded_data = np.zeros(self.fixed_size, dtype=np.float32)
+        padded_data = np.full(self.fixed_size, 102, dtype=np.float32)
         #padded_mask = np.zeros(self.fixed_size[:3], dtype=np.float32)
 
         offsets = [(self.fixed_size[dim] - crop_sizes[dim]) // 2 for dim in range(3)]
@@ -125,4 +125,5 @@ def get_target_context_blocks(build, context_radius, max_subcubes):
                 
     #print("context indexes:")
     #print(context_indexes)
+    #print(len(target_blocks), "targets")
     return np.array(target_blocks), np.array(context_blocks)
