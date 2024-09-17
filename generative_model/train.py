@@ -24,8 +24,6 @@ tok2block_file_path = r'../world2vec/tok2block.json'
 with open(tok2block_file_path, 'r') as j:
     tok2block = json.loads(j.read())
 
-embeddings = None
-
 device = torch.device(device_type)
 embedder = text2mcVAEEmbedder(emb_size=len(tok2block), emb_dimension=32).to(device)
 encoder = text2mcVAEEncoder().to(device)
@@ -74,9 +72,75 @@ def save_embeddings(embeddings, tok2block: dict[int, str]):
     with open(os.path.join("embeddings", "embeddings.json"), 'w') as f:
         json.dump(embedding_dict_copy, f)
 
-def embed_block(block):
-    print(torch.tensor(embeddings[tok2block[str(int(block))]]))
-    return torch.tensor(embeddings[tok2block[str(int(block))]])
+def prepare_embedding_matrix():
+    block2embedding = None
+    block2embedding_file_path = r'embeddings/embeddings.json'
+    with open(block2embedding_file_path, 'r') as j:
+        block2embedding = json.loads(j.read())
+    block2tok = None
+    block2tok_file_path = r'../world2vec/block2tok.json'
+    with open(block2tok_file_path, 'r') as j:
+        block2tok = json.loads(j.read())
+    # Convert block names to tokens (integers)
+    # Build tok2embedding mapping
+    tok2embedding_int = {}
+    for block_name, embedding in block2embedding.items():
+        token_str = block2tok.get(block_name)
+        if token_str is not None:
+            token = int(token_str)
+            tok2embedding_int[token] = np.array(embedding, dtype=np.float32)
+    
+    # Get the air token and embedding
+    air_block_name = 'minecraft:air'
+    air_token_str = block2tok.get(air_block_name)
+    if air_token_str is None:
+        raise ValueError('minecraft:air block not found in block2tok mapping')
+    air_token = int(air_token_str)
+    air_embedding = block2embedding.get(air_block_name)
+    if air_embedding is None:
+        raise ValueError('minecraft:air block not found in block2embedding mapping')
+    air_embedding = np.array(air_embedding, dtype=np.float32)
+
+    # Ensure that the air token and embedding are included
+    tok2embedding_int[air_token] = air_embedding
+
+    # Collect all tokens
+    tokens = list(tok2embedding_int.keys())
+
+    # Ensure tokens are non-negative integers
+    if min(tokens) < 0:
+        raise ValueError("All block tokens must be non-negative integers.")
+
+    token_set = set(tokens)
+    embedding_dim = len(air_embedding)
+
+    # Find the maximum token value to determine the size of the lookup arrays
+    max_token = max(tokens + [3714])  # Include unknown block token
+
+    # Build the embedding matrix
+    embedding_matrix = np.zeros((max_token + 1, embedding_dim), dtype=np.float32)
+    for token in tokens:
+        embedding_matrix[token] = tok2embedding_int[token]
+    # Set the embedding for unknown blocks to the air embedding
+    embedding_matrix[3714] = air_embedding  # Token 3714 is the unknown block
+
+    # Build the lookup array mapping tokens to indices in the embedding matrix
+    lookup_array = np.full((max_token + 1,), air_token, dtype=np.int32)
+    for token in tokens:
+        lookup_array[token] = token  # Map token to its own index
+
+    # Map unknown block token to 3714
+    lookup_array[3714] = 3714
+
+    return lookup_array, embedding_matrix
+
+    # For tokens in block_ignore_set, map them to air_token
+    #for block_name in block_ignore_set:
+        #token_str = block2tok.get(block_name)
+        #if token_str is not None:
+            #token = int(token_str)
+            #if token <= max_token:
+                #lookup_array[token] = air_token
 
 
 # Training function call
@@ -129,24 +193,31 @@ for epoch in range(1, num_epochs + 1):
             embedding_loss /= index + 1
             embeddings_array = embedder.target_embeddings.weight.cpu().data.numpy()
             save_embeddings(embeddings_array, tok2block)
-
-            with open(os.path.join("embeddings", "embeddings.json"), 'r') as f:
-                embeddings = json.loads(f.read())
             
-            np.vectorize(embed_block)(build_data)
+            lookup_array, embedding_matrix = prepare_embedding_matrix()
+            
+            # Map tokens outside the valid range [0, max_token] to the unknown block token (3714)
+            build_data_int = np.array(build_data[0]).astype(np.int32)
+            data_tokens_mapped = np.where(
+                (build_data_int >= 0) & (build_data_int <= len(lookup_array) - 1),
+                build_data_int,
+                3714  # Assign unknown block token
+            )
 
-            #embedded_data = build_data[:, :, :, :, None].expand(-1, -1, -1, -1, 32).clone()
-            #for x in range(0, 256):
-                #for y in range(0, 256):
-                    #for z in range(0, 256):
-                        #embedded_data[0][x][y][z] = torch.tensor(embeddings[int(embedded_data[0][x][y][z][0])])
-                        #print(x, y, z)
+            # Map tokens to indices in the embedding matrix using the lookup array
+            indices_array = lookup_array[data_tokens_mapped]
+
+            # Retrieve embeddings using indices
+            embedded_data = torch.from_numpy(embedding_matrix[indices_array]).permute(3, 0, 1, 2)
 
             # Encode the data to get latent representation, mean, and log variance
-            z, mu, logvar = encoder(build_data)
+            z, mu, logvar = encoder(embedded_data)
 
             # Decode the latent variable to reconstruct the input
             recon_batch = decoder(z)
+
+            # Reverse the embeddings
+            # Approximate nearest neighbor? Levenshtein vector distance? Research needed
 
             # Compute the loss
             loss = embedding_loss + loss_function(recon_batch, build_data, mu, logvar)
