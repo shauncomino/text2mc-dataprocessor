@@ -1,3 +1,5 @@
+import json
+
 class text2mcPredictor():
     def __init__(self):
         pass
@@ -5,6 +7,9 @@ class text2mcPredictor():
     # 1. Loads two builds from the dataset (user specified)
     # 2. Embeds builds using trained embedding model
     def load_two_builds_from_dataset(self, building1: str, building2: str):
+        with open("../block2vec/output/block2vec/embeddings.json") as f:
+            embeddings = json.load(f)
+
         print(building1, building2)
 
     # 3. Sends the two embedded builds through the encoder portion of the VAE
