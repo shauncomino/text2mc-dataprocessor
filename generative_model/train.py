@@ -23,7 +23,7 @@ optimizer = optim.Adam(list(encoder.parameters()) + list(decoder.parameters()), 
 scaler = GradScaler()  # Initialize the gradient scaler for mixed precision
 
 # Adjusted loss function with log-cosh loss
-def log_cosh_loss(x, y, a=1.0):
+def log_cosh_loss(x, y, a=10.0):
     diff = a * (x - y)
     return torch.mean((1.0 / a) * torch.log(torch.cosh(diff)))
 
