@@ -131,7 +131,6 @@ def train(model, train_loader, val_loader, optimizer, scheduler, num_epochs, dev
             epochs_no_improve = 0
         else:
             epochs_no_improve += 1
-
         # Early stopping
         if epochs_no_improve >= patience:
             logger.info("Early stopping triggered.")
