@@ -1,10 +1,9 @@
 import torch
 import torch.optim as optim
-import torch.nn as nn
-import pandas as pd
-import numpy as np
+import glob
 import json
 from text2mcVAE import text2mcVAE
+import os
 from text2mcVAEDataset import text2mcVAEDataset
 from encoder import text2mcVAEEncoder
 from decoder import text2mcVAEDecoder
@@ -68,6 +67,15 @@ for token, block_name in tok2block.items():
         tok2embedding[token] = block2embedding[block_name]
     else:
         print(f"Warning: Block name '{block_name}' not found in embeddings. Skipping token '{token}'.")
+
+''' STEPS TO TRAIN ON ARCC:
+1. UNCOMMENT THE FOLLOWING LINES AFTER THIS DOCSTRING COMMENT
+2. REPLACE builds_directory WITH THE LOCATION OF THE .h5 BUILDS ON THE ARCC
+3. ENJOY
+'''
+# builds_directory = r'need/to/specify/directory/'
+# hdf5_filepaths = glob.glob(os.path.join(builds_directory, '*.h5'))
+# print(f"Found {len(hdf5_filepaths)} builds to use as training data")
 
 hdf5_filepaths = [
     r'/mnt/d/processed_builds_compressed/rar_test5_Desert+Tavern+2.h5',
