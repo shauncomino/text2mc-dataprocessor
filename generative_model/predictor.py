@@ -1,16 +1,18 @@
 import json
+import h5py as h5
 
 class text2mcPredictor():
+    EMBEDDINGS_FILE = "../block2vec/output/block2vec/embeddings.json"
+
     def __init__(self):
         pass
 
     # 1. Loads two builds from the dataset (user specified)
     # 2. Embeds builds using trained embedding model
-    def load_two_builds_from_dataset(self, building1: str, building2: str):
-        with open("../block2vec/output/block2vec/embeddings.json") as f:
-            embeddings = json.load(f)
-
-        print(building1, building2)
+    def load_two_builds_from_dataset(self, building1_path: str, building2_path: str):
+        building1 = h5.File(building1_path, 'r')
+        building2 = h5.File(building2_path, 'r')
+        embeddings = json.load(open(self.EMBEDDINGS_FILE))
 
     # 3. Sends the two embedded builds through the encoder portion of the VAE
     # 4. Linearly interpolate between those n-dimensional latent points to get other latent points connecting the two
@@ -27,8 +29,8 @@ class text2mcPredictor():
     def save_predicted_build(self):
         pass
 
-building1 = "rar_test5_Desert+Tavern+2.h5"
-building2 = "rar_test6_Desert_Tavern.h5"
+building1_path = "rar_test5_Desert+Tavern+2.h5"
+building2_path = "rar_test6_Desert_Tavern.h5"
 
 predictor = text2mcPredictor()
-predictor.load_two_builds_from_dataset(building1, building2)
+predictor.load_two_builds_from_dataset(building1_path, building2_path)
