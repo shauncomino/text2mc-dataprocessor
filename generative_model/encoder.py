@@ -40,6 +40,7 @@ class text2mcVAEEncoder(nn.Sequential):
             # Final layers to adjust the feature map size without changing spatial dimensions
             nn.Conv3d(512, 8, kernel_size=3, padding=1),
             nn.Conv3d(8, 8, kernel_size=1, padding=0),
+            
         )
 
     def reparameterize(self, mu, logvar):
