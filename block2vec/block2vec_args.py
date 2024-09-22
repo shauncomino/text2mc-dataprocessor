@@ -3,8 +3,8 @@ import os
 
 """ Arguments for Block2Vec """
 class Block2VecArgs(Tap):
-    max_num_targets: int = 10
-    build_limit: int = 10 # set to -1 for no limit 
+    max_num_targets: int = 20
+    build_limit: int = -1 # set to -1 for no limit 
     emb_dimension: int = 32
     epochs: int = 3
     batch_size: int = 2
@@ -18,6 +18,7 @@ class Block2VecArgs(Tap):
     hdf5s_directory = "../processed_builds"
     checkpoints_directory = "checkpoints"
     model_savefile_name = "best_model.pth" 
+    cur_model_safefile_name = "current_model.pth"
     embeddings_txt_filename: str = "embeddings.txt"
     embeddings_json_filename: str = "embeddings.json"
     embeddings_npy_filename: str = "embeddings.npy"

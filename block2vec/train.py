@@ -20,6 +20,7 @@ from image_annotations_2d import ImageAnnotations2D
 import umap
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+logger.info("Process is using %s as device" % str(device))
 
 def custom_collate_fn(batch):
     targets, contexts, build_names = zip(*batch)
@@ -50,9 +51,10 @@ def train(model, train_loader, val_loader, optimizer, scheduler, num_epochs, dev
         # Training phase
         model.train()
         running_loss = 0.0
-
+        
         for batch in train_loader:
             try: 
+                batch_loss = 0.0
                 if batch is None:
                     continue 
 
@@ -60,27 +62,27 @@ def train(model, train_loader, val_loader, optimizer, scheduler, num_epochs, dev
                 batch_targets, lengths = pad_packed_sequence(batch_targets, batch_first=True, padding_value=-1)
                 batch_contexts, lengths = pad_packed_sequence(batch_contexts, batch_first=True, padding_value=-1)
 
-                # Move to device 
-                #batch_targets.to(device)
-               # batch_contexts.to(device)
-
                 optimizer.zero_grad()  # Clear previous gradients
-                
+                num_builds = 0
                 for item_targets, item_contexts in zip(batch_targets, batch_contexts):
+                    num_builds += 1
                     build_loss = 0.0
                     for target_block, context_blocks in zip(item_targets, item_contexts): 
                         if target_block == -1: 
                             break
                         loss = model(target_block, context_blocks)  # Forward pass, returns loss
-                        #loss = criterion(output, target_block)  # Compute loss
-                        #running_loss += loss.item()
                         build_loss += loss
-
+                    
+                    batch_loss += build_loss
                     running_loss += build_loss.item()
-                    build_loss.backward()  # Backpropagate
-                    optimizer.step()  # Update internal model weights
-                    scheduler.step()
-
+            
+                batch_loss /= num_builds
+                logger.info("Mean batch loss: %f" % batch_loss.item())
+                batch_loss.backward()  # Backpropagate
+                optimizer.step()  # Update internal model weights
+                scheduler.step()
+                torch.save(model.state_dict(), os.path.join(Block2VecArgs.checkpoints_directory, Block2VecArgs.cur_model_safefile_name))
+            
             except Exception as e: 
                 logger.error("Error occured processing training batch:")
                 traceback.print_exc()
@@ -91,8 +93,8 @@ def train(model, train_loader, val_loader, optimizer, scheduler, num_epochs, dev
         model.eval()
         val_loss = 0.0
         with torch.no_grad():
-            
             for batch in val_loader:
+                val_batch_loss = 0.0
                 try: 
                     if batch is None: 
                         continue 
@@ -100,11 +102,9 @@ def train(model, train_loader, val_loader, optimizer, scheduler, num_epochs, dev
                     batch_targets, batch_contexts, _ = batch
                     batch_targets, lengths = pad_packed_sequence(batch_targets, batch_first=True, padding_value=-1)
                     batch_contexts, lengths = pad_packed_sequence(batch_contexts, batch_first=True, padding_value=-1)
-
-                    #batch_targets.to(device)
-                    #batch_contexts.to(device)
-
+                    num_builds = 0
                     for item_targets, item_contexts in zip(batch_targets, batch_contexts):
+                        num_builds += 1
                         build_loss = 0.0
                         for target_block, context_blocks in zip(item_targets, item_contexts): 
                             if target_block == -1: 
@@ -113,15 +113,15 @@ def train(model, train_loader, val_loader, optimizer, scheduler, num_epochs, dev
                             #loss = criterion(output, target_block)  # Compute loss
                             #running_loss += loss.item()
                             build_loss += loss
+                        val_batch_loss += build_loss
 
-                        #build_loss.backward()  # Backpropagate
-                        # optimizer.step()  # Update weights
-                        val_loss += build_loss.item()
+                    val_batch_loss /= num_builds
+                    val_loss += val_batch_loss
                 except Exception as e: 
                     logger.error("Error occured processing validation batch:")
                     traceback.print_exc()
-
-            val_loss /= len(val_loader)
+            
+            #val_loss /= len(val_loader)
             logger.info(f"Epoch [{epoch+1}/{num_epochs}], Validation Loss: {val_loss:.4f}")
 
         # Checkpointing
@@ -132,30 +132,24 @@ def train(model, train_loader, val_loader, optimizer, scheduler, num_epochs, dev
         else:
             epochs_no_improve += 1
 
-        # Early stopping
-        if epochs_no_improve >= patience:
-            logger.info("Early stopping triggered.")
-            break
-
 def test(model, test_loader, device):
     mp.set_start_method('spawn', force=True) 
 
     model.eval()
     test_loss = 0.0
     with torch.no_grad():
-            
         for batch in test_loader:
+            test_batch_loss = 0.0
             try: 
                 if batch is None: 
                     continue 
+                
                 batch_targets, batch_contexts, _ = batch
                 batch_targets, lengths = pad_packed_sequence(batch_targets, batch_first=True, padding_value=-1)
                 batch_contexts, lengths = pad_packed_sequence(batch_contexts, batch_first=True, padding_value=-1)
-
-                #batch_targets.to(device)
-                #batch_contexts.to(device)
-                
+                num_builds = 0
                 for item_targets, item_contexts in zip(batch_targets, batch_contexts):
+                    num_builds += 1
                     build_loss = 0.0
                     for target_block, context_blocks in zip(item_targets, item_contexts): 
                         if target_block == -1: 
@@ -164,15 +158,17 @@ def test(model, test_loader, device):
                         #loss = criterion(output, target_block)  # Compute loss
                         #running_loss += loss.item()
                         build_loss += loss
-                    #build_loss.backward()  # Backpropagate
-                    # optimizer.step()  # Update weights
-                    test_loss += build_loss.item()
+                    test_batch_loss += build_loss
+
+                test_batch_loss /= num_builds
+                test_loss += test_batch_loss
             except Exception as e: 
                 logger.error("Error occured processing test batch:")
                 traceback.print_exc()
 
-    test_loss /= len(test_loader)
-    logger.info(f"Test Loss: {test_loss:.4f}")
+        
+        #val_loss /= len(val_loader)
+    logger.info(f"Test loss: {test_loss:.4f}")
 
 
 def get_next_filepath(base_filepath): 
@@ -228,12 +224,15 @@ def save_embeddings(embeddings, tok2block: dict[int, str]):
     # Write the modified copy to the JSON file
     with open(os.path.join(Block2VecArgs.output_path, Block2VecArgs.embeddings_json_filename), 'w') as f:
         json.dump(embedding_dict_copy, f)
-
-    plot_embeddings(embedding_dict)
+    
+    try: 
+        plot_embeddings(embedding_dict)
+    except: 
+        logger.info("Something went wrong trying to plot the embeddings. Continuing...")
 
 def main():
     mp.set_start_method('spawn', force=True) 
-
+    
     with open(Block2VecArgs.tok2block_filepath, "r") as file:
         tok2block = json.load(file)
 
@@ -259,6 +258,7 @@ def main():
 
     # Initialize model
     model = SkipGramModel(len(tok2block), Block2VecArgs.emb_dimension)
+    model.load_state_dict(torch.load(os.path.join(Block2VecArgs.checkpoints_directory, Block2VecArgs.model_savefile_name)))
     model.to(device)
 
     optimizer = optim.AdamW(model.parameters(), lr=Block2VecArgs.initial_lr)
@@ -271,7 +271,6 @@ def main():
     # Training and validation  
     train(model, train_loader, val_loader, optimizer, scheduler, Block2VecArgs.epochs, device)
     model.load_state_dict(torch.load(os.path.join(Block2VecArgs.checkpoints_directory, Block2VecArgs.model_savefile_name)))
-    
     # Testing 
     test(model, test_loader, device)
 
