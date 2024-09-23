@@ -23,26 +23,29 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 logger.info("Process is using %s as device" % str(device))
 
 def custom_collate_fn(batch):
-    targets, contexts, build_names = zip(*batch)
-
-    # Convert the targets and contexts to tensors
-    targets = [torch.tensor(target, dtype=torch.int64).to(device) for target in targets if len(target) > 0]
-    contexts = [torch.tensor(context, dtype=torch.int64).to(device) for context in contexts if len(context) > 0]
-
-    logger.info("Processing %d build(s) in batch." % (len(targets)))
-
+    targets, contexts = zip(*batch)
     # Handle empty batch 
     if len(targets) == 0 or len(contexts) == 0:
         return None
 
+    logger.info("Processing %d targets in batch." % (len(targets)))
+    # Convert the targets and contexts to tensors
+    if (len(targets) == Block2VecArgs.targets_per_batch):
+        targets = torch.tensor(targets, dtype=torch.int64).to(device)
+        contexts = torch.tensor(contexts, dtype=torch.int64).to(device)
+
+    
+
+    
     # Pack the targets and contexts as variable-length sequences
-    packed_targets = pack_sequence(targets, enforce_sorted=False)
-    packed_contexts = pack_sequence(contexts, enforce_sorted=False)
+    #packed_targets = pack_sequence(targets, enforce_sorted=False)
+    #packed_contexts = pack_sequence(contexts, enforce_sorted=False)
 
     # Return the packed sequences, without the build names
-    return packed_targets, packed_contexts, build_names
+    return targets, contexts
 
 def train(model, train_loader, val_loader, optimizer, scheduler, num_epochs, device):
+    logger.info("Hello")
     best_val_loss = float('inf')
     patience = 3
     epochs_no_improve = 0
@@ -53,30 +56,39 @@ def train(model, train_loader, val_loader, optimizer, scheduler, num_epochs, dev
         running_loss = 0.0
         
         for batch in train_loader:
+            logger.info("Hey")
             try: 
                 batch_loss = 0.0
                 if batch is None:
                     continue 
 
-                batch_targets, batch_contexts, _ = batch
-                batch_targets, lengths = pad_packed_sequence(batch_targets, batch_first=True, padding_value=-1)
-                batch_contexts, lengths = pad_packed_sequence(batch_contexts, batch_first=True, padding_value=-1)
+                batch_targets, batch_contexts = batch
+                print("targets are:")
+                print(batch_targets[0])
+                #batch_targets, lengths = pad_packed_sequence(batch_targets, batch_first=True, padding_value=-1)
+                #batch_contexts, lengths = pad_packed_sequence(batch_contexts, batch_first=True, padding_value=-1)
 
                 optimizer.zero_grad()  # Clear previous gradients
                 num_builds = 0
-                for item_targets, item_contexts in zip(batch_targets, batch_contexts):
-                    num_builds += 1
-                    build_loss = 0.0
-                    for target_block, context_blocks in zip(item_targets, item_contexts): 
-                        if target_block == -1: 
-                            break
-                        loss = model(target_block, context_blocks)  # Forward pass, returns loss
-                        build_loss += loss
+                logger.info("Hey again")
+
+                for target_block, context_blocks in zip(batch_targets[0], batch_contexts[0]): 
+                    """if target_block == -1: 
+                        break"""
                     
-                    batch_loss += build_loss
-                    running_loss += build_loss.item()
+                    print(target_block, context_blocks)
+                for target_block, context_blocks in zip(batch_targets[0], batch_contexts[0]): 
+                    """if target_block == -1: 
+                        break"""
+                    
+                    print(target_block, context_blocks)
+                    loss = model( torch.tensor(target_block, dtype=torch.int64), torch.tensor(context_blocks, dtype=torch.int64))  # Forward pass, returns loss
+                    batch_loss += loss
+                
+                
+                #running_loss += build_loss.item()
             
-                batch_loss /= num_builds
+                batch_loss /= len(batch_targets)
                 logger.info("Mean batch loss: %f" % batch_loss.item())
                 batch_loss.backward()  # Backpropagate
                 optimizer.step()  # Update internal model weights

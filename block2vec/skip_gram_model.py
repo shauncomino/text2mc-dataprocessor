@@ -18,6 +18,7 @@ class SkipGramModel(nn.Module):
     # Input: target_block: int, context_blocks: int[] 
     # Output: mean loss: int 
     def forward(self, target_block, context_blocks):
+        print("moving forward")
         emb_target = self.target_embeddings(target_block)
 
         score = self.output(emb_target)

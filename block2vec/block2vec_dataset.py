@@ -5,7 +5,8 @@ from loguru import logger
 import numpy as np
 from matplotlib import pyplot as plt
 from torch.utils.data.dataset import Dataset
-
+from block2vec_args import Block2VecArgs
+import itertools
 
 class Block2VecDataset(Dataset):
     def __init__(self, directory, tok2block: dict, context_radius: int, max_num_targets: int, build_limit: int):
@@ -32,32 +33,43 @@ class Block2VecDataset(Dataset):
 
     """ Lazy-loads each build into memory. """
     def __getitem__(self, idx):
-        target = []
-        context = []
-        build_name = self.files[idx]
-
-        file_path = os.path.join(self.directory, build_name)
+        targets, contexts = [], []
+        
         try: 
-            with h5py.File(file_path, "r") as file:
-                keys = file.keys()
-                if len(keys) == 0:
-                    logger.info("%s failed loading: no keys." % build_name)
-                else: 
-                    build_array = np.array(file[list(keys)[0]][()], dtype=np.int32)
-                    logger.info("%s loaded." % build_name)
+            while (idx < len(self.files)) and (len(targets) < Block2VecArgs.targets_per_batch): 
+                build_name = self.files[idx]
+                file_path = os.path.join(self.directory, build_name)
+                try: 
+                    with h5py.File(file_path, "r") as file:
+                        keys = file.keys()
+                        if len(keys) == 0:
+                            logger.info("%s failed loading: no keys." % build_name)
+                        else: 
+                            build_array = np.array(file[list(keys)[0]][()], dtype=np.int32)
+                            logger.info("%s loaded." % build_name)
+                        
+                            if not has_valid_dims(build_array, self.context_radius): 
+                                logger.info("%s: skipped (shape %dx%dx%d does not meet minimum dimensions required for context radius %d)." % (build_name, build_array.shape[0], build_array.shape[1], build_array.shape[2], self.context_radius))
+                            else:
+                                target, context = get_target_context_blocks(build_array, self.context_radius, Block2VecArgs.targets_per_build)
+                                logger.info("%s: %d targets found." % (build_name, len(target)))
+                                
+                                for item in target[:min(len(target), Block2VecArgs.targets_per_batch - len(targets))]:
+                                    targets.append(item)
+                                for item in context[:min(len(context), Block2VecArgs.targets_per_batch - len(contexts))]:
+                                    contexts.append(item)
+
+                except Exception as e:
+                    print(traceback.format_exc())
+                    print(f"{build_name} failed loading build due to error: \"{e}\"")
                 
-                    if not has_valid_dims(build_array, self.context_radius): 
-                        logger.info("%s: skipped (shape %dx%dx%d does not meet minimum dimensions required for context radius %d)." % (build_name, build_array.shape[0], build_array.shape[1], build_array.shape[2], self.context_radius))
-                    else:
-                        #target, context = get_target_context_blocks(build_array, self.context_radius)
-                        target, context = get_target_context_blocks(build_array, self.context_radius, self.max_num_targets)
-                        logger.info("%s: %d targets found." % (build_name, len(target)))
-                
+                self.files.remove(build_name)
+                idx +=1 
         except Exception as e: 
             print(traceback.format_exc())
-            print(f"{build_name} failed loading due to error: \"{e}\"")
+            print(f"{build_name} failed loading batch due to error: \"{e}\"")
         
-        return (target, context, build_name)
+        return (targets, contexts)
     
 """ Check if a given build has big enough dimensions to support neighbor radius. """
 def has_valid_dims(build, context_radius): 

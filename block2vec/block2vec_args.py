@@ -7,10 +7,12 @@ class Block2VecArgs(Tap):
     build_limit: int = -1 # set to -1 for no limit 
     emb_dimension: int = 32
     epochs: int = 3
-    batch_size: int = 2
+    batch_size: int = 1
     num_workers: int = 1
     initial_lr: float = 1e-3
     context_radius: int = 1
+    targets_per_batch: int = 100
+    targets_per_build: int = 50
     output_path: str = os.path.join("output", "block2vec") 
     textures_directory: str = os.path.join("block_pngs")
     tok2block_filepath: str = "../world2vec/tok2block.json"
