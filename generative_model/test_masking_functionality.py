@@ -85,7 +85,7 @@ hdf5_filepaths = [
     r'/mnt/d/processed_builds_compressed/zip_test_0_LargeSandDunes.h5'
 ]
 
-dataset = text2mcVAEDataset(file_paths=hdf5_filepaths, tok2embedding=tok2embedding, block_ignore_list=[0, 102], fixed_size=(64, 64, 64, 32))
+dataset = text2mcVAEDataset(file_paths=hdf5_filepaths, tok2embedding=tok2embedding, block_ignore_list=[102], fixed_size=(64, 64, 64, 32))
 data_loader = DataLoader(dataset, batch_size=1, shuffle=True)
 
 for i, (build, mask) in enumerate(data_loader):
