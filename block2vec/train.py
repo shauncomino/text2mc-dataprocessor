@@ -4,15 +4,14 @@ from loguru import logger
 import multiprocessing as mp 
 import traceback 
 import torch
+import json
+import math
 import torch.nn as nn
 from matplotlib import pyplot as plt
 from matplotlib import rcParams
-from matplotlib.font_manager import FontProperties
 import torch.optim as optim
 from torch.utils.data import random_split, DataLoader
-from torch.nn.utils.rnn import pack_sequence, pad_packed_sequence
-import math
-import json
+from torch.nn.utils.rnn import pad_packed_sequence
 from block2vec_dataset import Block2VecDataset
 from skip_gram_model import SkipGramModel
 from block2vec_args import Block2VecArgs
@@ -24,125 +23,79 @@ logger.info("Process is using %s as device" % str(device))
 
 def custom_collate_fn(batch):
     targets, contexts = zip(*batch)
-    # Handle empty batch 
-    if len(targets) == 0 or len(contexts) == 0:
-        return None
-
-    logger.info("Processing %d targets in batch." % (len(targets)))
-    # Convert the targets and contexts to tensors
-    if (len(targets) == Block2VecArgs.targets_per_batch):
+  
+    if (len(targets[0]) == Block2VecArgs.targets_per_batch):
         targets = torch.tensor(targets, dtype=torch.int64).to(device)
         contexts = torch.tensor(contexts, dtype=torch.int64).to(device)
-
-    
-
-    
-    # Pack the targets and contexts as variable-length sequences
-    #packed_targets = pack_sequence(targets, enforce_sorted=False)
-    #packed_contexts = pack_sequence(contexts, enforce_sorted=False)
-
-    # Return the packed sequences, without the build names
-    return targets, contexts
+        return targets, contexts
+    else:
+        return None
 
 def train(model, train_loader, val_loader, optimizer, scheduler, num_epochs, device):
-    logger.info("Hello")
     best_val_loss = float('inf')
-    patience = 3
-    epochs_no_improve = 0
     
     for epoch in range(num_epochs):
         # Training phase
         model.train()
-        running_loss = 0.0
-        
+        train_loss = 0.0
         for batch in train_loader:
-            logger.info("Hey")
             try: 
-                batch_loss = 0.0
+                batch_loss = torch.tensor(0.0, requires_grad=True)
                 if batch is None:
                     continue 
 
                 batch_targets, batch_contexts = batch
-                print("targets are:")
-                print(batch_targets[0])
-                #batch_targets, lengths = pad_packed_sequence(batch_targets, batch_first=True, padding_value=-1)
-                #batch_contexts, lengths = pad_packed_sequence(batch_contexts, batch_first=True, padding_value=-1)
-
                 optimizer.zero_grad()  # Clear previous gradients
-                num_builds = 0
-                logger.info("Hey again")
+                
+                logger.info("Processing %d targets in batch." % (len(batch_targets[0])))
+                for target_block, context_blocks in zip(batch_targets[0], batch_contexts[0]): 
+                    loss = model(target_block, context_blocks)  # Forward pass, returns loss
+                    batch_loss = batch_loss + loss
 
-                for target_block, context_blocks in zip(batch_targets[0], batch_contexts[0]): 
-                    """if target_block == -1: 
-                        break"""
-                    
-                    print(target_block, context_blocks)
-                for target_block, context_blocks in zip(batch_targets[0], batch_contexts[0]): 
-                    """if target_block == -1: 
-                        break"""
-                    
-                    print(target_block, context_blocks)
-                    loss = model( torch.tensor(target_block, dtype=torch.int64), torch.tensor(context_blocks, dtype=torch.int64))  # Forward pass, returns loss
-                    batch_loss += loss
-                
-                
-                #running_loss += build_loss.item()
-            
-                batch_loss /= len(batch_targets)
-                logger.info("Mean batch loss: %f" % batch_loss.item())
+                batch_loss = batch_loss / len(batch_targets[0])
+                train_loss = train_loss + batch_loss
+                logger.info("Batch loss (avg loss per target) : %f" % batch_loss)
                 batch_loss.backward()  # Backpropagate
                 optimizer.step()  # Update internal model weights
                 scheduler.step()
                 torch.save(model.state_dict(), os.path.join(Block2VecArgs.checkpoints_directory, Block2VecArgs.cur_model_safefile_name))
             
-            except Exception as e: 
+            except: 
                 logger.error("Error occured processing training batch:")
                 traceback.print_exc()
 
-        logger.info(f"Epoch [{epoch+1}/{num_epochs}], Training Loss: {running_loss/len(train_loader):.4f}")
+        logger.info(f"Epoch [{epoch+1}/{num_epochs}], Training Loss: {train_loss/len(train_loader):.4f}")
 
         # Validation phase
         model.eval()
         val_loss = 0.0
         with torch.no_grad():
             for batch in val_loader:
-                val_batch_loss = 0.0
+                val_batch_loss = torch.tensor(0.0, requires_grad=False)
                 try: 
                     if batch is None: 
                         continue 
                     
-                    batch_targets, batch_contexts, _ = batch
-                    batch_targets, lengths = pad_packed_sequence(batch_targets, batch_first=True, padding_value=-1)
-                    batch_contexts, lengths = pad_packed_sequence(batch_contexts, batch_first=True, padding_value=-1)
-                    num_builds = 0
-                    for item_targets, item_contexts in zip(batch_targets, batch_contexts):
-                        num_builds += 1
-                        build_loss = 0.0
-                        for target_block, context_blocks in zip(item_targets, item_contexts): 
-                            if target_block == -1: 
-                                break 
-                            loss = model(target_block, context_blocks)  # Forward pass, returns loss
-                            #loss = criterion(output, target_block)  # Compute loss
-                            #running_loss += loss.item()
-                            build_loss += loss
-                        val_batch_loss += build_loss
+                    batch_targets, batch_contexts = batch
+                    
+                    logger.info("Processing %d targets in batch." % (len(batch_targets[0])))
+                    for target_block, context_blocks in zip(batch_targets[0], batch_contexts[0]): 
+                        loss = model(target_block, context_blocks)  # Forward pass, returns loss
+                        val_batch_loss += loss
 
-                    val_batch_loss /= num_builds
+                    val_batch_loss = val_batch_loss / len(batch_targets[0])
                     val_loss += val_batch_loss
-                except Exception as e: 
+                except: 
                     logger.error("Error occured processing validation batch:")
                     traceback.print_exc()
             
-            #val_loss /= len(val_loader)
-            logger.info(f"Epoch [{epoch+1}/{num_epochs}], Validation Loss: {val_loss:.4f}")
+
+            logger.info(f"Epoch [{epoch+1}/{num_epochs}], Validation Loss: {val_loss/len(val_loader):.4f}")
 
         # Checkpointing
         if val_loss < best_val_loss:
             best_val_loss = val_loss
             torch.save(model.state_dict(), os.path.join(Block2VecArgs.checkpoints_directory, Block2VecArgs.model_savefile_name))
-            epochs_no_improve = 0
-        else:
-            epochs_no_improve += 1
 
 def test(model, test_loader, device):
     mp.set_start_method('spawn', force=True) 
@@ -151,35 +104,24 @@ def test(model, test_loader, device):
     test_loss = 0.0
     with torch.no_grad():
         for batch in test_loader:
-            test_batch_loss = 0.0
+            test_batch_loss = torch.tensor(0.0, requires_grad=False)
             try: 
                 if batch is None: 
                     continue 
                 
-                batch_targets, batch_contexts, _ = batch
-                batch_targets, lengths = pad_packed_sequence(batch_targets, batch_first=True, padding_value=-1)
-                batch_contexts, lengths = pad_packed_sequence(batch_contexts, batch_first=True, padding_value=-1)
-                num_builds = 0
-                for item_targets, item_contexts in zip(batch_targets, batch_contexts):
-                    num_builds += 1
-                    build_loss = 0.0
-                    for target_block, context_blocks in zip(item_targets, item_contexts): 
-                        if target_block == -1: 
-                            break 
-                        loss = model(target_block, context_blocks)  # Forward pass, returns loss
-                        #loss = criterion(output, target_block)  # Compute loss
-                        #running_loss += loss.item()
-                        build_loss += loss
-                    test_batch_loss += build_loss
+                batch_targets, batch_contexts = batch
 
-                test_batch_loss /= num_builds
+                for target_block, context_blocks in zip(batch_targets[0], batch_contexts[0]): 
+                    loss = model(target_block, context_blocks)  # Forward pass, returns loss
+                    test_batch_loss += loss
+                
+                test_batch_loss = test_batch_loss / len(batch_targets[0])
                 test_loss += test_batch_loss
             except Exception as e: 
                 logger.error("Error occured processing test batch:")
                 traceback.print_exc()
 
-        
-        #val_loss /= len(val_loader)
+        test_loss = test_loss / len(test_loader)
     logger.info(f"Test loss: {test_loss:.4f}")
 
 
@@ -195,6 +137,7 @@ def get_next_filepath(base_filepath):
     return new_filepath
 
 def plot_embeddings(embedding_dict: dict[str, np.ndarray]):
+    logger.info("Plotting embeddings...")
     # Load block2texture dict 
     with open(Block2VecArgs.block2texture_filepath, "r") as file:
         block2texture = json.load(file)
@@ -216,6 +159,7 @@ def plot_embeddings(embedding_dict: dict[str, np.ndarray]):
     plt.tight_layout()
     plt.savefig(os.path.join(Block2VecArgs.output_path, get_next_filepath(Block2VecArgs.embeddings_scatterplot_filename)), dpi=300)
     plt.close("all")
+    logger.info("Finished plotting embeddings.")
 
 def save_embeddings(embeddings, tok2block: dict[int, str]):
     embedding_dict = {}
@@ -270,7 +214,7 @@ def main():
 
     # Initialize model
     model = SkipGramModel(len(tok2block), Block2VecArgs.emb_dimension)
-    model.load_state_dict(torch.load(os.path.join(Block2VecArgs.checkpoints_directory, Block2VecArgs.model_savefile_name)))
+    #model.load_state_dict(torch.load(os.path.join(Block2VecArgs.checkpoints_directory, Block2VecArgs.model_savefile_name)))
     model.to(device)
 
     optimizer = optim.AdamW(model.parameters(), lr=Block2VecArgs.initial_lr)

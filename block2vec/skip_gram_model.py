@@ -15,10 +15,9 @@ class SkipGramModel(nn.Module):
         init.uniform_(self.target_embeddings.weight.data, -
                       initrange, initrange)
 
-    # Input: target_block: int, context_blocks: int[] 
-    # Output: mean loss: int 
+    # Input: target_block (tensor), context_blocks (tensor)
+    # Output: mean loss (scalar tensor)
     def forward(self, target_block, context_blocks):
-        print("moving forward")
         emb_target = self.target_embeddings(target_block)
 
         score = self.output(emb_target)

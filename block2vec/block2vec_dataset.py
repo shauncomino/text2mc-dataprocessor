@@ -81,7 +81,6 @@ def has_valid_dims(build, context_radius):
     return True
 
 def get_target_context_blocks(build, context_radius, max_subcubes):
-    logger.info("dimensions: %d %d %d" % build.shape)
     target_blocks = []
     context_blocks = []
     
@@ -129,11 +128,7 @@ def get_target_context_blocks(build, context_radius, max_subcubes):
                             if (str(context_block) == "4000"): 
                                 context_block = 3714
                             context.append(context_block)
-                #print("context subindex")
-                #print(context_indexes)
                 context_blocks.append(context)
                 context_indexes_list.append(context_indexes)
                 
-    #print("context indexes:")
-    #print(context_indexes)
     return target_blocks, context_blocks
