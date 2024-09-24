@@ -28,25 +28,18 @@ class World2Vec:
         return block
 
     # Finds the subdirectory containing region files
-    def find_regions_dir(dir: str) -> list:
-        dirs = glob.glob("**/*.mca", root_dir=dir, recursive=True)
-        paths = []
-        for d in dirs:
-            if "region" in d:
-                path = dir + "/"
-                for folder in d.split("\\"):
-                    path += folder
-                    if folder == "region":
-                        if (
-                            path not in paths
-                            and "DIM-1" not in path
-                            and "DIM1" not in path
-                        ):
-                            paths.append(path)
-                        break
-                    else:
-                        path += "/"
-        return paths
+    def find_regions_dir(directory: str) -> list:
+        folders_with_mca = []
+        # Walk through all directories and files in the given directory
+        for root, dirs, files in os.walk(directory):
+            # Skip Nether and End dimension folders
+            if "DIM-1" in root or "DIM1" in root or "poi" in root:
+                continue
+            # Check if any file ends with .mca in the current directory
+            if any(file.endswith(".mca") for file in files):
+                # If so, add the current directory to the list
+                folders_with_mca.append(root)
+        return folders_with_mca
 
     @staticmethod
     def find_inhabited_time_exists(dir: str) -> bool:
@@ -120,16 +113,21 @@ class World2Vec:
 
     # Reads all region files in dir and returns a Generator of Chunks, all of which contain blocks that are not in natural_blocks.txt
     def get_build(
-        dir: str, save_dir: str, build_name: str, natural_blocks_path: str = None
+        dir: str, save_dir: str, build_name: str, natural_blocks_path: str = None, bedrock_blocks_path: str = None
     ) -> List[str]:
-        print("Searching directory " + dir + "...")
-        # Read in the natural blocks to an array
+        print("Searching directories: " + dir)  # Read in the natural blocks to an array
         if natural_blocks_path is None:
             nb_file = open("natural_blocks.txt", "r")
         else:
             nb_file = open(natural_blocks_path, "r")
         natural_blocks = nb_file.read().splitlines()
         nb_file.close()
+        if bedrock_blocks_path is None:
+            bedrock_file = open("bedrock_blocks.txt", "r")
+        else:
+            bedrock_file = open(bedrock_blocks_path, "r")
+        bedrock_blocks = bedrock_file.read().splitlines()
+        bedrock_file.close()
         # This is the list of all the build chunks
         build_chunks = []
         relevant_regions = []
@@ -151,7 +149,7 @@ class World2Vec:
                 if region.data:
                     # Set search sections
                     inhabited_time_exist = True
-                    search_sections = range(16, -5, -1)
+                    search_sections = range(15, -5, -1)
                     # Retrieve each chunk in the region
                     for x in range(0, 32):
                         for z in range(0, 32):
@@ -162,6 +160,8 @@ class World2Vec:
                             if chunk_data:
                                 try:
                                     chunk = anvil.Region.get_chunk(region, x, z)
+                                    if chunk.version and chunk.version < 2844:
+                                        search_sections = range(15, -1, -1)
                                 except Exception as e:
                                     print(
                                         "Error: Could not read chunk",
@@ -189,8 +189,8 @@ class World2Vec:
                                     inhabited_time_exist = False
                                 # Check whether the chunk has been visited at all, if not we can skip checking it
                                 if (
-                                    inhabited_time >= inhabited_time_check
-                                    or inhabited_time_exist == False
+                                    inhabited_time_exist == False
+                                    or inhabited_time >= inhabited_time_check
                                 ):
 
                                     superflat_mode = False
@@ -221,13 +221,17 @@ class World2Vec:
                                             chunk, section=section
                                         ):
                                             block = World2Vec.convert_if_old(block)
-                                            if not anvil.Block.name(block).startswith(
-                                                "minecraft"
-                                            ):
+                                            if block != None and not anvil.Block.name(
+                                                block
+                                            ).startswith("minecraft"):
                                                 # This is a modded block, and we should skip the build
                                                 print(
                                                     "Modded block found in build. Skipping..."
                                                 )
+                                                return
+                                            # If it is a bedrock block, we should skip this build
+                                            if block != None and anvil.Block.name in bedrock_blocks:
+                                                print("Bedrock block found in build. Skipping...")
                                                 return
                                             # If it's not a natural block, add this chunk to the list
                                             if (
@@ -310,7 +314,7 @@ class World2Vec:
             data = np.array([(chunk.x, chunk.z) for chunk in build_chunks])
 
             # Apply DBSCAN clustering
-            dbscan = DBSCAN(eps = 5, min_samples = 5).fit(data)
+            dbscan = DBSCAN(eps=5, min_samples=5).fit(data)
             labels = dbscan.labels_
 
             # Get the label of the main cluster
@@ -417,7 +421,7 @@ class World2Vec:
             level = -100
         for chunk in chunks:
             superflat, surface_section = World2Vec.find_surface_section(
-                chunk, min_range, 16, superflat
+                chunk, min_range, 15, superflat
             )
             all_surface_sections.append(surface_section)
         # Find the mode (most common) surface section among the build chunks
@@ -457,7 +461,12 @@ class World2Vec:
             all_ys.append(chunk_lowest_y)
 
         lowest_surface_y = int(sum(all_ys) / len(all_ys))
-        if surface_section_mode != min_range + 1:
+        min_y = 0
+        if chunks[0].version is not None and chunks[0].version > 1451:
+            min_y = -64
+        if lowest_surface_y < min_y:
+            lowest_surface_y = min_y
+        elif surface_section_mode != min_range + 1:
             lowest_surface_y -= 1
 
         # Again, we don't need global coordinates, but we do need the blocks to be in the right places relative to each other
@@ -530,7 +539,7 @@ class World2Vec:
             save_dir, build_name + "_" + str(build_no), mcschematic.Version.JE_1_20_1
         )
         schem_file_path = os.path.join(
-            save_dir, build_name + "_" + str(build_no) + ".schematic"
+            save_dir, build_name + "_" + str(build_no) + ".schem"
         )
 
         schem_paths.append(schem_file_path)
@@ -547,22 +556,33 @@ class World2Vec:
         # Load JSON data
         with open(input_file_path) as f:
             data = json.load(f)
-
         # Extract dimensions from JSON
         dimensions = data["worldDimensions"]
         width = dimensions["width"]
         height = dimensions["height"]
         length = dimensions["length"]
-
         # Create a 3D array with dimensions from JSON
         world_array = np.zeros((width, height, length), dtype=object)
+        # Initialize counters for skipped and modded blocks
 
         # Fill the array with block names based on JSON data
         for block in data["blocks"]:
             x, y, z = block["x"], block["y"], block["z"]
             block_name = block["name"]
-            world_array[x, y, z] = block_name
 
+            try:
+                if block_name[0].isupper():
+                    continue
+                elif not block_name.startswith("minecraft:"):
+                    return None
+
+                world_array[x, y, z] = block_name
+
+            except IndexError:
+                world_array[x, y, z] = "minecraft:air"
+            except Exception as e:
+                print(f"An unexpected error occurred: {e}")
+                return None
         return world_array
 
     def export_npy_to_hdf5(output_file_prefix: str, world_array: np.ndarray):

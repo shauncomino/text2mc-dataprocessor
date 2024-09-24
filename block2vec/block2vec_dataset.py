@@ -1,138 +1,134 @@
 import os
-from collections import defaultdict
-from itertools import product
-from typing import Tuple
-import json
+import traceback
+import h5py
 from loguru import logger
 import numpy as np
-from tqdm import tqdm
 from matplotlib import pyplot as plt
 from torch.utils.data.dataset import Dataset
-
+from block2vec_args import Block2VecArgs
+import itertools
 
 class Block2VecDataset(Dataset):
-
-    def __init__(self, builds, tok2block_filename: str, neighbor_radius: int):
+    def __init__(self, directory, tok2block: dict, context_radius: int, max_num_targets: int, build_limit: int):
         super().__init__()
-        self.builds = builds
-        self.neighbor_radius = neighbor_radius
-        print(tok2block_filename)
-        print(neighbor_radius)
-        with open(tok2block_filename, 'r') as file:
-            self.tok2block = json.load(file)
-        logger.info("Received {} builds in dataset.", builds.shape[0])
-
-    """ Store discard probabilities for each token """
-    def _init_discards(self):
-        threshold = 0.001
-        token_frequencies = list(self.block_frequency.values())
-        freq = np.array(token_frequencies) / sum(token_frequencies)
-        self.discards = 1.0 - (np.sqrt(freq / threshold) + 1) * (threshold / freq)
-
-    
-    """ Return context and target blocks of build """
-    def _get_coords(self, build):
-        print("type is: " )
-        print(type(build))
-        self.block_frequency = defaultdict(int)
-        
-        x_max, y_max, z_max = build.shape
-
-        # All valid coordinates
-        coords = np.array([(x, y, z) for x, y, z in product(range(0, x_max),
-            range(0, y_max), range(0, z_max))])
-        
-
-        # Need to come back to this: this may be faster 
-        """
-        x, y, z = np.arange(x_max), np.arange(y_max), np.arange(z_max)
-        xx, yy, zz = np.meshgrid(x, y, z, indexing='ij')  # Create 3D grid
-        coords_array = np.vstack([xx.ravel(), yy.ravel(), zz.ravel()]).T
-        """
-        
-        # All valid target block coordinates
-        target_coords = [(x, y, z) for x, y, z in product(range(self.neighbor_radius, x_max - self.neighbor_radius),
-            range(self.neighbor_radius, y_max - self.neighbor_radius), range(self.neighbor_radius, z_max - self.neighbor_radius))]
-        target_coords = np.array(target_coords) 
-        
-        # All valid context block coordiantes 
-        context_coords = []
-        for target_coord in target_coords:
-            neighbors = [
-                (target_coord[0] + i, target_coord[1] + j, target_coord[2] + k)
-                for i, j, k in product(range(-self.neighbor_radius, self.neighbor_radius + 1), repeat=3)
-                if (i, j, k) != (0, 0, 0)
-            ]
-            context_coords.append(np.array(neighbors))
-
-        return coords, np.array(target_coords), np.array(context_coords)
-
-    """ Get blocks from build """
-    def _get_blocks(self, build, coords, target_coords, context_coords): 
-        logger.info("Found {} blocks in build", len(coords))
-
-        blocks = [build[coord[0], coord[1], coord[2]] for coord in coords]
-
-        target_blocks = [build[target_coord[0], target_coord[1], target_coord[2]] for target_coord in target_coords]
-
-        context_blocks = []
-        for context_coord_list in context_coords: 
-            context_blocks.append([build[context_coord[0], context_coord[1], context_coord[2]] for context_coord in context_coord_list])
-
-        return blocks, target_blocks, context_blocks
-
-    """ Size stuff"""
-    def _store_sizes(self, blocks): 
-        # Collect counts for each block 
-  
-        for block_tok in blocks: 
-            block_name = self.tok2block[str(block_tok)]
-
-            self.block_frequency[block_name] += 1
-
-        logger.info("Found the following blocks {blocks}", blocks=dict(self.block_frequency))
-       
-        self.block2idx = dict()
-        self.idx2block = dict()
-
-        for tok in self.block_frequency.keys():
-            block_idx = len(self.block2idx)
-            self.block2idx[tok] = block_idx
-            self.idx2block[block_idx] = tok
-
-    """ Returns target and context block lists """
-    def __getitem__(self, index):
-        # Abort forward pass with context window too small here 
-        build = self.builds[index]
-        coords, target_coords, context_coords = self._get_coords(build) 
-        blocks, target_blocks, context_blocks = self._get_blocks(build, coords, target_coords, context_coords)
-        print("blocks are")
-        print(blocks)
-
-        print("target blocks are")
-        print(target_blocks)
-
-        print("context blocks are")
-        print(context_blocks)
-        self._store_sizes(blocks) 
-
-        return target_blocks, context_blocks
-    
-    """ Visalization of target and neighbor block context for documentation """
-    def plot_coords(self, target_coord, context_coords): 
-        x, y, z = zip(*context_coords)
-
-        fig = plt.figure()
-        ax = fig.add_subplot(111, projection='3d', proj_type='ortho')
-       
-        ax.scatter(x, y, z, color='red')
-        ax.scatter(*target_coord, color='blue')
-
-        ax.set_xlabel('X Axis')
-        ax.set_ylabel('Y Axis')
-        ax.set_zlabel('Z Axis')
-
-        plt.show()
-
+        self.build_limit = build_limit
+        self.tok2block = tok2block
+        self.max_num_targets = max_num_targets
+        self.block_frequency = dict()
+        self.context_radius = context_radius
+        self.directory = directory
+        self.files = []
+        count = 0
+        for filename in os.listdir(directory):
+            if filename.endswith(".h5"):
+                self.files.append(filename)
+                count += 1
+                if (self.build_limit != -1 and count >= build_limit): 
+                    break 
+                
+        logger.info("Found {} .h5 builds.", len(self.files))
+   
     def __len__(self):
-        return self.builds.shape[0]
+        return len(self.files)
+
+    """ Lazy-loads each build into memory. """
+    def __getitem__(self, idx):
+        targets, contexts = [], []
+        
+        try: 
+            while (idx < len(self.files)) and (len(targets) < Block2VecArgs.targets_per_batch): 
+                build_name = self.files[idx]
+                file_path = os.path.join(self.directory, build_name)
+                try: 
+                    with h5py.File(file_path, "r") as file:
+                        keys = file.keys()
+                        if len(keys) == 0:
+                            logger.info("%s failed loading: no keys." % build_name)
+                        else: 
+                            build_array = np.array(file[list(keys)[0]][()], dtype=np.int32)
+                            logger.info("%s loaded." % build_name)
+                        
+                            if not has_valid_dims(build_array, self.context_radius): 
+                                logger.info("%s: skipped (shape %dx%dx%d does not meet minimum dimensions required for context radius %d)." % (build_name, build_array.shape[0], build_array.shape[1], build_array.shape[2], self.context_radius))
+                            else:
+                                target, context = get_target_context_blocks(build_array, self.context_radius, Block2VecArgs.targets_per_build)
+                                logger.info("%s: %d targets found." % (build_name, len(target)))
+                                
+                                for item in target[:min(len(target), Block2VecArgs.targets_per_batch - len(targets))]:
+                                    targets.append(item)
+                                for item in context[:min(len(context), Block2VecArgs.targets_per_batch - len(contexts))]:
+                                    contexts.append(item)
+
+                except Exception as e:
+                    print(traceback.format_exc())
+                    print(f"{build_name} failed loading build due to error: \"{e}\"")
+                
+                self.files.remove(build_name)
+                idx +=1 
+        except Exception as e: 
+            print(traceback.format_exc())
+            print(f"{build_name} failed loading batch due to error: \"{e}\"")
+        
+        return (targets, contexts)
+    
+""" Check if a given build has big enough dimensions to support neighbor radius. """
+def has_valid_dims(build, context_radius): 
+    # Minimum build (in every dimension) supports 1 target block with the number of blocks on either side of the target at least the neighbor radius. 
+    min_dimension = context_radius*2 + 1
+
+    if (build.shape[0] < min_dimension or build.shape[1] < min_dimension or build.shape[2] < min_dimension): 
+        return False
+    return True
+
+def get_target_context_blocks(build, context_radius, max_subcubes):
+    target_blocks = []
+    context_blocks = []
+    
+    target_indexes = []
+    context_indexes_list = [] 
+
+    x_dim, y_dim, z_dim = build.shape
+    
+    # Calculate the number of sub-cubes per dimension based on max_subcubes
+    subcubes_per_dim = int(np.round((max_subcubes ** (1/3))))
+    
+    # Calculate the new step size to space out the sub-cubes
+    step_size_x = max(1, (x_dim - 2 * context_radius) // subcubes_per_dim)
+    step_size_y = max(1, (y_dim - 2 * context_radius) // subcubes_per_dim)
+    step_size_z = max(1, (z_dim - 2 * context_radius) // subcubes_per_dim)
+    
+    # Iterate over the cube, spacing out the sub-cubes
+    for x in range(context_radius, x_dim - context_radius, step_size_x):
+        for y in range(context_radius, y_dim - context_radius, step_size_y):
+            for z in range(context_radius, z_dim - context_radius, step_size_z):
+                # Stop if we exceed the max number of sub-cubes
+                if len(target_blocks) >= max_subcubes:
+                    break
+
+                # The center block (target block)
+                target_indexes.append((x, y, z))
+
+                center_block = build[(x, y, z)]
+                if (str(center_block) == "4000"): 
+                    center_block = 3714
+
+                target_blocks.append(center_block)
+                
+                # The surrounding context blocks
+                context = []
+                context_indexes = []
+                for i in range(-context_radius, context_radius + 1):
+                    for j in range(-context_radius, context_radius + 1):
+                        for k in range(-context_radius, context_radius + 1):
+                            # Skip the center block itself
+                            if i == 0 and j == 0 and k == 0:
+                                continue
+                            context_block = build[(x + i, y + j, z + k)]
+                            context_indexes.append((x + i, y + j, z + k))
+                            if (str(context_block) == "4000"): 
+                                context_block = 3714
+                            context.append(context_block)
+                context_blocks.append(context)
+                context_indexes_list.append(context_indexes)
+                
+    return target_blocks, context_blocks

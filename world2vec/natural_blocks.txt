@@ -215,6 +215,7 @@ minecraft:crimson_roots
 minecraft:sand
 minecraft:red_sand
 minecraft:soul_sand
+minecraft:soul_lantern
 minecraft:sandstone
 minecraft:cut_sandstone
 minecraft:red_sandstone
@@ -334,9 +335,6 @@ minecraft:gray_bed
 minecraft:light_gray_bed
 minecraft:brown_bed
 minecraft:black_bed
-minecraft:
-minecraft:
-
 minecraft:light_blue_bed
 minecraft:magenta_banner
 minecraft:orange_banner
@@ -542,7 +540,6 @@ minecraft:beetroot_seeds
 minecraft:melon_seeds
 minecraft:pumpkin_seeds
 minecraft:grindstone
-minecraft:flowing_water
 minecraft:loom
 minecraft:brick_wall
 minecraft:mud_bricks
@@ -588,3 +585,5 @@ minecraft:dark_prismarine
 minecraft:grass_path
 minecraft:oak_wall_sign
 minecraft:spruce_wall_sign
+minecraft:pitcher_plant
+minecraft:pitcher_crop

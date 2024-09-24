@@ -1,11 +1,12 @@
 import h5py
 import mcschematic
 import numpy as np
+import json
+import sys
 import os
+import glob
 
-
-def create_schematic_file(data, schem_file_path):
-
+def create_schematic_file(data, schem_folder_path, schem_file_name):
     schem = mcschematic.MCSchematic()
     # Iterate over the elements of the array
     for i in range(data.shape[0]):
@@ -13,16 +14,45 @@ def create_schematic_file(data, schem_file_path):
             for k in range(data.shape[2]):
                 schem.setBlock((i, j, k), data[i, j, k])
 
-    schem.save(schem_file_path, "build", mcschematic.Version.JE_1_20_1)
+    schem.save(schem_folder_path, schem_file_name, mcschematic.Version.JE_1_20_1)
 
-# # Initialize a 3D array with empty strings
-# array = np.full((10, 4, 10), "minecraft:air", dtype=object)
+def convert_hdf5_file_to_numpy_array(hdf5_file: str):
+    with h5py.File(hdf5_file, 'r') as file:
+        # Access a specific dataset
+        dataset = file[hdf5_file]
+        data = dataset[:]  # Read the data into a NumPy array        
+        return data
 
-# # Set all blocks at specific y-coordinates to the desired block
-# array[1, 0, 2] = "minecraft:stone"
-# array[2, 1, 4] = "minecraft:moss_block"
-# array[0, 2, 3] = "minecraft:diamond_block"
-# array[2, 3, 3] = "minecraft:bricks"
+def convert_numpy_array_to_blocks(world_array):
+    json_file = open("../world2vec/tok2block.json")
+    data = json.load(json_file)
+    world_array_blocks = np.empty_like(world_array).astype(object)
+
+    for coordinate in np.ndindex(world_array.shape):
+        block_integer = world_array[coordinate]
+        block_string = data[str(block_integer)]
+        if block_integer == 4000 or block_integer == 3714 or block_integer == 102:
+            block_string = "minecraft:air"
+        world_array_blocks[coordinate] = block_string
+
+    return world_array_blocks
+
+def trim_folder_path(folder_path):
+    return folder_path.strip().lstrip('/').rstrip('/')
+
+hdf5_folder = sys.argv[1]
+hdf5_files = glob.glob(os.path.join(hdf5_folder, "*.h5"))
+
+schem_folder_path = "" if len(sys.argv) <= 2 else trim_folder_path(sys.argv[2])
+
+for path in hdf5_files:
+    print("Processing " + path)
+    schem_file_name = path.removesuffix(".h5")
+    integer_world_array = convert_hdf5_file_to_numpy_array(path)
+    string_world_array = convert_numpy_array_to_blocks(integer_world_array)
+    create_schematic_file(string_world_array, schem_folder_path, schem_file_name)
+
+if schem_folder_path != "" and not os.path.isdir(schem_folder_path):
+    os.makedirs(schem_folder_path)
 
 
-# create_schematic_file(array, os.getcwd())

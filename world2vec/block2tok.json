@@ -382,7 +382,7 @@
     "minecraft:beacon": 306,
     "minecraft:bedrock": 307,
     "minecraft:bee_nest": 308,
-    "minecraft:beehive": 309,
+    "minecraft:bee_hive": 309,
     "minecraft:beetroots": 310,
     "minecraft:bell": 311,
     "minecraft:big_dripleaf": 312,
@@ -1668,6 +1668,7 @@
     "minecraft:flower_pot": 1395,
     "minecraft:flowering_azalea": 1396,
     "minecraft:flowering_azalea_leaves": 1397,
+    "minecraft:azalea_leaves_flowers":1397,
     "minecraft:frogspawn": 1398,
     "minecraft:frosted_ice": 1399,
     "minecraft:furnace": 1400,
@@ -2408,6 +2409,7 @@
     "minecraft:netherite_block": 2024,
     "minecraft:netherrack": 2025,
     "minecraft:note_block": 2026,
+    "minecraft:button": 2027,
     "minecraft:oak_button": {
         "face=ceiling,facing=north": 2027,
         "face=ceiling,facing=south": 2027,
@@ -2422,18 +2424,37 @@
         "face=wall,facing=south": 2033,
         "face=wall,facing=west": 2034
     },
+    "minecraft:door": {
+        "facing=north": 2035,
+        "facing=east": 2036,
+        "facing=south": 2037,
+        "facing=west": 2038
+    },
     "minecraft:oak_door": {
         "facing=north": 2035,
         "facing=east": 2036,
         "facing=south": 2037,
         "facing=west": 2038
     },
+    "minecraft:fence": 2039,
     "minecraft:oak_fence": 2039,
+    "minecraft:fence_gate": {
+        "facing=north": 2040,
+        "facing=south": 2040,
+        "facing=east": 2041,
+        "facing=west": 2041
+    },
     "minecraft:oak_fence_gate": {
         "facing=north": 2040,
         "facing=south": 2040,
         "facing=east": 2041,
         "facing=west": 2041
+    },
+    "minecraft:hanging_sign": {
+        "facing=north": 2042,
+        "facing=east": 2043,
+        "facing=south": 2044,
+        "facing=west": 2045
     },
     "minecraft:oak_hanging_sign": {
         "facing=north": 2042,
@@ -2441,20 +2462,77 @@
         "facing=south": 2044,
         "facing=west": 2045
     },
+    "minecraft:leaves": 2046,
     "minecraft:oak_leaves": 2046,
+    "minecraft:log": {
+        "axis=x": 2047,
+        "axis=y": 2048,
+        "axis=z": 2049
+    },
     "minecraft:oak_log": {
         "axis=x": 2047,
         "axis=y": 2048,
         "axis=z": 2049
     },
+    "minecraft:planks": 2050,
     "minecraft:oak_planks": 2050,
+    "minecraft:pressure_plate": 2051,
     "minecraft:oak_pressure_plate": 2051,
+    "minecraft:sapling": 2052,
     "minecraft:oak_sapling": 2052,
+    "minecraft:sign": 2053,
     "minecraft:oak_sign": 2053,
+    "minecraft:wooden_slab": {
+        "type=bottom": 2054,
+        "type=top": 2055,
+        "type=double": 2050
+    },
     "minecraft:oak_slab": {
         "type=bottom": 2054,
         "type=top": 2055,
         "type=double": 2050
+    },
+    "minecraft:stairs": {
+        "facing=north,half=bottom,shape=straight": 2056,
+        "facing=east,half=bottom,shape=straight": 2057,
+        "facing=south,half=bottom,shape=straight": 2058,
+        "facing=west,half=bottom,shape=straight": 2059,
+        "facing=north,half=top,shape=straight": 2060,
+        "facing=east,half=top,shape=straight": 2061,
+        "facing=south,half=top,shape=straight": 2062,
+        "facing=west,half=top,shape=straight": 2063,
+        "facing=north,half=bottom,shape=outer_left": 2064,
+        "facing=east,half=bottom,shape=outer_left": 2065,
+        "facing=south,half=bottom,shape=outer_left": 2066,
+        "facing=west,half=bottom,shape=outer_left": 2067,
+        "facing=north,half=top,shape=outer_left": 2068,
+        "facing=east,half=top,shape=outer_left": 2069,
+        "facing=south,half=top,shape=outer_left": 2070,
+        "facing=west,half=top,shape=outer_left": 2071,
+        "facing=north,half=bottom,shape=outer_right": 2072,
+        "facing=east,half=bottom,shape=outer_right": 2073,
+        "facing=south,half=bottom,shape=outer_right": 2074,
+        "facing=west,half=bottom,shape=outer_right": 2075,
+        "facing=north,half=top,shape=outer_right": 2076,
+        "facing=east,half=top,shape=outer_right": 2077,
+        "facing=south,half=top,shape=outer_right": 2078,
+        "facing=west,half=top,shape=outer_right": 2079,
+        "facing=north,half=bottom,shape=inner_left": 2080,
+        "facing=east,half=bottom,shape=inner_left": 2081,
+        "facing=south,half=bottom,shape=inner_left": 2082,
+        "facing=west,half=bottom,shape=inner_left": 2083,
+        "facing=north,half=top,shape=inner_left": 2084,
+        "facing=east,half=top,shape=inner_left": 2085,
+        "facing=south,half=top,shape=inner_left": 2086,
+        "facing=west,half=top,shape=inner_left": 2087,
+        "facing=north,half=bottom,shape=inner_right": 2088,
+        "facing=east,half=bottom,shape=inner_right": 2089,
+        "facing=south,half=bottom,shape=inner_right": 2090,
+        "facing=west,half=bottom,shape=inner_right": 2091,
+        "facing=north,half=top,shape=inner_right": 2092,
+        "facing=east,half=top,shape=inner_right": 2093,
+        "facing=south,half=top,shape=inner_right": 2094,
+        "facing=west,half=top,shape=inner_right": 2095
     },
     "minecraft:oak_stairs": {
         "facing=north,half=bottom,shape=straight": 2056,
@@ -2498,6 +2576,24 @@
         "facing=south,half=top,shape=inner_right": 2094,
         "facing=west,half=top,shape=inner_right": 2095
     },
+    "minecraft:trapdoor": {
+        "facing=north,half=bottom,open=false": 2096,
+        "facing=north,half=bottom,open=true": 2097,
+        "facing=north,half=top,open=false": 2098,
+        "facing=north,half=top,open=true": 2099,
+        "facing=east,half=bottom,open=false": 2100,
+        "facing=east,half=bottom,open=true": 2101,
+        "facing=east,half=top,open=false": 2102,
+        "facing=east,half=top,open=true": 2103,
+        "facing=south,half=bottom,open=false": 2104,
+        "facing=south,half=bottom,open=true": 2105,
+        "facing=south,half=top,open=false": 2106,
+        "facing=south,half=top,open=true": 2107,
+        "facing=west,half=bottom,open=false": 2108,
+        "facing=west,half=bottom,open=true": 2109,
+        "facing=west,half=top,open=false": 2110,
+        "facing=west,half=top,open=true": 2111
+    },
     "minecraft:oak_trapdoor": {
         "facing=north,half=bottom,open=false": 2096,
         "facing=north,half=bottom,open=true": 2097,
@@ -2516,17 +2612,34 @@
         "facing=west,half=top,open=false": 2110,
         "facing=west,half=top,open=true": 2111
     },
+    "minecraft:wall_hanging_sign": {
+        "facing=north": 2112,
+        "facing=east": 2113,
+        "facing=south": 2114,
+        "facing=west": 2115
+    },
     "minecraft:oak_wall_hanging_sign": {
         "facing=north": 2112,
         "facing=east": 2113,
         "facing=south": 2114,
         "facing=west": 2115
     },
+    "minecraft:wall_sign": {
+        "facing=north": 2116,
+        "facing=east": 2117,
+        "facing=south": 2118,
+        "facing=west": 2119
+    },
     "minecraft:oak_wall_sign": {
         "facing=north": 2116,
         "facing=east": 2117,
         "facing=south": 2118,
         "facing=west": 2119
+    },
+    "minecraft:wood": {
+        "axis=x": 2120,
+        "axis=y": 2121,
+        "axis=z": 2122
     },
     "minecraft:oak_wood": {
         "axis=x": 2120,
@@ -3213,6 +3326,7 @@
     "minecraft:raw_gold_block": 2731,
     "minecraft:raw_iron_block": 2732,
     "minecraft:red_banner": 2733,
+    "minecraft:bed": 2734,
     "minecraft:red_bed": 2734,
     "minecraft:red_candle": 2735,
     "minecraft:red_candle_cake": 2736,
@@ -3402,6 +3516,7 @@
     "minecraft:shroomlight": 2905,
     "minecraft:shulker_box": 2906,
     "minecraft:skeleton_skull": 2907,
+    "minecraft:skull": 2907,
     "minecraft:skeleton_wall_skull": 2908,
     "minecraft:slime_block": 2909,
     "minecraft:small_amethyst_bud": {
@@ -3567,6 +3682,7 @@
         "type=double": 3049
     },
     "minecraft:snow": 3052,
+    "minecraft:snow_layer": 3052,
     "minecraft:snow_block": 3053,
     "minecraft:soul_campfire": 3054,
     "minecraft:soul_fire": 3055,
@@ -4340,12 +4456,16 @@
     "minecraft:wet_sponge": 3674,
     "minecraft:wheat": 3675,
     "minecraft:white_banner": 3676,
+    "minecraft:banner": 3676,
     "minecraft:white_bed": 3677,
     "minecraft:white_candle": 3678,
     "minecraft:white_candle_cake": 3679,
     "minecraft:white_carpet": 3680,
+    "minecraft:carpet": 3680,
     "minecraft:white_concrete": 3681,
     "minecraft:white_concrete_powder": 3682,
+    "minecraft:concrete":3681,
+    "minecraft:concrete_powder":3682,
     "minecraft:white_glazed_terracotta": 3683,
     "minecraft:white_shulker_box": 3684,
     "minecraft:white_stained_glass": 3685,
@@ -4372,5 +4492,19 @@
     "minecraft:yellow_wall_banner": 3706,
     "minecraft:yellow_wool": 3707,
     "minecraft:zombie_head": 3708,
-    "minecraft:zombie_wall_head": 3709
+    "minecraft:zombie_wall_head": 3709,
+    "minecraft:calibrated_sculk_sensor": 3710,
+    "minecraft:pitcher_crop": {
+        "half=lower": 3711,
+        "half=upper": 3712
+    },
+    "minecraft:soul_fire_lantern":3716,
+    "minecraft:stained_glass":3685, 
+    "minecraft:stained_glass_pane":3686,
+    "minecraft:stained_hardened_clay":3687,
+    "minecraft:suspicious_gravel":3715,
+    "minecraft:wall_banner":3689,
+    "minecraft:wool":3690,
+    "minecraft:pitcher_plant": 3713,
+    "UNKNOWN_BLOCK": 3714
 }
