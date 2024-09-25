@@ -12,7 +12,7 @@ import h5py
 import numpy as np
 import random
 
-batch_size = 8
+batch_size = 5
 num_epochs = 32
 
 # Path to checkpoint file (if the training interrupts)
@@ -37,9 +37,10 @@ np.random.seed(seed)
 random.seed(seed)
 
 # Device config
-# device_type = "cuda" if torch.cuda.is_available() else "cpu"
-device_type = "cpu"
+device_type = "cuda" if torch.cuda.is_available() else "cpu"
 device = torch.device(device_type)
+if (torch.cuda.is_available()):
+    print("Using GPUs with CUDA")
 
 # Load block2tok
 
