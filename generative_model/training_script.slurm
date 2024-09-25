@@ -3,9 +3,9 @@
 #SBATCH --job-name=VAE                      # Job name
 #SBATCH --partition=normal                  # Partition (queue) name
 #SBATCH --cpus-per-task=10                   # Number of CPU cores per task
-#SBATCH --mem=256G                           # Memory per node (GB)
+#SBATCH --mem=128GB                           # Memory per node (GB)
 #SBATCH --output=VAE_results                 # Output File
-#SBATCH --time=128:00:00                    # Time limit (HH:MM:SS)
+#SBATCH --time=00:10:00                    # Time limit (HH:MM:SS)
 #SBATCH --gres=gpu:2
 
 # Workaround to ensure conda initializes the shell
