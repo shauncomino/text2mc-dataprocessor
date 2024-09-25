@@ -5,7 +5,7 @@
 #SBATCH --cpus-per-task=10                   # Number of CPU cores per task
 #SBATCH --mem=128GB                           # Memory per node (GB)
 #SBATCH --output=VAE_results                 # Output File
-#SBATCH --time=00:10:00                    # Time limit (HH:MM:SS)
+#SBATCH --time=9:00:00                    # Time limit (HH:MM:SS)
 #SBATCH --gres=gpu:2
 
 # Workaround to ensure conda initializes the shell
