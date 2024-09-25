@@ -13,11 +13,6 @@ source /lustre/fs1/groups/jaedo/miniconda3/etc/profile.d/conda.sh
 
 conda activate world2vec
 
-
-export JAVA_HOME=/groups/jaedo/jdk-22.0.1
-export PATH=$JAVA_HOME/bin:$PATH
-export RAR_EXECUTABLE=/lustre/fs1/groups/jaedo/unrar
-
 # Commands to run Python script
 # $1 is the data frame path
 # $2 is the destination path
