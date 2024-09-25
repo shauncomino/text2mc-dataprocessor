@@ -23,7 +23,7 @@ device_type = "cuda" if torch.cuda.is_available() else "cpu"
 device = torch.device(device_type)
 
 # Load block2tok
-block2tok_file_path = r'world2vec/block2tok.json'
+block2tok_file_path = r'/lustre/fs1/home/scomino/text2mc/text2mc-dataprocessor/world2vec/block2tok.json'
 with open(block2tok_file_path, 'r') as j:
     block2tok = json.load(j)
 
