@@ -12,6 +12,24 @@ import h5py
 import numpy as np
 import random
 
+batch_size = 64  
+num_epochs = 32
+
+# Path to checkpoint file (if the training interrupts)
+checkpoint_path = r'/lustre/fs1/home/scomino/training/checkpoint.pth'
+block2tok_file_path = r'/lustre/fs1/home/scomino/text2mc/text2mc-dataprocessor/world2vec/tok2block.json'
+builds_folder_path = r'/lustre/fs1/groups/jaedo/processed_builds'
+
+# Specify the paths for the two builds to interpolate between during training
+build1_path = r'/lustre/fs1/groups/jaedo/processed_builds/batch_101_2606.h5'
+build2_path = r'/lustre/fs1/groups/jaedo/processed_builds/batch_118_3048.h5'
+
+# Specify the directory to save the generated builds (interpolations)
+save_dir = r'/lustre/fs1/home/scomino/training/interpolations'
+
+# Path to the highest performing model found during training
+best_model_path = r'/lustre/fs1/home/scomino/training/best_model.pth'
+
 # Set random seeds for reproducibility
 seed = 42
 torch.manual_seed(seed)
@@ -19,17 +37,20 @@ np.random.seed(seed)
 random.seed(seed)
 
 # Device config
-device_type = "cuda" if torch.cuda.is_available() else "cpu"
+# device_type = "cuda" if torch.cuda.is_available() else "cpu"
+device_type = "cpu"
 device = torch.device(device_type)
 
 # Load block2tok
-block2tok_file_path = r'/lustre/fs1/home/scomino/text2mc/text2mc-dataprocessor/world2vec/block2tok.json'
+
 with open(block2tok_file_path, 'r') as j:
     block2tok = json.load(j)
+    block2tok = dict((v,k) for k,v in block2tok.items())
 
 # Prepare the dataset
-hdf5_filepaths = glob.glob(os.path.join('/lustre/fs1/groups/jaedo/processed_builds/', '*.h5'))
-dataset = text2mcVAEDataset(file_paths=hdf5_filepaths, block2tok=block2tok)
+
+hdf5_filepaths = glob.glob(os.path.join(builds_folder_path, '*.h5'))
+dataset = text2mcVAEDataset(file_paths=hdf5_filepaths, block2tok=block2tok, fixed_size=(256, 256, 256))
 
 # Get num_tokens from dataset
 num_tokens = dataset.num_tokens  # Total number of tokens
@@ -39,10 +60,8 @@ embedding_dim = 32  # Choose an embedding dimension
 encoder = text2mcVAEEncoder(num_tokens=num_tokens, embedding_dim=embedding_dim).to(device)
 decoder = text2mcVAEDecoder(num_tokens=num_tokens, embedding_dim=embedding_dim).to(device)
 optimizer = optim.Adam(list(encoder.parameters()) + list(decoder.parameters()), lr=1e-2)
-scaler = GradScaler(device_type)  # Initialize the gradient scaler for mixed precision
+scaler = torch.amp.GradScaler()  # Initialize the gradient scaler for mixed precision
 
-# Path to checkpoint file
-checkpoint_path = '/lustre/fs1/home/scomino/checkpoint.pth'
 
 start_epoch = 1
 best_val_loss = float('inf')
@@ -75,12 +94,10 @@ train_dataset, val_dataset, test_dataset = random_split(
 )
 
 # Create DataLoaders
-batch_size = 64  # Adjust as needed
+
 train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
 val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False)
 test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
-
-num_epochs = 32  # Adjust as needed
 
 # Adjust the loss function to use CrossEntropyLoss
 import torch.nn.functional as F
@@ -165,11 +182,6 @@ def interpolate_and_generate(encoder, decoder, build1_path, build2_path, save_di
 
 # Training loop
 
-# Specify the paths for the two builds to interpolate between
-build1_path = r'/lustre/fs1/groups/jaedo/processed_builds/batch_864_22457.h5'
-build2_path = r'/lustre/fs1/groups/jaedo/processed_builds/batch_86_2224.h5'
-# Specify the directory to save the generated builds
-save_dir = r'/lustre/fs1/home/scomino/training/interpolations'
 os.makedirs(save_dir, exist_ok=True)
 
 for epoch in range(start_epoch, num_epochs + 1):
@@ -182,7 +194,7 @@ for epoch in range(start_epoch, num_epochs + 1):
         optimizer.zero_grad()
 
         # Mixed precision context
-        with autocast(device_type=device_type, enabled=(device_type == 'cuda')):
+        with torch.amp.autocast(device_type=device_type, enabled=(device_type == 'cuda')):
             # Encode the data to get latent representation, mean, and log variance
             z, mu, logvar = encoder(data)
 
@@ -227,22 +239,25 @@ for epoch in range(start_epoch, num_epochs + 1):
             'decoder_state_dict': decoder.state_dict(),
             'optimizer_state_dict': optimizer.state_dict(),
             'loss': avg_val_loss,
-        }, '/lustre/fs1/home/scomino/best_model.pth')
+        }, best_model_path)
         print(f'Saved new best model at epoch {epoch} with validation loss {avg_val_loss:.4f}')
 
-    # Save checkpoint
-    checkpoint = {
-        'epoch': epoch,
-        'encoder_state_dict': encoder.state_dict(),
-        'decoder_state_dict': decoder.state_dict(),
-        'optimizer_state_dict': optimizer.state_dict(),
-        'scaler_state_dict': scaler.state_dict(),
-        'best_val_loss': best_val_loss,
-        # Optionally, save the random seed
-        'seed': seed,
-    }
-    torch.save(checkpoint, checkpoint_path)
-    print(f"Saved checkpoint at epoch {epoch}")
+    try:
+        # Save checkpoint
+        checkpoint = {
+            'epoch': epoch,
+            'encoder_state_dict': encoder.state_dict(),
+            'decoder_state_dict': decoder.state_dict(),
+            'optimizer_state_dict': optimizer.state_dict(),
+            'scaler_state_dict': scaler.state_dict(),
+            'best_val_loss': best_val_loss,
+            # Optionally, save the random seed
+            'seed': seed,
+        }
+        torch.save(checkpoint, checkpoint_path)
+        print(f"Saved checkpoint at epoch {epoch}")
+    except:
+        print("Failed to save checkpoint")
 
     # Interpolate and generate builds
     print(f'Interpolating between builds at the end of epoch {epoch}')
