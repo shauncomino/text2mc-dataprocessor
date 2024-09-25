@@ -17,23 +17,22 @@ import numpy as np
 import random
 
 
-def main(rank, world_size):
+def main():
+    # Get rank and world_size from environment variables
+    rank = int(os.environ['RANK'])
+    world_size = int(os.environ['WORLD_SIZE'])
+    local_rank = int(os.environ['LOCAL_RANK'])
+
     batch_size = 8
     num_epochs = 32
 
-    # Path to checkpoint file (if the training interrupts)
+    # Paths and configurations
     checkpoint_path = r'/lustre/fs1/home/scomino/training/checkpoint.pth'
     block2tok_file_path = r'/lustre/fs1/home/scomino/text2mc/text2mc-dataprocessor/world2vec/tok2block.json'
     builds_folder_path = r'/lustre/fs1/groups/jaedo/processed_builds'
-
-    # Specify the paths for the two builds to interpolate between during training
     build1_path = r'/lustre/fs1/groups/jaedo/processed_builds/batch_101_2606.h5'
     build2_path = r'/lustre/fs1/groups/jaedo/processed_builds/batch_118_3048.h5'
-
-    # Specify the directory to save the generated builds (interpolations)
     save_dir = r'/lustre/fs1/home/scomino/training/interpolations'
-
-    # Path to the highest performing model found during training
     best_model_path = r'/lustre/fs1/home/scomino/training/best_model.pth'
 
     # Set random seeds for reproducibility
@@ -42,69 +41,27 @@ def main(rank, world_size):
     np.random.seed(seed)
     random.seed(seed)
 
-    # Device config
-    device_type = "cuda" if torch.cuda.is_available() else "cpu"
-    device = torch.device(device_type)
-    if (torch.cuda.is_available()):
-        if rank == 0:
-            print("Using GPUs with CUDA")
+    # Initialize the process group
+    dist.init_process_group(backend='nccl')
+
+    # Set the device for this process
+    torch.cuda.set_device(local_rank)
+    device = torch.device('cuda', local_rank)
+    if rank == 0:
+        print(f"Using GPUs with CUDA, Rank: {rank}")
 
     # Load block2tok
-
     with open(block2tok_file_path, 'r') as j:
         block2tok = json.load(j)
-        block2tok = dict((v,k) for k,v in block2tok.items())
+        block2tok = dict((v, k) for k, v in block2tok.items())
 
     # Prepare the dataset
-
     hdf5_filepaths = glob.glob(os.path.join(builds_folder_path, '*.h5'))
     dataset = text2mcVAEDataset(file_paths=hdf5_filepaths, block2tok=block2tok, fixed_size=(128, 128, 128))
 
     # Get num_tokens from dataset
     num_tokens = dataset.num_tokens  # Total number of tokens
     embedding_dim = 32  # Choose an embedding dimension
-
-    dist.init_process_group(
-        backend='nccl',  # 'nccl' is optimized for NVIDIA GPUs
-        init_method='env://',
-        world_size=world_size,
-        rank=rank
-    )
-
-    # Set the device for this process
-    torch.cuda.set_device(rank)
-    device = torch.device('cuda', rank)
-
-    # Initialize the model components
-    encoder = text2mcVAEEncoder(num_tokens=num_tokens, embedding_dim=embedding_dim).to(device)
-    decoder = text2mcVAEDecoder(num_tokens=num_tokens, embedding_dim=embedding_dim).to(device)
-    encoder = torch.nn.parallel.DistributedDataParallel(encoder, device_ids=[rank])
-    decoder = torch.nn.parallel.DistributedDataParallel(decoder, device_ids=[rank])
-
-
-    optimizer = optim.Adam(list(encoder.parameters()) + list(decoder.parameters()), lr=1e-2)
-    scaler = torch.amp.GradScaler()  # Initialize the gradient scaler for mixed precision
-
-
-    start_epoch = 1
-    best_val_loss = float('inf')
-
-    # Load checkpoint if it exists
-    if os.path.exists(checkpoint_path):
-        if rank == 0:
-            print(f"Loading checkpoint from {checkpoint_path}")
-        checkpoint = torch.load(checkpoint_path, map_location=device)
-        encoder.load_state_dict(checkpoint['encoder_state_dict'])
-        decoder.load_state_dict(checkpoint['decoder_state_dict'])
-        optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
-        scaler.load_state_dict(checkpoint['scaler_state_dict'])
-        start_epoch = checkpoint['epoch'] + 1
-        best_val_loss = checkpoint['best_val_loss']
-        if rank == 0:
-            print(f"Resuming training from epoch {start_epoch}")
-    else:
-        if rank == 0:
-            print("No checkpoint found, starting from scratch")
 
     # Split the dataset into training, validation, and test sets
     dataset_size = len(dataset)
@@ -128,6 +85,42 @@ def main(rank, world_size):
     train_loader = DataLoader(train_dataset, batch_size=batch_size, sampler=train_sampler)
     val_loader = DataLoader(val_dataset, batch_size=batch_size, sampler=val_sampler)
     test_loader = DataLoader(test_dataset, batch_size=batch_size, sampler=test_sampler)
+
+    # Initialize the model components
+    encoder = text2mcVAEEncoder(num_tokens=num_tokens, embedding_dim=embedding_dim).to(device)
+    decoder = text2mcVAEDecoder(num_tokens=num_tokens, embedding_dim=embedding_dim).to(device)
+    optimizer = optim.Adam(list(encoder.parameters()) + list(decoder.parameters()), lr=1e-2)
+    scaler = GradScaler()  # Initialize the gradient scaler for mixed precision
+
+    # Wrap models with DDP
+    encoder = torch.nn.parallel.DistributedDataParallel(encoder, device_ids=[local_rank], output_device=local_rank)
+    decoder = torch.nn.parallel.DistributedDataParallel(decoder, device_ids=[local_rank], output_device=local_rank)
+
+    start_epoch = 1
+    best_val_loss = float('inf')
+
+    # Load checkpoint if it exists (only on rank 0)
+    if rank == 0 and os.path.exists(checkpoint_path):
+        print(f"Loading checkpoint from {checkpoint_path}")
+        checkpoint = torch.load(checkpoint_path, map_location=device)
+        encoder.module.load_state_dict(checkpoint['encoder_state_dict'])
+        decoder.module.load_state_dict(checkpoint['decoder_state_dict'])
+        optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+        scaler.load_state_dict(checkpoint['scaler_state_dict'])
+        start_epoch = checkpoint['epoch'] + 1
+        best_val_loss = checkpoint['best_val_loss']
+        print(f"Resuming training from epoch {start_epoch}")
+    else:
+        print(f"Rank {rank}: No checkpoint found, starting from scratch")
+
+    # Broadcast the start_epoch and best_val_loss to all processes
+    start_epoch_tensor = torch.tensor(start_epoch).to(device)
+    best_val_loss_tensor = torch.tensor(best_val_loss).to(device)
+    dist.broadcast(start_epoch_tensor, src=0)
+    dist.broadcast(best_val_loss_tensor, src=0)
+    start_epoch = start_epoch_tensor.item()
+    best_val_loss = best_val_loss_tensor.item()
+
 
     # Adjust the loss function to use CrossEntropyLoss
     import torch.nn.functional as F
@@ -213,8 +206,8 @@ def main(rank, world_size):
                     print(f'Saved interpolated build at {save_path}')
 
     # Training loop
-
-    os.makedirs(save_dir, exist_ok=True)
+    if rank == 0:
+        os.makedirs(save_dir, exist_ok=True)
 
     for epoch in range(start_epoch, num_epochs + 1):
         train_sampler.set_epoch(epoch)
@@ -227,7 +220,7 @@ def main(rank, world_size):
             optimizer.zero_grad()
 
             # Mixed precision context
-            with torch.amp.autocast(device_type=device_type, enabled=(device_type == 'cuda')):
+            with autocast():
                 # Encode the data to get latent representation, mean, and log variance
                 z, mu, logvar = encoder(data)
 
@@ -243,10 +236,17 @@ def main(rank, world_size):
             scaler.update()
 
             total_loss += loss.item()
-            if batch_idx % 10 == 0:
-                print(f'Epoch: {epoch} [{batch_idx * batch_size}/{len(train_loader.dataset)} '
-                    f'({100. * batch_idx / len(train_loader):.0f}%)] Loss: {loss.item():.6f}')
+
+            if batch_idx % 10 == 0 and rank == 0:
+                print(f'Rank {rank}, Epoch: {epoch} [{batch_idx * batch_size}/{len(train_loader.dataset)} '
+                      f'({100. * batch_idx / len(train_loader):.0f}%)] Loss: {loss.item():.6f}')
+
+        # Average the training loss across all processes
         avg_train_loss = total_loss / len(train_loader.dataset)
+        avg_train_loss_tensor = torch.tensor(avg_train_loss).to(device)
+        dist.all_reduce(avg_train_loss_tensor, op=dist.ReduceOp.SUM)
+        avg_train_loss = avg_train_loss_tensor.item() / world_size
+
         if rank == 0:
             print(f'====> Epoch: {epoch} Average training loss: {avg_train_loss:.4f}')
 
@@ -261,56 +261,50 @@ def main(rank, world_size):
                 recon_batch = decoder(z)
                 loss = loss_function(recon_batch, data, mu, logvar, mask)
                 val_loss += loss.item()
+
+        # Average the validation loss across all processes
         avg_val_loss = val_loss / len(val_loader.dataset)
+        avg_val_loss_tensor = torch.tensor(avg_val_loss).to(device)
+        dist.all_reduce(avg_val_loss_tensor, op=dist.ReduceOp.SUM)
+        avg_val_loss = avg_val_loss_tensor.item() / world_size
+
         if rank == 0:
             print(f'====> Epoch: {epoch} Validation loss: {avg_val_loss:.4f}')
 
-
-        if rank == 0:
             # Check if validation loss improved, and save model
             if avg_val_loss < best_val_loss:
                 best_val_loss = avg_val_loss
                 torch.save({
                     'epoch': epoch,
-                    'encoder_state_dict': encoder.state_dict(),
-                    'decoder_state_dict': decoder.state_dict(),
+                    'encoder_state_dict': encoder.module.state_dict(),
+                    'decoder_state_dict': decoder.module.state_dict(),
                     'optimizer_state_dict': optimizer.state_dict(),
                     'loss': avg_val_loss,
                 }, best_model_path)
-                if rank == 0:
-                    print(f'Saved new best model at epoch {epoch} with validation loss {avg_val_loss:.4f}')
+                print(f'Saved new best model at epoch {epoch} with validation loss {avg_val_loss:.4f}')
 
-            try:
-                # Save checkpoint
-                checkpoint = {
-                    'epoch': epoch,
-                    'encoder_state_dict': encoder.state_dict(),
-                    'decoder_state_dict': decoder.state_dict(),
-                    'optimizer_state_dict': optimizer.state_dict(),
-                    'scaler_state_dict': scaler.state_dict(),
-                    'best_val_loss': best_val_loss,
-                    # Optionally, save the random seed
-                    'seed': seed,
-                }
-                torch.save(checkpoint, checkpoint_path)
-                if rank == 0:
-                    print(f"Saved checkpoint at epoch {epoch}")
-            except:
-                if rank == 0:
-                    print("Failed to save checkpoint")
+            # Save checkpoint
+            checkpoint = {
+                'epoch': epoch,
+                'encoder_state_dict': encoder.module.state_dict(),
+                'decoder_state_dict': decoder.module.state_dict(),
+                'optimizer_state_dict': optimizer.state_dict(),
+                'scaler_state_dict': scaler.state_dict(),
+                'best_val_loss': best_val_loss,
+                'seed': seed,
+            }
+            torch.save(checkpoint, checkpoint_path)
+            print(f"Saved checkpoint at epoch {epoch}")
 
             # Interpolate and generate builds
-            if rank == 0:
-                print(f'Interpolating between builds at the end of epoch {epoch}')
+            print(f'Interpolating between builds at the end of epoch {epoch}')
             try:
-                interpolate_and_generate(encoder, decoder, build1_path, build2_path, save_dir, epoch, num_interpolations=5)
+                interpolate_and_generate(encoder.module, decoder.module, build1_path, build2_path, save_dir, epoch, num_interpolations=5)
             except Exception as e:
-                if rank == 0:
-                    print(f"Unable to generate interpolations for this epoch due to error: {e}")
+                print(f"Unable to generate interpolations for this epoch due to error: {e}")
 
+    # Clean up the process group
     dist.destroy_process_group()
 
 if __name__ == '__main__':
-    world_size = 2  # Number of GPUs
-    mp.spawn(main, args=(world_size,), nprocs=world_size, join=True)
-
+    main()

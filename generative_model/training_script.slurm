@@ -15,14 +15,9 @@ source /lustre/fs1/groups/jaedo/miniconda3/etc/profile.d/conda.sh
 
 conda activate world2vec
 
-# Set environment variables for PyTorch distributed
-export MASTER_ADDR=$(srun --nodes=1 hostname | head -n1)
-export MASTER_PORT=12355
-export WORLD_SIZE=2
-export RANK=${SLURM_PROCID}
 
 # Commands to run Python script
 # $1 is the data frame path
 # $2 is the destination path
 
-python -m torch.distributed.launch --nproc_per_node=2 train.py
+torchrun --nnodes=1 --nproc_per_node=2 training_script.py
