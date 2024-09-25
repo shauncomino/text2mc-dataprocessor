@@ -2,10 +2,10 @@
 #!/bin/bash
 #SBATCH --job-name=VAE                      # Job name
 #SBATCH --partition=normal                  # Partition (queue) name
-#SBATCH --cpus-per-task=10                   # Number of CPU cores per task
-#SBATCH --mem=128GB                           # Memory per node (GB)
+#SBATCH --cpus-per-task=8                   # Number of CPU cores per task
+#SBATCH --mem=64GB                           # Memory per node (GB)
 #SBATCH --output=VAE_results                 # Output File
-#SBATCH --time=9:00:00                    # Time limit (HH:MM:SS)
+#SBATCH --time=0:30:00                    # Time limit (HH:MM:SS)
 #SBATCH --gres=gpu:2
 
 # Workaround to ensure conda initializes the shell
@@ -17,4 +17,4 @@ conda activate world2vec
 # $1 is the data frame path
 # $2 is the destination path
 
-python train.py
+python -m torch.distributed.launch --nproc_per_node=2 train.py
