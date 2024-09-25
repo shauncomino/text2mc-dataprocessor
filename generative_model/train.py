@@ -1,4 +1,5 @@
 import torch
+import torch.nn as nn
 import torch.optim as optim
 import glob
 import json
@@ -40,19 +41,19 @@ def loss_function(recon_x, x, mu, logvar, mask, a=10.0):
     x_masked = x * mask_expanded
 
     # Use log-cosh error instead of MSE
-    log_cosh = log_cosh_loss(recon_x_masked, x_masked, a)
+    BCE = nn.functional.binary_cross_entropy_with_logits(recon_x_masked, x_masked, reduction='sum')
 
     # Calculate KL Divergence
     batch_size = x.size(0)
     KLD = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp()) / batch_size
 
-    return log_cosh + KLD
+    return BCE + KLD
 
 # Load tok2embedding
 tok2block = None
 block2embedding = None
-block2embedding_file_path = r'block2vec/output/block2vec/embeddings.json'
-tok2block_file_path = r'world2vec/tok2block.json'
+block2embedding_file_path = r'../block2vec/output/block2vec/embeddings.json'
+tok2block_file_path = r'../world2vec/tok2block.json'
 with open(block2embedding_file_path, 'r') as j:
     block2embedding = json.loads(j.read())
 
@@ -78,12 +79,14 @@ for token, block_name in tok2block.items():
 # print(f"Found {len(hdf5_filepaths)} builds to use as training data")
 
 hdf5_filepaths = [
-    r'/mnt/d/processed_builds_compressed/rar_test5_Desert+Tavern+2.h5',
-    # r'/mnt/d/processed_builds_compressed/rar_test6_Desert_Tavern.h5',
+    r'./rar_test5_Desert+Tavern+2.h5',
+    r'./rar_test6_Desert_Tavern.h5',
     # r'/mnt/d/processed_builds_compressed/zip_test_0_LargeSandDunes.h5'
 ]
 
-dataset = text2mcVAEDataset(file_paths=hdf5_filepaths, tok2embedding=tok2embedding, block_ignore_list=[102])
+# dataset = text2mcVAEDataset(file_paths=hdf5_filepaths, tok2embedding=tok2embedding, block_ignore_list=[102])
+dataset = text2mcVAEDataset(file_paths=hdf5_filepaths, block_ignore_list=[102])
+print(f"Loaded {len(dataset)} builds from {len(hdf5_filepaths)} total builds")
 
 # Split the dataset into training, validation, and test sets
 dataset_size = len(dataset)
