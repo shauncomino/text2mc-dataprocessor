@@ -51,7 +51,7 @@ with open(block2tok_file_path, 'r') as j:
 # Prepare the dataset
 
 hdf5_filepaths = glob.glob(os.path.join(builds_folder_path, '*.h5'))
-dataset = text2mcVAEDataset(file_paths=hdf5_filepaths, block2tok=block2tok, fixed_size=(256, 256, 256))
+dataset = text2mcVAEDataset(file_paths=hdf5_filepaths, block2tok=block2tok, fixed_size=(128, 128, 128))
 
 # Get num_tokens from dataset
 num_tokens = dataset.num_tokens  # Total number of tokens
