@@ -12,7 +12,7 @@ import h5py
 import numpy as np
 import random
 
-batch_size = 64  
+batch_size = 12
 num_epochs = 32
 
 # Path to checkpoint file (if the training interrupts)
