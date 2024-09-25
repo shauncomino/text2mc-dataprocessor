@@ -2,88 +2,64 @@ import torch
 import torch.optim as optim
 import glob
 import json
-from text2mcVAE import text2mcVAE
 import os
 from text2mcVAEDataset import text2mcVAEDataset
 from encoder import text2mcVAEEncoder
 from decoder import text2mcVAEDecoder
 from torch.utils.data import DataLoader, random_split
-from torch.amp import autocast, GradScaler
+from torch.cuda.amp import autocast, GradScaler
+import h5py
+import numpy as np
+import random
 
-# Initialize the model components, optimizer, and gradient scaler
+# Set random seeds for reproducibility
+seed = 42
+torch.manual_seed(seed)
+np.random.seed(seed)
+random.seed(seed)
 
-# Change the following line to the commented line proceeding it when using a capable machine to train
-device_type = "cpu"
-# device_type = "cuda" if torch.cuda.is_available() else "cpu"
-
+# Device config
+device_type = "cuda" if torch.cuda.is_available() else "cpu"
 device = torch.device(device_type)
-encoder = text2mcVAEEncoder().to(device)
-decoder = text2mcVAEDecoder().to(device)
-optimizer = optim.Adam(list(encoder.parameters()) + list(decoder.parameters()), lr=1e-3)
-scaler = GradScaler()  # Initialize the gradient scaler for mixed precision
 
-# Adjusted loss function with log-cosh loss
-def log_cosh_loss(x, y, a=10.0):
-    diff = a * (x - y)
-    return torch.mean((1.0 / a) * torch.log(torch.cosh(diff)))
+# Load block2tok
+block2tok_file_path = r'world2vec/block2tok.json'
+with open(block2tok_file_path, 'r') as j:
+    block2tok = json.load(j)
 
-def loss_function(recon_x, x, mu, logvar, mask, a=10.0):
-    # If recon_x has more channels, slice to match x's channels
-    recon_x = recon_x[:, :x.size(1), :, :, :]
+# Prepare the dataset
+hdf5_filepaths = glob.glob(os.path.join('/lustre/fs1/groups/jaedo/processed_builds/', '*.h5'))
+dataset = text2mcVAEDataset(file_paths=hdf5_filepaths, block2tok=block2tok)
 
-    # Adjust the mask to match the shape of recon_x
-    mask_expanded = mask.unsqueeze(1)  # Add a singleton dimension for channels
-    mask_expanded = mask_expanded.expand_as(recon_x)  # Expand to match recon_x's channel size
+# Get num_tokens from dataset
+num_tokens = dataset.num_tokens  # Total number of tokens
+embedding_dim = 32  # Choose an embedding dimension
 
-    # Apply the mask
-    recon_x_masked = recon_x * mask_expanded
-    x_masked = x * mask_expanded
+# Initialize the model components
+encoder = text2mcVAEEncoder(num_tokens=num_tokens, embedding_dim=embedding_dim).to(device)
+decoder = text2mcVAEDecoder(num_tokens=num_tokens, embedding_dim=embedding_dim).to(device)
+optimizer = optim.Adam(list(encoder.parameters()) + list(decoder.parameters()), lr=1e-2)
+scaler = GradScaler(device_type)  # Initialize the gradient scaler for mixed precision
 
-    # Use log-cosh error instead of MSE
-    log_cosh = log_cosh_loss(recon_x_masked, x_masked, a)
+# Path to checkpoint file
+checkpoint_path = '/lustre/fs1/home/scomino/checkpoint.pth'
 
-    # Calculate KL Divergence
-    batch_size = x.size(0)
-    KLD = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp()) / batch_size
+start_epoch = 1
+best_val_loss = float('inf')
 
-    return log_cosh + KLD
-
-# Load tok2embedding
-tok2block = None
-block2embedding = None
-block2embedding_file_path = r'block2vec/output/block2vec/embeddings.json'
-tok2block_file_path = r'world2vec/tok2block.json'
-with open(block2embedding_file_path, 'r') as j:
-    block2embedding = json.loads(j.read())
-
-with open(tok2block_file_path, 'r') as j:
-    tok2block = json.loads(j.read())
-
-# Create a new dictionary mapping tokens directly to embeddings
-tok2embedding = {}
-
-for token, block_name in tok2block.items():
-    if block_name in block2embedding:
-        tok2embedding[token] = block2embedding[block_name]
-    else:
-        print(f"Warning: Block name '{block_name}' not found in embeddings. Skipping token '{token}'.")
-
-''' STEPS TO TRAIN ON ARCC:
-1. UNCOMMENT THE FOLLOWING LINES AFTER THIS DOCSTRING COMMENT
-2. REPLACE builds_directory WITH THE LOCATION OF THE .h5 BUILDS ON THE ARCC
-3. ENJOY
-'''
-# builds_directory = r'need/to/specify/directory/'
-# hdf5_filepaths = glob.glob(os.path.join(builds_directory, '*.h5'))
-# print(f"Found {len(hdf5_filepaths)} builds to use as training data")
-
-hdf5_filepaths = [
-    r'/mnt/d/processed_builds_compressed/rar_test5_Desert+Tavern+2.h5',
-    # r'/mnt/d/processed_builds_compressed/rar_test6_Desert_Tavern.h5',
-    # r'/mnt/d/processed_builds_compressed/zip_test_0_LargeSandDunes.h5'
-]
-
-dataset = text2mcVAEDataset(file_paths=hdf5_filepaths, tok2embedding=tok2embedding, block_ignore_list=[102])
+# Load checkpoint if it exists
+if os.path.exists(checkpoint_path):
+    print(f"Loading checkpoint from {checkpoint_path}")
+    checkpoint = torch.load(checkpoint_path, map_location=device)
+    encoder.load_state_dict(checkpoint['encoder_state_dict'])
+    decoder.load_state_dict(checkpoint['decoder_state_dict'])
+    optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+    scaler.load_state_dict(checkpoint['scaler_state_dict'])
+    start_epoch = checkpoint['epoch'] + 1
+    best_val_loss = checkpoint['best_val_loss']
+    print(f"Resuming training from epoch {start_epoch}")
+else:
+    print("No checkpoint found, starting from scratch")
 
 # Split the dataset into training, validation, and test sets
 dataset_size = len(dataset)
@@ -93,20 +69,110 @@ train_size = int((1 - validation_split - test_split) * dataset_size)
 val_size = int(validation_split * dataset_size)
 test_size = dataset_size - train_size - val_size
 
-train_dataset, val_dataset, test_dataset = random_split(dataset, [train_size, val_size, test_size])
+train_dataset, val_dataset, test_dataset = random_split(
+    dataset, [train_size, val_size, test_size],
+    generator=torch.Generator().manual_seed(seed)  # Ensure splits are consistent
+)
 
 # Create DataLoaders
-batch_size = 1  # Adjust as needed
+batch_size = 64  # Adjust as needed
 train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
 val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False)
 test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
 
-num_epochs = 1  # Adjust as needed
+num_epochs = 32  # Adjust as needed
+
+# Adjust the loss function to use CrossEntropyLoss
+import torch.nn.functional as F
+
+def loss_function(recon_x, x, mu, logvar, mask):
+    # recon_x: (Batch_Size, num_tokens, Depth, Height, Width)
+    # x: (Batch_Size, Depth, Height, Width)  # Target tokens
+    # mask: (Batch_Size, Depth, Height, Width)
+
+    # Flatten the outputs and targets
+    batch_size = x.size(0)
+    recon_x = recon_x.view(batch_size, recon_x.size(1), -1)  # (Batch_Size, num_tokens, N)
+    x = x.view(batch_size, -1)  # (Batch_Size, N)
+    mask = mask.view(batch_size, -1)  # (Batch_Size, N)
+
+    # Apply mask to targets (we don't need to mask the logits)
+    x_masked = x * mask.long()
+
+    # CrossEntropyLoss expects input: (N, C), target: (N)
+    recon_x = recon_x.permute(0, 2, 1).reshape(-1, recon_x.size(1))  # (Batch_Size * N, num_tokens)
+    x_masked = x_masked.reshape(-1)  # (Batch_Size * N)
+    mask = mask.reshape(-1)  # (Batch_Size * N)
+
+    # Compute loss only where mask is 1
+    valid_indices = mask.nonzero(as_tuple=True)[0]
+    if len(valid_indices) == 0:
+        recon_loss = torch.tensor(0.0, device=x.device)
+    else:
+        recon_loss = F.cross_entropy(recon_x[valid_indices], x_masked[valid_indices], reduction='sum')
+
+    # KL Divergence
+    KLD = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp())
+
+    return recon_loss + KLD
+
+# Function to interpolate between two builds and generate new builds
+def interpolate_and_generate(encoder, decoder, build1_path, build2_path, save_dir, epoch, num_interpolations=5):
+    encoder.eval()
+    decoder.eval()
+    with torch.no_grad():
+        # Load the two builds
+        dataset = text2mcVAEDataset(file_paths=[build1_path, build2_path], block2tok=block2tok, block_ignore_list=[])
+        data_loader = DataLoader(dataset, batch_size=1, shuffle=False)
+
+        # Get the latent representations
+        data_list = []
+        mask_list = []
+        for data, mask in data_loader:
+            data_list.append(data.to(device))
+            mask_list.append(mask.to(device))
+
+        z_list = []
+        for data in data_list:
+            z, mu, logvar = encoder(data)
+            z_list.append(z)
+
+        # Linearly interpolate between z1 and z2
+        z1 = z_list[0]
+        z2 = z_list[1]
+
+        interpolations = []
+        for alpha in np.linspace(0, 1, num_interpolations):
+            z_interp = (1 - alpha) * z1 + alpha * z2
+            interpolations.append(z_interp)
+
+        # Generate builds from interpolated latent vectors
+        for idx, z in enumerate(interpolations):
+            recon_build = decoder(z)
+            # recon_build: (1, num_tokens, Depth, Height, Width)
+
+            # Convert logits to predicted tokens
+            recon_build = recon_build.argmax(dim=1)  # (1, Depth, Height, Width)
+
+            # Convert to numpy array
+            recon_build_np = recon_build.cpu().numpy().squeeze(0)  # (Depth, Height, Width)
+
+            # Save the build as an HDF5 file
+            save_path = os.path.join(save_dir, f'epoch_{epoch}_interp_{idx}.h5')
+            with h5py.File(save_path, 'w') as h5f:
+                h5f.create_dataset('build', data=recon_build_np, compression='gzip')
+            print(f'Saved interpolated build at {save_path}')
 
 # Training loop
-best_val_loss = float('inf')
 
-for epoch in range(1, num_epochs + 1):
+# Specify the paths for the two builds to interpolate between
+build1_path = r'/lustre/fs1/groups/jaedo/processed_builds/batch_864_22457.h5'
+build2_path = r'/lustre/fs1/groups/jaedo/processed_builds/batch_86_2224.h5'
+# Specify the directory to save the generated builds
+save_dir = r'/lustre/fs1/home/scomino/training/interpolations'
+os.makedirs(save_dir, exist_ok=True)
+
+for epoch in range(start_epoch, num_epochs + 1):
     encoder.train()
     decoder.train()
     total_loss = 0
@@ -161,5 +227,26 @@ for epoch in range(1, num_epochs + 1):
             'decoder_state_dict': decoder.state_dict(),
             'optimizer_state_dict': optimizer.state_dict(),
             'loss': avg_val_loss,
-        }, 'best_model.pth')
+        }, '/lustre/fs1/home/scomino/best_model.pth')
         print(f'Saved new best model at epoch {epoch} with validation loss {avg_val_loss:.4f}')
+
+    # Save checkpoint
+    checkpoint = {
+        'epoch': epoch,
+        'encoder_state_dict': encoder.state_dict(),
+        'decoder_state_dict': decoder.state_dict(),
+        'optimizer_state_dict': optimizer.state_dict(),
+        'scaler_state_dict': scaler.state_dict(),
+        'best_val_loss': best_val_loss,
+        # Optionally, save the random seed
+        'seed': seed,
+    }
+    torch.save(checkpoint, checkpoint_path)
+    print(f"Saved checkpoint at epoch {epoch}")
+
+    # Interpolate and generate builds
+    print(f'Interpolating between builds at the end of epoch {epoch}')
+    try:
+        interpolate_and_generate(encoder, decoder, build1_path, build2_path, save_dir, epoch, num_interpolations=5)
+    except Exception as e:
+        print(f"Unable to generate interpolations for this epoch due to error: {e}")
