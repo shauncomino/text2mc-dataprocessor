@@ -15,4 +15,4 @@ source /lustre/fs1/groups/jaedo/miniconda3/etc/profile.d/conda.sh
 conda activate world2vec
 
 # Command to run Python script
-python training_script.py
+python train.py
