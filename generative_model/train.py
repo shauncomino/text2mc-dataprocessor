@@ -14,7 +14,7 @@ import random
 import torch.nn.functional as F
 
 
-batch_size = 4
+batch_size = 2
 num_epochs = 32
 
 # Paths and configurations
@@ -74,7 +74,7 @@ test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
 encoder = text2mcVAEEncoder(num_tokens=num_tokens, embedding_dim=embedding_dim).to(device)
 decoder = text2mcVAEDecoder(num_tokens=num_tokens, embedding_dim=embedding_dim).to(device)
 optimizer = optim.Adam(list(encoder.parameters()) + list(decoder.parameters()), lr=1e-2)
-scaler = GradScaler()  # Initialize the gradient scaler for mixed precision
+scaler = torch.amp.GradScaler()  # Initialize the gradient scaler for mixed precision
 
 start_epoch = 1
 best_val_loss = float('inf')
@@ -186,7 +186,7 @@ for epoch in range(start_epoch, num_epochs + 1):
         optimizer.zero_grad()
 
         # Mixed precision context
-        with torch.cuda.amp.autocast(enabled=True if device_type == 'cuda' else False):
+        with torch.amp.autocast(enabled=True if device_type == 'cuda' else False):
             # Encode the data to get latent representation, mean, and log variance
             z, mu, logvar = encoder(data)
 

@@ -2,7 +2,7 @@
 #SBATCH --job-name=VAE                      # Job name
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1                 # Number of processes (GPUs)
-#SBATCH --gpus-per-node=1                   # Number of GPUs
+#SBATCH --gpus-per-node=2                   # Number of GPUs
 #SBATCH --partition=normal                  # Partition (queue) name
 #SBATCH --cpus-per-task=8                   # Number of CPU cores per task
 #SBATCH --mem=64GB                          # Memory per node (GB)
