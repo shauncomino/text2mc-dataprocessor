@@ -7,7 +7,6 @@ from text2mcVAEDataset import text2mcVAEDataset
 from encoder import text2mcVAEEncoder
 from decoder import text2mcVAEDecoder
 from torch.utils.data import DataLoader, random_split
-from torch.cuda.amp import autocast, GradScaler
 import h5py
 import numpy as np
 import random
@@ -186,7 +185,7 @@ for epoch in range(start_epoch, num_epochs + 1):
         optimizer.zero_grad()
 
         # Mixed precision context
-        with torch.amp.autocast(enabled=True if device_type == 'cuda' else False):
+        with torch.amp.autocast(enabled=True if device_type == 'cuda' else False, device_type=device_type):
             # Encode the data to get latent representation, mean, and log variance
             z, mu, logvar = encoder(data)
 
