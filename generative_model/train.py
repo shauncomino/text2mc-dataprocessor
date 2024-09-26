@@ -11,7 +11,7 @@ import h5py
 import numpy as np
 import random
 import torch.nn.functional as F
-
+import torch.utils.checkpoint as checkpoint
 
 batch_size = 1
 num_epochs = 32
@@ -65,15 +65,20 @@ train_dataset, val_dataset, test_dataset = random_split(
 )
 
 # Create DataLoaders
-train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
-val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False)
-test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
+train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, pin_memory=True)
+val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False, pin_memory=True)
+test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False, pin_memory=True)
 
 # Initialize the model components
 encoder = text2mcVAEEncoder(num_tokens=num_tokens, embedding_dim=embedding_dim).to(device)
 decoder = text2mcVAEDecoder(num_tokens=num_tokens, embedding_dim=embedding_dim).to(device)
+
+# Convert models to FP16
+encoder.half()
+decoder.half()
+
 optimizer = optim.Adam(list(encoder.parameters()) + list(decoder.parameters()), lr=1e-2)
-scaler = torch.amp.GradScaler()  # Initialize the gradient scaler for mixed precision
+scaler = torch.cuda.amp.GradScaler()  # Initialize the gradient scaler for mixed precision
 
 start_epoch = 1
 best_val_loss = float('inf')
@@ -81,13 +86,13 @@ best_val_loss = float('inf')
 # Load checkpoint if it exists
 if os.path.exists(checkpoint_path):
     print(f"Loading checkpoint from {checkpoint_path}")
-    checkpoint = torch.load(checkpoint_path, map_location=device)
-    encoder.load_state_dict(checkpoint['encoder_state_dict'])
-    decoder.load_state_dict(checkpoint['decoder_state_dict'])
-    optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
-    scaler.load_state_dict(checkpoint['scaler_state_dict'])
-    start_epoch = checkpoint['epoch'] + 1
-    best_val_loss = checkpoint['best_val_loss']
+    checkpoint_data = torch.load(checkpoint_path, map_location=device)
+    encoder.load_state_dict(checkpoint_data['encoder_state_dict'])
+    decoder.load_state_dict(checkpoint_data['decoder_state_dict'])
+    optimizer.load_state_dict(checkpoint_data['optimizer_state_dict'])
+    scaler.load_state_dict(checkpoint_data['scaler_state_dict'])
+    start_epoch = checkpoint_data['epoch'] + 1
+    best_val_loss = checkpoint_data['best_val_loss']
     print(f"Resuming training from epoch {start_epoch}")
 else:
     print("No checkpoint found, starting from scratch")
@@ -115,7 +120,7 @@ def loss_function(recon_x, x, mu, logvar, mask):
     # Compute loss only where mask is 1
     valid_indices = mask.nonzero(as_tuple=True)[0]
     if len(valid_indices) == 0:
-        recon_loss = torch.tensor(0.0, device=x.device)
+        recon_loss = torch.tensor(0.0, device=x.device, dtype=torch.float32)
     else:
         recon_loss = F.cross_entropy(recon_x[valid_indices], x_masked[valid_indices], reduction='sum')
 
@@ -137,7 +142,7 @@ def interpolate_and_generate(encoder, decoder, build1_path, build2_path, save_di
         data_list = []
         mask_list = []
         for data, mask in data_loader:
-            data_list.append(data.to(device))
+            data_list.append(data.to(device).half())
             mask_list.append(mask.to(device))
 
         z_list = []
@@ -160,6 +165,7 @@ def interpolate_and_generate(encoder, decoder, build1_path, build2_path, save_di
             # recon_build: (1, num_tokens, Depth, Height, Width)
 
             # Convert logits to predicted tokens
+            recon_build = recon_build.float()  # Convert to float32 for argmax
             recon_build = recon_build.argmax(dim=1)  # (1, Depth, Height, Width)
 
             # Convert to numpy array
@@ -172,6 +178,17 @@ def interpolate_and_generate(encoder, decoder, build1_path, build2_path, save_di
 
             print(f'Saved interpolated build at {save_path}')
 
+# Custom forward functions with gradient checkpointing
+def checkpointed_encoder_forward(module, input_data):
+    def custom_forward(*inputs):
+        return module(*inputs)
+    return checkpoint.checkpoint(custom_forward, input_data)
+
+def checkpointed_decoder_forward(module, input_data):
+    def custom_forward(*inputs):
+        return module(*inputs)
+    return checkpoint.checkpoint(custom_forward, input_data)
+
 # Training loop
 os.makedirs(save_dir, exist_ok=True)
 
@@ -182,18 +199,22 @@ for epoch in range(start_epoch, num_epochs + 1):
 
     for batch_idx, (data, mask) in enumerate(train_loader):
         data, mask = data.to(device), mask.to(device)
+
+        # Convert data to FP16
+        data = data.half()
+
         optimizer.zero_grad()
 
         # Mixed precision context
-        with torch.amp.autocast(enabled=True if device_type == 'cuda' else False, device_type=device_type):
+        with torch.cuda.amp.autocast(enabled=True):
             # Encode the data to get latent representation, mean, and log variance
-            z, mu, logvar = encoder(data)
+            z, mu, logvar = checkpointed_encoder_forward(encoder, data)
 
             # Decode the latent variable to reconstruct the input
-            recon_batch = decoder(z)
+            recon_batch = checkpointed_decoder_forward(decoder, z)
 
             # Compute the loss
-            loss = loss_function(recon_batch, data, mu, logvar, mask)
+            loss = loss_function(recon_batch.float(), data.float(), mu.float(), logvar.float(), mask)
 
         # Scale loss and perform backpropagation
         scaler.scale(loss).backward()
@@ -204,7 +225,7 @@ for epoch in range(start_epoch, num_epochs + 1):
 
         if batch_idx % 10 == 0:
             print(f'Epoch: {epoch} [{batch_idx * batch_size}/{len(train_loader.dataset)} '
-                    f'({100. * batch_idx / len(train_loader):.0f}%)] Loss: {loss.item():.6f}')
+                  f'({100. * batch_idx / len(train_loader):.0f}%)] Loss: {loss.item():.6f}')
 
     avg_train_loss = total_loss / len(train_loader.dataset)
     print(f'====> Epoch: {epoch} Average training loss: {avg_train_loss:.4f}')
@@ -216,9 +237,13 @@ for epoch in range(start_epoch, num_epochs + 1):
     with torch.no_grad():
         for data, mask in val_loader:
             data, mask = data.to(device), mask.to(device)
+
+            # Convert data to FP16
+            data = data.half()
+
             z, mu, logvar = encoder(data)
             recon_batch = decoder(z)
-            loss = loss_function(recon_batch, data, mu, logvar, mask)
+            loss = loss_function(recon_batch.float(), data.float(), mu.float(), logvar.float(), mask)
             val_loss += loss.item()
 
     avg_val_loss = val_loss / len(val_loader.dataset)
@@ -237,7 +262,7 @@ for epoch in range(start_epoch, num_epochs + 1):
         print(f'Saved new best model at epoch {epoch} with validation loss {avg_val_loss:.4f}')
 
     # Save checkpoint
-    checkpoint = {
+    checkpoint_data = {
         'epoch': epoch,
         'encoder_state_dict': encoder.state_dict(),
         'decoder_state_dict': decoder.state_dict(),
@@ -246,7 +271,7 @@ for epoch in range(start_epoch, num_epochs + 1):
         'best_val_loss': best_val_loss,
         'seed': seed,
     }
-    torch.save(checkpoint, checkpoint_path)
+    torch.save(checkpoint_data, checkpoint_path)
     print(f"Saved checkpoint at epoch {epoch}")
 
     # Interpolate and generate builds
@@ -255,4 +280,3 @@ for epoch in range(start_epoch, num_epochs + 1):
         interpolate_and_generate(encoder, decoder, build1_path, build2_path, save_dir, epoch, num_interpolations=5)
     except Exception as e:
         print(f"Unable to generate interpolations for this epoch due to error: {e}")
-
