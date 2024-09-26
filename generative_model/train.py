@@ -13,7 +13,7 @@ import random
 import torch.nn.functional as F
 
 
-batch_size = 2
+batch_size = 1
 num_epochs = 32
 
 # Paths and configurations
