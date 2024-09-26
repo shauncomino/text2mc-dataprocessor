@@ -13,7 +13,7 @@ import random
 import torch.nn.functional as F
 
 
-batch_size = 1
+batch_size = 3
 num_epochs = 32
 
 # Paths and configurations
@@ -185,7 +185,7 @@ for epoch in range(start_epoch, num_epochs + 1):
         optimizer.zero_grad()
 
         # Mixed precision context
-        with torch.amp.autocast(enabled=True if device_type == 'cuda' else False, device_type=device_type):
+        with torch.amp.autocast(enabled=True if device_type == 'cuda' else False, device_type=device_type, dtype=torch.float16):
             # Encode the data to get latent representation, mean, and log variance
             z, mu, logvar = encoder(data)
 
