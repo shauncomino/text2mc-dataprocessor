@@ -186,7 +186,7 @@ for epoch in range(start_epoch, num_epochs + 1):
         optimizer.zero_grad()
 
         # Mixed precision context
-        with torch.cuda.amp.autocast(enabled=1 if device_type == 'cuda' else 0):
+        with torch.cuda.amp.autocast(enabled=True if device_type == 'cuda' else False):
             # Encode the data to get latent representation, mean, and log variance
             z, mu, logvar = encoder(data)
 
