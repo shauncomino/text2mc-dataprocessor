@@ -46,7 +46,7 @@ with open(block2tok_file_path, 'r') as j:
 
 # Prepare the dataset
 hdf5_filepaths = glob.glob(os.path.join(builds_folder_path, '*.h5'))
-dataset = text2mcVAEDataset(file_paths=hdf5_filepaths, block2tok=block2tok, fixed_size=(128, 128, 128))
+dataset = text2mcVAEDataset(file_paths=hdf5_filepaths, block2tok=block2tok, fixed_size=(64, 64, 64))
 
 # Get num_tokens from dataset
 num_tokens = dataset.num_tokens  # Total number of tokens
@@ -186,7 +186,7 @@ for epoch in range(start_epoch, num_epochs + 1):
         optimizer.zero_grad()
 
         # Mixed precision context
-        with torch.cuda.amp.autocast(device_type, enabled=1 if device_type == 'cuda' else 0):
+        with torch.cuda.amp.autocast(enabled=1 if device_type == 'cuda' else 0):
             # Encode the data to get latent representation, mean, and log variance
             z, mu, logvar = encoder(data)
 
