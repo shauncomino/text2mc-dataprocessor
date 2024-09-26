@@ -7,7 +7,7 @@
 #SBATCH --mem=64GB                          # Memory per node (GB)
 #SBATCH --output=VAE_results                # Output File
 #SBATCH --time=0:30:00                      # Time limit (HH:MM:SS)
-#SBATCH ---gpus-per-node=h100:1
+#SBATCH --gpus-per-node=h100:1
 
 # Workaround to ensure conda initializes the shell
 source /lustre/fs1/groups/jaedo/miniconda3/etc/profile.d/conda.sh
