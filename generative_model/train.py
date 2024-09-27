@@ -213,7 +213,7 @@ for epoch in range(start_epoch, num_epochs + 1):
             data, mask = data.to(device), mask.to(device)
             z, mu, logvar = encoder(data)
             recon_batch = decoder(z)
-            loss = loss_function(recon_batch, data, mu, logvar, mask)
+            loss = loss_function(recon_batch, data, mu, logvar)
             val_loss += loss.item()
 
     avg_val_loss = val_loss / len(val_loader.dataset)
