@@ -13,7 +13,7 @@ import random
 import torch.nn.functional as F
 
 
-batch_size = 4
+batch_size = 2
 num_epochs = 32
 fixed_size = (64, 64, 64)
 
