@@ -4,7 +4,7 @@ from torch.utils.data import Dataset
 import numpy as np
 
 class text2mcVAEDataset(Dataset):
-    def __init__(self, file_paths=[], block2embedding={}, block2tok={}, block_ignore_list=[], fixed_size=(256, 256, 256, 32)):
+    def __init__(self, file_paths=[], block2embedding={}, block2tok={}, block_ignore_list=[], fixed_size=(64, 64, 64, 32)):
         self.file_paths = file_paths
         self.block2embedding = block2embedding
         self.block2tok = block2tok
@@ -125,4 +125,4 @@ class text2mcVAEDataset(Dataset):
         padded_data = torch.from_numpy(padded_data).permute(3, 0, 1, 2)
         padded_mask = torch.from_numpy(padded_mask)
 
-        return padded_data, padded_mask
+        return padded_data

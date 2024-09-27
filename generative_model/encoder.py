@@ -51,7 +51,6 @@ class text2mcVAEEncoder(nn.Sequential):
     def forward(self, x):
         # x: (Batch_Size, Channel, Height, Width, Depth)
         # noise: (Batch_Size, 4, Height / 8, Width / 8)
-        print("Encoder")
         for module in self:
             x = module(x)
             print(x.shape)
