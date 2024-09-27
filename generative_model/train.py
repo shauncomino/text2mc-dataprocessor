@@ -188,7 +188,7 @@ for epoch in range(start_epoch, num_epochs + 1):
             recon_batch = decoder(z)
 
             # Compute the loss
-            loss = loss_function(recon_batch, data, mu, logvar, mask)
+            loss = loss_function(recon_batch, data, mu, logvar)
 
         # Scale loss and perform backpropagation
         scaler.scale(loss).backward()
