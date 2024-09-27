@@ -13,7 +13,7 @@ import random
 import torch.nn.functional as F
 
 
-batch_size = 6
+batch_size = 4
 num_epochs = 32
 fixed_size = (64, 64, 64)
 
@@ -77,7 +77,7 @@ test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
 # Initialize the model components
 encoder = text2mcVAEEncoder(num_tokens=num_tokens, embedding_dim=embedding_dim).to(device)
 decoder = text2mcVAEDecoder(num_tokens=num_tokens, embedding_dim=embedding_dim).to(device)
-optimizer = optim.Adam(list(encoder.parameters()) + list(decoder.parameters()), lr=1e-2)
+optimizer = optim.Adam(list(encoder.parameters()) + list(decoder.parameters()), lr=1e-4)
 scaler = torch.amp.GradScaler()  # Initialize the gradient scaler for mixed precision
 
 start_epoch = 1
@@ -97,32 +97,22 @@ if os.path.exists(checkpoint_path):
 else:
     print("No checkpoint found, starting from scratch")
 
-# Loss function using CrossEntropyLoss
-def loss_function(recon_x, x, mu, logvar, mask):
+# Loss function using CrossEntropyLoss (no mask)
+def loss_function(recon_x, x, mu, logvar):
     # recon_x: (Batch_Size, num_tokens, Depth, Height, Width)
     # x: (Batch_Size, Depth, Height, Width)  # Target tokens
-    # mask: (Batch_Size, Depth, Height, Width)
 
     # Flatten the outputs and targets
     batch_size = x.size(0)
     recon_x = recon_x.view(batch_size, recon_x.size(1), -1)  # (Batch_Size, num_tokens, N)
     x = x.view(batch_size, -1)  # (Batch_Size, N)
-    mask = mask.view(batch_size, -1)  # (Batch_Size, N)
-
-    # Apply mask to targets (we don't need to mask the logits)
-    x_masked = x * mask.long()
 
     # CrossEntropyLoss expects input: (N, C), target: (N)
     recon_x = recon_x.permute(0, 2, 1).reshape(-1, recon_x.size(1))  # (Batch_Size * N, num_tokens)
-    x_masked = x_masked.reshape(-1)  # (Batch_Size * N)
-    mask = mask.reshape(-1)  # (Batch_Size * N)
+    x = x.reshape(-1)  # (Batch_Size * N)
 
-    # Compute loss only where mask is 1
-    valid_indices = mask.nonzero(as_tuple=True)[0]
-    if len(valid_indices) == 0:
-        recon_loss = torch.tensor(0.0, device=x.device)
-    else:
-        recon_loss = F.cross_entropy(recon_x[valid_indices], x_masked[valid_indices], reduction='sum')
+    # Compute reconstruction loss
+    recon_loss = F.cross_entropy(recon_x, x, reduction='sum')
 
     # KL Divergence
     KLD = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp())

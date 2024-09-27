@@ -94,6 +94,8 @@ class text2mcVAEDecoder(nn.Module):
             nn.GroupNorm(32, 128),
             nn.SiLU(),
             nn.Conv3d(128, num_tokens, kernel_size=3, padding=1),  # Output logits over tokens
+            nn.BatchNorm3d(num_features=3717),
+            nn.Sigmoid()
         )
 
     def forward(self, x):
