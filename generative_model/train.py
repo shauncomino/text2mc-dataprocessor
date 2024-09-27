@@ -12,7 +12,7 @@ import numpy as np
 import random
 import torch.functional as F
 
-batch_size = 4
+batch_size = 8
 num_epochs = 32
 fixed_size = (64, 64, 64)
 embedding_dim = 32
@@ -131,13 +131,15 @@ with open(tok2block_file_path, 'r') as f:
     tok2block = json.load(f)
     tok2block = {int(k): v for k, v in tok2block.items()}  # Ensure keys are integers
 
+block2tok = {v: k for k, v in tok2block.items()}
+
 with open(block2embedding_file_path, 'r') as f:
     block2embedding = json.load(f)
     block2embedding = {k: np.array(v, dtype=np.float32) for k, v in block2embedding.items()}
 
 # Prepare the dataset
 hdf5_filepaths = glob.glob(os.path.join(builds_folder_path, '*.h5'))
-dataset = text2mcVAEDataset(file_paths=hdf5_filepaths, tok2block=tok2block, block2embedding=block2embedding, fixed_size=fixed_size)
+dataset = text2mcVAEDataset(file_paths=hdf5_filepaths, block2tok=block2tok, block2embedding=block2embedding, fixed_size=fixed_size)
 
 print(f"Discovered {len(dataset)} builds, beginning training")
 
