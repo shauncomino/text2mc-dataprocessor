@@ -112,7 +112,7 @@ def loss_function(recon_x, x, mu, logvar):
     x = x.reshape(-1)  # (Batch_Size * N)
 
     # Compute reconstruction loss
-    recon_loss = F.cross_entropy(recon_x, x, reduction='sum')
+    recon_loss = F.cross_entropy(recon_x, x, reduction='mean')
 
     # KL Divergence
     KLD = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp())
