@@ -4,7 +4,7 @@ from torch.utils.data import Dataset
 import numpy as np
 
 class text2mcVAEDataset(Dataset):
-    def __init__(self, file_paths=[], block2tok={}, block_ignore_list=[], fixed_size=(128, 128, 128)):
+    def __init__(self, file_paths=[], block2tok={}, block_ignore_list=[], fixed_size=(64, 64, 64)):
         self.file_paths = file_paths
         self.block2tok = block2tok
         self.block_ignore_set = set(block_ignore_list)

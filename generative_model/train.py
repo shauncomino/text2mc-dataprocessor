@@ -13,8 +13,9 @@ import random
 import torch.nn.functional as F
 
 
-batch_size = 3
+batch_size = 6
 num_epochs = 32
+fixed_size = (64, 64, 64)
 
 # Paths and configurations
 checkpoint_path = r'/lustre/fs1/home/scomino/training/checkpoint.pth'
@@ -45,7 +46,11 @@ with open(block2tok_file_path, 'r') as j:
 
 # Prepare the dataset
 hdf5_filepaths = glob.glob(os.path.join(builds_folder_path, '*.h5'))
-dataset = text2mcVAEDataset(file_paths=hdf5_filepaths, block2tok=block2tok, fixed_size=(64, 64, 64))
+dataset = text2mcVAEDataset(file_paths=hdf5_filepaths, block2tok=block2tok, fixed_size=fixed_size)
+try:
+    print(f"Discovered {len(dataset)} builds, beginning training")
+except:
+    print(f"No builds discovered!")
 
 # Get num_tokens from dataset
 num_tokens = dataset.num_tokens  # Total number of tokens
@@ -130,7 +135,7 @@ def interpolate_and_generate(encoder, decoder, build1_path, build2_path, save_di
     decoder.eval()
     with torch.no_grad():
         # Load the two builds
-        dataset = text2mcVAEDataset(file_paths=[build1_path, build2_path], block2tok=block2tok, block_ignore_list=[])
+        dataset = text2mcVAEDataset(file_paths=[build1_path, build2_path], block2tok=block2tok, block_ignore_list=[], fixed_size=fixed_size)
         data_loader = DataLoader(dataset, batch_size=1, shuffle=False)
 
         # Get the latent representations
