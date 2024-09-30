@@ -40,7 +40,7 @@ def train(model, train_loader, val_loader, optimizer, scheduler, num_epochs, dev
         train_loss = 0.0
         for batch in train_loader:
             try: 
-                batch_loss = torch.tensor(0.0, requires_grad=True)
+                batch_loss = torch.tensor(0.0, requires_grad=True, device=device)
                 if batch is None:
                     continue 
 
@@ -49,7 +49,7 @@ def train(model, train_loader, val_loader, optimizer, scheduler, num_epochs, dev
                 
                 logger.info("Processing %d targets in batch." % (len(batch_targets[0])))
                 for target_block, context_blocks in zip(batch_targets[0], batch_contexts[0]): 
-                    loss = model(target_block, context_blocks)  # Forward pass, returns loss
+                    loss = model(target_block.to(device), context_blocks.to(device))  # Forward pass, returns loss
                     batch_loss = batch_loss + loss
 
                 batch_loss = batch_loss / len(batch_targets[0])
@@ -58,7 +58,7 @@ def train(model, train_loader, val_loader, optimizer, scheduler, num_epochs, dev
                 batch_loss.backward()  # Backpropagate
                 optimizer.step()  # Update internal model weights
                 scheduler.step()
-                torch.save(model.state_dict(), os.path.join(Block2VecArgs.checkpoints_directory, Block2VecArgs.cur_model_safefile_name))
+                #torch.save(model.state_dict(), os.path.join(Block2VecArgs.checkpoints_directory, Block2VecArgs.cur_model_safefile_name))
             
             except: 
                 logger.error("Error occured processing training batch:")
@@ -71,7 +71,7 @@ def train(model, train_loader, val_loader, optimizer, scheduler, num_epochs, dev
         val_loss = 0.0
         with torch.no_grad():
             for batch in val_loader:
-                val_batch_loss = torch.tensor(0.0, requires_grad=False)
+                val_batch_loss = torch.tensor(0.0, requires_grad=False, device=device)
                 try: 
                     if batch is None: 
                         continue 
@@ -80,7 +80,7 @@ def train(model, train_loader, val_loader, optimizer, scheduler, num_epochs, dev
                     
                     logger.info("Processing %d targets in batch." % (len(batch_targets[0])))
                     for target_block, context_blocks in zip(batch_targets[0], batch_contexts[0]): 
-                        loss = model(target_block, context_blocks)  # Forward pass, returns loss
+                        loss = model(target_block.to(device), context_blocks.to(device))  # Forward pass, returns loss
                         val_batch_loss += loss
 
                     val_batch_loss = val_batch_loss / len(batch_targets[0])
@@ -104,7 +104,7 @@ def test(model, test_loader, device):
     test_loss = 0.0
     with torch.no_grad():
         for batch in test_loader:
-            test_batch_loss = torch.tensor(0.0, requires_grad=False)
+            test_batch_loss = torch.tensor(0.0, requires_grad=False, device=device)
             try: 
                 if batch is None: 
                     continue 
@@ -112,7 +112,7 @@ def test(model, test_loader, device):
                 batch_targets, batch_contexts = batch
 
                 for target_block, context_blocks in zip(batch_targets[0], batch_contexts[0]): 
-                    loss = model(target_block, context_blocks)  # Forward pass, returns loss
+                    loss = model(target_block.to(device), context_blocks.to(device))  # Forward pass, returns loss
                     test_batch_loss += loss
                 
                 test_batch_loss = test_batch_loss / len(batch_targets[0])
@@ -197,7 +197,7 @@ def main():
         directory=Block2VecArgs.hdf5s_directory,
         tok2block=tok2block, 
         context_radius=Block2VecArgs.context_radius,
-        max_num_targets=Block2VecArgs.max_num_targets, 
+        max_num_targets=Block2VecArgs.targets_per_batch, 
         build_limit=Block2VecArgs.build_limit
     )
 
@@ -214,7 +214,7 @@ def main():
 
     # Initialize model
     model = SkipGramModel(len(tok2block), Block2VecArgs.emb_dimension)
-    #model.load_state_dict(torch.load(os.path.join(Block2VecArgs.checkpoints_directory, Block2VecArgs.model_savefile_name)))
+    model.load_state_dict(torch.load(os.path.join(Block2VecArgs.checkpoints_directory, Block2VecArgs.cur_model_safefile_name)))
     model.to(device)
 
     optimizer = optim.AdamW(model.parameters(), lr=Block2VecArgs.initial_lr)
