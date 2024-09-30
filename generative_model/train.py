@@ -192,7 +192,7 @@ for epoch in range(1, num_epochs + 1):
                 index += 1
             embedding_loss /= index + 1
             embeddings_array = embedder.target_embeddings.weight.cpu().data.numpy()
-            save_embeddings(embeddings_array, tok2block)
+            #save_embeddings(embeddings_array, tok2block) #don't overwrite the embeddings i'm working with rn
             
             lookup_array, embedding_matrix = prepare_embedding_matrix()
             
@@ -217,7 +217,7 @@ for epoch in range(1, num_epochs + 1):
             recon_batch = decoder(z)
 
             # Reverse the embeddings
-            # Approximate nearest neighbor? Levenshtein vector distance? Research needed
+            
 
             # Compute the loss
             loss = embedding_loss + loss_function(recon_batch, build_data, mu, logvar)
