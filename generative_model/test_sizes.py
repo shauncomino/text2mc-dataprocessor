@@ -96,7 +96,7 @@ if __name__ == '__main__':
     batch_sizes = [1, 2, 4, 8, 16, 32]
 
     # Optionally, define the fixed size for input data
-    fixed_size = (64, 64, 64)  # Adjust as needed
+    fixed_size = (8, 8, 8)  # Adjust as needed
 
     # Call the testing function
     test_batch_sizes(batch_sizes, fixed_size=fixed_size)

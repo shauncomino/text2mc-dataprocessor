@@ -55,4 +55,3 @@ for path in hdf5_files:
 if schem_folder_path != "" and not os.path.isdir(schem_folder_path):
     os.makedirs(schem_folder_path)
 
-

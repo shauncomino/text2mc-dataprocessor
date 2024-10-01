@@ -12,9 +12,9 @@ import numpy as np
 import random
 import torch.functional as F
 
-batch_size = 8
+batch_size = 4
 num_epochs = 32
-fixed_size = (64, 64, 64)
+fixed_size = (128, 128, 128)
 embedding_dim = 32
 
 # Paths and configurations
