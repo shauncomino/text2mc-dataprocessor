@@ -14,7 +14,7 @@ import torch.functional as F
 
 batch_size = 2
 num_epochs = 64
-fixed_size = (128, 128, 128)
+fixed_size = (64, 64, 64)
 embedding_dim = 32
 
 # Paths and configurations
