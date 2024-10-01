@@ -32,8 +32,6 @@ def create_schematic_file(data, schem_folder_path, schem_file_name):
                 unique_blocks.add(block)
                 schem.setBlock((i, j, k), str(data[i, j, k]))
            
-            
-
     schem.save(schem_folder_path, schem_file_name, mcschematic.Version.JE_1_20_1)
     return unique_blocks
 

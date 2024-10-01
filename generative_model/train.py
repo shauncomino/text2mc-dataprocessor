@@ -13,7 +13,7 @@ import random
 import torch.functional as F
 
 batch_size = 4
-num_epochs = 32
+num_epochs = 64
 fixed_size = (128, 128, 128)
 embedding_dim = 32
 

@@ -104,8 +104,9 @@ class text2mcVAEDataset(Dataset):
         crop_sizes = [min(embedded_data.shape[dim], self.fixed_size[dim]) for dim in range(3)]
         embedded_data = embedded_data[:crop_sizes[0], :crop_sizes[1], :crop_sizes[2], :]
 
-        # Initialize padded data with shape (Depth, Height, Width, Embedding_Dim)
-        padded_data = np.zeros((*self.fixed_size, self.embedding_dim), dtype=np.float32)
+        # Initialize padded data with the air embedding
+        padded_data = np.empty((*self.fixed_size, self.embedding_dim), dtype=np.float32)
+        padded_data[...] = self.air_embedding
 
         # Calculate offsets for centering the data
         offsets = [(self.fixed_size[dim] - crop_sizes[dim]) // 2 for dim in range(3)]
