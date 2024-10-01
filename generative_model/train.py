@@ -28,11 +28,11 @@ best_model_path = r'/lustre/fs1/home/scomino/training/best_model.pth'
 block2embedding_file_path = r'/lustre/fs1/home/scomino/block2vec/output/block2vec/embeddings.json'
 
 # Adjusted loss function with log-cosh loss
-def log_cosh_loss(x, y, a=5.0):
+def log_cosh_loss(x, y, a=3.0):
     diff = a * (x - y)
     return torch.mean((1.0 / a) * torch.log(torch.cosh(diff)))
 
-def loss_function(recon_x, x, mu, logvar, a=10.0):
+def loss_function(recon_x, x, mu, logvar, a=5.0):
     # If recon_x has more channels, slice to match x's channels
     recon_x = recon_x[:, :x.size(1), :, :, :]
 
@@ -182,12 +182,6 @@ if os.path.exists(checkpoint_path):
     print(f"Resuming training from epoch {start_epoch}")
 else:
     print("No checkpoint found, starting from scratch")
-
-# Loss function using MSELoss
-def loss_function(recon_x, x, mu, logvar):
-    recon_loss = F.mse_loss(recon_x, x, reduction='mean')
-    KLD = -0.5 * torch.mean(1 + logvar - mu.pow(2) - logvar.exp())
-    return recon_loss + KLD
 
 # Training loop
 os.makedirs(save_dir, exist_ok=True)

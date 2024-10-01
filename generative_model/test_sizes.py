@@ -11,6 +11,23 @@ from encoder import text2mcVAEEncoder
 from decoder import text2mcVAEDecoder
 import torch.nn.functional as F
 
+def log_cosh_loss(x, y, a=3.0):
+    diff = a * (x - y)
+    return torch.mean((1.0 / a) * torch.log(torch.cosh(diff)))
+
+def loss_function(recon_x, x, mu, logvar, a=5.0):
+    # If recon_x has more channels, slice to match x's channels
+    recon_x = recon_x[:, :x.size(1), :, :, :]
+
+    # Use log-cosh error instead of MSE
+    log_cosh = log_cosh_loss(recon_x, x, a)
+
+    # Calculate KL Divergence
+    batch_size = x.size(0)
+    KLD = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp()) / batch_size
+
+    return log_cosh + KLD
+
 def test_batch_sizes(batch_sizes, fixed_size=(64, 64, 64)):
     # Paths and configurations
     tok2block_file_path = '/home/shaun/projects/text2mc-dataprocessor/world2vec/tok2block.json'
@@ -83,7 +100,7 @@ def test_batch_sizes(batch_sizes, fixed_size=(64, 64, 64)):
                 print(f"Decoder output shape: {recon_batch.shape}")
 
                 # Optionally, compute the reconstruction loss
-                recon_loss = F.mse_loss(recon_batch, data_batch, reduction='mean')
+                recon_loss = loss_function(recon_batch, data_batch, mu, logvar)
                 print(f"Reconstruction loss: {recon_loss.item()}")
 
         except RuntimeError as e:
@@ -96,7 +113,7 @@ if __name__ == '__main__':
     batch_sizes = [1, 2, 4, 8, 16, 32]
 
     # Optionally, define the fixed size for input data
-    fixed_size = (8, 8, 8)  # Adjust as needed
+    fixed_size = (64, 64, 64)  # Adjust as needed
 
     # Call the testing function
     test_batch_sizes(batch_sizes, fixed_size=fixed_size)
