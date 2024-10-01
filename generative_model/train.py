@@ -25,7 +25,7 @@ build1_path = r'/lustre/fs1/groups/jaedo/processed_builds/batch_101_2606.h5'
 build2_path = r'/lustre/fs1/groups/jaedo/processed_builds/batch_118_3048.h5'
 save_dir = r'/lustre/fs1/home/scomino/training/interpolations'
 best_model_path = r'/lustre/fs1/home/scomino/training/best_model.pth'
-block2embedding_file_path = r'/lustre/fs1/home/scomino/block2vec/output/block2vec/embeddings.json'
+block2embedding_file_path = r'/lustre/fs1/home/scomino/text2mc/text2mc-dataprocessor/block2vec/output/block2vec/embeddings.json'
 
 # Adjusted loss function with log-cosh loss
 def log_cosh_loss(x, y, a=3.0):
