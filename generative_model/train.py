@@ -195,7 +195,7 @@ for epoch in range(start_epoch, num_epochs + 1):
         data = data.to(device)
         optimizer.zero_grad()
 
-        with torch.amp.autocast(enabled=device_type=='cuda'):
+        with torch.amp.autocast(enabled=True, device_type='cuda'):
             z, mu, logvar = encoder(data)
             recon_batch = decoder(z)
             loss = loss_function(recon_batch, data, mu, logvar)
