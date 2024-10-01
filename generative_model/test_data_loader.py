@@ -30,10 +30,9 @@ def create_schematic_file(data, schem_folder_path, schem_file_name):
             for k in range(data.shape[2]):
                 block = data[i, j, k]
                 unique_blocks.add(block)
-                if block in tok2block.values():
-                    schem.setBlock((i, j, k), data[i, j, k])
-                else:
-                    schem.setBlock((i, j, k), "minecraft:air")
+                schem.setBlock((i, j, k), str(data[i, j, k]))
+           
+            
 
     schem.save(schem_folder_path, schem_file_name, mcschematic.Version.JE_1_20_1)
     return unique_blocks
@@ -63,8 +62,8 @@ def convert_numpy_array_to_blocks(world_array):
     for coordinate in np.ndindex(world_array.shape):
         block_integer = world_array[coordinate]
         block_string = data[str(block_integer)]
-        if block_integer == 3714:
-            block_string = "minecraft:air"
+        # if block_integer == 3714:
+        #     block_string = "minecraft:air"
         world_array_blocks[coordinate] = block_string
 
     return world_array_blocks
@@ -138,3 +137,7 @@ for i in range(0, len(sets_of_blocks_of_original)):
     print("")
     print("Processed set:")
     print(sorted(sets_of_blocks_of_processed[i]))
+
+    print("Set difference:")
+    print(sets_of_blocks_of_processed[i] - sets_of_blocks_of_original[i])
+    print("")
