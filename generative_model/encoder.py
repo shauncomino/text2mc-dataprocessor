@@ -53,7 +53,6 @@ class text2mcVAEEncoder(nn.Sequential):
         # noise: (Batch_Size, 4, Height / 8, Width / 8)
         for module in self:
             x = module(x)
-            print(x.shape)
 
         # Clip the mean and variance from the output
         mu, logvar = torch.chunk(x, 2, dim=1)

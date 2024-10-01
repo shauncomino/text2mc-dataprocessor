@@ -115,9 +115,7 @@ class text2mcVAEDecoder(nn.Sequential):
     def forward(self, x):
         # x: (Batch_Size, 4, Depth / 8, Height / 8, Width / 8)
         x /= 0.18215  # Scale factor adjustment as per the original decoder logic
-        print("Decoder")
         for module in self:
             x = module(x)
-            print(x.shape)
         # Output: (Batch_Size, 3, Depth, Height, Width)
         return x
