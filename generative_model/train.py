@@ -10,7 +10,7 @@ from decoder import text2mcVAEDecoder
 from torch.utils.data import DataLoader, random_split
 import numpy as np
 import random
-import torch.functional as F
+from sklearn.neighbors import NearestNeighbors
 
 batch_size = 2
 num_epochs = 64
@@ -26,6 +26,18 @@ build2_path = r'/lustre/fs1/groups/jaedo/processed_builds/batch_118_3048.h5'
 save_dir = r'/lustre/fs1/home/scomino/training/interpolations'
 best_model_path = r'/lustre/fs1/home/scomino/training/best_model.pth'
 block2embedding_file_path = r'/lustre/fs1/home/scomino/text2mc/text2mc-dataprocessor/block2vec/output/block2vec/embeddings.json'
+
+# Load mappings
+with open(tok2block_file_path, 'r') as f:
+    tok2block = json.load(f)
+    tok2block = {int(k): v for k, v in tok2block.items()}  # Ensure keys are integers
+
+block2tok = {v: k for k, v in tok2block.items()}
+
+with open(block2embedding_file_path, 'r') as f:
+    block2embedding = json.load(f)
+    block2embedding = {k: np.array(v, dtype=np.float32) for k, v in block2embedding.items()}
+
 
 # Adjusted loss function with log-cosh loss
 def log_cosh_loss(x, y, a=3.0):
@@ -50,7 +62,7 @@ def interpolate_and_generate(encoder, decoder, build1_path, build2_path, save_di
     decoder.eval()
     with torch.no_grad():
         # Load the two builds
-        dataset = text2mcVAEDataset(file_paths=[build1_path, build2_path], tok2block=tok2block, block2embedding=block2embedding, fixed_size=fixed_size)
+        dataset = text2mcVAEDataset(file_paths=[build1_path, build2_path], block2tok=block2tok, block2embedding=block2embedding, fixed_size=fixed_size)
         data_loader = DataLoader(dataset, batch_size=1, shuffle=False)
 
         data_list = []
@@ -78,7 +90,7 @@ def interpolate_and_generate(encoder, decoder, build1_path, build2_path, save_di
             # recon_embedded: (1, Embedding_Dim, Depth, Height, Width)
 
             # Convert embeddings back to tokens
-            recon_tokens = embedding_to_tokens(recon_embedded, dataset.embeddings_matrix)
+            recon_tokens = embedding_to_tokens(recon_embedded, dataset.embedding_matrix)
             # recon_tokens: (1, Depth, Height, Width)
 
             # Convert to numpy array
@@ -93,26 +105,38 @@ def interpolate_and_generate(encoder, decoder, build1_path, build2_path, save_di
 
 
 def embedding_to_tokens(embedded_data, embeddings_matrix):
-    # embedded_data: (Batch_Size, Embedding_Dim, Depth, Height, Width)
-    # embeddings_matrix: (Num_Tokens, Embedding_Dim)
+    # embedded_data: PyTorch tensor of shape (Batch_Size, Embedding_Dim, Depth, Height, Width)
+    # embeddings_matrix: NumPy array or PyTorch tensor of shape (Num_Tokens, Embedding_Dim)
 
     batch_size, embedding_dim, D, H, W = embedded_data.shape
-    embedded_data = embedded_data.view(batch_size, embedding_dim, -1)  # Shape: (Batch_Size, Embedding_Dim, N)
-    embedded_data = embedded_data.permute(0, 2, 1)  # Shape: (Batch_Size, N, Embedding_Dim)
 
-    # Normalize embeddings
-    embedded_data = F.normalize(embedded_data, dim=2)
-    embeddings_matrix = embeddings_matrix.to(embedded_data.device)
-    embeddings_matrix = F.normalize(embeddings_matrix, dim=1)
+    # Convert embedded_data to NumPy array
+    embedded_data_np = embedded_data.detach().cpu().numpy()
 
-    # Compute cosine similarity
-    similarity = torch.matmul(embedded_data, embeddings_matrix.T)  # Shape: (Batch_Size, N, Num_Tokens)
+    # Ensure embeddings_matrix is a NumPy array
+    if isinstance(embeddings_matrix, torch.Tensor):
+        embeddings_matrix_np = embeddings_matrix.detach().cpu().numpy()
+    else:
+        embeddings_matrix_np = embeddings_matrix
 
-    # Find the most similar embedding (max cosine similarity)
-    tokens = torch.argmax(similarity, dim=2)  # Shape: (Batch_Size, N)
+    # Flatten the embedded data
+    N = D * H * W
+    embedded_data_flat = embedded_data_np.reshape(batch_size, embedding_dim, N)
+    embedded_data_flat = embedded_data_flat.transpose(0, 2, 1)  # Shape: (Batch_Size, N, Embedding_Dim)
+    embedded_data_flat = embedded_data_flat.reshape(-1, embedding_dim)  # Shape: (Batch_Size * N, Embedding_Dim)
 
-    # Reshape tokens to (Batch_Size, Depth, Height, Width)
-    tokens = tokens.view(batch_size, D, H, W)
+    # Initialize NearestNeighbors with Euclidean distance
+    nbrs = NearestNeighbors(n_neighbors=1, algorithm='auto', metric='euclidean')
+    nbrs.fit(embeddings_matrix_np)
+
+    # Find nearest neighbors
+    distances, indices = nbrs.kneighbors(embedded_data_flat)
+    tokens_flat = indices.flatten()  # Shape: (Batch_Size * N,)
+
+    # Reshape tokens back to (Batch_Size, Depth, Height, Width)
+    tokens = tokens_flat.reshape(batch_size, D, H, W)
+    tokens = torch.from_numpy(tokens).long()  # Convert to torch tensor
+
     return tokens
 
 # Set random seeds for reproducibility
@@ -125,17 +149,6 @@ random.seed(seed)
 device_type = 'cuda' if torch.cuda.is_available() else 'cpu'
 device = torch.device(device_type)
 print("Using device:", device)
-
-# Load mappings
-with open(tok2block_file_path, 'r') as f:
-    tok2block = json.load(f)
-    tok2block = {int(k): v for k, v in tok2block.items()}  # Ensure keys are integers
-
-block2tok = {v: k for k, v in tok2block.items()}
-
-with open(block2embedding_file_path, 'r') as f:
-    block2embedding = json.load(f)
-    block2embedding = {k: np.array(v, dtype=np.float32) for k, v in block2embedding.items()}
 
 # Prepare the dataset
 hdf5_filepaths = glob.glob(os.path.join(builds_folder_path, '*.h5'))
