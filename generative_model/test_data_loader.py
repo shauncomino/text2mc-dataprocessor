@@ -16,21 +16,27 @@ schem_folder_path_reconstructed = '/mnt/c/users/shaun/curseforge/minecraft/insta
 tok2block_file_path = '/home/shaun/projects/text2mc-dataprocessor/world2vec/tok2block.json'
 block2embedding_file_path = '/home/shaun/projects/text2mc-dataprocessor/block2vec/output/block2vec/embeddings.json'
 
+sets_of_blocks_of_original = []
+sets_of_blocks_of_processed = []
+
 
 # Functions: create_schematic_file, convert_hdf5_file_to_numpy_array, convert_numpy_array_to_blocks, embeddings_to_tokens (as above)
 def create_schematic_file(data, schem_folder_path, schem_file_name):
+    unique_blocks = set()
     schem = mcschematic.MCSchematic()
     # Iterate over the elements of the array
     for i in range(data.shape[0]):
         for j in range(data.shape[1]):
             for k in range(data.shape[2]):
                 block = data[i, j, k]
-                if (block in tok2block.values()):
+                unique_blocks.add(block)
+                if block in tok2block.values():
                     schem.setBlock((i, j, k), data[i, j, k])
                 else:
                     schem.setBlock((i, j, k), "minecraft:air")
 
     schem.save(schem_folder_path, schem_file_name, mcschematic.Version.JE_1_20_1)
+    return unique_blocks
 
 def convert_hdf5_file_to_numpy_array(hdf5_file: str):
     with h5py.File(hdf5_file, 'r') as file:
@@ -57,7 +63,7 @@ def convert_numpy_array_to_blocks(world_array):
     for coordinate in np.ndindex(world_array.shape):
         block_integer = world_array[coordinate]
         block_string = data[str(block_integer)]
-        if block_integer == 3714 or block_integer == 102:
+        if block_integer == 3714:
             block_string = "minecraft:air"
         world_array_blocks[coordinate] = block_string
 
@@ -89,14 +95,17 @@ for i, hdf5_file in enumerate(hdf5_files):
     integer_world_array = convert_hdf5_file_to_numpy_array(hdf5_file)
     string_world_array = convert_numpy_array_to_blocks(integer_world_array)
     schem_file_name = f"test{i}_original"
-    create_schematic_file(string_world_array, schem_folder_path_original, schem_file_name)
+    unique_blocks = create_schematic_file(string_world_array, schem_folder_path_original, schem_file_name)
+    sets_of_blocks_of_original.append(unique_blocks)
+
+
 
 # Prepare the dataset
 dataset = text2mcVAEDataset(
     file_paths=hdf5_files,
     block2embedding=block2embedding,
     block2tok=block2tok,
-    fixed_size=(128, 128, 128)  # Adjust as needed
+    fixed_size=(64, 64, 64)  # Adjust as needed
 )
 
 data_loader = DataLoader(dataset, batch_size=1, shuffle=False)
@@ -117,4 +126,15 @@ for idx, embedded_data in enumerate(data_loader):
     # Save as .schem file
     hdf5_file = hdf5_files[idx]
     schem_file_name =  f"test{idx}_reconstructed"
-    create_schematic_file(block_names, schem_folder_path_reconstructed, schem_file_name)
+    unique_blocks = create_schematic_file(block_names, schem_folder_path_reconstructed, schem_file_name)
+    sets_of_blocks_of_processed.append(unique_blocks)
+
+for i in range(0, len(sets_of_blocks_of_original)):
+    print("")
+    print("Original set:")
+    print("")
+    print(sorted(sets_of_blocks_of_original[i]))
+
+    print("")
+    print("Processed set:")
+    print(sorted(sets_of_blocks_of_processed[i]))
