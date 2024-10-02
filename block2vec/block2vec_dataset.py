@@ -25,7 +25,8 @@ class Block2VecDataset(Dataset):
                 count += 1
                 if (self.build_limit != -1 and count >= build_limit): 
                     break 
-                
+        self.total_builds = len(self.files)
+        self.builds_processed = 0 
         logger.info("Found {} .h5 builds.", len(self.files))
    
     def __len__(self):
@@ -64,10 +65,13 @@ class Block2VecDataset(Dataset):
                     print(f"{build_name} failed loading build due to error: \"{e}\"")
                 
                 self.files.remove(build_name)
+                self.builds_processed += 1
                 idx +=1 
+                logger.info("%d/%d builds processed." % (self.builds_processed, self.total_builds))
         except Exception as e: 
             print(traceback.format_exc())
             print(f"{build_name} failed loading batch due to error: \"{e}\"")
+        
         
         return (targets, contexts)
     

@@ -108,6 +108,7 @@ class text2mcVAEDecoder(nn.Sequential):
             text2mcVAEResidualBlock(128, 128),
             nn.GroupNorm(32, 128),
             nn.SiLU(),
+            nn.Dropout3d(p=0.2),
             # The following "32" corresponds to the channel size, which is the length of the embedding dimension for the blocks
             nn.Conv3d(128, 32, kernel_size=3, padding=1),
         )
@@ -115,9 +116,7 @@ class text2mcVAEDecoder(nn.Sequential):
     def forward(self, x):
         # x: (Batch_Size, 4, Depth / 8, Height / 8, Width / 8)
         x /= 0.18215  # Scale factor adjustment as per the original decoder logic
-        print("Decoder")
         for module in self:
             x = module(x)
-            print(x.shape)
         # Output: (Batch_Size, 3, Depth, Height, Width)
         return x

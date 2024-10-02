@@ -3,16 +3,15 @@ import os
 
 """ Arguments for Block2Vec """
 class Block2VecArgs(Tap):
-    max_num_targets: int = 800
     build_limit: int = -1 # set to -1 for no limit 
     emb_dimension: int = 32
     epochs: int = 3
     batch_size: int = 1
     num_workers: int = 1
-    initial_lr: float = 1e-3
+    initial_lr: float = 1e-25
     context_radius: int = 1
-    targets_per_batch: int = 20000
-    targets_per_build: int = 5000
+    targets_per_batch: int = 5000
+    targets_per_build: int = 1250
     output_path: str = os.path.join("output", "block2vec") 
     textures_directory: str = os.path.join("block_pngs")
     tok2block_filepath: str = "../world2vec/tok2block.json"

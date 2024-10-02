@@ -4,26 +4,26 @@ from torch.utils.data import Dataset
 import numpy as np
 
 class text2mcVAEDataset(Dataset):
-    def __init__(self, file_paths=[], block2embedding={}, block2tok={}, block_ignore_list=[], fixed_size=(256, 256, 256, 32)):
+    def __init__(self, file_paths=[], block2embedding={}, block2tok={}, block_ignore_list=[], fixed_size=(64, 64, 64), augment=False):
         self.file_paths = file_paths
         self.block2embedding = block2embedding
         self.block2tok = block2tok
         self.block_ignore_set = set(block_ignore_list)
-        self.fixed_size = fixed_size
+        self.fixed_size = fixed_size  # (Depth, Height, Width)
+        self.augment = augment  # Flag to enable data augmentation
 
         # Prepare the embedding matrix and lookup arrays
         self.prepare_embedding_matrix()
 
     def prepare_embedding_matrix(self):
-        # Convert block names to tokens (integers)
-        # Build tok2embedding mapping
+        # Build token to embedding mapping
         self.tok2embedding_int = {}
         for block_name, embedding in self.block2embedding.items():
             token_str = self.block2tok.get(block_name)
             if token_str is not None:
                 token = int(token_str)
                 self.tok2embedding_int[token] = np.array(embedding, dtype=np.float32)
-        
+
         # Get the air token and embedding
         air_block_name = 'minecraft:air'
         air_token_str = self.block2tok.get(air_block_name)
@@ -101,28 +101,80 @@ class text2mcVAEDataset(Dataset):
         # Shape: (Depth, Height, Width, Embedding_Dim)
         embedded_data = self.embedding_matrix[indices_array]
 
-        # Create mask: 1 where token is not air_token, else 0
-        mask = np.where(indices_array != self.air_token, 1.0, 0.0)
+        if self.augment:
+            # === Data Augmentation ===
 
-        # Crop or pad data and mask to fixed size
-        crop_sizes = [min(embedded_data.shape[dim], self.fixed_size[dim]) for dim in range(3)]
-        embedded_data = embedded_data[:crop_sizes[0], :crop_sizes[1], :crop_sizes[2], :]
-        mask = mask[:crop_sizes[0], :crop_sizes[1], :crop_sizes[2]]
+            # Random rotation around Y axis (vertical axis)
+            k = np.random.choice([0, 1, 2, 3])  # Number of 90-degree rotations
+            embedded_data = np.rot90(embedded_data, k=k, axes=(0, 2))  # Rotate in the (Depth, Width) plane
 
-        # Initialize padded data and mask
-        padded_data = np.zeros(self.fixed_size, dtype=np.float32)
-        padded_mask = np.zeros(self.fixed_size[:3], dtype=np.float32)
+            # Define maximum shifts as 1/4 of the fixed size
+            max_shift_depth = self.fixed_size[0] // 4
+            max_shift_height = self.fixed_size[1] // 4
+            max_shift_width = self.fixed_size[2] // 4
 
-        # Calculate offsets for centering the data
-        offsets = [(self.fixed_size[dim] - crop_sizes[dim]) // 2 for dim in range(3)]
-        slices_data = tuple(slice(offsets[dim], offsets[dim] + crop_sizes[dim]) for dim in range(3))
+            # Calculate padded size
+            padded_size_depth = max(embedded_data.shape[0], self.fixed_size[0] + 2 * max_shift_depth)
+            padded_size_height = max(embedded_data.shape[1], self.fixed_size[1] + 2 * max_shift_height)
+            padded_size_width = max(embedded_data.shape[2], self.fixed_size[2] + 2 * max_shift_width)
 
-        # Place cropped data into the padded arrays
-        padded_data[slices_data] = embedded_data
-        padded_mask[slices_data] = mask
+            # Initialize padded data with air embedding
+            padded_shape = (padded_size_depth, padded_size_height, padded_size_width, self.embedding_dim)
+            padded_data = np.empty(padded_shape, dtype=np.float32)
+            padded_data[...] = self.air_embedding  # Fill with air embedding
 
-        # Convert to torch tensors and permute dimensions to (Embedding_Dim, Depth, Height, Width)
-        padded_data = torch.from_numpy(padded_data).permute(3, 0, 1, 2)
-        padded_mask = torch.from_numpy(padded_mask)
+            # Calculate offsets to place embedded_data into padded_data
+            offset_depth = (padded_size_depth - embedded_data.shape[0]) // 2
+            offset_height = (padded_size_height - embedded_data.shape[1]) // 2
+            offset_width = (padded_size_width - embedded_data.shape[2]) // 2
 
-        return padded_data, padded_mask
+            # Place embedded_data into padded_data
+            padded_data[
+                offset_depth:offset_depth + embedded_data.shape[0],
+                offset_height:offset_height + embedded_data.shape[1],
+                offset_width:offset_width + embedded_data.shape[2],
+                :
+            ] = embedded_data
+
+            # Now, select a random crop of size fixed_size from the padded data
+            max_start_depth = padded_size_depth - self.fixed_size[0]
+            max_start_height = padded_size_height - self.fixed_size[1]
+            max_start_width = padded_size_width - self.fixed_size[2]
+
+            # Random starting indices within valid range
+            start_depth = np.random.randint(0, max_start_depth + 1)
+            start_height = np.random.randint(0, max_start_height + 1)
+            start_width = np.random.randint(0, max_start_width + 1)
+
+            # Extract the crop
+            embedded_data = padded_data[
+                start_depth:start_depth + self.fixed_size[0],
+                start_height:start_height + self.fixed_size[1],
+                start_width:start_width + self.fixed_size[2],
+                :
+            ]
+
+        else:
+            # === No Data Augmentation ===
+
+            # Crop or pad data to fixed size
+            crop_sizes = [min(embedded_data.shape[dim], self.fixed_size[dim]) for dim in range(3)]
+            embedded_data = embedded_data[:crop_sizes[0], :crop_sizes[1], :crop_sizes[2], :]
+
+            # Initialize padded data with the air embedding
+            padded_data = np.empty((*self.fixed_size, self.embedding_dim), dtype=np.float32)
+            padded_data[...] = self.air_embedding
+
+            # Calculate offsets for centering the data
+            offsets = [(self.fixed_size[dim] - crop_sizes[dim]) // 2 for dim in range(3)]
+            slices_data = tuple(slice(offsets[dim], offsets[dim] + crop_sizes[dim]) for dim in range(3))
+
+            # Place cropped data into the padded array
+            padded_data[slices_data] = embedded_data
+
+            embedded_data = padded_data
+
+        # Convert to torch tensor and permute dimensions to (Embedding_Dim, Depth, Height, Width)
+        embedded_data = torch.from_numpy(embedded_data).permute(3, 0, 1, 2)
+
+        return embedded_data

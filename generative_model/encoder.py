@@ -37,6 +37,7 @@ class text2mcVAEEncoder(nn.Sequential):
             text2mcVAEResidualBlock(512, 512),
             nn.GroupNorm(32, 512),
             nn.SiLU(),
+            nn.Dropout3d(p=0.2),
             # Final layers to adjust the feature map size without changing spatial dimensions
             nn.Conv3d(512, 8, kernel_size=3, padding=1),
             nn.Conv3d(8, 8, kernel_size=1, padding=0),
@@ -51,21 +52,19 @@ class text2mcVAEEncoder(nn.Sequential):
     def forward(self, x):
         # x: (Batch_Size, Channel, Height, Width, Depth)
         # noise: (Batch_Size, 4, Height / 8, Width / 8)
-        print("Encoder")
         for module in self:
             x = module(x)
-            print(x.shape)
 
         # Clip the mean and variance from the output
         mu, logvar = torch.chunk(x, 2, dim=1)
 
         # Ensure the variance lies within reasonable bounds
-        logvar = torch.clamp(logvar, -30, 20)
+        logvar = torch.clamp(logvar, -20, 20)
 
-        # Reparameterization trick! (Don't ask me why this works. I do not know.)
+        # Reparameterization trick!
         z = self.reparameterize(mu, logvar)
 
-        # Stolen artifact from external GitHub repo (*Indiana Jones theme music*)
+        # Stolen artifact from external GitHub repo
         z *= 0.18215
         return z, mu, logvar
 

@@ -2,45 +2,57 @@ import torch
 import torch.optim as optim
 import glob
 import json
-from text2mcVAE import text2mcVAE
+import h5py
 import os
 from text2mcVAEDataset import text2mcVAEDataset
 from encoder import text2mcVAEEncoder
 from decoder import text2mcVAEDecoder
 from torch.utils.data import DataLoader, random_split
-from torch.amp import autocast, GradScaler
+import numpy as np
+import random
+from sklearn.neighbors import NearestNeighbors
+import torch.nn.functional as F  # Corrected import
+import math
 
-# Initialize the model components, optimizer, and gradient scaler
+batch_size = 2
+num_epochs = 64
+fixed_size = (64, 64, 64)
+embedding_dim = 32
 
-# Change the following line to the commented line proceeding it when using a capable machine to train
-device_type = "cpu"
-# device_type = "cuda" if torch.cuda.is_available() else "cpu"
+# Paths and configurations
+checkpoint_path = r'/lustre/fs1/home/scomino/training/checkpoint.pth'
+tok2block_file_path = r'/lustre/fs1/home/scomino/text2mc/text2mc-dataprocessor/world2vec/tok2block.json'
+builds_folder_path = r'/lustre/fs1/groups/jaedo/processed_builds'
+build1_path = r'/lustre/fs1/groups/jaedo/processed_builds/batch_101_2606.h5'
+build2_path = r'/lustre/fs1/groups/jaedo/processed_builds/batch_118_3048.h5'
+save_dir = r'/lustre/fs1/home/scomino/training/interpolations'
+best_model_path = r'/lustre/fs1/home/scomino/training/best_model.pth'
+block2embedding_file_path = r'/lustre/fs1/home/scomino/text2mc/text2mc-dataprocessor/block2vec/output/block2vec/embeddings.json'
 
-device = torch.device(device_type)
-encoder = text2mcVAEEncoder().to(device)
-decoder = text2mcVAEDecoder().to(device)
-optimizer = optim.Adam(list(encoder.parameters()) + list(decoder.parameters()), lr=1e-3)
-scaler = GradScaler()  # Initialize the gradient scaler for mixed precision
+# Load mappings
+with open(tok2block_file_path, 'r') as f:
+    tok2block = json.load(f)
+    tok2block = {int(k): v for k, v in tok2block.items()}  # Ensure keys are integers
+
+block2tok = {v: k for k, v in tok2block.items()}
+
+with open(block2embedding_file_path, 'r') as f:
+    block2embedding = json.load(f)
+    block2embedding = {k: np.array(v, dtype=np.float32) for k, v in block2embedding.items()}
+
 
 # Adjusted loss function with log-cosh loss
-def log_cosh_loss(x, y, a=10.0):
+def log_cosh_loss(x, y, a=3.0):
     diff = a * (x - y)
-    return torch.mean((1.0 / a) * torch.log(torch.cosh(diff)))
+    # Use a numerically stable implementation
+    return torch.mean((1.0 / a) * (diff + F.softplus(-2.0 * diff) - math.log(2.0)))
 
-def loss_function(recon_x, x, mu, logvar, mask, a=10.0):
+def loss_function(recon_x, x, mu, logvar, a=5.0):
     # If recon_x has more channels, slice to match x's channels
     recon_x = recon_x[:, :x.size(1), :, :, :]
 
-    # Adjust the mask to match the shape of recon_x
-    mask_expanded = mask.unsqueeze(1)  # Add a singleton dimension for channels
-    mask_expanded = mask_expanded.expand_as(recon_x)  # Expand to match recon_x's channel size
-
-    # Apply the mask
-    recon_x_masked = recon_x * mask_expanded
-    x_masked = x * mask_expanded
-
     # Use log-cosh error instead of MSE
-    log_cosh = log_cosh_loss(recon_x_masked, x_masked, a)
+    log_cosh = log_cosh_loss(recon_x, x, a)
 
     # Calculate KL Divergence
     batch_size = x.size(0)
@@ -48,42 +60,104 @@ def loss_function(recon_x, x, mu, logvar, mask, a=10.0):
 
     return log_cosh + KLD
 
-# Load tok2embedding
-tok2block = None
-block2embedding = None
-block2embedding_file_path = r'block2vec/output/block2vec/embeddings.json'
-tok2block_file_path = r'world2vec/tok2block.json'
-with open(block2embedding_file_path, 'r') as j:
-    block2embedding = json.loads(j.read())
+def interpolate_and_generate(encoder, decoder, build1_path, build2_path, save_dir, epoch, num_interpolations=5):
+    encoder.eval()
+    decoder.eval()
+    with torch.no_grad():
+        # Load the two builds
+        dataset = text2mcVAEDataset(file_paths=[build1_path, build2_path], block2tok=block2tok, block2embedding=block2embedding, fixed_size=fixed_size, augment=True)
+        data_loader = DataLoader(dataset, batch_size=1, shuffle=False)
 
-with open(tok2block_file_path, 'r') as j:
-    tok2block = json.loads(j.read())
+        data_list = []
+        for data in data_loader:
+            data = data.to(device)
+            data_list.append(data)
 
-# Create a new dictionary mapping tokens directly to embeddings
-tok2embedding = {}
+        z_list = []
+        for data in data_list:
+            z, mu, logvar = encoder(data)
+            z_list.append(z)
 
-for token, block_name in tok2block.items():
-    if block_name in block2embedding:
-        tok2embedding[token] = block2embedding[block_name]
+        # Interpolate between z1 and z2
+        z1 = z_list[0]
+        z2 = z_list[1]
+
+        interpolations = []
+        for alpha in np.linspace(0, 1, num_interpolations):
+            z_interp = (1 - alpha) * z1 + alpha * z2
+            interpolations.append(z_interp)
+
+        # Generate builds from interpolated latent vectors
+        for idx, z in enumerate(interpolations):
+            recon_embedded = decoder(z)
+            # recon_embedded: (1, Embedding_Dim, Depth, Height, Width)
+
+            # Convert embeddings back to tokens
+            recon_tokens = embedding_to_tokens(recon_embedded, dataset.embedding_matrix)
+            # recon_tokens: (1, Depth, Height, Width)
+
+            # Convert to numpy array
+            recon_tokens_np = recon_tokens.cpu().numpy().squeeze(0)  # Shape: (Depth, Height, Width)
+
+            # Save the build as an HDF5 file
+            save_path = os.path.join(save_dir, f'epoch_{epoch}_interp_{idx}.h5')
+            with h5py.File(save_path, 'w') as h5f:
+                h5f.create_dataset('build', data=recon_tokens_np, compression='gzip')
+
+            print(f'Saved interpolated build at {save_path}')
+
+
+def embedding_to_tokens(embedded_data, embeddings_matrix):
+    # embedded_data: PyTorch tensor of shape (Batch_Size, Embedding_Dim, Depth, Height, Width)
+    # embeddings_matrix: NumPy array or PyTorch tensor of shape (Num_Tokens, Embedding_Dim)
+
+    batch_size, embedding_dim, D, H, W = embedded_data.shape
+
+    # Convert embedded_data to NumPy array
+    embedded_data_np = embedded_data.detach().cpu().numpy()
+
+    # Ensure embeddings_matrix is a NumPy array
+    if isinstance(embeddings_matrix, torch.Tensor):
+        embeddings_matrix_np = embeddings_matrix.detach().cpu().numpy()
     else:
-        print(f"Warning: Block name '{block_name}' not found in embeddings. Skipping token '{token}'.")
+        embeddings_matrix_np = embeddings_matrix
 
-''' STEPS TO TRAIN ON ARCC:
-1. UNCOMMENT THE FOLLOWING LINES AFTER THIS DOCSTRING COMMENT
-2. REPLACE builds_directory WITH THE LOCATION OF THE .h5 BUILDS ON THE ARCC
-3. ENJOY
-'''
-# builds_directory = r'need/to/specify/directory/'
-# hdf5_filepaths = glob.glob(os.path.join(builds_directory, '*.h5'))
-# print(f"Found {len(hdf5_filepaths)} builds to use as training data")
+    # Flatten the embedded data
+    N = D * H * W
+    embedded_data_flat = embedded_data_np.reshape(batch_size, embedding_dim, N)
+    embedded_data_flat = embedded_data_flat.transpose(0, 2, 1)  # Shape: (Batch_Size, N, Embedding_Dim)
+    embedded_data_flat = embedded_data_flat.reshape(-1, embedding_dim)  # Shape: (Batch_Size * N, Embedding_Dim)
 
-hdf5_filepaths = [
-    r'/mnt/d/processed_builds_compressed/rar_test5_Desert+Tavern+2.h5',
-    # r'/mnt/d/processed_builds_compressed/rar_test6_Desert_Tavern.h5',
-    # r'/mnt/d/processed_builds_compressed/zip_test_0_LargeSandDunes.h5'
-]
+    # Initialize NearestNeighbors with Euclidean distance
+    nbrs = NearestNeighbors(n_neighbors=1, algorithm='auto', metric='euclidean')
+    nbrs.fit(embeddings_matrix_np)
 
-dataset = text2mcVAEDataset(file_paths=hdf5_filepaths, tok2embedding=tok2embedding, block_ignore_list=[102])
+    # Find nearest neighbors
+    distances, indices = nbrs.kneighbors(embedded_data_flat)
+    tokens_flat = indices.flatten()  # Shape: (Batch_Size * N,)
+
+    # Reshape tokens back to (Batch_Size, Depth, Height, Width)
+    tokens = tokens_flat.reshape(batch_size, D, H, W)
+    tokens = torch.from_numpy(tokens).long()  # Convert to torch tensor
+
+    return tokens
+
+# Set random seeds for reproducibility
+seed = 42
+torch.manual_seed(seed)
+np.random.seed(seed)
+random.seed(seed)
+
+# Device type
+device_type = 'cuda' if torch.cuda.is_available() else 'cpu'
+device = torch.device(device_type)
+print("Using device:", device)
+
+# Prepare the dataset
+hdf5_filepaths = glob.glob(os.path.join(builds_folder_path, '*.h5'))
+dataset = text2mcVAEDataset(file_paths=hdf5_filepaths, block2tok=block2tok, block2embedding=block2embedding, fixed_size=fixed_size)
+
+print(f"Discovered {len(dataset)} builds, beginning training")
 
 # Split the dataset into training, validation, and test sets
 dataset_size = len(dataset)
@@ -93,49 +167,64 @@ train_size = int((1 - validation_split - test_split) * dataset_size)
 val_size = int(validation_split * dataset_size)
 test_size = dataset_size - train_size - val_size
 
-train_dataset, val_dataset, test_dataset = random_split(dataset, [train_size, val_size, test_size])
+train_dataset, val_dataset, test_dataset = random_split(
+    dataset, [train_size, val_size, test_size],
+    generator=torch.Generator().manual_seed(seed)
+)
 
 # Create DataLoaders
-batch_size = 1  # Adjust as needed
 train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
 val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False)
-test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
 
-num_epochs = 1  # Adjust as needed
+# Initialize the model components
+encoder = text2mcVAEEncoder().to(device)
+decoder = text2mcVAEDecoder().to(device)
+optimizer = optim.Adam(list(encoder.parameters()) + list(decoder.parameters()), lr=1e-5, weight_decay=1e-5)
 
-# Training loop
+start_epoch = 1
 best_val_loss = float('inf')
 
-for epoch in range(1, num_epochs + 1):
+# Load checkpoint if it exists
+if os.path.exists(checkpoint_path):
+    print(f"Loading checkpoint from {checkpoint_path}")
+    checkpoint = torch.load(checkpoint_path, map_location=device)
+    encoder.load_state_dict(checkpoint['encoder_state_dict'])
+    decoder.load_state_dict(checkpoint['decoder_state_dict'])
+    optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+    start_epoch = checkpoint['epoch'] + 1
+    best_val_loss = checkpoint['best_val_loss']
+    print(f"Resuming training from epoch {start_epoch}")
+else:
+    print("No checkpoint found, starting from scratch")
+
+# Training loop
+os.makedirs(save_dir, exist_ok=True)
+
+for epoch in range(start_epoch, num_epochs + 1):
     encoder.train()
     decoder.train()
     total_loss = 0
 
-    for batch_idx, (data, mask) in enumerate(train_loader):
-        data, mask = data.to(device), mask.to(device)
+    for batch_idx, data in enumerate(train_loader):
+        data = data.to(device)
         optimizer.zero_grad()
 
-        # Mixed precision context
-        with autocast(device_type=device_type, enabled=(device_type == 'cuda')):
-            # Encode the data to get latent representation, mean, and log variance
-            z, mu, logvar = encoder(data)
+        z, mu, logvar = encoder(data)
+        recon_batch = decoder(z)
+        loss = loss_function(recon_batch, data, mu, logvar)
 
-            # Decode the latent variable to reconstruct the input
-            recon_batch = decoder(z)
-
-            # Compute the loss
-            loss = loss_function(recon_batch, data, mu, logvar, mask)
-
-        # Scale loss and perform backpropagation
-        scaler.scale(loss).backward()
-        scaler.step(optimizer)
-        scaler.update()
+        loss.backward()
+        torch.nn.utils.clip_grad_norm_(encoder.parameters(), max_norm=1.0)
+        torch.nn.utils.clip_grad_norm_(decoder.parameters(), max_norm=1.0)
+        optimizer.step()
 
         total_loss += loss.item()
+
         if batch_idx % 10 == 0:
             print(f'Epoch: {epoch} [{batch_idx * batch_size}/{len(train_loader.dataset)} '
                   f'({100. * batch_idx / len(train_loader):.0f}%)] Loss: {loss.item():.6f}')
-    avg_train_loss = total_loss / len(train_loader.dataset)
+
+    avg_train_loss = total_loss / len(train_loader)
     print(f'====> Epoch: {epoch} Average training loss: {avg_train_loss:.4f}')
 
     # Validation
@@ -143,13 +232,14 @@ for epoch in range(1, num_epochs + 1):
     decoder.eval()
     val_loss = 0
     with torch.no_grad():
-        for data, mask in val_loader:
-            data, mask = data.to(device), mask.to(device)
+        for data in val_loader:
+            data = data.to(device)
             z, mu, logvar = encoder(data)
             recon_batch = decoder(z)
-            loss = loss_function(recon_batch, data, mu, logvar, mask)
+            loss = loss_function(recon_batch, data, mu, logvar)
             val_loss += loss.item()
-    avg_val_loss = val_loss / len(val_loader.dataset)
+
+    avg_val_loss = val_loss / len(val_loader)
     print(f'====> Epoch: {epoch} Validation loss: {avg_val_loss:.4f}')
 
     # Check if validation loss improved, and save model
@@ -161,5 +251,24 @@ for epoch in range(1, num_epochs + 1):
             'decoder_state_dict': decoder.state_dict(),
             'optimizer_state_dict': optimizer.state_dict(),
             'loss': avg_val_loss,
-        }, 'best_model.pth')
+        }, best_model_path)
         print(f'Saved new best model at epoch {epoch} with validation loss {avg_val_loss:.4f}')
+
+    # Save checkpoint
+    checkpoint = {
+        'epoch': epoch,
+        'encoder_state_dict': encoder.state_dict(),
+        'decoder_state_dict': decoder.state_dict(),
+        'optimizer_state_dict': optimizer.state_dict(),
+        'best_val_loss': best_val_loss,
+        'seed': seed,
+    }
+    torch.save(checkpoint, checkpoint_path)
+    print(f"Saved checkpoint at epoch {epoch}")
+
+    # Interpolate and generate builds
+    print(f'Interpolating between builds at the end of epoch {epoch}')
+    try:
+        interpolate_and_generate(encoder, decoder, build1_path, build2_path, save_dir, epoch, num_interpolations=5)
+    except Exception as e:
+        print(f"Unable to generate interpolations for this epoch due to error: {e}")
