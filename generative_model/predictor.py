@@ -7,6 +7,10 @@ from decoder import text2mcVAEDecoder
 from text2mcVAEDataset import text2mcVAEDataset
 import scipy
 import numpy as np
+import os
+import h5py
+from datetime import datetime
+
 
 class text2mcPredictor(nn.Module):
     def __init__(self):
@@ -18,10 +22,15 @@ class text2mcPredictor(nn.Module):
         self.ENCODER_MODEL_PATH = "generative_model/checkpoints/encoder.pth"
         self.DECODER_MODEL_PATH = "generative_model/checkpoints/decoder.pth"
 
+        self.TOK_TO_BLOCK = "../world2vec/tok2block.json"
         self.BLOCK_TO_TOK = "../world2vec/block2tok.json"
+
+        self.SAVE_DIRECTORY = "../generated_builds/"
+        self.GENERATED_HDF5S_PATH = "../generated_hdf5s/"
 
         # Load the pre-trained embeddings and the encoder and decoder models and set them to eval mode
         self.embeddings = json.load(open(self.EMBEDDINGS_FILE))
+        self.tok2block = json.load(open(self.TOK_TO_BLOCK))
         self.block2tok = json.load(open(self.BLOCK_TO_TOK))
 
         # self.encoder = text2mcVAEEncoder()
@@ -61,53 +70,86 @@ class text2mcPredictor(nn.Module):
         return z1, z2
         
     # 4. Linearly interpolate between those n-dimensional latent points to get other latent points connecting the two
-    def interpolate_latent_points(self, z1, z2, num_steps):
-        """
-        Linearly interpolate between two n-dimensional latent points using LinearNDInterpolator.
+    def interpolate_latent_points(self, z1, z2, num_interpolations=1):
 
-        Args:
-            point1 (np.ndarray): The first latent point (n-dimensional).
-            point2 (np.ndarray): The second latent point (n-dimensional).
-            num_steps (int): The number of interpolation steps.
+        interpolations = []
+        for alpha in np.linspace(0, 1, num_interpolations):
+            z_interp = (1 - alpha) * z1 + alpha * z2
+            interpolations.append(z_interp)
 
-        Returns:
-            np.ndarray: An array of interpolated points.
-        """
-
-        """"
-            READ THIS WE NEED SOME HELP
-            what is z supposed to be?
-        """
-
-        # Ensure the points are numpy arrays
-        point1 = np.array(point1)
-        point2 = np.array(point2)
-
-        # Generate a series of values for t between 0 and 1
-        t_values = np.linspace(0, 1, num_steps)
-
-        # Create the interpolation function
-        points = np.array([[0], [1]])
-        values = np.vstack([point1, point2])
-        interpolator = scipy.LinearNDInterpolator(points, values)
-
-        # Compute the interpolated points
-        interpolated_points = interpolator(t_values[:, None])
-
-        return interpolated_points
-        pass
+        return interpolations
 
     # 5. Send those intermediate latent points through the decoder portion of the VAE    
-    def call_vae(self):
-        pass
+    def call_vae(self, interpolations, save_dir):
+        
+        interp_builds_paths = []
+        
+        recon_build = self.decoder(interpolations)
+        # recon_build: (1, num_tokens, Depth, Height, Width)
+
+        # Convert logits to predicted tokens
+        recon_build = recon_build.argmax(dim=1)  # (1, Depth, Height, Width)
+
+        # Convert to numpy array
+        recon_build_np = recon_build.cpu().numpy().squeeze(0)  # (Depth, Height, Width)
+
+        # Save the build as an HDF5 file
+        save_path = os.path.join(save_dir, f'{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.h5')
+        with h5py.File(save_path, 'w') as h5f:
+            h5f.create_dataset('build', data=recon_build_np, compression='gzip')
+        
+        interp_builds_paths.append(save_path)
+
+        print(f'Saved interpolated build at {save_path}')
+        return interp_builds_paths
 
     # 6. Convert those intermediate (embedded at this point) builds into tokens
-    def convert_intermediate_builds_to_tokens(self):
-        pass
+    def convert_intermediate_builds_to_tokens(self, interpolations):
+        
+        tokens = list(self.tok2block.keys())
+        embeddings = np.array(list(self.embeddings.values()))
 
+        token_arrays = []
+
+        for z in interpolations:
+            recon_build = self.decoder(z)
+            # recon_build: (1, num_tokens, Depth, Height, Width)
+
+            # Convert logits to predicted tokens
+            recon_build = recon_build.argmax(dim=1)  # (1, Depth, Height, Width)
+
+            # Convert to numpy array
+            recon_build_np = recon_build.cpu().numpy().squeeze(0)  # (Depth, Height, Width)
+
+            # Initialize an array to store the token representation
+            token_array = np.empty(recon_build_np.shape, dtype=object)
+
+            # Flatten the recon_build_np for distance computation
+            recon_build_flat = recon_build_np.reshape(-1, recon_build_np.shape[-1])
+
+            # Compute distances between recon_build_flat and pre-trained embeddings
+            distances = cdist(recon_build_flat, embeddings, metric='euclidean')
+
+            # Find the index of the closest embedding for each point
+            closest_indices = np.argmin(distances, axis=1)
+
+            # Map the closest indices to tokens
+            closest_tokens = np.array(tokens)[closest_indices]
+
+            # Reshape the token array to the original shape
+            token_array = closest_tokens.reshape(recon_build_np.shape)
+
+            token_arrays.append(token_array)
+
+        return token_arrays
+
+
+        pass
+    
     # 7. Convert those token arrays into actual builds using vec2world
     # 8. Save the build to be accessible somewhere
     def save_predicted_build(self):
+        file_name = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
         pass
 
 def main():
@@ -119,7 +161,7 @@ def main():
     building1_embedding, building2_embedding = predictor.embed_builds(building1_path, building2_path)
     print(building1_embedding)
     #building1_latent, building2_latent = predictor.encode_builds(building1_embedding, building2_embedding)
-    
 
+    
 if __name__ == "__main__":
     main()
