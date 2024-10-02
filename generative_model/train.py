@@ -11,6 +11,8 @@ from torch.utils.data import DataLoader, random_split
 import numpy as np
 import random
 from sklearn.neighbors import NearestNeighbors
+import torch.nn.functional as F  # Corrected import
+import math
 
 batch_size = 2
 num_epochs = 64
@@ -42,7 +44,8 @@ with open(block2embedding_file_path, 'r') as f:
 # Adjusted loss function with log-cosh loss
 def log_cosh_loss(x, y, a=3.0):
     diff = a * (x - y)
-    return torch.mean((1.0 / a) * torch.log(torch.cosh(diff)))
+    # Use a numerically stable implementation
+    return torch.mean((1.0 / a) * (diff + F.softplus(-2.0 * diff) - math.log(2.0)))
 
 def loss_function(recon_x, x, mu, logvar, a=5.0):
     # If recon_x has more channels, slice to match x's channels
@@ -62,7 +65,7 @@ def interpolate_and_generate(encoder, decoder, build1_path, build2_path, save_di
     decoder.eval()
     with torch.no_grad():
         # Load the two builds
-        dataset = text2mcVAEDataset(file_paths=[build1_path, build2_path], block2tok=block2tok, block2embedding=block2embedding, fixed_size=fixed_size)
+        dataset = text2mcVAEDataset(file_paths=[build1_path, build2_path], block2tok=block2tok, block2embedding=block2embedding, fixed_size=fixed_size, augment=True)
         data_loader = DataLoader(dataset, batch_size=1, shuffle=False)
 
         data_list = []
@@ -176,8 +179,7 @@ val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False)
 # Initialize the model components
 encoder = text2mcVAEEncoder().to(device)
 decoder = text2mcVAEDecoder().to(device)
-optimizer = optim.Adam(list(encoder.parameters()) + list(decoder.parameters()), lr=1e-4)
-scaler = torch.amp.GradScaler()
+optimizer = optim.Adam(list(encoder.parameters()) + list(decoder.parameters()), lr=1e-5, weight_decay=1e-5)
 
 start_epoch = 1
 best_val_loss = float('inf')
@@ -189,7 +191,6 @@ if os.path.exists(checkpoint_path):
     encoder.load_state_dict(checkpoint['encoder_state_dict'])
     decoder.load_state_dict(checkpoint['decoder_state_dict'])
     optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
-    scaler.load_state_dict(checkpoint['scaler_state_dict'])
     start_epoch = checkpoint['epoch'] + 1
     best_val_loss = checkpoint['best_val_loss']
     print(f"Resuming training from epoch {start_epoch}")
@@ -208,14 +209,14 @@ for epoch in range(start_epoch, num_epochs + 1):
         data = data.to(device)
         optimizer.zero_grad()
 
-        with torch.amp.autocast(enabled=True, device_type='cuda'):
-            z, mu, logvar = encoder(data)
-            recon_batch = decoder(z)
-            loss = loss_function(recon_batch, data, mu, logvar)
+        z, mu, logvar = encoder(data)
+        recon_batch = decoder(z)
+        loss = loss_function(recon_batch, data, mu, logvar)
 
-        scaler.scale(loss).backward()
-        scaler.step(optimizer)
-        scaler.update()
+        loss.backward()
+        torch.nn.utils.clip_grad_norm_(encoder.parameters(), max_norm=1.0)
+        torch.nn.utils.clip_grad_norm_(decoder.parameters(), max_norm=1.0)
+        optimizer.step()
 
         total_loss += loss.item()
 
@@ -259,7 +260,6 @@ for epoch in range(start_epoch, num_epochs + 1):
         'encoder_state_dict': encoder.state_dict(),
         'decoder_state_dict': decoder.state_dict(),
         'optimizer_state_dict': optimizer.state_dict(),
-        'scaler_state_dict': scaler.state_dict(),
         'best_val_loss': best_val_loss,
         'seed': seed,
     }

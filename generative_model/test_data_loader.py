@@ -102,7 +102,8 @@ dataset = text2mcVAEDataset(
     file_paths=hdf5_files,
     block2embedding=block2embedding,
     block2tok=block2tok,
-    fixed_size=(64, 64, 64)  # Adjust as needed
+    fixed_size=(64, 64, 64),
+    augment=True  # Adjust as needed
 )
 
 data_loader = DataLoader(dataset, batch_size=1, shuffle=False)
