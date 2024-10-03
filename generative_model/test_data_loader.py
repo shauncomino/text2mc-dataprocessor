@@ -95,8 +95,6 @@ for i, hdf5_file in enumerate(hdf5_files):
     unique_blocks = create_schematic_file(string_world_array, schem_folder_path_original, schem_file_name)
     sets_of_blocks_of_original.append(unique_blocks)
 
-
-
 # Prepare the dataset
 dataset = text2mcVAEDataset(
     file_paths=hdf5_files,

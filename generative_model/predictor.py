@@ -7,6 +7,11 @@ from decoder import text2mcVAEDecoder
 from text2mcVAEDataset import text2mcVAEDataset
 import scipy
 import numpy as np
+import os
+import h5py
+import vec2world
+from datetime import datetime
+from sklearn.neighbors import NearestNeighbors
 
 class text2mcPredictor(nn.Module):
     def __init__(self):
@@ -19,6 +24,9 @@ class text2mcPredictor(nn.Module):
         self.DECODER_MODEL_PATH = "generative_model/checkpoints/decoder.pth"
 
         self.BLOCK_TO_TOK = "../world2vec/block2tok.json"
+
+        self.SAVE_DIRECTORY = "../generated_builds/"
+        self.GENERATED_HDF5S_PATH = "../generated_hdf5s/"
 
         # Load the pre-trained embeddings and the encoder and decoder models and set them to eval mode
         self.embeddings = json.load(open(self.EMBEDDINGS_FILE))
@@ -37,7 +45,7 @@ class text2mcPredictor(nn.Module):
     def embed_builds(self, building1_path: str, building2_path: str):
         hdf5_files = [building1_path, building2_path]
 
-        dataset = text2mcVAEDataset(file_paths=hdf5_files, block2embedding=self.embeddings, block2tok=self.block2tok, block_ignore_list=[102], fixed_size=(256, 256, 256, 32))
+        dataset = text2mcVAEDataset(file_paths=hdf5_files, block2embedding=self.embeddings, block2tok=self.block2tok, block_ignore_list=[102], fixed_size=(64, 64, 64))
         
         '''
         Get the data and mask for the two builds by calling the __getitem__ method which converts the build into the embeddings.
@@ -46,7 +54,7 @@ class text2mcPredictor(nn.Module):
         building1_data, building1_mask = dataset.__getitem__(0)
         building2_data, building2_mask = dataset.__getitem__(1)
 
-        return building1_data, building2_data
+        return building1_data, building2_data, dataset.embedding_matrix
 
     # 3. Sends the two embedded builds through the encoder portion of the VAE
     def encode_builds(self, embedding1, embedding2):
@@ -61,54 +69,44 @@ class text2mcPredictor(nn.Module):
         return z1, z2
         
     # 4. Linearly interpolate between those n-dimensional latent points to get other latent points connecting the two
-    def interpolate_latent_points(self, z1, z2, num_steps):
-        """
-        Linearly interpolate between two n-dimensional latent points using LinearNDInterpolator.
+    def interpolate_latent_points(self, z1, z2, num_interpolations=1):
 
-        Args:
-            point1 (np.ndarray): The first latent point (n-dimensional).
-            point2 (np.ndarray): The second latent point (n-dimensional).
-            num_steps (int): The number of interpolation steps.
+        interpolations = []
+        for alpha in np.linspace(0, 1, num_interpolations):
+            z_interp = (1 - alpha) * z1 + alpha * z2
+            interpolations.append(z_interp)
 
-        Returns:
-            np.ndarray: An array of interpolated points.
-        """
-
-        """"
-            READ THIS WE NEED SOME HELP
-            what is z supposed to be?
-        """
-
-        # Ensure the points are numpy arrays
-        point1 = np.array(point1)
-        point2 = np.array(point2)
-
-        # Generate a series of values for t between 0 and 1
-        t_values = np.linspace(0, 1, num_steps)
-
-        # Create the interpolation function
-        points = np.array([[0], [1]])
-        values = np.vstack([point1, point2])
-        interpolator = scipy.LinearNDInterpolator(points, values)
-
-        # Compute the interpolated points
-        interpolated_points = interpolator(t_values[:, None])
-
-        return interpolated_points
-        pass
-
-    # 5. Send those intermediate latent points through the decoder portion of the VAE    
-    def call_vae(self):
-        pass
-
+        return interpolations
+    
     # 6. Convert those intermediate (embedded at this point) builds into tokens
-    def convert_intermediate_builds_to_tokens(self):
-        pass
+    def embeddings_to_tokens(self, embedded_data, embedding_matrix):
+        batch_size, embedding_dim, D, H, W = embedded_data.shape
+        N = D * H * W
+        embedded_data_flat = embedded_data.view(batch_size, embedding_dim, -1).permute(0, 2, 1).contiguous()
+        embedded_data_flat = embedded_data_flat[0].numpy()  # (N, Embedding_Dim)
 
-    # 7. Convert those token arrays into actual builds using vec2world
-    # 8. Save the build to be accessible somewhere
-    def save_predicted_build(self):
-        pass
+        nbrs = NearestNeighbors(n_neighbors=1, algorithm='auto').fit(embedding_matrix)
+        distances, indices = nbrs.kneighbors(embedded_data_flat)
+        tokens = indices.flatten().reshape(D, H, W)
+        return tokens
+    
+    # 5. Send those intermediate latent points through the decoder portion of the VAE    
+    def call_vae(self, interpolations, embedding_matrix):
+        
+        for z in interpolations:
+            recon_embedding = self.decoder(z)
+
+            # Convert to numpy array
+            recon_embedding = recon_embedding.cpu()
+
+            # Convert tokens to block names
+            tokens = text2mcPredictor.embeddings_to_tokens(recon_embedding, embedding_matrix) # 3d Array Of Integers
+
+            # Call functions from vec2world to convert tokens to blocks and same it as a schematics
+            string_world = vec2world.convert_numpy_array_to_blocks(tokens)
+            file_name = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+            vec2world.create_schematic_file(string_world, self.SAVE_DIRECTORY, file_name)
+
 
 def main():
     building1_path = "rar_test5_Desert+Tavern+2.h5"
@@ -116,10 +114,10 @@ def main():
 
     predictor = text2mcPredictor()
     
-    building1_embedding, building2_embedding = predictor.embed_builds(building1_path, building2_path)
-    print(building1_embedding)
-    #building1_latent, building2_latent = predictor.encode_builds(building1_embedding, building2_embedding)
-    
+    building1_embedding, building2_embedding, embedding_matrix = predictor.embed_builds(building1_path, building2_path)
+    building1_latent, building2_latent = predictor.encode_builds(building1_embedding, building2_embedding)
+    interpolations = predictor.interpolate_latent_points(building1_latent, building2_latent, num_interpolations=1)
+    predictor.call_vae(interpolations, embedding_matrix)
 
 if __name__ == "__main__":
     main()
