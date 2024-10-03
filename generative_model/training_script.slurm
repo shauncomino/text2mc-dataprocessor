@@ -5,7 +5,6 @@
 #SBATCH --partition=normal                  # Partition (queue) name
 #SBATCH --cpus-per-task=1                   # Number of CPU cores per task
 #SBATCH --mem=80GB                          # Memory per node (GB)
-#SBATCH --unbuffered
 #SBATCH --output=training.out                # Output File
 #SBATCH --time=36:00:00                     # Time limit (HH:MM:SS)
 #SBATCH --gres=gpu:1
@@ -17,4 +16,4 @@ source /lustre/fs1/groups/jaedo/miniconda3/etc/profile.d/conda.sh
 conda activate world2vec
 
 # Command to run Python script
-python train.py
+python -u train.py
