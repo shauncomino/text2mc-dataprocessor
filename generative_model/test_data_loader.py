@@ -10,7 +10,7 @@ from text2mcVAEDataset import text2mcVAEDataset
 from sklearn.neighbors import NearestNeighbors
 
 # Paths
-hdf5_folder = '/home/shaun/projects/text2mc-dataprocessor/test_builds'
+hdf5_folder = '/home/shaun/projects/text2mc-dataprocessor/test_builds/interpolations'
 schem_folder_path_original = '/mnt/c/users/shaun/curseforge/minecraft/instances/text2mc/config/worldedit/schematics/'
 schem_folder_path_reconstructed = '/mnt/c/users/shaun/curseforge/minecraft/instances/text2mc/config/worldedit/schematics/'
 tok2block_file_path = '/home/shaun/projects/text2mc-dataprocessor/world2vec/tok2block.json'

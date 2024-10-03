@@ -106,7 +106,9 @@ class text2mcVAEDataset(Dataset):
 
             # Random rotation around Y axis (vertical axis)
             k = np.random.choice([0, 1, 2, 3])  # Number of 90-degree rotations
-            embedded_data = np.rot90(embedded_data, k=k, axes=(0, 2))  # Rotate in the (Depth, Width) plane
+            # Rotate in the (Depth, Width) plane
+            embedded_data = np.rot90(embedded_data, k=k, axes=(0, 2))
+            data_tokens_mapped = np.rot90(data_tokens_mapped, k=k, axes=(0, 2))
 
             # Define maximum shifts as 1/4 of the fixed size
             max_shift_depth = self.fixed_size[0] // 4
@@ -118,10 +120,13 @@ class text2mcVAEDataset(Dataset):
             padded_size_height = max(embedded_data.shape[1], self.fixed_size[1] + 2 * max_shift_height)
             padded_size_width = max(embedded_data.shape[2], self.fixed_size[2] + 2 * max_shift_width)
 
-            # Initialize padded data with air embedding
+            # Initialize padded data with air embedding and air token
             padded_shape = (padded_size_depth, padded_size_height, padded_size_width, self.embedding_dim)
             padded_data = np.empty(padded_shape, dtype=np.float32)
             padded_data[...] = self.air_embedding  # Fill with air embedding
+
+            padded_tokens_shape = (padded_size_depth, padded_size_height, padded_size_width)
+            padded_tokens = np.full(padded_tokens_shape, self.air_token, dtype=np.int32)
 
             # Calculate offsets to place embedded_data into padded_data
             offset_depth = (padded_size_depth - embedded_data.shape[0]) // 2
@@ -135,6 +140,13 @@ class text2mcVAEDataset(Dataset):
                 offset_width:offset_width + embedded_data.shape[2],
                 :
             ] = embedded_data
+
+            # Place data_tokens_mapped into padded_tokens
+            padded_tokens[
+                offset_depth:offset_depth + data_tokens_mapped.shape[0],
+                offset_height:offset_height + data_tokens_mapped.shape[1],
+                offset_width:offset_width + data_tokens_mapped.shape[2]
+            ] = data_tokens_mapped
 
             # Now, select a random crop of size fixed_size from the padded data
             max_start_depth = padded_size_depth - self.fixed_size[0]
@@ -154,16 +166,25 @@ class text2mcVAEDataset(Dataset):
                 :
             ]
 
+            data_tokens_mapped = padded_tokens[
+                start_depth:start_depth + self.fixed_size[0],
+                start_height:start_height + self.fixed_size[1],
+                start_width:start_width + self.fixed_size[2]
+            ]
+
         else:
             # === No Data Augmentation ===
 
             # Crop or pad data to fixed size
             crop_sizes = [min(embedded_data.shape[dim], self.fixed_size[dim]) for dim in range(3)]
             embedded_data = embedded_data[:crop_sizes[0], :crop_sizes[1], :crop_sizes[2], :]
+            data_tokens_mapped = data_tokens_mapped[:crop_sizes[0], :crop_sizes[1], :crop_sizes[2]]
 
-            # Initialize padded data with the air embedding
+            # Initialize padded data with the air embedding and air token
             padded_data = np.empty((*self.fixed_size, self.embedding_dim), dtype=np.float32)
             padded_data[...] = self.air_embedding
+
+            padded_tokens = np.full(self.fixed_size, self.air_token, dtype=np.int32)
 
             # Calculate offsets for centering the data
             offsets = [(self.fixed_size[dim] - crop_sizes[dim]) // 2 for dim in range(3)]
@@ -171,10 +192,14 @@ class text2mcVAEDataset(Dataset):
 
             # Place cropped data into the padded array
             padded_data[slices_data] = embedded_data
+            padded_tokens[slices_data] = data_tokens_mapped
 
             embedded_data = padded_data
+            data_tokens_mapped = padded_tokens
 
         # Convert to torch tensor and permute dimensions to (Embedding_Dim, Depth, Height, Width)
         embedded_data = torch.from_numpy(embedded_data).permute(3, 0, 1, 2)
+        # Convert tokens to torch tensor with dimensions (Depth, Height, Width)
+        data_tokens_mapped = torch.from_numpy(data_tokens_mapped)
 
-        return embedded_data
+        return embedded_data, data_tokens_mapped

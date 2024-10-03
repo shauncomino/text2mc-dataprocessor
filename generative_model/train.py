@@ -40,25 +40,48 @@ with open(block2embedding_file_path, 'r') as f:
     block2embedding = json.load(f)
     block2embedding = {k: np.array(v, dtype=np.float32) for k, v in block2embedding.items()}
 
-
-# Adjusted loss function with log-cosh loss
-def log_cosh_loss(x, y, a=3.0):
-    diff = a * (x - y)
-    # Use a numerically stable implementation
-    return torch.mean((1.0 / a) * (diff + F.softplus(-2.0 * diff) - math.log(2.0)))
-
-def loss_function(recon_x, x, mu, logvar, a=5.0):
+# Define the loss function to use weighted token probabilities
+def loss_function(recon_x, x, mu, logvar, data_tokens, a=5.0, epsilon=1e-6):
     # If recon_x has more channels, slice to match x's channels
     recon_x = recon_x[:, :x.size(1), :, :, :]
-
-    # Use log-cosh error instead of MSE
-    log_cosh = log_cosh_loss(recon_x, x, a)
-
+    
+    # Flatten tokens to compute frequencies
+    tokens_flat = data_tokens.view(-1)
+    unique_tokens, counts = tokens_flat.unique(return_counts=True)
+    
+    # Compute frequencies
+    total_count = counts.sum().float()
+    token_freqs = counts.float() / total_count + epsilon  # Add epsilon to avoid division by zero
+    
+    # Compute inverse frequencies (weights)
+    token_weights = 1.0 / token_freqs
+    
+    # Normalize weights to prevent them from becoming too large
+    token_weights = token_weights / token_weights.sum()
+    
+    # Create a weight map for all tokens
+    max_token_id = data_tokens.max()
+    weight_map = torch.zeros(max_token_id + 1, device=data_tokens.device)
+    weight_map[unique_tokens] = token_weights
+    
+    # Map weights to the data tokens
+    weights = weight_map[data_tokens]
+    
+    # Reshape weights to match recon_x shape
+    weights = weights.unsqueeze(1)  # Shape: (Batch_Size, 1, Depth, Height, Width)
+    
+    # Compute weighted reconstruction loss
+    diff = a * (recon_x - x)
+    # Use a numerically stable implementation of log-cosh loss
+    loss = (1.0 / a) * (diff + F.softplus(-2.0 * diff) - math.log(2.0))
+    weighted_loss = loss * weights
+    log_cosh = torch.mean(weighted_loss)
+    
     # Calculate KL Divergence
-    batch_size = x.size(0)
-    KLD = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp()) / batch_size
-
+    KLD = -0.5 * torch.mean(1 + logvar - mu.pow(2) - logvar.exp())
+    
     return log_cosh + KLD
+
 
 def interpolate_and_generate(encoder, decoder, build1_path, build2_path, save_dir, epoch, num_interpolations=5):
     encoder.eval()
@@ -69,7 +92,8 @@ def interpolate_and_generate(encoder, decoder, build1_path, build2_path, save_di
         data_loader = DataLoader(dataset, batch_size=1, shuffle=False)
 
         data_list = []
-        for data in data_loader:
+        # We aren't using the tokens directly in this case
+        for data, _ in data_loader:
             data = data.to(device)
             data_list.append(data)
 
@@ -205,24 +229,26 @@ for epoch in range(start_epoch, num_epochs + 1):
     decoder.train()
     total_loss = 0
 
-    for batch_idx, data in enumerate(train_loader):
-        data = data.to(device)
+    for batch_idx, (data, data_tokens) in enumerate(train_loader):
+        data = data.to(device)          # Embedded data
+        data_tokens = data_tokens.to(device)  # Tokens
         optimizer.zero_grad()
-
+        
         z, mu, logvar = encoder(data)
         recon_batch = decoder(z)
-        loss = loss_function(recon_batch, data, mu, logvar)
-
+        loss = loss_function(recon_batch, data, mu, logvar, data_tokens)
+        
         loss.backward()
         torch.nn.utils.clip_grad_norm_(encoder.parameters(), max_norm=1.0)
         torch.nn.utils.clip_grad_norm_(decoder.parameters(), max_norm=1.0)
         optimizer.step()
-
+        
         total_loss += loss.item()
-
+        
         if batch_idx % 10 == 0:
             print(f'Epoch: {epoch} [{batch_idx * batch_size}/{len(train_loader.dataset)} '
-                  f'({100. * batch_idx / len(train_loader):.0f}%)] Loss: {loss.item():.6f}')
+                f'({100. * batch_idx / len(train_loader):.0f}%)] Loss: {loss.item():.6f}')
+
 
     avg_train_loss = total_loss / len(train_loader)
     print(f'====> Epoch: {epoch} Average training loss: {avg_train_loss:.4f}')
@@ -232,12 +258,15 @@ for epoch in range(start_epoch, num_epochs + 1):
     decoder.eval()
     val_loss = 0
     with torch.no_grad():
-        for data in val_loader:
+        for data, data_tokens in val_loader:
             data = data.to(device)
+            data_tokens = data_tokens.to(device)
+            
             z, mu, logvar = encoder(data)
             recon_batch = decoder(z)
-            loss = loss_function(recon_batch, data, mu, logvar)
+            loss = loss_function(recon_batch, data, mu, logvar, data_tokens)
             val_loss += loss.item()
+
 
     avg_val_loss = val_loss / len(val_loader)
     print(f'====> Epoch: {epoch} Validation loss: {avg_val_loss:.4f}')
