@@ -20,16 +20,38 @@ batch_size = 2
 num_epochs = 64
 fixed_size = (64, 64, 64)
 embedding_dim = 32
+on_arcc = False
 
-# Paths and configurations
-checkpoint_path = r'/lustre/fs1/home/scomino/training/checkpoint.pth'
-tok2block_file_path = r'/lustre/fs1/home/scomino/text2mc/text2mc-dataprocessor/world2vec/tok2block.json'
-builds_folder_path = r'/lustre/fs1/groups/jaedo/processed_builds'
-build1_path = r'/lustre/fs1/groups/jaedo/processed_builds/batch_101_2606.h5'
-build2_path = r'/lustre/fs1/groups/jaedo/processed_builds/batch_118_3048.h5'
-save_dir = r'/lustre/fs1/home/scomino/training/interpolations'
-best_model_path = r'/lustre/fs1/home/scomino/training/best_model.pth'
-block2embedding_file_path = r'/lustre/fs1/home/scomino/text2mc/text2mc-dataprocessor/block2vec/output/block2vec/embeddings.json'
+if on_arcc:
+    # Paths and configurations
+    checkpoint_path = r'/lustre/fs1/home/scomino/training/checkpoint.pth'
+    tok2block_file_path = r'/lustre/fs1/home/scomino/text2mc/text2mc-dataprocessor/world2vec/tok2block.json'
+    builds_folder_path = r'/lustre/fs1/groups/jaedo/processed_builds'
+    build1_path = r'/lustre/fs1/groups/jaedo/processed_builds/batch_101_2606.h5'
+    build2_path = r'/lustre/fs1/groups/jaedo/processed_builds/batch_118_3048.h5'
+    save_dir = r'/lustre/fs1/home/scomino/training/interpolations'
+    best_model_path = r'/lustre/fs1/home/scomino/training/best_model.pth'
+    block2embedding_file_path = r'/lustre/fs1/home/scomino/text2mc/text2mc-dataprocessor/block2vec/output/block2vec/embeddings.json'
+    
+    # Device type for arcc
+    device_type = 'cuda' if torch.cuda.is_available() else 'cpu'
+    device = torch.device(device_type)
+    print("Using device:", device)
+else:
+    builds_folder_path = r'/home/shaun/projects/text2mc-dataprocessor/test_builds/'
+    tok2block_file_path = r'/home/shaun/projects/text2mc-dataprocessor/world2vec/tok2block.json'
+    block2embedding_file_path = r'/home/shaun/projects/text2mc-dataprocessor/block2vec/output/block2vec/embeddings.json'
+    checkpoint_path = r'/home/shaun/projects/text2mc-dataprocessor/checkpoint.pth'
+    best_model_path = r'/home/shaun/projects/text2mc-dataprocessor/best_model.pth'
+    build1_path = r'/home/shaun/projects/text2mc-dataprocessor/test_builds/batch_157_4066.h5'
+    build2_path = r'/home/shaun/projects/text2mc-dataprocessor/test_builds/batch_157_4077.h5'
+    save_dir = r'/home/shaun/projects/text2mc-dataprocessor/test_builds/'
+
+    # Device type for local machine
+    device_type = 'cpu'
+    device = torch.device(device_type)
+    print("Using device:", device)
+
 
 # Load mappings
 with open(tok2block_file_path, 'r') as f:
@@ -48,10 +70,6 @@ torch.manual_seed(seed)
 np.random.seed(seed)
 random.seed(seed)
 
-# Device type
-device_type = 'cuda' if torch.cuda.is_available() else 'cpu'
-device = torch.device(device_type)
-print("Using device:", device)
 
 # Prepare the file paths
 hdf5_filepaths = glob.glob(os.path.join(builds_folder_path, '*.h5'))
@@ -130,27 +148,37 @@ else:
     print("No checkpoint found, starting from scratch")
 
 # Define the loss function with masking for air blocks
-def loss_function(recon_x, x, mu, logvar, data_tokens, air_token_id, a=5.0):
+def loss_function(recon_x, x, mu, logvar, data_tokens, air_token_id, a=3.0, epsilon=1e-6):
     # If recon_x has more channels, slice to match x's channels
     recon_x = recon_x[:, :x.size(1), :, :, :]
-
+    
     # Compute the per-voxel difference using log-cosh loss
     diff = a * (recon_x - x)
     loss = (1.0 / a) * (diff + F.softplus(-2.0 * diff) - math.log(2.0))
-
+    
     # Create a mask where the token is not air
     mask = (data_tokens != air_token_id).unsqueeze(1).float()  # Shape: (Batch_Size, 1, D, H, W)
-
+    
     # Apply the mask to the loss
-    masked_loss = loss * mask
-
-    # Compute the mean of the masked loss
-    recon_loss = torch.mean(masked_loss)
-
+    masked_loss = loss * mask  # Zero out the loss where the token is air
+    
+    # Sum the masked loss over all voxels and batches
+    total_recon_loss = torch.sum(masked_loss)
+    
+    # Compute the number of non-air voxels
+    num_non_air_voxels = torch.sum(mask)
+    
+    # To avoid division by zero
+    num_non_air_voxels = num_non_air_voxels + epsilon
+    
+    # Compute the mean reconstruction loss per non-air voxel
+    recon_loss = total_recon_loss / num_non_air_voxels
+    
     # Calculate KL Divergence
     KLD = -0.5 * torch.mean(1 + logvar - mu.pow(2) - logvar.exp())
-
+    
     return recon_loss + KLD
+
 
 # Function to convert embeddings back to tokens
 def embedding_to_tokens(embedded_data, embeddings_matrix):
