@@ -20,7 +20,7 @@ batch_size = 2
 num_epochs = 64
 fixed_size = (64, 64, 64)
 embedding_dim = 32
-on_arcc = False
+on_arcc = True
 
 if on_arcc:
     # Paths and configurations
