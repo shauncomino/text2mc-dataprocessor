@@ -6,7 +6,7 @@ import glob
 import json
 import h5py
 import os
-from dataloader import text2mcVAEDataset
+from text2mcVAEDataset import text2mcVAEDataset
 from encoder import text2mcVAEEncoder
 from decoder import text2mcVAEDecoder
 from torch.utils.data import DataLoader, random_split
@@ -53,37 +53,60 @@ device_type = 'cuda' if torch.cuda.is_available() else 'cpu'
 device = torch.device(device_type)
 print("Using device:", device)
 
-# Prepare the dataset
+# Prepare the file paths
 hdf5_filepaths = glob.glob(os.path.join(builds_folder_path, '*.h5'))
-dataset = text2mcVAEDataset(
-    file_paths=hdf5_filepaths,
-    block2tok=block2tok,
-    block2embedding=block2embedding,
-    fixed_size=fixed_size
-)
 
-print(f"Discovered {len(dataset)} builds, beginning training")
+print(f"Discovered {len(hdf5_filepaths)} builds, beginning training")
 
-# Retrieve the air token ID
-air_token_id = dataset.air_token
-print(f"Air token ID: {air_token_id}")
-
-# Split the dataset into training, validation, and test sets
-dataset_size = len(dataset)
+# Split the file paths into training, validation, and test sets
+dataset_size = len(hdf5_filepaths)
 validation_split = 0.2
 test_split = 0.1
 train_size = int((1 - validation_split - test_split) * dataset_size)
 val_size = int(validation_split * dataset_size)
 test_size = dataset_size - train_size - val_size
 
-train_dataset, val_dataset, test_dataset = random_split(
-    dataset, [train_size, val_size, test_size],
-    generator=torch.Generator().manual_seed(seed)
+# Shuffle file paths
+random.shuffle(hdf5_filepaths)
+
+# Split the file paths
+train_file_paths = hdf5_filepaths[:train_size]
+val_file_paths = hdf5_filepaths[train_size:train_size + val_size]
+test_file_paths = hdf5_filepaths[train_size + val_size:]
+
+# Create separate datasets with appropriate augmentation settings
+train_dataset = text2mcVAEDataset(
+    file_paths=train_file_paths,
+    block2tok=block2tok,
+    block2embedding=block2embedding,
+    fixed_size=fixed_size,
+    augment=True  # Enable augmentations for training
 )
+
+val_dataset = text2mcVAEDataset(
+    file_paths=val_file_paths,
+    block2tok=block2tok,
+    block2embedding=block2embedding,
+    fixed_size=fixed_size,
+    augment=False  # Disable augmentations for validation
+)
+
+test_dataset = text2mcVAEDataset(
+    file_paths=test_file_paths,
+    block2tok=block2tok,
+    block2embedding=block2embedding,
+    fixed_size=fixed_size,
+    augment=False  # Disable augmentations for testing
+)
+
+# Retrieve the air token ID from the training dataset
+air_token_id = train_dataset.air_token
+print(f"Air token ID: {air_token_id}")
 
 # Create DataLoaders
 train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
 val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False)
+test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
 
 # Initialize the model components
 encoder = text2mcVAEEncoder().to(device)
@@ -128,6 +151,111 @@ def loss_function(recon_x, x, mu, logvar, data_tokens, air_token_id, a=5.0):
     KLD = -0.5 * torch.mean(1 + logvar - mu.pow(2) - logvar.exp())
 
     return recon_loss + KLD
+
+# Function to convert embeddings back to tokens
+def embedding_to_tokens(embedded_data, embeddings_matrix):
+    # embedded_data: PyTorch tensor of shape (Batch_Size, Embedding_Dim, Depth, Height, Width)
+    # embeddings_matrix: NumPy array or PyTorch tensor of shape (Num_Tokens, Embedding_Dim)
+
+    batch_size, embedding_dim, D, H, W = embedded_data.shape
+
+    # Convert embedded_data to NumPy array
+    embedded_data_np = embedded_data.detach().cpu().numpy()
+
+    # Ensure embeddings_matrix is a NumPy array
+    if isinstance(embeddings_matrix, torch.Tensor):
+        embeddings_matrix_np = embeddings_matrix.detach().cpu().numpy()
+    else:
+        embeddings_matrix_np = embeddings_matrix
+
+    # Flatten the embedded data
+    N = D * H * W
+    embedded_data_flat = embedded_data_np.reshape(batch_size, embedding_dim, N)
+    embedded_data_flat = embedded_data_flat.transpose(0, 2, 1)  # Shape: (Batch_Size, N, Embedding_Dim)
+    embedded_data_flat = embedded_data_flat.reshape(-1, embedding_dim)  # Shape: (Batch_Size * N, Embedding_Dim)
+
+    # Initialize NearestNeighbors with Euclidean distance
+    nbrs = NearestNeighbors(n_neighbors=1, algorithm='auto', metric='euclidean')
+    nbrs.fit(embeddings_matrix_np)
+
+    # Find nearest neighbors
+    distances, indices = nbrs.kneighbors(embedded_data_flat)
+    tokens_flat = indices.flatten()  # Shape: (Batch_Size * N,)
+
+    # Reshape tokens back to (Batch_Size, Depth, Height, Width)
+    tokens = tokens_flat.reshape(batch_size, D, H, W)
+    tokens = torch.from_numpy(tokens).long()  # Convert to torch tensor
+
+    return tokens
+
+# Function to interpolate and generate builds
+def interpolate_and_generate(encoder, decoder, build1_path, build2_path, save_dir, epoch, num_interpolations=5):
+    encoder.eval()
+    decoder.eval()
+    with torch.no_grad():
+        # Load the two builds
+        dataset = text2mcVAEDataset(
+            file_paths=[build1_path, build2_path],
+            block2tok=block2tok,
+            block2embedding=block2embedding,
+            fixed_size=fixed_size,
+            augment=False  # Disable augmentation for consistent reconstructions
+        )
+        data_loader = DataLoader(dataset, batch_size=1, shuffle=False)
+
+        data_list = []
+        # We aren't using the tokens directly in this case
+        for data, _ in data_loader:
+            data = data.to(device)
+            data_list.append(data)
+
+        z_list = []
+        for data in data_list:
+            z, mu, logvar = encoder(data)
+            z_list.append(z)
+
+        # Generate reconstructions of the original builds
+        for idx, (data, z) in enumerate(zip(data_list, z_list)):
+            recon_embedded = decoder(z)
+            # Convert embeddings back to tokens
+            recon_tokens = embedding_to_tokens(recon_embedded, dataset.embedding_matrix)
+            # Convert to numpy array
+            recon_tokens_np = recon_tokens.cpu().numpy().squeeze(0)  # Shape: (Depth, Height, Width)
+
+            # Save the reconstructed build as an HDF5 file
+            save_path = os.path.join(save_dir, f'epoch_{epoch}_recon_{idx}.h5')
+            with h5py.File(save_path, 'w') as h5f:
+                h5f.create_dataset('build', data=recon_tokens_np, compression='gzip')
+
+            print(f'Saved reconstruction of build {idx + 1} at {save_path}')
+
+        # Interpolate between z1 and z2
+        z1 = z_list[0]
+        z2 = z_list[1]
+
+        interpolations = []
+        for alpha in np.linspace(0, 1, num_interpolations):
+            z_interp = (1 - alpha) * z1 + alpha * z2
+            interpolations.append(z_interp)
+
+        # Generate builds from interpolated latent vectors
+        for idx, z in enumerate(interpolations):
+            recon_embedded = decoder(z)
+            # recon_embedded: (1, Embedding_Dim, Depth, Height, Width)
+
+            # Convert embeddings back to tokens
+            recon_tokens = embedding_to_tokens(recon_embedded, dataset.embedding_matrix)
+            # recon_tokens: (1, Depth, Height, Width)
+
+            # Convert to numpy array
+            recon_tokens_np = recon_tokens.cpu().numpy().squeeze(0)  # Shape: (Depth, Height, Width)
+
+            # Save the interpolated build as an HDF5 file
+            save_path = os.path.join(save_dir, f'epoch_{epoch}_interp_{idx}.h5')
+            with h5py.File(save_path, 'w') as h5f:
+                h5f.create_dataset('build', data=recon_tokens_np, compression='gzip')
+
+            print(f'Saved interpolated build at {save_path}')
 
 # Training loop
 os.makedirs(save_dir, exist_ok=True)
@@ -208,92 +336,3 @@ for epoch in range(start_epoch, num_epochs + 1):
     except Exception as e:
         print(f"Unable to generate interpolations for this epoch due to error: {e}")
 
-# Function to interpolate and generate builds
-def interpolate_and_generate(encoder, decoder, build1_path, build2_path, save_dir, epoch, num_interpolations=5):
-    encoder.eval()
-    decoder.eval()
-    with torch.no_grad():
-        # Load the two builds
-        dataset = text2mcVAEDataset(
-            file_paths=[build1_path, build2_path],
-            block2tok=block2tok,
-            block2embedding=block2embedding,
-            fixed_size=fixed_size,
-            augment=True
-        )
-        data_loader = DataLoader(dataset, batch_size=1, shuffle=False)
-
-        data_list = []
-        # We aren't using the tokens directly in this case
-        for data, _ in data_loader:
-            data = data.to(device)
-            data_list.append(data)
-
-        z_list = []
-        for data in data_list:
-            z, mu, logvar = encoder(data)
-            z_list.append(z)
-
-        # Interpolate between z1 and z2
-        z1 = z_list[0]
-        z2 = z_list[1]
-
-        interpolations = []
-        for alpha in np.linspace(0, 1, num_interpolations):
-            z_interp = (1 - alpha) * z1 + alpha * z2
-            interpolations.append(z_interp)
-
-        # Generate builds from interpolated latent vectors
-        for idx, z in enumerate(interpolations):
-            recon_embedded = decoder(z)
-            # recon_embedded: (1, Embedding_Dim, Depth, Height, Width)
-
-            # Convert embeddings back to tokens
-            recon_tokens = embedding_to_tokens(recon_embedded, dataset.embedding_matrix)
-            # recon_tokens: (1, Depth, Height, Width)
-
-            # Convert to numpy array
-            recon_tokens_np = recon_tokens.cpu().numpy().squeeze(0)  # Shape: (Depth, Height, Width)
-
-            # Save the build as an HDF5 file
-            save_path = os.path.join(save_dir, f'epoch_{epoch}_interp_{idx}.h5')
-            with h5py.File(save_path, 'w') as h5f:
-                h5f.create_dataset('build', data=recon_tokens_np, compression='gzip')
-
-            print(f'Saved interpolated build at {save_path}')
-
-# Function to convert embeddings back to tokens
-def embedding_to_tokens(embedded_data, embeddings_matrix):
-    # embedded_data: PyTorch tensor of shape (Batch_Size, Embedding_Dim, Depth, Height, Width)
-    # embeddings_matrix: NumPy array or PyTorch tensor of shape (Num_Tokens, Embedding_Dim)
-
-    batch_size, embedding_dim, D, H, W = embedded_data.shape
-
-    # Convert embedded_data to NumPy array
-    embedded_data_np = embedded_data.detach().cpu().numpy()
-
-    # Ensure embeddings_matrix is a NumPy array
-    if isinstance(embeddings_matrix, torch.Tensor):
-        embeddings_matrix_np = embeddings_matrix.detach().cpu().numpy()
-    else:
-        embeddings_matrix_np = embeddings_matrix
-
-    # Flatten the embedded data
-    N = D * H * W
-    embedded_data_flat = embedded_data_np.reshape(batch_size, embedding_dim, N)
-    embedded_data_flat = embedded_data_flat.transpose(0, 2, 1)  # Shape: (Batch_Size, N, Embedding_Dim)
-    embedded_data_flat = embedded_data_flat.reshape(-1, embedding_dim)  # Shape: (Batch_Size * N, Embedding_Dim)
-
-    # Initialize NearestNeighbors with Euclidean distance
-    nbrs = NearestNeighbors(n_neighbors=1, algorithm='auto', metric='euclidean')
-    nbrs.fit(embeddings_matrix_np)
-
-    # Find nearest neighbors
-    distances, indices = nbrs.kneighbors(embedded_data_flat)
-    tokens_flat = indices.flatten()  # Shape: (Batch_Size * N,)
-
-    # Reshape tokens back to (Batch_Size, Depth, Height, Width)
-    tokens = tokens_flat.reshape(batch_size, D, H, W)
-    tokens = torch.from_numpy(tokens).long()  # Convert to torch tensor
-
-    return tokens
