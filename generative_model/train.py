@@ -14,6 +14,7 @@ import numpy as np
 import random
 from sklearn.neighbors import NearestNeighbors
 import torch.nn.functional as F
+import torch.nn as nn
 import math
 
 batch_size = 2
@@ -147,37 +148,44 @@ if os.path.exists(checkpoint_path):
 else:
     print("No checkpoint found, starting from scratch")
 
-# Define the loss function with masking for air blocks
-def loss_function(recon_x, x, mu, logvar, data_tokens, air_token_id, a=3.0, epsilon=1e-6):
-    # If recon_x has more channels, slice to match x's channels
-    recon_x = recon_x[:, :x.size(1), :, :, :]
+# Initialize CosineEmbeddingLoss
+cosine_loss_fn = nn.CosineEmbeddingLoss(margin=0.0, reduction='sum')
+
+def loss_function(recon_x, x, mu, logvar, data_tokens, air_token_id, epsilon=1e-6):
+    # recon_x and x are both of shape (Batch_Size, Embedding_Dim, D, H, W)
+    # We need to reshape them to compute the loss per voxel
     
-    # Compute the per-voxel difference using log-cosh loss
-    diff = a * (recon_x - x)
-    loss = (1.0 / a) * (diff + F.softplus(-2.0 * diff) - math.log(2.0))
+    # Move Embedding_Dim to the last dimension
+    recon_x = recon_x.permute(0, 2, 3, 4, 1)  # Shape: (Batch_Size, D, H, W, Embedding_Dim)
+    x = x.permute(0, 2, 3, 4, 1)              # Shape: (Batch_Size, D, H, W, Embedding_Dim)
+    
+    # Flatten the spatial dimensions
+    recon_x_flat = recon_x.reshape(-1, recon_x.shape[-1])  # Shape: (N, Embedding_Dim)
+    x_flat = x.reshape(-1, x.shape[-1])                    # Shape: (N, Embedding_Dim)
     
     # Create a mask where the token is not air
-    mask = (data_tokens != air_token_id).unsqueeze(1).float()  # Shape: (Batch_Size, 1, D, H, W)
+    mask = (data_tokens != air_token_id)  # Shape: (Batch_Size, D, H, W)
+    mask_flat = mask.reshape(-1)          # Shape: (N,)
     
-    # Apply the mask to the loss
-    masked_loss = loss * mask  # Zero out the loss where the token is air
+    # Filter out air voxels
+    recon_x_flat = recon_x_flat[mask_flat]
+    x_flat = x_flat[mask_flat]
     
-    # Sum the masked loss over all voxels and batches
-    total_recon_loss = torch.sum(masked_loss)
+    # Prepare the labels (y = 1 for similar embeddings)
+    y = torch.ones(x_flat.size(0)).to(x_flat.device)
     
-    # Compute the number of non-air voxels
-    num_non_air_voxels = torch.sum(mask)
+    # Compute the Cosine Embedding Loss
+    recon_loss = cosine_loss_fn(recon_x_flat, x_flat, y)
     
-    # To avoid division by zero
-    num_non_air_voxels = num_non_air_voxels + epsilon
+    # Normalize the loss by the number of non-air voxels
+    num_non_air_voxels = x_flat.size(0) + epsilon
+    recon_loss = recon_loss / num_non_air_voxels
     
-    # Compute the mean reconstruction loss per non-air voxel
-    recon_loss = total_recon_loss / num_non_air_voxels
-    
-    # Calculate KL Divergence
+    # KL Divergence
     KLD = -0.5 * torch.mean(1 + logvar - mu.pow(2) - logvar.exp())
     
     return recon_loss + KLD
+
 
 
 # Function to convert embeddings back to tokens
