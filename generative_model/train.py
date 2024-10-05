@@ -190,7 +190,7 @@ def loss_function(recon_x, x, mu, logvar, data_tokens, air_token_id, epsilon=1e-
 
 # Function to convert embeddings back to tokens
 def embedding_to_tokens(embedded_data, embeddings_matrix):
-    # embedded_data: PyTorch tensor of shape (Batch_Size, Embedding_Dim, Depth, Height, Width)
+    # embedded_data: PyTorch tensor of shape (Batch_Size, Embedding_Dim, D, H, W)
     # embeddings_matrix: NumPy array or PyTorch tensor of shape (Num_Tokens, Embedding_Dim)
 
     batch_size, embedding_dim, D, H, W = embedded_data.shape
@@ -204,25 +204,30 @@ def embedding_to_tokens(embedded_data, embeddings_matrix):
     else:
         embeddings_matrix_np = embeddings_matrix
 
+    # Normalize embeddings_matrix
+    embeddings_matrix_norm = embeddings_matrix_np / np.linalg.norm(embeddings_matrix_np, axis=1, keepdims=True)
+
     # Flatten the embedded data
     N = D * H * W
     embedded_data_flat = embedded_data_np.reshape(batch_size, embedding_dim, N)
     embedded_data_flat = embedded_data_flat.transpose(0, 2, 1)  # Shape: (Batch_Size, N, Embedding_Dim)
     embedded_data_flat = embedded_data_flat.reshape(-1, embedding_dim)  # Shape: (Batch_Size * N, Embedding_Dim)
 
-    # Initialize NearestNeighbors with Euclidean distance
-    nbrs = NearestNeighbors(n_neighbors=1, algorithm='auto', metric='euclidean')
-    nbrs.fit(embeddings_matrix_np)
+    # Normalize embedded_data_flat
+    embedded_data_flat_norm = embedded_data_flat / np.linalg.norm(embedded_data_flat, axis=1, keepdims=True)
 
-    # Find nearest neighbors
-    distances, indices = nbrs.kneighbors(embedded_data_flat)
-    tokens_flat = indices.flatten()  # Shape: (Batch_Size * N,)
+    # Compute cosine similarity
+    cosine_similarity = np.dot(embedded_data_flat_norm, embeddings_matrix_norm.T)  # Shape: (Batch_Size * N, Num_Tokens)
+
+    # Find the token with the highest cosine similarity
+    tokens_flat = np.argmax(cosine_similarity, axis=1)  # Shape: (Batch_Size * N,)
 
     # Reshape tokens back to (Batch_Size, Depth, Height, Width)
     tokens = tokens_flat.reshape(batch_size, D, H, W)
     tokens = torch.from_numpy(tokens).long()  # Convert to torch tensor
 
     return tokens
+
 
 # Function to interpolate and generate builds
 def interpolate_and_generate(encoder, decoder, build1_path, build2_path, save_dir, epoch, num_interpolations=5):
