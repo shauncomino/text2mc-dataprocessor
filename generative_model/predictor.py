@@ -1,5 +1,4 @@
 import json
-import h5py as h5
 import torch
 import torch.nn as nn
 from encoder import text2mcVAEEncoder
@@ -32,13 +31,13 @@ class text2mcPredictor(nn.Module):
         self.embeddings = json.load(open(self.EMBEDDINGS_FILE))
         self.block2tok = json.load(open(self.BLOCK_TO_TOK))
 
-        # self.encoder = text2mcVAEEncoder()
-        # self.encoder.load_state_dict(torch.load(self.ENCODER_MODEL_PATH, weights_only=True))
-        # self.encoder.eval()
+        self.encoder = text2mcVAEEncoder()
+        self.encoder.load_state_dict(torch.load(self.ENCODER_MODEL_PATH, weights_only=True))
+        self.encoder.eval()
 
-        # self.decoder = text2mcVAEDecoder()
-        # self.decoder.load_state_dict(torch.load(self.DECODER_MODEL_PATH, weights_only=True))
-        # self.decoder.eval()
+        self.decoder = text2mcVAEDecoder()
+        self.decoder.load_state_dict(torch.load(self.DECODER_MODEL_PATH, weights_only=True))
+        self.decoder.eval()
 
     # 1. Loads two builds from the dataset (user specified)
     # 2. Embeds builds using trained embedding model
@@ -91,7 +90,7 @@ class text2mcPredictor(nn.Module):
         return tokens
     
     # 5. Send those intermediate latent points through the decoder portion of the VAE    
-    def call_vae(self, interpolations, embedding_matrix):
+    def decode_and_generate(self, interpolations, embedding_matrix):
         
         for z in interpolations:
             recon_embedding = self.decoder(z)
@@ -107,6 +106,16 @@ class text2mcPredictor(nn.Module):
             file_name = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
             vec2world.create_schematic_file(string_world, self.SAVE_DIRECTORY, file_name)
 
+    def encode_build_find_latent_point(self, building_path):
+        hdf5_files = [building_path]
+
+        dataset = text2mcVAEDataset(file_paths=hdf5_files, block2embedding=self.embeddings, block2tok=self.block2tok, block_ignore_list=[102], fixed_size=(64, 64, 64))
+
+        building_data, building_mask = dataset.__get__item(0)
+
+        z, mu, logvar = self.encoder(building_data)
+
+        return z
 
 def main():
     building1_path = "rar_test5_Desert+Tavern+2.h5"
@@ -117,7 +126,7 @@ def main():
     building1_embedding, building2_embedding, embedding_matrix = predictor.embed_builds(building1_path, building2_path)
     building1_latent, building2_latent = predictor.encode_builds(building1_embedding, building2_embedding)
     interpolations = predictor.interpolate_latent_points(building1_latent, building2_latent, num_interpolations=1)
-    predictor.call_vae(interpolations, embedding_matrix)
+    predictor.decode_and_generate(interpolations, embedding_matrix)
 
 if __name__ == "__main__":
     main()
