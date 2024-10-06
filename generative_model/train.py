@@ -16,7 +16,7 @@ import torch.nn.functional as F
 import torch.nn as nn
 import math
 
-batch_size = 4
+batch_size = 2
 num_epochs = 64
 fixed_size = (64, 64, 64)
 embedding_dim = 32
@@ -193,11 +193,31 @@ def loss_function(recon_x, x, mu, logvar, data_tokens, idf_weights_tensor, epsil
     x = x.permute(0, 2, 3, 4, 1)              # Shape: (Batch_Size, D, H, W, Embedding_Dim)
 
     # Flatten the spatial dimensions
+    N = recon_x.shape[0] * recon_x.shape[1] * recon_x.shape[2] * recon_x.shape[3]
     recon_x_flat = recon_x.reshape(-1, recon_x.shape[-1])  # Shape: (N, Embedding_Dim)
     x_flat = x.reshape(-1, x.shape[-1])                    # Shape: (N, Embedding_Dim)
 
     # Reshape data_tokens to a flat vector
     data_tokens_flat = data_tokens.reshape(-1)  # Shape: (N,)
+
+    # Compute TF per data point (build) within the batch
+    batch_size = data_tokens.size(0)
+    tf_weights = torch.zeros_like(data_tokens, dtype=torch.float32)  # Shape: (Batch_Size, D, H, W)
+
+    for i in range(batch_size):
+        tokens = data_tokens[i].view(-1)  # Tokens for build i
+        token_counts = torch.bincount(tokens)
+        total_tokens = tokens.numel()
+        tf = token_counts.float() / total_tokens  # TF for build i
+        tf_weights[i] = tf[tokens].view(data_tokens[i].shape)
+
+    tf_weights_flat = tf_weights.reshape(-1).to(device)  # Shape: (N,)
+
+    # Get IDF weights per voxel
+    idf_weights_per_voxel = idf_weights_tensor[data_tokens_flat]  # Shape: (N,)
+
+    # Compute TF-IDF weights per voxel
+    tf_idf_weights = tf_weights_flat * idf_weights_per_voxel  # Shape: (N,)
 
     # Prepare the labels (y = 1 for similar embeddings)
     y = torch.ones(x_flat.size(0)).to(x_flat.device)
@@ -206,11 +226,8 @@ def loss_function(recon_x, x, mu, logvar, data_tokens, idf_weights_tensor, epsil
     cosine_loss_fn = nn.CosineEmbeddingLoss(margin=0.0, reduction='none')
     loss_per_voxel = cosine_loss_fn(recon_x_flat, x_flat, y)  # Shape: (N,)
 
-    # Get IDF weights per voxel
-    idf_weights_per_voxel = idf_weights_tensor[data_tokens_flat]  # Shape: (N,)
-
-    # Multiply loss per voxel by IDF weight
-    weighted_loss = loss_per_voxel * idf_weights_per_voxel
+    # Multiply loss per voxel by TF-IDF weight
+    weighted_loss = loss_per_voxel * tf_idf_weights
 
     # Compute mean loss over all voxels
     recon_loss = torch.mean(weighted_loss)
