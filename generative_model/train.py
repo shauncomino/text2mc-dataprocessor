@@ -9,10 +9,9 @@ import os
 from text2mcVAEDataset import text2mcVAEDataset
 from encoder import text2mcVAEEncoder
 from decoder import text2mcVAEDecoder
-from torch.utils.data import DataLoader, random_split
+from torch.utils.data import DataLoader
 import numpy as np
 import random
-from sklearn.neighbors import NearestNeighbors
 import torch.nn.functional as F
 import torch.nn as nn
 import math
@@ -53,7 +52,6 @@ else:
     device = torch.device(device_type)
     print("Using device:", device)
 
-
 # Load mappings
 with open(tok2block_file_path, 'r') as f:
     tok2block = json.load(f)
@@ -63,14 +61,17 @@ block2tok = {v: k for k, v in tok2block.items()}
 
 with open(block2embedding_file_path, 'r') as f:
     block2embedding = json.load(f)
-    block2embedding = {k: np.array(v, dtype=np.float32) for k, v in block2embedding.items()}
+    # Normalize embeddings during loading
+    block2embedding = {
+        k: np.array(v, dtype=np.float32) / (np.linalg.norm(v) + 1e-8)
+        for k, v in block2embedding.items()
+    }
 
 # Set random seeds for reproducibility
 seed = 42
 torch.manual_seed(seed)
 np.random.seed(seed)
 random.seed(seed)
-
 
 # Prepare the file paths
 hdf5_filepaths = glob.glob(os.path.join(builds_folder_path, '*.h5'))
@@ -122,6 +123,41 @@ test_dataset = text2mcVAEDataset(
 air_token_id = train_dataset.air_token
 print(f"Air token ID: {air_token_id}")
 
+# Compute or load IDF weights
+idf_weights_file = 'idf_weights.json'
+if os.path.exists(idf_weights_file):
+    print(f"Loading IDF weights from {idf_weights_file}")
+    with open(idf_weights_file, 'r') as f:
+        idf_weights = json.load(f)
+        idf_weights = {int(k): float(v) for k, v in idf_weights.items()}
+else:
+    print("Computing IDF weights...")
+    df = {}
+    N = len(hdf5_filepaths)
+    for file_path in hdf5_filepaths:
+        with h5py.File(file_path, 'r') as file:
+            build_folder_in_hdf5 = list(file.keys())[0]
+            data = file[build_folder_in_hdf5][()]
+        tokens_in_build = set(np.unique(data))
+        for token in tokens_in_build:
+            token = int(token)
+            df[token] = df.get(token, 0) + 1
+    # Compute IDF weights
+    idf_weights = {}
+    for token, df_t in df.items():
+        idf_weights[token] = np.log((N + 1) / (df_t + 1)) + 1e-6  # Smooth IDF
+    # Save IDF weights
+    with open(idf_weights_file, 'w') as f:
+        json.dump(idf_weights, f)
+    print(f"Saved IDF weights to {idf_weights_file}")
+
+# Create IDF weights tensor
+max_token_id = train_dataset.max_token
+idf_weights_tensor = torch.zeros(max_token_id + 1, dtype=torch.float32)
+for token in range(max_token_id + 1):
+    idf_weights_tensor[token] = idf_weights.get(token, 0.0)
+idf_weights_tensor = idf_weights_tensor.to(device)
+
 # Create DataLoaders
 train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
 val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False)
@@ -148,45 +184,41 @@ if os.path.exists(checkpoint_path):
 else:
     print("No checkpoint found, starting from scratch")
 
-# Initialize CosineEmbeddingLoss
-cosine_loss_fn = nn.CosineEmbeddingLoss(margin=0.0, reduction='sum')
-
-def loss_function(recon_x, x, mu, logvar, data_tokens, air_token_id, epsilon=1e-6):
+def loss_function(recon_x, x, mu, logvar, data_tokens, idf_weights_tensor, epsilon=1e-6):
     # recon_x and x are both of shape (Batch_Size, Embedding_Dim, D, H, W)
     # We need to reshape them to compute the loss per voxel
-    
+
     # Move Embedding_Dim to the last dimension
     recon_x = recon_x.permute(0, 2, 3, 4, 1)  # Shape: (Batch_Size, D, H, W, Embedding_Dim)
     x = x.permute(0, 2, 3, 4, 1)              # Shape: (Batch_Size, D, H, W, Embedding_Dim)
-    
+
     # Flatten the spatial dimensions
     recon_x_flat = recon_x.reshape(-1, recon_x.shape[-1])  # Shape: (N, Embedding_Dim)
     x_flat = x.reshape(-1, x.shape[-1])                    # Shape: (N, Embedding_Dim)
-    
-    # Create a mask where the token is not air
-    mask = (data_tokens != air_token_id)  # Shape: (Batch_Size, D, H, W)
-    mask_flat = mask.reshape(-1)          # Shape: (N,)
-    
-    # Filter out air voxels
-    recon_x_flat = recon_x_flat[mask_flat]
-    x_flat = x_flat[mask_flat]
-    
+
+    # Reshape data_tokens to a flat vector
+    data_tokens_flat = data_tokens.reshape(-1)  # Shape: (N,)
+
     # Prepare the labels (y = 1 for similar embeddings)
     y = torch.ones(x_flat.size(0)).to(x_flat.device)
-    
-    # Compute the Cosine Embedding Loss
-    recon_loss = cosine_loss_fn(recon_x_flat, x_flat, y)
-    
-    # Normalize the loss by the number of non-air voxels
-    num_non_air_voxels = x_flat.size(0) + epsilon
-    recon_loss = recon_loss / num_non_air_voxels
-    
+
+    # Compute the Cosine Embedding Loss per sample
+    cosine_loss_fn = nn.CosineEmbeddingLoss(margin=0.0, reduction='none')
+    loss_per_voxel = cosine_loss_fn(recon_x_flat, x_flat, y)  # Shape: (N,)
+
+    # Get IDF weights per voxel
+    idf_weights_per_voxel = idf_weights_tensor[data_tokens_flat]  # Shape: (N,)
+
+    # Multiply loss per voxel by IDF weight
+    weighted_loss = loss_per_voxel * idf_weights_per_voxel
+
+    # Compute mean loss over all voxels
+    recon_loss = torch.mean(weighted_loss)
+
     # KL Divergence
     KLD = -0.5 * torch.mean(1 + logvar - mu.pow(2) - logvar.exp())
-    
+
     return recon_loss + KLD
-
-
 
 # Function to convert embeddings back to tokens
 def embedding_to_tokens(embedded_data, embeddings_matrix):
@@ -205,7 +237,7 @@ def embedding_to_tokens(embedded_data, embeddings_matrix):
         embeddings_matrix_np = embeddings_matrix
 
     # Normalize embeddings_matrix
-    embeddings_matrix_norm = embeddings_matrix_np / np.linalg.norm(embeddings_matrix_np, axis=1, keepdims=True)
+    embeddings_matrix_norm = embeddings_matrix_np / (np.linalg.norm(embeddings_matrix_np, axis=1, keepdims=True) + 1e-8)
 
     # Flatten the embedded data
     N = D * H * W
@@ -214,7 +246,7 @@ def embedding_to_tokens(embedded_data, embeddings_matrix):
     embedded_data_flat = embedded_data_flat.reshape(-1, embedding_dim)  # Shape: (Batch_Size * N, Embedding_Dim)
 
     # Normalize embedded_data_flat
-    embedded_data_flat_norm = embedded_data_flat / np.linalg.norm(embedded_data_flat, axis=1, keepdims=True)
+    embedded_data_flat_norm = embedded_data_flat / (np.linalg.norm(embedded_data_flat, axis=1, keepdims=True) + 1e-8)
 
     # Compute cosine similarity
     cosine_similarity = np.dot(embedded_data_flat_norm, embeddings_matrix_norm.T)  # Shape: (Batch_Size * N, Num_Tokens)
@@ -227,7 +259,6 @@ def embedding_to_tokens(embedded_data, embeddings_matrix):
     tokens = torch.from_numpy(tokens).long()  # Convert to torch tensor
 
     return tokens
-
 
 # Function to interpolate and generate builds
 def interpolate_and_generate(encoder, decoder, build1_path, build2_path, save_dir, epoch, num_interpolations=5):
@@ -245,7 +276,6 @@ def interpolate_and_generate(encoder, decoder, build1_path, build2_path, save_di
         data_loader = DataLoader(dataset, batch_size=1, shuffle=False)
 
         data_list = []
-        # We aren't using the tokens directly in this case
         for data, _ in data_loader:
             data = data.to(device)
             data_list.append(data)
@@ -313,7 +343,7 @@ for epoch in range(start_epoch, num_epochs + 1):
         
         z, mu, logvar = encoder(data)
         recon_batch = decoder(z)
-        loss = loss_function(recon_batch, data, mu, logvar, data_tokens, air_token_id)
+        loss = loss_function(recon_batch, data, mu, logvar, data_tokens, idf_weights_tensor)
         
         loss.backward()
         torch.nn.utils.clip_grad_norm_(encoder.parameters(), max_norm=1.0)
@@ -340,7 +370,7 @@ for epoch in range(start_epoch, num_epochs + 1):
             
             z, mu, logvar = encoder(data)
             recon_batch = decoder(z)
-            loss = loss_function(recon_batch, data, mu, logvar, data_tokens, air_token_id)
+            loss = loss_function(recon_batch, data, mu, logvar, data_tokens, idf_weights_tensor)
             val_loss += loss.item()
 
     avg_val_loss = val_loss / len(val_loader)
@@ -376,4 +406,3 @@ for epoch in range(start_epoch, num_epochs + 1):
         interpolate_and_generate(encoder, decoder, build1_path, build2_path, save_dir, epoch, num_interpolations=5)
     except Exception as e:
         print(f"Unable to generate interpolations for this epoch due to error: {e}")
-
