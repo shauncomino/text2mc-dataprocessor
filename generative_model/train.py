@@ -16,7 +16,7 @@ import torch.nn.functional as F
 import torch.nn as nn
 import math
 
-batch_size = 2
+batch_size = 4
 num_epochs = 64
 fixed_size = (64, 64, 64)
 embedding_dim = 32
