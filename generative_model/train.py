@@ -18,7 +18,7 @@ import math
 
 batch_size = 2
 num_epochs = 64
-fixed_size = (64, 64, 64)
+fixed_size = (128, 128, 128)
 embedding_dim = 32
 on_arcc = True
 
@@ -63,8 +63,7 @@ with open(block2embedding_file_path, 'r') as f:
     block2embedding = json.load(f)
     # Normalize embeddings during loading
     block2embedding = {
-        k: np.array(v, dtype=np.float32) / (np.linalg.norm(v) + 1e-8)
-        for k, v in block2embedding.items()
+        k: np.array(v, dtype=np.float32) for k, v in block2embedding.items()
     }
 
 # Set random seeds for reproducibility
