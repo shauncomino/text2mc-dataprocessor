@@ -394,7 +394,7 @@ for epoch in range(start_epoch, num_epochs + 1):
         
         if batch_idx % 10 == 0:
             print(f'Epoch: {epoch} [{batch_idx * batch_size}/{len(train_loader.dataset)} '
-                  f'({100. * batch_idx / len(train_loader):.0f}%)] Reconstruction Error: {loss.item():.6f}, KL-divergence: {KL_divergence:.6f}')
+                  f'({100. * batch_idx / len(train_loader):.0f}%)] Reconstruction Error: {reconstruction_loss:.6f}, KL-divergence: {KL_divergence:.6f}')
 
     average_reconstruction_loss /= len(train_loader)
     average_KL_divergence /= len(train_loader)
@@ -412,8 +412,8 @@ for epoch in range(start_epoch, num_epochs + 1):
             
             z, mu, logvar = encoder(data)
             recon_batch = decoder(z)
-            loss = loss_function(recon_batch, data, mu, logvar, data_tokens, idf_weights_tensor, air_token_id=air_token_id)
-            val_loss += loss.item()
+            recon, kl = loss_function(recon_batch, data, mu, logvar, data_tokens, idf_weights_tensor, air_token_id=air_token_id)
+            val_loss += (recon + kl)
 
     avg_val_loss = val_loss / len(val_loader)
     print(f'====> Epoch: {epoch} Validation loss: {avg_val_loss:.4f}')
