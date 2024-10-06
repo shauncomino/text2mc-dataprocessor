@@ -75,11 +75,15 @@ random.seed(seed)
 # Prepare the file paths
 hdf5_filepaths = glob.glob(os.path.join(builds_folder_path, '*.h5'))
 
+''' WARNING, THE FOLLOWING CODE INTENTIONALLY OVERFITS ON THE TRAINING DATASET '''
+hdf5_filepaths = hdf5_filepaths[0:200]
+''' WARNING, THE PREVIOUS CODE INTENTIONALLY OVERFITS ON THE TRAINING DATASET '''
+
 print(f"Discovered {len(hdf5_filepaths)} builds, beginning training")
 
 # Split the file paths into training, validation, and test sets
 dataset_size = len(hdf5_filepaths)
-validation_split = 0.2
+validation_split = 0.1
 test_split = 0.1
 train_size = int((1 - validation_split - test_split) * dataset_size)
 val_size = int(validation_split * dataset_size)
@@ -99,7 +103,7 @@ train_dataset = text2mcVAEDataset(
     block2tok=block2tok,
     block2embedding=block2embedding,
     fixed_size=fixed_size,
-    augment=True  # Enable augmentations for training
+    augment=False  # Enable augmentations for training
 )
 
 val_dataset = text2mcVAEDataset(
@@ -165,7 +169,7 @@ test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
 # Initialize the model components
 encoder = text2mcVAEEncoder().to(device)
 decoder = text2mcVAEDecoder().to(device)
-optimizer = optim.Adam(list(encoder.parameters()) + list(decoder.parameters()), lr=1e-5, weight_decay=1e-3)
+optimizer = optim.Adam(list(encoder.parameters()) + list(decoder.parameters()), lr=1e-5)
 
 start_epoch = 1
 best_val_loss = float('inf')
@@ -377,7 +381,7 @@ for epoch in range(start_epoch, num_epochs + 1):
         
         z, mu, logvar = encoder(data)
         recon_batch = decoder(z)
-        reconstruction_loss, KL_divergence = loss_function(recon_batch, data, mu, logvar, data_tokens, idf_weights_tensor)
+        reconstruction_loss, KL_divergence = loss_function(recon_batch, data, mu, logvar, data_tokens, idf_weights_tensor, air_token_id=air_token_id)
 
         average_reconstruction_loss += reconstruction_loss
         average_KL_divergence += KL_divergence
@@ -408,7 +412,7 @@ for epoch in range(start_epoch, num_epochs + 1):
             
             z, mu, logvar = encoder(data)
             recon_batch = decoder(z)
-            loss = loss_function(recon_batch, data, mu, logvar, data_tokens, idf_weights_tensor)
+            loss = loss_function(recon_batch, data, mu, logvar, data_tokens, idf_weights_tensor, air_token_id=air_token_id)
             val_loss += loss.item()
 
     avg_val_loss = val_loss / len(val_loader)
