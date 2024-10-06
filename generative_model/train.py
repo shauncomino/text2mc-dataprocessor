@@ -18,7 +18,7 @@ import math
 
 batch_size = 2
 num_epochs = 64
-fixed_size = (128, 128, 128)
+fixed_size = (64, 64, 64)
 embedding_dim = 32
 on_arcc = True
 
@@ -249,7 +249,7 @@ def loss_function(recon_x, x, mu, logvar, data_tokens, idf_weights_tensor, air_t
     # KL Divergence remains the same
     KLD = -0.5 * torch.mean(1 + logvar - mu.pow(2) - logvar.exp())
 
-    return recon_loss + KLD
+    return recon_loss, KLD
 
 
 # Function to convert embeddings back to tokens
@@ -366,7 +366,9 @@ os.makedirs(save_dir, exist_ok=True)
 for epoch in range(start_epoch, num_epochs + 1):
     encoder.train()
     decoder.train()
-    total_loss = 0
+    average_reconstruction_loss = 0
+    average_KL_divergence = 0
+
 
     for batch_idx, (data, data_tokens) in enumerate(train_loader):
         data = data.to(device)          # Embedded data
@@ -375,21 +377,25 @@ for epoch in range(start_epoch, num_epochs + 1):
         
         z, mu, logvar = encoder(data)
         recon_batch = decoder(z)
-        loss = loss_function(recon_batch, data, mu, logvar, data_tokens, idf_weights_tensor)
-        
+        reconstruction_loss, KL_divergence = loss_function(recon_batch, data, mu, logvar, data_tokens, idf_weights_tensor)
+
+        average_reconstruction_loss += reconstruction_loss
+        average_KL_divergence += KL_divergence
+
+        loss = reconstruction_loss + KL_divergence
         loss.backward()
         torch.nn.utils.clip_grad_norm_(encoder.parameters(), max_norm=1.0)
         torch.nn.utils.clip_grad_norm_(decoder.parameters(), max_norm=1.0)
         optimizer.step()
         
-        total_loss += loss.item()
-        
         if batch_idx % 10 == 0:
             print(f'Epoch: {epoch} [{batch_idx * batch_size}/{len(train_loader.dataset)} '
-                  f'({100. * batch_idx / len(train_loader):.0f}%)] Loss: {loss.item():.6f}')
+                  f'({100. * batch_idx / len(train_loader):.0f}%)] Reconstruction Error: {loss.item():.6f}, KL-divergence: {KL_divergence:.6f}')
 
-    avg_train_loss = total_loss / len(train_loader)
-    print(f'====> Epoch: {epoch} Average training loss: {avg_train_loss:.4f}')
+    average_reconstruction_loss /= len(train_loader)
+    average_KL_divergence /= len(train_loader)
+    print(f'====> Epoch: {epoch} Average reconstruction loss: {average_reconstruction_loss:.8f}')
+    print(f'====> Epoch: {epoch} Average KL-divergence: {average_KL_divergence:.8f}')
 
     # Validation
     encoder.eval()
