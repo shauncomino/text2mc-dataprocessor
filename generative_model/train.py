@@ -184,58 +184,74 @@ if os.path.exists(checkpoint_path):
 else:
     print("No checkpoint found, starting from scratch")
 
-def loss_function(recon_x, x, mu, logvar, data_tokens, idf_weights_tensor, epsilon=1e-6):
-    # recon_x and x are both of shape (Batch_Size, Embedding_Dim, D, H, W)
-    # We need to reshape them to compute the loss per voxel
+def loss_function(recon_x, x, mu, logvar, data_tokens, idf_weights_tensor, air_token_id, epsilon=1e-6):
+    # recon_x and x: (Batch_Size, Embedding_Dim, D, H, W)
+    # data_tokens: (Batch_Size, D, H, W)
 
     # Move Embedding_Dim to the last dimension
-    recon_x = recon_x.permute(0, 2, 3, 4, 1)  # Shape: (Batch_Size, D, H, W, Embedding_Dim)
-    x = x.permute(0, 2, 3, 4, 1)              # Shape: (Batch_Size, D, H, W, Embedding_Dim)
+    recon_x = recon_x.permute(0, 2, 3, 4, 1)  # (Batch_Size, D, H, W, Embedding_Dim)
+    x = x.permute(0, 2, 3, 4, 1)              # (Batch_Size, D, H, W, Embedding_Dim)
 
-    # Flatten the spatial dimensions
-    N = recon_x.shape[0] * recon_x.shape[1] * recon_x.shape[2] * recon_x.shape[3]
-    recon_x_flat = recon_x.reshape(-1, recon_x.shape[-1])  # Shape: (N, Embedding_Dim)
-    x_flat = x.reshape(-1, x.shape[-1])                    # Shape: (N, Embedding_Dim)
+    # Flatten spatial dimensions
+    batch_size, D, H, W, embedding_dim = recon_x.shape
+    N = batch_size * D * H * W
+    recon_x_flat = recon_x.reshape(N, embedding_dim)  # (N, Embedding_Dim)
+    x_flat = x.reshape(N, embedding_dim)              # (N, Embedding_Dim)
 
-    # Reshape data_tokens to a flat vector
-    data_tokens_flat = data_tokens.reshape(-1)  # Shape: (N,)
+    # Flatten data_tokens
+    data_tokens_flat = data_tokens.reshape(-1)  # (N,)
 
-    # Compute TF per data point (build) within the batch
+    # Prepare labels for Cosine Embedding Loss
+    y = torch.ones(x_flat.size(0), device=x_flat.device)  # (N,)
+
+    # Compute Cosine Embedding Loss per voxel
+    cosine_loss_fn = nn.CosineEmbeddingLoss(margin=0.0, reduction='none')
+    loss_per_voxel = cosine_loss_fn(recon_x_flat, x_flat, y)  # (N,)
+
+    # Compute TF per build within the batch
+    tf_weights = torch.zeros_like(data_tokens, dtype=torch.float32)  # (Batch_Size, D, H, W)
     batch_size = data_tokens.size(0)
-    tf_weights = torch.zeros_like(data_tokens, dtype=torch.float32)  # Shape: (Batch_Size, D, H, W)
 
     for i in range(batch_size):
-        tokens = data_tokens[i].view(-1)  # Tokens for build i
-        token_counts = torch.bincount(tokens)
+        tokens = data_tokens[i].view(-1)  # (D*H*W,)
+        token_counts = torch.bincount(tokens, minlength=idf_weights_tensor.size(0))
         total_tokens = tokens.numel()
-        tf = token_counts.float() / total_tokens  # TF for build i
-        tf_weights[i] = tf[tokens].view(data_tokens[i].shape)
+        tf = token_counts.float() / total_tokens  # (Num_Tokens,)
+        # Map TF values back to the positions of the tokens
+        tf_weights[i] = tf[tokens].view(D, H, W)
 
-    tf_weights_flat = tf_weights.reshape(-1).to(device)  # Shape: (N,)
+    # Flatten tf_weights
+    tf_weights_flat = tf_weights.reshape(-1)  # (N,)
 
     # Get IDF weights per voxel
-    idf_weights_per_voxel = idf_weights_tensor[data_tokens_flat]  # Shape: (N,)
+    idf_weights_per_voxel = idf_weights_tensor[data_tokens_flat]  # (N,)
 
     # Compute TF-IDF weights per voxel
-    tf_idf_weights = tf_weights_flat * idf_weights_per_voxel  # Shape: (N,)
-
-    # Prepare the labels (y = 1 for similar embeddings)
-    y = torch.ones(x_flat.size(0)).to(x_flat.device)
-
-    # Compute the Cosine Embedding Loss per sample
-    cosine_loss_fn = nn.CosineEmbeddingLoss(margin=0.0, reduction='none')
-    loss_per_voxel = cosine_loss_fn(recon_x_flat, x_flat, y)  # Shape: (N,)
+    tf_idf_weights = tf_weights_flat * idf_weights_per_voxel  # (N,)
 
     # Multiply loss per voxel by TF-IDF weight
-    weighted_loss = loss_per_voxel * tf_idf_weights
+    weighted_loss = loss_per_voxel * tf_idf_weights  # (N,)
 
-    # Compute mean loss over all voxels
-    recon_loss = torch.mean(weighted_loss)
+    # Create mask for non-air tokens
+    mask = (data_tokens_flat != air_token_id)  # (N,)
 
-    # KL Divergence
+    # Apply mask to weighted loss
+    masked_weighted_loss = weighted_loss[mask]  # Only non-air tokens
+
+    # Sum the masked weighted loss
+    total_loss = masked_weighted_loss.sum()
+
+    # Compute the number of non-air tokens
+    num_non_air_tokens = mask.sum().float() + epsilon  # To avoid division by zero
+
+    # Compute the mean loss
+    recon_loss = total_loss / num_non_air_tokens
+
+    # KL Divergence remains the same
     KLD = -0.5 * torch.mean(1 + logvar - mu.pow(2) - logvar.exp())
 
     return recon_loss + KLD
+
 
 # Function to convert embeddings back to tokens
 def embedding_to_tokens(embedded_data, embeddings_matrix):
