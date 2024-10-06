@@ -37,7 +37,6 @@ class text2mcVAEEncoder(nn.Sequential):
             text2mcVAEResidualBlock(512, 512),
             nn.GroupNorm(32, 512),
             nn.SiLU(),
-            nn.Dropout3d(p=0.2),
             # Final layers to adjust the feature map size without changing spatial dimensions
             nn.Conv3d(512, 8, kernel_size=3, padding=1),
             nn.Conv3d(8, 8, kernel_size=1, padding=0),

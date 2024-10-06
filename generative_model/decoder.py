@@ -108,7 +108,6 @@ class text2mcVAEDecoder(nn.Sequential):
             text2mcVAEResidualBlock(128, 128),
             nn.GroupNorm(32, 128),
             nn.SiLU(),
-            nn.Dropout3d(p=0.2),
             # The following "32" corresponds to the channel size, which is the length of the embedding dimension for the blocks
             nn.Conv3d(128, 32, kernel_size=3, padding=1),
         )
