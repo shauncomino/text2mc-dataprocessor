@@ -27,8 +27,8 @@ if on_arcc:
     checkpoint_path = r'/lustre/fs1/home/scomino/training/checkpoint.pth'
     tok2block_file_path = r'/lustre/fs1/home/scomino/text2mc/text2mc-dataprocessor/world2vec/tok2block.json'
     builds_folder_path = r'/lustre/fs1/groups/jaedo/processed_builds'
-    build1_path = r'/lustre/fs1/groups/jaedo/processed_builds/batch_101_2606.h5'
-    build2_path = r'/lustre/fs1/groups/jaedo/processed_builds/batch_118_3048.h5'
+    build1_path = r'/lustre/fs1/groups/jaedo/processed_builds/batch_319_8281.h5'
+    build2_path = r'/lustre/fs1/groups/jaedo/processed_builds/batch_225_5840.h5'
     save_dir = r'/lustre/fs1/home/scomino/training/interpolations'
     best_model_path = r'/lustre/fs1/home/scomino/training/best_model.pth'
     block2embedding_file_path = r'/lustre/fs1/home/scomino/text2mc/text2mc-dataprocessor/block2vec/output/block2vec/embeddings.json'
@@ -98,7 +98,7 @@ train_dataset = text2mcVAEDataset(
     block2tok=block2tok,
     block2embedding=block2embedding,
     fixed_size=fixed_size,
-    augment=False  # Enable augmentations for training
+    augment=True  # Enable augmentations for training
 )
 
 val_dataset = text2mcVAEDataset(
