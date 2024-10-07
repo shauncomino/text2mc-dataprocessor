@@ -15,6 +15,7 @@ import random
 import torch.nn.functional as F
 import torch.nn as nn
 import math
+from sklearn.metrics import precision_score, recall_score, f1_score  # Added for classification metrics
 
 batch_size = 2
 num_epochs = 64
@@ -367,7 +368,6 @@ for epoch in range(start_epoch, num_epochs + 1):
     average_reconstruction_loss = 0
     average_KL_divergence = 0
 
-
     for batch_idx, (data, data_tokens) in enumerate(train_loader):
         data = data.to(device)          # Embedded data
         data_tokens = data_tokens.to(device)  # Tokens
@@ -377,8 +377,8 @@ for epoch in range(start_epoch, num_epochs + 1):
         recon_batch = decoder(z)
         reconstruction_loss, KL_divergence = loss_function(recon_batch, data, mu, logvar, data_tokens, idf_weights_tensor, air_token_id=air_token_id)
 
-        average_reconstruction_loss += reconstruction_loss
-        average_KL_divergence += KL_divergence
+        average_reconstruction_loss += reconstruction_loss.item()
+        average_KL_divergence += KL_divergence.item()
 
         loss = reconstruction_loss + KL_divergence
         loss.backward()
@@ -386,9 +386,33 @@ for epoch in range(start_epoch, num_epochs + 1):
         torch.nn.utils.clip_grad_norm_(decoder.parameters(), max_norm=1.0)
         optimizer.step()
         
-        if batch_idx % 10 == 0:
+        # Compute accuracy every 30 batches
+        if batch_idx % 30 == 0:
+            with torch.no_grad():
+                # Convert reconstructions to tokens
+                recon_tokens = embedding_to_tokens(recon_batch, train_dataset.embedding_matrix).to(device)
+                # Flatten the tokens
+                recon_tokens_flat = recon_tokens.view(-1)
+                data_tokens_flat = data_tokens.view(-1)
+                # Create mask for non-air tokens
+                mask = (data_tokens_flat != air_token_id)
+                # Apply mask
+                recon_tokens_non_air = recon_tokens_flat[mask]
+                data_tokens_non_air = data_tokens_flat[mask]
+                # Compute accuracy
+                correct = (recon_tokens_non_air == data_tokens_non_air).sum().item()
+                total = data_tokens_non_air.numel()
+                accuracy = correct / total if total > 0 else 0.0
+                # Compute other metrics if possible
+                y_true = data_tokens_non_air.cpu().numpy()
+                y_pred = recon_tokens_non_air.cpu().numpy()
+                precision = precision_score(y_true, y_pred, average='macro', zero_division=0)
+                recall = recall_score(y_true, y_pred, average='macro', zero_division=0)
+                f1 = f1_score(y_true, y_pred, average='macro', zero_division=0)
             print(f'Epoch: {epoch} [{batch_idx * batch_size}/{len(train_loader.dataset)} '
-                  f'({100. * batch_idx / len(train_loader):.0f}%)] Reconstruction Error: {reconstruction_loss:.6f}, KL-divergence: {KL_divergence:.6f}')
+                  f'({100. * batch_idx / len(train_loader):.0f}%)] Reconstruction Error: {reconstruction_loss.item():.6f}, '
+                  f'KL-divergence: {KL_divergence.item():.6f}, Accuracy: {accuracy:.4f}, Precision: {precision:.4f}, '
+                  f'Recall: {recall:.4f}, F1-score: {f1:.4f}')
 
     average_reconstruction_loss /= len(train_loader)
     average_KL_divergence /= len(train_loader)
