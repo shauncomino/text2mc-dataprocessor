@@ -61,7 +61,7 @@ block2tok = {v: k for k, v in tok2block.items()}
 
 with open(block2embedding_file_path, 'r') as f:
     block2embedding = json.load(f)
-    # Normalize embeddings during loading
+    # Load embeddings
     block2embedding = {
         k: np.array(v, dtype=np.float32) for k, v in block2embedding.items()
     }
@@ -267,8 +267,7 @@ def embedding_to_tokens(embedded_data, embeddings_matrix):
     else:
         embeddings_matrix_np = embeddings_matrix
 
-    # Normalize embeddings_matrix
-    embeddings_matrix_norm = embeddings_matrix_np / (np.linalg.norm(embeddings_matrix_np, axis=1, keepdims=True) + 1e-8)
+    embeddings_matrix_norm = embeddings_matrix_np
 
     # Flatten the embedded data
     N = D * H * W
