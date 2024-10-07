@@ -74,11 +74,6 @@ random.seed(seed)
 
 # Prepare the file paths
 hdf5_filepaths = glob.glob(os.path.join(builds_folder_path, '*.h5'))
-
-''' WARNING, THE FOLLOWING CODE INTENTIONALLY OVERFITS ON THE TRAINING DATASET '''
-hdf5_filepaths = hdf5_filepaths[0:200]
-''' WARNING, THE PREVIOUS CODE INTENTIONALLY OVERFITS ON THE TRAINING DATASET '''
-
 print(f"Discovered {len(hdf5_filepaths)} builds, beginning training")
 
 # Split the file paths into training, validation, and test sets
