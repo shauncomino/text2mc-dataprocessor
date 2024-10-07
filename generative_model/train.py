@@ -28,7 +28,7 @@ if on_arcc:
     best_model_path = r'/lustre/fs1/home/scomino/training_genembed/best_model.pth'
     save_dir = r'/lustre/fs1/home/scomino/training_genembed/interpolations'
     tok2block_file_path = r'/lustre/fs1/home/scomino/text2mc_genembed/text2mc-dataprocessor/world2vec/tok2block.json'
-    
+
     builds_folder_path = r'/lustre/fs1/groups/jaedo/processed_builds'
     build1_path = r'/lustre/fs1/groups/jaedo/processed_builds/batch_319_8281.h5'
     build2_path = r'/lustre/fs1/groups/jaedo/processed_builds/batch_225_5840.h5'
@@ -59,6 +59,95 @@ with open(tok2block_file_path, 'r') as f:
     tok2block = {int(k): v for k, v in tok2block.items()}  # Ensure keys are integers
 
 block2tok = {v: k for k, v in tok2block.items()}
+
+def loss_function(recon_logits, data_tokens, mu, logvar, air_token_id):
+    # recon_logits: (Batch_Size, num_tokens, D, H, W)
+    # data_tokens: (Batch_Size, D, H, W)
+
+    # Flatten spatial dimensions
+    batch_size, num_tokens, D, H, W = recon_logits.shape
+    N = batch_size * D * H * W
+
+    recon_logits_flat = recon_logits.view(batch_size, num_tokens, -1)  # (Batch_Size, num_tokens, N)
+    recon_logits_flat = recon_logits_flat.permute(0, 2, 1).reshape(-1, num_tokens)  # (N, num_tokens)
+    data_tokens_flat = data_tokens.view(-1)  # (N,)
+
+    # Create mask for non-air tokens
+    mask = (data_tokens_flat != air_token_id)  # (N,)
+
+    # Apply mask to outputs and targets
+    recon_logits_flat = recon_logits_flat[mask]  # (N_non_air, num_tokens)
+    data_tokens_flat = data_tokens_flat[mask]  # (N_non_air,)
+
+    # Compute CrossEntropyLoss
+    criterion = nn.CrossEntropyLoss()
+    recon_loss = criterion(recon_logits_flat, data_tokens_flat)
+
+    # KL Divergence remains the same
+    KLD = -0.5 * torch.mean(1 + logvar - mu.pow(2) - logvar.exp())
+
+    return recon_loss, KLD
+
+# Function to interpolate and generate builds
+def interpolate_and_generate(encoder, decoder, build1_path, build2_path, save_dir, epoch, num_interpolations=5, device='cpu'):
+    encoder.eval()
+    decoder.eval()
+    with torch.no_grad():
+        # Load the two builds
+        dataset = text2mcVAEDataset(
+            file_paths=[build1_path, build2_path],
+            block2tok=block2tok,
+            fixed_size=fixed_size,
+            augment=False  # Disable augmentation for consistent reconstructions
+        )
+        data_loader = DataLoader(dataset, batch_size=1, shuffle=False)
+
+        data_tokens_list = []
+        for data_tokens in data_loader:
+            data_tokens = data_tokens.to(device)
+            data_tokens_list.append(data_tokens)
+
+        z_list = []
+        for data_tokens in data_tokens_list:
+            z, mu, logvar = encoder(data_tokens)
+            z_list.append(z)
+
+        # Generate reconstructions of the original builds
+        for idx, (data_tokens, z) in enumerate(zip(data_tokens_list, z_list)):
+            recon_logits = decoder(z)
+            # Get predicted tokens
+            recon_tokens = torch.argmax(recon_logits, dim=1)  # Shape: (1, D, H, W)
+            recon_tokens_np = recon_tokens.cpu().numpy().squeeze(0)  # Shape: (D, H, W)
+
+            # Save the reconstructed build as an HDF5 file
+            save_path = os.path.join(save_dir, f'epoch_{epoch}_recon_{idx}.h5')
+            with h5py.File(save_path, 'w') as h5f:
+                h5f.create_dataset('build', data=recon_tokens_np, compression='gzip')
+
+            print(f'Saved reconstruction of build {idx + 1} at {save_path}')
+
+        # Interpolate between z1 and z2
+        z1 = z_list[0]
+        z2 = z_list[1]
+
+        interpolations = []
+        for alpha in np.linspace(0, 1, num_interpolations):
+            z_interp = (1 - alpha) * z1 + alpha * z2
+            interpolations.append(z_interp)
+
+        # Generate builds from interpolated latent vectors
+        for idx, z in enumerate(interpolations):
+            recon_logits = decoder(z)
+            # Get predicted tokens
+            recon_tokens = torch.argmax(recon_logits, dim=1)  # Shape: (1, D, H, W)
+            recon_tokens_np = recon_tokens.cpu().numpy().squeeze(0)  # Shape: (D, H, W)
+
+            # Save the interpolated build as an HDF5 file
+            save_path = os.path.join(save_dir, f'epoch_{epoch}_interp_{idx}.h5')
+            with h5py.File(save_path, 'w') as h5f:
+                h5f.create_dataset('build', data=recon_tokens_np, compression='gzip')
+
+            print(f'Saved interpolated build at {save_path}')
 
 # Set random seeds for reproducibility
 seed = 42
@@ -141,34 +230,6 @@ if os.path.exists(checkpoint_path):
     print(f"Resuming training from epoch {start_epoch}")
 else:
     print("No checkpoint found, starting from scratch")
-
-def loss_function(recon_logits, data_tokens, mu, logvar, air_token_id):
-    # recon_logits: (Batch_Size, num_tokens, D, H, W)
-    # data_tokens: (Batch_Size, D, H, W)
-
-    # Flatten spatial dimensions
-    batch_size, num_tokens, D, H, W = recon_logits.shape
-    N = batch_size * D * H * W
-
-    recon_logits_flat = recon_logits.view(batch_size, num_tokens, -1)  # (Batch_Size, num_tokens, N)
-    recon_logits_flat = recon_logits_flat.permute(0, 2, 1).reshape(-1, num_tokens)  # (N, num_tokens)
-    data_tokens_flat = data_tokens.view(-1)  # (N,)
-
-    # Create mask for non-air tokens
-    mask = (data_tokens_flat != air_token_id)  # (N,)
-
-    # Apply mask to outputs and targets
-    recon_logits_flat = recon_logits_flat[mask]  # (N_non_air, num_tokens)
-    data_tokens_flat = data_tokens_flat[mask]  # (N_non_air,)
-
-    # Compute CrossEntropyLoss
-    criterion = nn.CrossEntropyLoss()
-    recon_loss = criterion(recon_logits_flat, data_tokens_flat)
-
-    # KL Divergence remains the same
-    KLD = -0.5 * torch.mean(1 + logvar - mu.pow(2) - logvar.exp())
-
-    return recon_loss, KLD
 
 # Training loop
 os.makedirs(save_dir, exist_ok=True)
@@ -275,64 +336,3 @@ for epoch in range(start_epoch, num_epochs + 1):
         interpolate_and_generate(encoder, decoder, build1_path, build2_path, save_dir, epoch, num_interpolations=5, device=device)
     except Exception as e:
         print(f"Unable to generate interpolations for this epoch due to error: {e}")
-
-# Function to interpolate and generate builds
-def interpolate_and_generate(encoder, decoder, build1_path, build2_path, save_dir, epoch, num_interpolations=5, device='cpu'):
-    encoder.eval()
-    decoder.eval()
-    with torch.no_grad():
-        # Load the two builds
-        dataset = text2mcVAEDataset(
-            file_paths=[build1_path, build2_path],
-            block2tok=block2tok,
-            fixed_size=fixed_size,
-            augment=False  # Disable augmentation for consistent reconstructions
-        )
-        data_loader = DataLoader(dataset, batch_size=1, shuffle=False)
-
-        data_tokens_list = []
-        for data_tokens in data_loader:
-            data_tokens = data_tokens.to(device)
-            data_tokens_list.append(data_tokens)
-
-        z_list = []
-        for data_tokens in data_tokens_list:
-            z, mu, logvar = encoder(data_tokens)
-            z_list.append(z)
-
-        # Generate reconstructions of the original builds
-        for idx, (data_tokens, z) in enumerate(zip(data_tokens_list, z_list)):
-            recon_logits = decoder(z)
-            # Get predicted tokens
-            recon_tokens = torch.argmax(recon_logits, dim=1)  # Shape: (1, D, H, W)
-            recon_tokens_np = recon_tokens.cpu().numpy().squeeze(0)  # Shape: (D, H, W)
-
-            # Save the reconstructed build as an HDF5 file
-            save_path = os.path.join(save_dir, f'epoch_{epoch}_recon_{idx}.h5')
-            with h5py.File(save_path, 'w') as h5f:
-                h5f.create_dataset('build', data=recon_tokens_np, compression='gzip')
-
-            print(f'Saved reconstruction of build {idx + 1} at {save_path}')
-
-        # Interpolate between z1 and z2
-        z1 = z_list[0]
-        z2 = z_list[1]
-
-        interpolations = []
-        for alpha in np.linspace(0, 1, num_interpolations):
-            z_interp = (1 - alpha) * z1 + alpha * z2
-            interpolations.append(z_interp)
-
-        # Generate builds from interpolated latent vectors
-        for idx, z in enumerate(interpolations):
-            recon_logits = decoder(z)
-            # Get predicted tokens
-            recon_tokens = torch.argmax(recon_logits, dim=1)  # Shape: (1, D, H, W)
-            recon_tokens_np = recon_tokens.cpu().numpy().squeeze(0)  # Shape: (D, H, W)
-
-            # Save the interpolated build as an HDF5 file
-            save_path = os.path.join(save_dir, f'epoch_{epoch}_interp_{idx}.h5')
-            with h5py.File(save_path, 'w') as h5f:
-                h5f.create_dataset('build', data=recon_tokens_np, compression='gzip')
-
-            print(f'Saved interpolated build at {save_path}')
