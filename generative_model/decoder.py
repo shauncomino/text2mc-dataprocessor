@@ -1,8 +1,9 @@
+# decoder.py
+
 import torch
 from torch import nn
 from torch.nn import functional as F
 from attention import SelfAttention3D
-
 
 class text2mcVAEAttentionBlock(nn.Module):
     def __init__(self, channels):
@@ -37,7 +38,6 @@ class text2mcVAEAttentionBlock(nn.Module):
 
         return x
 
-
 class text2mcVAEResidualBlock(nn.Module):
     def __init__(self, in_channels, out_channels):
         super().__init__()
@@ -64,61 +64,41 @@ class text2mcVAEResidualBlock(nn.Module):
         x = self.conv_2(x)
         return x + self.residual_layer(residue)
 
-
-class text2mcVAEDecoder(nn.Sequential):
-    def __init__(self):
-        super().__init__(
-            nn.Conv3d(4, 4, kernel_size=1, padding=0),
+class text2mcVAEDecoder(nn.Module):
+    def __init__(self, num_tokens, embedding_dim):
+        super().__init__()
+        self.initial_layers = nn.Sequential(
             nn.Conv3d(4, 512, kernel_size=3, padding=1),
-
             text2mcVAEResidualBlock(512, 512),
-
             text2mcVAEAttentionBlock(512),
-
             text2mcVAEResidualBlock(512, 512),
             text2mcVAEResidualBlock(512, 512),
             text2mcVAEResidualBlock(512, 512),
-
+        )
+        self.upsampling_layers = nn.Sequential(
             nn.Upsample(scale_factor=2),
-
-            nn.Conv3d(
-                512, 512, kernel_size=3, padding=1
-            ),
-
+            nn.Conv3d(512, 512, kernel_size=3, padding=1),
             text2mcVAEResidualBlock(512, 512),
             text2mcVAEResidualBlock(512, 512),
             text2mcVAEResidualBlock(512, 512),
-
             nn.Upsample(scale_factor=2),
-
-            nn.Conv3d(
-                512, 256, kernel_size=3, padding=1
-            ),  # Upsample
+            nn.Conv3d(512, 256, kernel_size=3, padding=1),
             text2mcVAEResidualBlock(256, 256),
             text2mcVAEResidualBlock(256, 256),
             text2mcVAEResidualBlock(256, 256),
-
             nn.Upsample(scale_factor=2),
-
-            nn.Conv3d(
-                256, 256, kernel_size=3, padding=1
-            ),  # Upsample
-            text2mcVAEResidualBlock(256, 128),
+            nn.Conv3d(256, 128, kernel_size=3, padding=1),
             text2mcVAEResidualBlock(128, 128),
             text2mcVAEResidualBlock(128, 128),
+            text2mcVAEResidualBlock(128, 128),
+        )
+        self.final_layers = nn.Sequential(
             nn.GroupNorm(32, 128),
-            nn.SiLU(),
-            # The following "32" corresponds to the channel size, which is the length of the embedding dimension for the blocks
-            nn.Conv3d(128, 32, kernel_size=3, padding=1),
-            nn.Sigmoid()
+            nn.Conv3d(128, num_tokens, kernel_size=3, padding=1),
         )
 
     def forward(self, x):
-        # x: (Batch_Size, 4, Depth / 8, Height / 8, Width / 8)
-        x /= 0.18215  # Scale factor adjustment as per the original decoder logic
-        print("Decoder")
-        for module in self:
-            x = module(x)
-            print(x.shape)
-        # Output: (Batch_Size, 3, Depth, Height, Width)
-        return x
+        x = self.initial_layers(x)
+        x = self.upsampling_layers(x)
+        x = self.final_layers(x)
+        return x  # Output shape: (Batch_Size, num_tokens, D, H, W)
