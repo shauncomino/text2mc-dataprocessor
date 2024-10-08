@@ -20,7 +20,7 @@ batch_size = 2
 num_epochs = 64
 fixed_size = (64, 64, 64)
 embedding_dim = 32
-on_arcc = True
+on_arcc = False
 
 if on_arcc:
     # Paths and configurations
@@ -168,15 +168,15 @@ def loss_function(embeddings_pred, block_air_pred, x, mu, logvar, data_tokens, a
     # Flatten data_tokens
     data_tokens_flat = data_tokens.reshape(-1)  # (N,)
 
-    # Prepare labels for Cosine Embedding Loss
-    y = torch.ones(x_flat.size(0), device=x_flat.device)  # (N,)
-
     # Create mask for non-air tokens
     mask = (data_tokens_flat != air_token_id)  # (N,)
 
     # Apply mask to embeddings_pred_flat and x_flat
     embeddings_pred_flat = embeddings_pred_flat[mask]
     x_flat = x_flat[mask]
+
+    # Prepare labels for Cosine Embedding Loss after masking
+    y = torch.ones(x_flat.size(0), device=x_flat.device)  # Size matches masked embeddings
 
     # Compute Cosine Embedding Loss over non-air tokens
     cosine_loss_fn = nn.CosineEmbeddingLoss(margin=0.0, reduction='mean')
@@ -197,6 +197,7 @@ def loss_function(embeddings_pred, block_air_pred, x, mu, logvar, data_tokens, a
     total_loss = recon_loss + bce_loss + KLD
 
     return total_loss, recon_loss, bce_loss, KLD
+
 
 # Function to convert embeddings back to tokens
 def embedding_to_tokens(embedded_data, embeddings_matrix):
