@@ -14,7 +14,6 @@ import numpy as np
 import random
 import torch.nn.functional as F
 import torch.nn as nn
-import math
 from sklearn.metrics import precision_score, recall_score, f1_score  # Added for classification metrics
 
 batch_size = 2
@@ -47,7 +46,7 @@ else:
     build1_path = r'/home/shaun/projects/text2mc-dataprocessor/test_builds/batch_157_4066.h5'
     build2_path = r'/home/shaun/projects/text2mc-dataprocessor/test_builds/batch_157_4077.h5'
     save_dir = r'/home/shaun/projects/text2mc-dataprocessor/test_builds/'
-
+    
     # Device type for local machine
     device_type = 'cpu'
     device = torch.device(device_type)
@@ -122,40 +121,8 @@ test_dataset = text2mcVAEDataset(
 air_token_id = train_dataset.air_token
 print(f"Air token ID: {air_token_id}")
 
-# Compute or load IDF weights
-idf_weights_file = 'idf_weights.json'
-if os.path.exists(idf_weights_file):
-    print(f"Loading IDF weights from {idf_weights_file}")
-    with open(idf_weights_file, 'r') as f:
-        idf_weights = json.load(f)
-        idf_weights = {int(k): float(v) for k, v in idf_weights.items()}
-else:
-    print("Computing IDF weights...")
-    df = {}
-    N = len(hdf5_filepaths)
-    for file_path in hdf5_filepaths:
-        with h5py.File(file_path, 'r') as file:
-            build_folder_in_hdf5 = list(file.keys())[0]
-            data = file[build_folder_in_hdf5][()]
-        tokens_in_build = set(np.unique(data))
-        for token in tokens_in_build:
-            token = int(token)
-            df[token] = df.get(token, 0) + 1
-    # Compute IDF weights
-    idf_weights = {}
-    for token, df_t in df.items():
-        idf_weights[token] = np.log((N + 1) / (df_t + 1)) + 1e-6  # Smooth IDF
-    # Save IDF weights
-    with open(idf_weights_file, 'w') as f:
-        json.dump(idf_weights, f)
-    print(f"Saved IDF weights to {idf_weights_file}")
-
-# Create IDF weights tensor
+# Get the maximum token ID
 max_token_id = train_dataset.max_token
-idf_weights_tensor = torch.zeros(max_token_id + 1, dtype=torch.float32)
-for token in range(max_token_id + 1):
-    idf_weights_tensor[token] = idf_weights.get(token, 0.0)
-idf_weights_tensor = idf_weights_tensor.to(device)
 
 # Create DataLoaders
 train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
@@ -183,19 +150,20 @@ if os.path.exists(checkpoint_path):
 else:
     print("No checkpoint found, starting from scratch")
 
-def loss_function(recon_x, x, mu, logvar, data_tokens, idf_weights_tensor, air_token_id, epsilon=1e-6):
-    # recon_x and x: (Batch_Size, Embedding_Dim, D, H, W)
+def loss_function(embeddings_pred, block_air_pred, x, mu, logvar, data_tokens, air_token_id):
+    # embeddings_pred and x: (Batch_Size, Embedding_Dim, D, H, W)
+    # block_air_pred: (Batch_Size, 1, D, H, W)
     # data_tokens: (Batch_Size, D, H, W)
 
     # Move Embedding_Dim to the last dimension
-    recon_x = recon_x.permute(0, 2, 3, 4, 1)  # (Batch_Size, D, H, W, Embedding_Dim)
-    x = x.permute(0, 2, 3, 4, 1)              # (Batch_Size, D, H, W, Embedding_Dim)
+    embeddings_pred = embeddings_pred.permute(0, 2, 3, 4, 1)  # (Batch_Size, D, H, W, Embedding_Dim)
+    x = x.permute(0, 2, 3, 4, 1)                              # (Batch_Size, D, H, W, Embedding_Dim)
 
     # Flatten spatial dimensions
-    batch_size, D, H, W, embedding_dim = recon_x.shape
+    batch_size, D, H, W, embedding_dim = embeddings_pred.shape
     N = batch_size * D * H * W
-    recon_x_flat = recon_x.reshape(N, embedding_dim)  # (N, Embedding_Dim)
-    x_flat = x.reshape(N, embedding_dim)              # (N, Embedding_Dim)
+    embeddings_pred_flat = embeddings_pred.reshape(N, embedding_dim)  # (N, Embedding_Dim)
+    x_flat = x.reshape(N, embedding_dim)                              # (N, Embedding_Dim)
 
     # Flatten data_tokens
     data_tokens_flat = data_tokens.reshape(-1)  # (N,)
@@ -203,54 +171,32 @@ def loss_function(recon_x, x, mu, logvar, data_tokens, idf_weights_tensor, air_t
     # Prepare labels for Cosine Embedding Loss
     y = torch.ones(x_flat.size(0), device=x_flat.device)  # (N,)
 
-    # Compute Cosine Embedding Loss per voxel
-    cosine_loss_fn = nn.CosineEmbeddingLoss(margin=0.0, reduction='none')
-    loss_per_voxel = cosine_loss_fn(recon_x_flat, x_flat, y)  # (N,)
-
-    # Compute TF per build within the batch
-    tf_weights = torch.zeros_like(data_tokens, dtype=torch.float32)  # (Batch_Size, D, H, W)
-    batch_size = data_tokens.size(0)
-
-    for i in range(batch_size):
-        tokens = data_tokens[i].view(-1)  # (D*H*W,)
-        token_counts = torch.bincount(tokens, minlength=idf_weights_tensor.size(0))
-        total_tokens = tokens.numel()
-        tf = token_counts.float() / total_tokens  # (Num_Tokens,)
-        # Map TF values back to the positions of the tokens
-        tf_weights[i] = tf[tokens].view(D, H, W)
-
-    # Flatten tf_weights
-    tf_weights_flat = tf_weights.reshape(-1)  # (N,)
-
-    # Get IDF weights per voxel
-    idf_weights_per_voxel = idf_weights_tensor[data_tokens_flat]  # (N,)
-
-    # Compute TF-IDF weights per voxel
-    tf_idf_weights = tf_weights_flat * idf_weights_per_voxel  # (N,)
-
-    # Multiply loss per voxel by TF-IDF weight
-    weighted_loss = loss_per_voxel * tf_idf_weights  # (N,)
-
     # Create mask for non-air tokens
     mask = (data_tokens_flat != air_token_id)  # (N,)
 
-    # Apply mask to weighted loss
-    masked_weighted_loss = weighted_loss[mask]  # Only non-air tokens
+    # Apply mask to embeddings_pred_flat and x_flat
+    embeddings_pred_flat = embeddings_pred_flat[mask]
+    x_flat = x_flat[mask]
 
-    # Sum the masked weighted loss
-    total_loss = masked_weighted_loss.sum()
+    # Compute Cosine Embedding Loss over non-air tokens
+    cosine_loss_fn = nn.CosineEmbeddingLoss(margin=0.0, reduction='mean')
+    recon_loss = cosine_loss_fn(embeddings_pred_flat, x_flat, y)
 
-    # Compute the number of non-air tokens
-    num_non_air_tokens = mask.sum().float() + epsilon  # To avoid division by zero
+    # Prepare ground truth labels for block vs. air
+    block_air_labels = (data_tokens != air_token_id).float()  # (Batch_Size, D, H, W)
 
-    # Compute the mean loss
-    recon_loss = total_loss / num_non_air_tokens
+    # Compute binary cross-entropy loss for block vs. air prediction over all voxels
+    bce_loss_fn = nn.BCELoss()
+    block_air_pred = block_air_pred.squeeze(1)  # Remove channel dimension
+    bce_loss = bce_loss_fn(block_air_pred, block_air_labels)
 
     # KL Divergence remains the same
     KLD = -0.5 * torch.mean(1 + logvar - mu.pow(2) - logvar.exp())
 
-    return recon_loss, KLD
+    # Combine losses
+    total_loss = recon_loss + bce_loss + KLD
 
+    return total_loss, recon_loss, bce_loss, KLD
 
 # Function to convert embeddings back to tokens
 def embedding_to_tokens(embedded_data, embeddings_matrix):
@@ -277,7 +223,7 @@ def embedding_to_tokens(embedded_data, embeddings_matrix):
     embedded_data_flat = embedded_data_flat.reshape(-1, embedding_dim)  # Shape: (Batch_Size * N, Embedding_Dim)
 
     # Normalize embedded_data_flat
-    embedded_data_flat_norm = embedded_data_flat / (np.linalg.norm(embedded_data_flat, axis=1, keepdims=True) + 1e-8)
+    embedded_data_flat_norm = embedded_data_flat
 
     # Compute cosine similarity
     cosine_similarity = np.dot(embedded_data_flat_norm, embeddings_matrix_norm.T)  # Shape: (Batch_Size * N, Num_Tokens)
@@ -318,9 +264,12 @@ def interpolate_and_generate(encoder, decoder, build1_path, build2_path, save_di
 
         # Generate reconstructions of the original builds
         for idx, (data, z) in enumerate(zip(data_list, z_list)):
-            recon_embedded = decoder(z)
+            embeddings_pred, block_air_pred = decoder(z)
             # Convert embeddings back to tokens
-            recon_tokens = embedding_to_tokens(recon_embedded, dataset.embedding_matrix)
+            recon_tokens = embedding_to_tokens(embeddings_pred, dataset.embedding_matrix)
+            # Apply block-air mask
+            block_air_pred_labels = (block_air_pred.squeeze(1) >= 0.5).long()
+            recon_tokens = recon_tokens * block_air_pred_labels  # Zero out air voxels
             # Convert to numpy array
             recon_tokens_np = recon_tokens.cpu().numpy().squeeze(0)  # Shape: (Depth, Height, Width)
 
@@ -342,13 +291,12 @@ def interpolate_and_generate(encoder, decoder, build1_path, build2_path, save_di
 
         # Generate builds from interpolated latent vectors
         for idx, z in enumerate(interpolations):
-            recon_embedded = decoder(z)
-            # recon_embedded: (1, Embedding_Dim, Depth, Height, Width)
-
+            embeddings_pred, block_air_pred = decoder(z)
             # Convert embeddings back to tokens
-            recon_tokens = embedding_to_tokens(recon_embedded, dataset.embedding_matrix)
-            # recon_tokens: (1, Depth, Height, Width)
-
+            recon_tokens = embedding_to_tokens(embeddings_pred, dataset.embedding_matrix)
+            # Apply block-air mask
+            block_air_pred_labels = (block_air_pred.squeeze(1) >= 0.5).long()
+            recon_tokens = recon_tokens * block_air_pred_labels  # Zero out air voxels
             # Convert to numpy array
             recon_tokens_np = recon_tokens.cpu().numpy().squeeze(0)  # Shape: (Depth, Height, Width)
 
@@ -366,77 +314,135 @@ for epoch in range(start_epoch, num_epochs + 1):
     encoder.train()
     decoder.train()
     average_reconstruction_loss = 0
+    average_bce_loss = 0
     average_KL_divergence = 0
 
     for batch_idx, (data, data_tokens) in enumerate(train_loader):
-        data = data.to(device)          # Embedded data
-        data_tokens = data_tokens.to(device)  # Tokens
+        data = data.to(device)
+        data_tokens = data_tokens.to(device)
         optimizer.zero_grad()
         
+        # Forward pass
         z, mu, logvar = encoder(data)
-        recon_batch = decoder(z)
-        reconstruction_loss, KL_divergence = loss_function(recon_batch, data, mu, logvar, data_tokens, idf_weights_tensor, air_token_id=air_token_id)
+        embeddings_pred, block_air_pred = decoder(z)
+        
+        # Compute losses
+        total_loss, recon_loss, bce_loss, KLD = loss_function(
+            embeddings_pred, block_air_pred, data, mu, logvar, data_tokens, air_token_id=air_token_id
+        )
 
-        average_reconstruction_loss += reconstruction_loss.item()
-        average_KL_divergence += KL_divergence.item()
+        average_reconstruction_loss += recon_loss.item()
+        average_bce_loss += bce_loss.item()
+        average_KL_divergence += KLD.item()
 
-        loss = reconstruction_loss + KL_divergence
-        loss.backward()
+        # Backward pass and optimization
+        total_loss.backward()
         torch.nn.utils.clip_grad_norm_(encoder.parameters(), max_norm=1.0)
         torch.nn.utils.clip_grad_norm_(decoder.parameters(), max_norm=1.0)
         optimizer.step()
         
-        # Compute accuracy every 30 batches
+        # Compute classification metrics every 30 batches
         if batch_idx % 30 == 0:
             with torch.no_grad():
-                # Convert reconstructions to tokens
-                recon_tokens = embedding_to_tokens(recon_batch, train_dataset.embedding_matrix).to(device)
-                # Flatten the tokens
-                recon_tokens_flat = recon_tokens.view(-1)
-                data_tokens_flat = data_tokens.view(-1)
-                # Create mask for non-air tokens
-                mask = (data_tokens_flat != air_token_id)
-                # Apply mask
-                recon_tokens_non_air = recon_tokens_flat[mask]
-                data_tokens_non_air = data_tokens_flat[mask]
-                # Compute accuracy
-                correct = (recon_tokens_non_air == data_tokens_non_air).sum().item()
-                total = data_tokens_non_air.numel()
-                accuracy = correct / total if total > 0 else 0.0
-                # Compute other metrics if possible
-                y_true = data_tokens_non_air.cpu().numpy()
-                y_pred = recon_tokens_non_air.cpu().numpy()
-                precision = precision_score(y_true, y_pred, average='macro', zero_division=0)
-                recall = recall_score(y_true, y_pred, average='macro', zero_division=0)
-                f1 = f1_score(y_true, y_pred, average='macro', zero_division=0)
-            print(f'Epoch: {epoch} [{batch_idx * batch_size}/{len(train_loader.dataset)} '
-                  f'({100. * batch_idx / len(train_loader):.0f}%)] Reconstruction Error: {reconstruction_loss.item():.6f}, '
-                  f'KL-divergence: {KL_divergence.item():.6f}, Accuracy: {accuracy:.4f}, Precision: {precision:.4f}, '
-                  f'Recall: {recall:.4f}, F1-score: {f1:.4f}')
+                # Prepare block-air predictions and labels
+                block_air_pred_probs = block_air_pred.squeeze(1)  # Shape: (Batch_Size, D, H, W)
+                block_air_pred_labels = (block_air_pred_probs >= 0.5).long()
+                block_air_labels = (data_tokens != air_token_id).long()
 
+                # Flatten tensors
+                block_air_pred_flat = block_air_pred_labels.view(-1).cpu()
+                block_air_labels_flat = block_air_labels.view(-1).cpu()
+
+                # Compute classification metrics
+                accuracy = (block_air_pred_flat == block_air_labels_flat).sum().item() / block_air_labels_flat.numel()
+                precision = precision_score(block_air_labels_flat, block_air_pred_flat, average='binary', zero_division=0)
+                recall = recall_score(block_air_labels_flat, block_air_pred_flat, average='binary', zero_division=0)
+                f1 = f1_score(block_air_labels_flat, block_air_pred_flat, average='binary', zero_division=0)
+
+            print(f'Epoch: {epoch} [{batch_idx * batch_size}/{len(train_loader.dataset)} '
+                  f'({100. * batch_idx / len(train_loader):.0f}%)] Reconstruction Error: {recon_loss.item():.6f}, '
+                  f'KL-Divergence: {KLD.item():.6f}, BCE Loss: {bce_loss.item():.6f}, '
+                  f'Block-Air Accuracy: {accuracy:.4f}, Precision: {precision:.4f}, '
+                  f'Recall: {recall:.4f}, F1-Score: {f1:.4f}')
+
+    # Compute average losses over the epoch
     average_reconstruction_loss /= len(train_loader)
+    average_bce_loss /= len(train_loader)
     average_KL_divergence /= len(train_loader)
-    print(f'====> Epoch: {epoch} Average reconstruction loss: {average_reconstruction_loss:.8f}')
-    print(f'====> Epoch: {epoch} Average KL-divergence: {average_KL_divergence:.8f}')
+    print(f'====> Epoch: {epoch} Average Reconstruction Loss: {average_reconstruction_loss:.8f}')
+    print(f'====> Epoch: {epoch} Average KL-Divergence: {average_KL_divergence:.8f}')
+    print(f'====> Epoch: {epoch} Average BCE Loss: {average_bce_loss:.8f}')
 
     # Validation
     encoder.eval()
     decoder.eval()
     val_loss = 0
+    val_recon_loss = 0
+    val_bce_loss = 0
+    val_KLD = 0
+    val_accuracy = 0
+    val_precision = 0
+    val_recall = 0
+    val_f1 = 0
+    val_batches = 0
+
     with torch.no_grad():
         for data, data_tokens in val_loader:
             data = data.to(device)
             data_tokens = data_tokens.to(device)
             
+            # Forward pass
             z, mu, logvar = encoder(data)
-            recon_batch = decoder(z)
-            recon, kl = loss_function(recon_batch, data, mu, logvar, data_tokens, idf_weights_tensor, air_token_id=air_token_id)
-            val_loss += (recon + kl)
+            embeddings_pred, block_air_pred = decoder(z)
+            
+            # Compute losses
+            total_loss, recon_loss, bce_loss, KLD = loss_function(
+                embeddings_pred, block_air_pred, data, mu, logvar, data_tokens, air_token_id=air_token_id
+            )
+            val_loss += total_loss.item()
+            val_recon_loss += recon_loss.item()
+            val_bce_loss += bce_loss.item()
+            val_KLD += KLD.item()
+            val_batches += 1
 
-    avg_val_loss = val_loss / len(val_loader)
-    print(f'====> Epoch: {epoch} Validation loss: {avg_val_loss:.4f}')
+            # Prepare block-air predictions and labels
+            block_air_pred_probs = block_air_pred.squeeze(1)
+            block_air_pred_labels = (block_air_pred_probs >= 0.5).long()
+            block_air_labels = (data_tokens != air_token_id).long()
 
-    # Check if validation loss improved, and save model
+            # Flatten tensors
+            block_air_pred_flat = block_air_pred_labels.view(-1).cpu()
+            block_air_labels_flat = block_air_labels.view(-1).cpu()
+
+            # Compute classification metrics
+            accuracy = (block_air_pred_flat == block_air_labels_flat).sum().item() / block_air_labels_flat.numel()
+            precision = precision_score(block_air_labels_flat, block_air_pred_flat, average='binary', zero_division=0)
+            recall = recall_score(block_air_labels_flat, block_air_pred_flat, average='binary', zero_division=0)
+            f1 = f1_score(block_air_labels_flat, block_air_pred_flat, average='binary', zero_division=0)
+
+            val_accuracy += accuracy
+            val_precision += precision
+            val_recall += recall
+            val_f1 += f1
+
+    # Compute average validation losses and metrics
+    avg_val_loss = val_loss / val_batches
+    avg_val_recon_loss = val_recon_loss / val_batches
+    avg_val_bce_loss = val_bce_loss / val_batches
+    avg_val_KLD = val_KLD / val_batches
+    avg_val_accuracy = val_accuracy / val_batches
+    avg_val_precision = val_precision / val_batches
+    avg_val_recall = val_recall / val_batches
+    avg_val_f1 = val_f1 / val_batches
+
+    print(f'====> Epoch: {epoch} Validation Loss: {avg_val_loss:.4f}')
+    print(f'====> Validation Reconstruction Loss: {avg_val_recon_loss:.6f}')
+    print(f'====> Validation KL-Divergence: {avg_val_KLD:.6f}')
+    print(f'====> Validation BCE Loss: {avg_val_bce_loss:.6f}')
+    print(f'====> Validation Block-Air Accuracy: {avg_val_accuracy:.4f}, Precision: {avg_val_precision:.4f}, '
+          f'Recall: {avg_val_recall:.4f}, F1-Score: {avg_val_f1:.4f}')
+
+    # Save the best model based on validation loss
     if avg_val_loss < best_val_loss:
         best_val_loss = avg_val_loss
         torch.save({

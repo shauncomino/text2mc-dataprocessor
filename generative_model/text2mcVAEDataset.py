@@ -1,3 +1,5 @@
+# text2mcVAEDataset.py
+
 import h5py
 import torch
 from torch.utils.data import Dataset
@@ -202,4 +204,4 @@ class text2mcVAEDataset(Dataset):
         # Convert tokens to torch tensor with dimensions (Depth, Height, Width)
         data_tokens_mapped = torch.from_numpy(data_tokens_mapped)
 
-        return embedded_data, data_tokens_mapped
+        return embedded_data.float(), data_tokens_mapped.long()
