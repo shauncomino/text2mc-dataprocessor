@@ -267,10 +267,12 @@ def interpolate_and_generate(encoder, decoder, build1_path, build2_path, save_di
         for idx, (data, z) in enumerate(zip(data_list, z_list)):
             embeddings_pred, block_air_pred = decoder(z)
             # Convert embeddings back to tokens
-            recon_tokens = embedding_to_tokens(embeddings_pred, dataset.embedding_matrix)
+            recon_tokens = embedding_to_tokens(embeddings_pred, dataset.embedding_matrix).to(device)
             # Apply block-air mask
             block_air_pred_labels = (block_air_pred.squeeze(1) >= 0.5).long()
-            recon_tokens = recon_tokens * block_air_pred_labels  # Zero out air voxels
+            air_mask = (block_air_pred_labels == 0)
+            # Assign air_token_id to air voxels
+            recon_tokens[air_mask] = air_token_id
             # Convert to numpy array
             recon_tokens_np = recon_tokens.cpu().numpy().squeeze(0)  # Shape: (Depth, Height, Width)
 
@@ -294,10 +296,12 @@ def interpolate_and_generate(encoder, decoder, build1_path, build2_path, save_di
         for idx, z in enumerate(interpolations):
             embeddings_pred, block_air_pred = decoder(z)
             # Convert embeddings back to tokens
-            recon_tokens = embedding_to_tokens(embeddings_pred, dataset.embedding_matrix)
+            recon_tokens = embedding_to_tokens(embeddings_pred, dataset.embedding_matrix).to(device)
             # Apply block-air mask
             block_air_pred_labels = (block_air_pred.squeeze(1) >= 0.5).long()
-            recon_tokens = recon_tokens * block_air_pred_labels  # Zero out air voxels
+            air_mask = (block_air_pred_labels == 0)
+            # Assign air_token_id to air voxels
+            recon_tokens[air_mask] = air_token_id
             # Convert to numpy array
             recon_tokens_np = recon_tokens.cpu().numpy().squeeze(0)  # Shape: (Depth, Height, Width)
 
@@ -307,6 +311,7 @@ def interpolate_and_generate(encoder, decoder, build1_path, build2_path, save_di
                 h5f.create_dataset('build', data=recon_tokens_np, compression='gzip')
 
             print(f'Saved interpolated build at {save_path}')
+
 
 # Training loop
 os.makedirs(save_dir, exist_ok=True)
