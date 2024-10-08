@@ -73,11 +73,11 @@ def loss_function(recon_logits, data_tokens, mu, logvar, air_token_id):
     data_tokens_flat = data_tokens.view(-1)  # (N,)
 
     # Create mask for non-air tokens
-    mask = (data_tokens_flat != air_token_id)  # (N,)
+    # mask = (data_tokens_flat != air_token_id)  # (N,)
 
     # Apply mask to outputs and targets
-    recon_logits_flat = recon_logits_flat[mask]  # (N_non_air, num_tokens)
-    data_tokens_flat = data_tokens_flat[mask]  # (N_non_air,)
+    # recon_logits_flat = recon_logits_flat[mask]  # (N_non_air, num_tokens)
+    # data_tokens_flat = data_tokens_flat[mask]  # (N_non_air,)
 
     # Compute CrossEntropyLoss
     criterion = nn.CrossEntropyLoss()
