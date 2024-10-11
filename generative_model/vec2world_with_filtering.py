@@ -4,14 +4,14 @@ import numpy as np
 import json
 import os
 import glob
-import torch
+import os
 from torch.utils.data import DataLoader
 from text2mcVAEDataset import text2mcVAEDataset
 from sklearn.neighbors import NearestNeighbors
 from collections import Counter
 
 # Paths
-hdf5_folder = '/home/shaun/projects/text2mc-dataprocessor/test_builds/reconstructions'
+hdf5_folder = '/home/shaun/projects/text2mc-dataprocessor/test_builds/'
 schem_folder_path_original = '/mnt/c/users/shaun/curseforge/minecraft/instances/text2mc/config/worldedit/schematics/'
 schem_folder_path_reconstructed = '/mnt/c/users/shaun/curseforge/minecraft/instances/text2mc/config/worldedit/schematics/'
 tok2block_file_path = '/home/shaun/projects/text2mc-dataprocessor/world2vec/tok2block.json'
@@ -43,24 +43,8 @@ def convert_hdf5_file_to_numpy_array(hdf5_file: str):
         data = file[build_folder_in_hdf5][()]
     return data
 
-def embeddings_to_tokens(embedded_data, embedding_matrix):
-    batch_size, embedding_dim, D, H, W = embedded_data.shape
-    N = D * H * W
-    embedded_data_flat = embedded_data.view(batch_size, embedding_dim, -1).permute(0, 2, 1).contiguous()
-    embedded_data_flat = embedded_data_flat[0].numpy()  # (N, Embedding_Dim)
-
-    nbrs = NearestNeighbors(n_neighbors=1, algorithm='auto').fit(embedding_matrix)
-    distances, indices = nbrs.kneighbors(embedded_data_flat)
-    tokens = indices.flatten().reshape(D, H, W)
-    return tokens
-
-def convert_numpy_array_to_blocks(world_array, tokens_to_remove, air_token_id):
+def convert_numpy_array_to_blocks(world_array, air_token_id):
     world_array_blocks = np.empty_like(world_array, dtype=object)
-
-    # Replace specified tokens with air_token_id
-    for token_to_remove in tokens_to_remove:
-        world_array[world_array == token_to_remove] = air_token_id
-
     for coordinate in np.ndindex(world_array.shape):
         block_integer = world_array[coordinate]
         block_string = tok2block.get(str(block_integer), 'minecraft:air')
@@ -91,30 +75,24 @@ os.makedirs(schem_folder_path_reconstructed, exist_ok=True)
 # Get list of .h5 files
 hdf5_files = glob.glob(os.path.join(hdf5_folder, "*.h5"))
 
-# Function to compute N most common tokens across all builds
-def get_n_most_common_tokens(hdf5_files, N):
-    token_counts = Counter()
-    for hdf5_file in hdf5_files:
-        integer_world_array = convert_hdf5_file_to_numpy_array(hdf5_file)
-        tokens_flat = integer_world_array.flatten()
-        token_counts.update(tokens_flat)
-    most_common = token_counts.most_common(N)
-    most_common_tokens = [int(token) for token, count in most_common]
-    print(f"Most common tokens to remove: {most_common_tokens}")
-    return most_common_tokens
-
-# Get the N most common tokens to remove
-tokens_to_remove = get_n_most_common_tokens(hdf5_files, N)
-
 # Step 1: Convert .h5 files to original .schem files
-for i, hdf5_file in enumerate(hdf5_files):
+for hdf5_file in hdf5_files:
     print(f"Processing {hdf5_file} for original schematic")
+    
+    # Extract the prefix from the hdf5 file name (without extension)
+    hdf5_file_prefix = os.path.splitext(os.path.basename(hdf5_file))[0]
+    
+    # Convert HDF5 to numpy array
     integer_world_array = convert_hdf5_file_to_numpy_array(hdf5_file)
-    # Remove specified tokens by replacing them with the air token ID
-    for token_to_remove in tokens_to_remove:
-        integer_world_array[integer_world_array == token_to_remove] = air_token_id
-    # Convert tokens to block names
-    string_world_array = convert_numpy_array_to_blocks(integer_world_array, tokens_to_remove=[], air_token_id=air_token_id)
-    schem_file_name = f"test{i}"
+    
+    # Convert numpy array to blocks
+    string_world_array = convert_numpy_array_to_blocks(integer_world_array, air_token_id=air_token_id)
+    
+    # Use the original HDF5 file prefix for the .schem file name
+    schem_file_name = hdf5_file_prefix
+    
+    # Create the schematic file and save the unique blocks
     unique_blocks = create_schematic_file(string_world_array, schem_folder_path_original, schem_file_name)
+    
+    # Append the unique blocks to the list
     sets_of_blocks_of_original.append(unique_blocks)
