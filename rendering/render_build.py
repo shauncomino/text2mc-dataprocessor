@@ -20,7 +20,7 @@ output_folder = '/home/shaun/projects/text2mc-dataprocessor/rendering/output'  #
 tok2block_path = '/home/shaun/projects/text2mc-dataprocessor/world2vec/tok2block.json'  # Update this path
 
 # Path to the Minecraft texture pack block textures
-texture_folder = '/mnt/c/Users/shaun/Downloads/VanillaDefault 1.21/assets/minecraft/textures/block/'  # Update this path
+texture_folder = '/home/shaun/projects/text2mc-dataprocessor/rendering/VanillaDefault 1.21/assets/minecraft/textures/block'  # Update this path
 
 # Block size
 block_size = 1  # Adjust if necessary
@@ -102,19 +102,22 @@ def create_voxel_mesh(block_data):
                 nodes = mat.node_tree.nodes
                 links = mat.node_tree.links
                 bsdf = nodes.get('Principled BSDF')
+                
                 # Create texture node
                 tex_image_node = nodes.new('ShaderNodeTexImage')
                 try:
                     tex_image_node.image = bpy.data.images.load(texture_path)
-                    tex_image_node.interpolation = 'Smart'
+                    tex_image_node.interpolation = 'Closest'  # Prevent blurring
+                    tex_image_node.extension = 'CLIP'  # Prevent tiling beyond texture size
                 except:
                     print(f"Failed to load texture for {block_name}_{face_type}")
                     continue
                 # Connect the texture node to the base color of the BSDF shader
                 links.new(bsdf.inputs['Base Color'], tex_image_node.outputs['Color'])
                 materials_dict[block_token_str][face_type] = mat
-        if not materials_dict[block_token_str]:
-            del materials_dict[block_token_str]
+    if not materials_dict:
+        print("No materials were created. Check your textures and tok2block.json mappings.")
+        return obj
 
     # Assign materials to the object
     for block_materials in materials_dict.values():
@@ -123,10 +126,8 @@ def create_voxel_mesh(block_data):
                 obj.data.materials.append(mat)
 
     # Build the mesh
-    max_z = block_data.shape[2]
     for i, pos in enumerate(positions):
         x, y, z = pos * block_size
-        z = pos[2] * block_size  # Use original Z-axis value (no inversion)
         block_token = block_types[i]
         block_token_str = str(block_token)
         block_materials = materials_dict.get(block_token_str)
@@ -204,6 +205,12 @@ def create_voxel_mesh(block_data):
             loop_index = poly.loop_start + j
             uv_layer.data[loop_index].uv = uvs[i][j]
 
+    # Recalculate normals to ensure they are facing outward
+    bpy.context.view_layer.objects.active = obj
+    bpy.ops.object.mode_set(mode='EDIT')
+    bpy.ops.mesh.normals_make_consistent(inside=False)
+    bpy.ops.object.mode_set(mode='OBJECT')
+
     # Ensure object transformations are updated
     bpy.context.view_layer.update()
 
@@ -245,19 +252,10 @@ def setup_scene(grid_shape):
     cam_obj.location = initial_cam_location
 
     # Rotate the camera position horizontally by 90 degrees to the right
-    # Define the rotation angle (90 degrees in radians)
     rotation_angle = math.radians(90)
-
-    # Create a rotation matrix around the Z-axis
     rot_matrix = Matrix.Rotation(rotation_angle, 4, 'Z')
-
-    # Calculate the relative camera location to the grid center
     relative_cam_loc = cam_obj.location - grid_center
-
-    # Apply the rotation matrix to the relative camera location
     new_relative_cam_loc = rot_matrix @ relative_cam_loc
-
-    # Update the camera's location
     cam_obj.location = grid_center + new_relative_cam_loc
 
     # Point the camera at the grid center
@@ -268,25 +266,38 @@ def setup_scene(grid_shape):
     # Set camera field of view
     cam_data.angle = math.radians(fov_deg)
 
-    # Set up lighting (from above)
+    # Remove existing lights
+    for obj in bpy.data.objects:
+        if obj.type == 'LIGHT':
+            bpy.data.objects.remove(obj, do_unlink=True)
+
+    # Set up lighting directly above the center of the build
     light_data = bpy.data.lights.new(name="Sun", type='SUN')
     light_obj = bpy.data.objects.new(name="Sun", object_data=light_data)
     bpy.context.collection.objects.link(light_obj)
-    light_obj.location = grid_center + Vector((100, 0, 0))
+    light_obj.location = grid_center + Vector((0, 150, 100))  # Directly above
+
     light_obj.rotation_euler = (
-        math.radians(90),
+        math.radians(-60),  # Pointing straight down
         0,
         0,
     )
-    light_data.energy = 90
+    light_data.energy = 10  # Adjust energy as needed
 
-    # Additional ambient light
+    # Optional: Adjust world background color
     bpy.context.scene.world.use_nodes = True
     world_nodes = bpy.context.scene.world.node_tree.nodes
     bg_node = world_nodes.get('Background')
     if bg_node:
-        bg_node.inputs[0].default_value = (1, 1, 1, 1)
-        bg_node.inputs[1].default_value = 0.3  # Reduce strength for subtle ambient light
+        bg_node.inputs[0].default_value = (1, 1, 1, 1)  # White background
+        bg_node.inputs[1].default_value = 0.1  # Strength
+
+    # Set background to transparent
+    bpy.context.scene.render.film_transparent = True
+
+    # Set output format to PNG with RGBA
+    bpy.context.scene.render.image_settings.file_format = 'PNG'
+    bpy.context.scene.render.image_settings.color_mode = 'RGBA'
 
 def process_h5_files():
     # Ensure output folder exists
@@ -312,10 +323,6 @@ def process_h5_files():
         # Create voxel mesh
         obj = create_voxel_mesh(block_data)
 
-        # Optionally, rotate the object if still misaligned
-        # Uncomment the following lines to rotate the object by 90 degrees around the X-axis
-        # obj.rotation_euler[0] += math.radians(90)
-
         # Get grid shape
         grid_shape = block_data.shape
 
@@ -327,12 +334,12 @@ def process_h5_files():
         bpy.context.scene.cycles.device = 'GPU'  # Use GPU if available
 
         # Set output path
-        output_path = os.path.join(output_folder, os.path.splitext(h5_file)[0] + '.png')
+        output_path = os.path.join(output_folder, os.path.splitext(os.path.basename(h5_file))[0] + '.png')
         bpy.context.scene.render.filepath = output_path
 
         # Set square render resolution
-        bpy.context.scene.render.resolution_x = 1024
-        bpy.context.scene.render.resolution_y = 1024
+        bpy.context.scene.render.resolution_x = 4096
+        bpy.context.scene.render.resolution_y = 4096
 
         # Increase samples for better quality
         bpy.context.scene.cycles.samples = 256  # Increase as needed
