@@ -306,8 +306,7 @@ def process_h5_files():
 
     # List all .h5 files in the folder
     h5_files = [f for f in os.listdir(h5_folder) if f.endswith('.h5')]
-    # Remove the following line to process more than one h5 file
-    h5_files = ['/home/shaun/projects/text2mc-dataprocessor/test_builds/batch_319_8281.h5']
+
     for h5_file in h5_files:
         print(f"Processing {h5_file}...")
         clear_scene()
@@ -338,8 +337,8 @@ def process_h5_files():
         bpy.context.scene.render.filepath = output_path
 
         # Set square render resolution
-        bpy.context.scene.render.resolution_x = 4096
-        bpy.context.scene.render.resolution_y = 4096
+        bpy.context.scene.render.resolution_x = 6000
+        bpy.context.scene.render.resolution_y = 6000
 
         # Increase samples for better quality
         bpy.context.scene.cycles.samples = 256  # Increase as needed
