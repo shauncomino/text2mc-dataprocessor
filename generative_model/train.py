@@ -24,14 +24,14 @@ on_arcc = True
 
 if on_arcc:
     # Paths and configurations
-    checkpoint_path = r'/lustre/fs1/home/scomino/training_lattice/checkpoint.pth'
-    tok2block_file_path = r'/lustre/fs1/home/scomino/text2mc_lattice/text2mc-dataprocessor/world2vec/tok2block.json'
+    checkpoint_path = r'/lustre/fs1/home/scomino/axial_attention_training/checkpoint.pth'
+    tok2block_file_path = r'/lustre/fs1/home/scomino/axial_attention/text2mc-dataprocessor/world2vec/tok2block.json'
     builds_folder_path = r'/lustre/fs1/groups/jaedo/processed_builds'
     build1_path = r'/lustre/fs1/groups/jaedo/processed_builds/batch_319_8281.h5'
     build2_path = r'/lustre/fs1/groups/jaedo/processed_builds/batch_225_5840.h5'
-    save_dir = r'/lustre/fs1/home/scomino/training_lattice/interpolations'
-    best_model_path = r'/lustre/fs1/home/scomino/training_lattice/best_model.pth'
-    block2embedding_file_path = r'/lustre/fs1/home/scomino/text2mc_lattice/text2mc-dataprocessor/block2vec/output/block2vec/embeddings.json'
+    save_dir = r'/lustre/fs1/home/scomino/axial_attention_training/interpolations'
+    best_model_path = r'/lustre/fs1/home/scomino/axial_attention_training/best_model.pth'
+    block2embedding_file_path = r'/lustre/fs1/home/scomino/axial_attention/text2mc-dataprocessor/block2vec/output/block2vec/embeddings.json'
     
     # Device type for arcc
     device_type = 'cuda' if torch.cuda.is_available() else 'cpu'
