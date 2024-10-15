@@ -6,7 +6,7 @@
 #SBATCH --cpus-per-task=1                   # Number of CPU cores per task
 #SBATCH --mem=80GB                          # Memory per node (GB)
 #SBATCH --output=training.out                # Output File
-#SBATCH --time=24:00:00                     # Time limit (HH:MM:SS)
+#SBATCH --time=1:00:00                     # Time limit (HH:MM:SS)
 #SBATCH --gres=gpu:1
 #SBATCH --constraint=h100                   # Constraint to use nodes with H100 GPUs
 
