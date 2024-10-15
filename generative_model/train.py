@@ -14,7 +14,7 @@ import numpy as np
 import random
 import torch.nn.functional as F
 import torch.nn as nn
-from sklearn.metrics import precision_score, recall_score, f1_score
+from sklearn.metrics import precision_score, recall_score, f1_score  # Import metrics
 
 batch_size = 2
 num_epochs = 64
@@ -140,18 +140,22 @@ def loss_function(embeddings_pred, block_air_pred, x, mu, logvar, data_tokens, a
     # block_air_pred: (Batch_Size, 1, D, H, W)
     # data_tokens: (Batch_Size, D, H, W)
 
+    # Ensure embeddings_pred and x have matching spatial dimensions
+    assert embeddings_pred.shape == x.shape, f"Shape mismatch: embeddings_pred {embeddings_pred.shape}, x {x.shape}"
+
     # Move Embedding_Dim to the last dimension
-    embeddings_pred = embeddings_pred.permute(0, 2, 3, 4, 1)
-    x = x.permute(0, 2, 3, 4, 1)
+    embeddings_pred = embeddings_pred.permute(0, 2, 3, 4, 1).contiguous()
+    x = x.permute(0, 2, 3, 4, 1).contiguous()
 
     # Flatten spatial dimensions
     batch_size, D, H, W, embedding_dim = embeddings_pred.shape
     N = batch_size * D * H * W
-    embeddings_pred_flat = embeddings_pred.reshape(N, embedding_dim)
-    x_flat = x.reshape(N, embedding_dim)
+
+    embeddings_pred_flat = embeddings_pred.view(N, embedding_dim)
+    x_flat = x.view(N, embedding_dim)
 
     # Flatten data_tokens
-    data_tokens_flat = data_tokens.reshape(-1)
+    data_tokens_flat = data_tokens.view(-1)
 
     # Prepare labels for Cosine Embedding Loss
     y = torch.ones(N, device=x_flat.device)
@@ -173,8 +177,8 @@ def loss_function(embeddings_pred, block_air_pred, x, mu, logvar, data_tokens, a
 
     # Compute binary cross-entropy loss
     bce_loss_fn = nn.BCELoss()
-    block_air_pred = block_air_pred.squeeze(1)
-    bce_loss = bce_loss_fn(block_air_pred, block_air_labels)
+    block_air_pred_probs = block_air_pred.squeeze(1)
+    bce_loss = bce_loss_fn(block_air_pred_probs, block_air_labels)
 
     # Compute KL Divergence
     KLD = -0.5 * torch.mean(1 + logvar - mu.pow(2) - logvar.exp())
@@ -193,6 +197,11 @@ for epoch in range(start_epoch, num_epochs + 1):
     average_reconstruction_loss = 0
     average_bce_loss = 0
     average_KL_divergence = 0
+    total_accuracy = 0
+    total_precision = 0
+    total_recall = 0
+    total_f1 = 0
+    num_batches = 0
 
     for batch_idx, (data, data_tokens) in enumerate(train_loader):
         data = data.to(device)
@@ -218,24 +227,63 @@ for epoch in range(start_epoch, num_epochs + 1):
         torch.nn.utils.clip_grad_norm_(decoder.parameters(), max_norm=1.0)
         optimizer.step()
         
+        # Compute classification metrics
+        with torch.no_grad():
+            # Prepare block-air predictions and labels
+            block_air_pred_probs = block_air_pred.squeeze(1)  # Shape: (Batch_Size, D, H, W)
+            block_air_pred_labels = (block_air_pred_probs >= 0.5).long()
+            block_air_labels = (data_tokens != air_token_id).long()
+
+            # Flatten tensors
+            block_air_pred_flat = block_air_pred_labels.view(-1).cpu()
+            block_air_labels_flat = block_air_labels.view(-1).cpu()
+
+            # Compute classification metrics
+            accuracy = (block_air_pred_flat == block_air_labels_flat).sum().item() / block_air_labels_flat.numel()
+            precision = precision_score(block_air_labels_flat, block_air_pred_flat, average='binary', zero_division=0)
+            recall = recall_score(block_air_labels_flat, block_air_pred_flat, average='binary', zero_division=0)
+            f1 = f1_score(block_air_labels_flat, block_air_pred_flat, average='binary', zero_division=0)
+
+            total_accuracy += accuracy
+            total_precision += precision
+            total_recall += recall
+            total_f1 += f1
+            num_batches += 1
+
         # Logging
         if batch_idx % 30 == 0:
             print(f'Epoch: {epoch} [{batch_idx * batch_size}/{len(train_loader.dataset)}] '
                   f'Recon Loss: {recon_loss.item():.6f}, KL Divergence: {KLD.item():.6f}, '
-                  f'BCE Loss: {bce_loss.item():.6f}')
+                  f'BCE Loss: {bce_loss.item():.6f}, F1 Score: {f1:.4f}')
 
-    # Compute average losses over the epoch
-    average_reconstruction_loss /= len(train_loader)
-    average_bce_loss /= len(train_loader)
-    average_KL_divergence /= len(train_loader)
+    # Compute average losses and metrics over the epoch
+    average_reconstruction_loss /= num_batches
+    average_bce_loss /= num_batches
+    average_KL_divergence /= num_batches
+    average_accuracy = total_accuracy / num_batches
+    average_precision = total_precision / num_batches
+    average_recall = total_recall / num_batches
+    average_f1 = total_f1 / num_batches
+
     print(f'====> Epoch: {epoch} Average Reconstruction Loss: {average_reconstruction_loss:.8f}')
     print(f'====> Epoch: {epoch} Average KL-Divergence: {average_KL_divergence:.8f}')
     print(f'====> Epoch: {epoch} Average BCE Loss: {average_bce_loss:.8f}')
+    print(f'====> Epoch: {epoch} Average Block-Air Accuracy: {average_accuracy:.4f}, '
+          f'Precision: {average_precision:.4f}, Recall: {average_recall:.4f}, F1 Score: {average_f1:.4f}')
 
     # Validation
     encoder.eval()
     decoder.eval()
     val_loss = 0
+    val_recon_loss = 0
+    val_bce_loss = 0
+    val_KLD = 0
+    val_accuracy = 0
+    val_precision = 0
+    val_recall = 0
+    val_f1 = 0
+    val_batches = 0
+
     with torch.no_grad():
         for data, data_tokens in val_loader:
             data = data.to(device)
@@ -246,21 +294,59 @@ for epoch in range(start_epoch, num_epochs + 1):
                 embeddings_pred, block_air_pred, data, mu, logvar, data_tokens, air_token_id=air_token_id
             )
             val_loss += total_loss.item()
+            val_recon_loss += recon_loss.item()
+            val_bce_loss += bce_loss.item()
+            val_KLD += KLD.item()
+            val_batches += 1
 
-    val_loss /= len(val_loader)
-    print(f'====> Epoch: {epoch} Validation Loss: {val_loss:.4f}')
+            # Prepare block-air predictions and labels
+            block_air_pred_probs = block_air_pred.squeeze(1)
+            block_air_pred_labels = (block_air_pred_probs >= 0.5).long()
+            block_air_labels = (data_tokens != air_token_id).long()
+
+            # Flatten tensors
+            block_air_pred_flat = block_air_pred_labels.view(-1).cpu()
+            block_air_labels_flat = block_air_labels.view(-1).cpu()
+
+            # Compute classification metrics
+            accuracy = (block_air_pred_flat == block_air_labels_flat).sum().item() / block_air_labels_flat.numel()
+            precision = precision_score(block_air_labels_flat, block_air_pred_flat, average='binary', zero_division=0)
+            recall = recall_score(block_air_labels_flat, block_air_pred_flat, average='binary', zero_division=0)
+            f1 = f1_score(block_air_labels_flat, block_air_pred_flat, average='binary', zero_division=0)
+
+            val_accuracy += accuracy
+            val_precision += precision
+            val_recall += recall
+            val_f1 += f1
+
+    # Compute average validation losses and metrics
+    avg_val_loss = val_loss / val_batches
+    avg_val_recon_loss = val_recon_loss / val_batches
+    avg_val_bce_loss = val_bce_loss / val_batches
+    avg_val_KLD = val_KLD / val_batches
+    avg_val_accuracy = val_accuracy / val_batches
+    avg_val_precision = val_precision / val_batches
+    avg_val_recall = val_recall / val_batches
+    avg_val_f1 = val_f1 / val_batches
+
+    print(f'====> Epoch: {epoch} Validation Loss: {avg_val_loss:.4f}')
+    print(f'====> Validation Reconstruction Loss: {avg_val_recon_loss:.6f}')
+    print(f'====> Validation KL-Divergence: {avg_val_KLD:.6f}')
+    print(f'====> Validation BCE Loss: {avg_val_bce_loss:.6f}')
+    print(f'====> Validation Block-Air Accuracy: {avg_val_accuracy:.4f}, '
+          f'Precision: {avg_val_precision:.4f}, Recall: {avg_val_recall:.4f}, F1 Score: {avg_val_f1:.4f}')
 
     # Save the best model
-    if val_loss < best_val_loss:
-        best_val_loss = val_loss
+    if avg_val_loss < best_val_loss:
+        best_val_loss = avg_val_loss
         torch.save({
             'epoch': epoch,
             'encoder_state_dict': encoder.state_dict(),
             'decoder_state_dict': decoder.state_dict(),
             'optimizer_state_dict': optimizer.state_dict(),
-            'loss': val_loss,
+            'loss': avg_val_loss,
         }, best_model_path)
-        print(f'Saved new best model at epoch {epoch} with validation loss {val_loss:.4f}')
+        print(f'Saved new best model at epoch {epoch} with validation loss {avg_val_loss:.4f}')
 
     # Save checkpoint
     checkpoint = {
