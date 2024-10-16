@@ -220,7 +220,7 @@ def embedding_to_tokens(embeddings_pred, embedding_matrix):
     return tokens
 
 # Function to interpolate and generate builds
-def interpolate_and_generate(encoder, decoder, build1_path, build2_path, save_dir, epoch, num_interpolations=5):
+def interpolate_and_generate(encoder, decoder, build1_path, build2_path, save_dir, epoch, num_interpolations=10):
     encoder.eval()
     decoder.eval()
     with torch.no_grad():
@@ -246,26 +246,6 @@ def interpolate_and_generate(encoder, decoder, build1_path, build2_path, save_di
         for data in data_list:
             z, mu, logvar = encoder(data)
             z_list.append(z)
-
-        # Generate reconstructions of the original builds
-        for idx, (data, z, data_tokens) in enumerate(zip(data_list, z_list, data_tokens_list)):
-            embeddings_pred, block_air_pred = decoder(z)
-            # Convert embeddings back to tokens
-            recon_tokens = embedding_to_tokens(embeddings_pred, train_dataset.embedding_matrix).to(device)
-            # Apply block-air mask
-            block_air_pred_labels = (block_air_pred.squeeze(1) >= 0.5).long()
-            air_mask = (block_air_pred_labels == 0)
-            # Assign air_token_id to air voxels
-            recon_tokens[air_mask] = air_token_id
-            # Convert to numpy array
-            recon_tokens_np = recon_tokens.cpu().numpy().squeeze(0)  # Shape: (Depth, Height, Width)
-
-            # Save the reconstructed build as an HDF5 file
-            save_path = os.path.join(save_dir, f'epoch_{epoch}_recon_{idx}.h5')
-            with h5py.File(save_path, 'w') as h5f:
-                h5f.create_dataset('build', data=recon_tokens_np, compression='gzip')
-
-            print(f'Saved reconstruction of build {idx + 1} at {save_path}')
 
         # Interpolate between z1 and z2
         z1 = z_list[0]
