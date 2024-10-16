@@ -1,0 +1,16 @@
+INDEX VERSION 1.131+C:\Projects\text2mc\text2mc-dataprocessor\.metadata\.plugins\org.eclipse.jdt.core
+937352684.index
+3351892863.index
+3373215636.index
+3082105802.index
+1865797976.index
+1435424785.index
+3847094381.index
+1851522037.index
+1691259381.index
+2476202872.index
+2393316897.index
+1882214419.index
+946037087.index
+1589399218.index
+3171405284.index

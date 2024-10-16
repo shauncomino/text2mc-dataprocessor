@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<section name="Workbench">
+	<section name="LaunchTerminalSettingsDialog">
+		<item key="terminalLabel" value="Git Bash"/>
+		<section name="SettingsPanelControl">
+			<section name="Git Bash">
+				<item key="encoding" value="UTF-8"/>
+			</section>
+			<section name="Local Terminal">
+				<item key="encoding" value="UTF-8"/>
+			</section>
+		</section>
+	</section>
+</section>
