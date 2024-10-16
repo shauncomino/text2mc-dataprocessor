@@ -11,6 +11,7 @@ import h5py
 import json
 
 # import minecraft.nbt as nbt
+from PyAnvilEditor.pyanvil import World, BlockState, Canvas
 from utils import load_pkl
 
 

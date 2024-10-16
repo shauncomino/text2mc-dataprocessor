@@ -1,0 +1,1174 @@
+2024-10-16 00:11:13,436 INFO    StreamThr :24880 [internal.py:wandb_internal():86] W&B internal server running at pid: 24880, started at: 2024-10-16 00:11:13.435461
+2024-10-16 00:11:13,436 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: status
+2024-10-16 00:11:13,444 INFO    WriterThread:24880 [datastore.py:open_for_write():87] open: output\wandb\run-20241016_001113-4wu92acj\run-4wu92acj.wandb
+2024-10-16 00:11:13,445 DEBUG   SenderThread:24880 [sender.py:send():378] send: header
+2024-10-16 00:11:13,485 DEBUG   SenderThread:24880 [sender.py:send():378] send: run
+2024-10-16 00:11:14,147 INFO    SenderThread:24880 [dir_watcher.py:__init__():211] watching files in: output\wandb\run-20241016_001113-4wu92acj\files
+2024-10-16 00:11:14,147 INFO    SenderThread:24880 [sender.py:_start_run_threads():1099] run started: 4wu92acj with start time 1729051873.43657
+2024-10-16 00:11:14,148 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: check_version
+2024-10-16 00:11:14,148 DEBUG   SenderThread:24880 [sender.py:send_request():405] send_request: check_version
+2024-10-16 00:11:14,665 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: run_start
+2024-10-16 00:11:14,677 DEBUG   HandlerThread:24880 [system_info.py:__init__():26] System info init
+2024-10-16 00:11:14,677 DEBUG   HandlerThread:24880 [system_info.py:__init__():41] System info init done
+2024-10-16 00:11:14,677 INFO    HandlerThread:24880 [system_monitor.py:start():194] Starting system monitor
+2024-10-16 00:11:14,677 INFO    SystemMonitor:24880 [system_monitor.py:_start():158] Starting system asset monitoring threads
+2024-10-16 00:11:14,677 INFO    HandlerThread:24880 [system_monitor.py:probe():214] Collecting system info
+2024-10-16 00:11:14,685 INFO    SystemMonitor:24880 [interfaces.py:start():190] Started cpu monitoring
+2024-10-16 00:11:14,691 DEBUG   HandlerThread:24880 [system_info.py:probe():150] Probing system
+2024-10-16 00:11:14,691 INFO    SystemMonitor:24880 [interfaces.py:start():190] Started disk monitoring
+2024-10-16 00:11:14,700 INFO    SystemMonitor:24880 [interfaces.py:start():190] Started memory monitoring
+2024-10-16 00:11:14,712 INFO    SystemMonitor:24880 [interfaces.py:start():190] Started network monitoring
+2024-10-16 00:11:14,713 DEBUG   HandlerThread:24880 [system_info.py:_probe_git():135] Probing git
+2024-10-16 00:11:14,781 DEBUG   HandlerThread:24880 [system_info.py:_probe_git():143] Probing git done
+2024-10-16 00:11:14,782 DEBUG   HandlerThread:24880 [system_info.py:probe():198] Probing system done
+2024-10-16 00:11:14,782 DEBUG   HandlerThread:24880 [system_monitor.py:probe():223] {'os': 'Windows-10-10.0.22631-SP0', 'python': '3.10.13', 'heartbeatAt': '2024-10-16T04:11:14.691440', 'startedAt': '2024-10-16T04:11:13.416846', 'docker': None, 'cuda': None, 'args': (), 'state': 'running', 'program': 'C:\\Projects\\text2mc\\text2mc-dataprocessor\\World_GAN\\main.py', 'codePathLocal': 'main.py', 'codePath': 'World_GAN\\main.py', 'git': {'remote': 'https://github.com/shauncomino/text2mc-dataprocessor.git', 'commit': 'edf61955ace14e994392af3543af9889adf84f84'}, 'email': 'thatonepersonnobodyknows@gmail.com', 'root': 'C:/Projects/text2mc/text2mc-dataprocessor', 'host': 'MorgueParty', 'username': 'isabe', 'executable': 'C:\\Users\\isabe\\anaconda3\\envs\\world_gan\\python.exe', 'cpu_count': 8, 'cpu_count_logical': 16, 'cpu_freq': {'current': 2000.0, 'min': 0.0, 'max': 2000.0}, 'cpu_freq_per_core': [{'current': 2000.0, 'min': 0.0, 'max': 2000.0}], 'disk': {'/': {'total': 475.94042587280273, 'used': 282.4106330871582}}, 'memory': {'total': 15.342613220214844}}
+2024-10-16 00:11:14,782 INFO    HandlerThread:24880 [system_monitor.py:probe():224] Finished collecting system info
+2024-10-16 00:11:14,782 INFO    HandlerThread:24880 [system_monitor.py:probe():227] Publishing system info
+2024-10-16 00:11:14,782 DEBUG   HandlerThread:24880 [system_info.py:_save_conda():207] Saving list of conda packages installed into the current environment
+2024-10-16 00:11:14,788 ERROR   HandlerThread:24880 [system_info.py:_save_conda():218] Error saving conda packages: [WinError 2] The system cannot find the file specified
+Traceback (most recent call last):
+  File "C:\Users\isabe\anaconda3\envs\world_gan\lib\site-packages\wandb\sdk\internal\system\system_info.py", line 214, in _save_conda
+    subprocess.call(
+  File "C:\Users\isabe\anaconda3\envs\world_gan\lib\subprocess.py", line 345, in call
+    with Popen(*popenargs, **kwargs) as p:
+  File "C:\Users\isabe\anaconda3\envs\world_gan\lib\subprocess.py", line 971, in __init__
+    self._execute_child(args, executable, preexec_fn, close_fds,
+  File "C:\Users\isabe\anaconda3\envs\world_gan\lib\subprocess.py", line 1456, in _execute_child
+    hp, ht, pid, tid = _winapi.CreateProcess(executable, args,
+FileNotFoundError: [WinError 2] The system cannot find the file specified
+2024-10-16 00:11:14,789 DEBUG   HandlerThread:24880 [system_info.py:_save_conda():219] Saving conda packages done
+2024-10-16 00:11:14,790 INFO    HandlerThread:24880 [system_monitor.py:probe():229] Finished publishing system info
+2024-10-16 00:11:14,794 DEBUG   SenderThread:24880 [sender.py:send():378] send: files
+2024-10-16 00:11:14,794 INFO    SenderThread:24880 [sender.py:_save_file():1365] saving file wandb-metadata.json with policy now
+2024-10-16 00:11:14,962 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: python_packages
+2024-10-16 00:11:14,962 DEBUG   SenderThread:24880 [sender.py:send_request():405] send_request: python_packages
+2024-10-16 00:11:14,962 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: stop_status
+2024-10-16 00:11:14,963 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: internal_messages
+2024-10-16 00:11:14,963 DEBUG   SenderThread:24880 [sender.py:send_request():405] send_request: stop_status
+2024-10-16 00:11:15,141 DEBUG   SenderThread:24880 [sender.py:send():378] send: telemetry
+2024-10-16 00:11:15,160 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\output.log
+2024-10-16 00:11:15,161 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\wandb-metadata.json
+2024-10-16 00:11:15,161 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\conda-environment.yaml
+2024-10-16 00:11:15,161 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\requirements.txt
+2024-10-16 00:11:15,555 INFO    wandb-upload_0:24880 [upload_job.py:push():131] Uploaded file C:\Users\isabe\AppData\Local\Temp\tmp2x58qh72wandb\4nuozy9w-wandb-metadata.json
+2024-10-16 00:11:17,182 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output.log
+2024-10-16 00:11:18,207 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output.log
+2024-10-16 00:11:18,207 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\0
+2024-10-16 00:11:18,208 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\state_dicts
+2024-10-16 00:11:18,231 DEBUG   SenderThread:24880 [sender.py:send():378] send: telemetry
+2024-10-16 00:11:18,231 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: partial_history
+2024-10-16 00:11:18,342 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: partial_history
+2024-10-16 00:11:18,440 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: partial_history
+2024-10-16 00:11:18,762 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: partial_history
+2024-10-16 00:11:18,763 DEBUG   SenderThread:24880 [sender.py:send():378] send: history
+2024-10-16 00:11:18,764 DEBUG   SenderThread:24880 [sender.py:send_request():405] send_request: summary_record
+2024-10-16 00:11:18,764 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: status_report
+2024-10-16 00:11:18,764 INFO    SenderThread:24880 [sender.py:_save_file():1365] saving file wandb-summary.json with policy end
+2024-10-16 00:11:19,215 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output.log
+2024-10-16 00:11:19,215 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\wandb-summary.json
+2024-10-16 00:11:20,222 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output.log
+2024-10-16 00:11:22,229 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output.log
+2024-10-16 00:11:23,836 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: status_report
+2024-10-16 00:11:24,247 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output.log
+2024-10-16 00:11:24,491 DEBUG   SenderThread:24880 [sender.py:send():378] send: telemetry
+2024-10-16 00:11:24,492 DEBUG   SenderThread:24880 [sender.py:send():378] send: files
+2024-10-16 00:11:24,492 INFO    SenderThread:24880 [sender.py:_save_file():1365] saving file output\wandb\run-20241016_001113-4wu92acj\files\0 with policy live
+2024-10-16 00:11:24,542 DEBUG   SenderThread:24880 [sender.py:send():378] send: files
+2024-10-16 00:11:24,542 INFO    SenderThread:24880 [sender.py:_save_file():1365] saving file output\wandb\run-20241016_001113-4wu92acj\files\*.pth with policy live
+2024-10-16 00:11:24,547 DEBUG   SenderThread:24880 [sender.py:send():378] send: files
+2024-10-16 00:11:24,547 INFO    SenderThread:24880 [sender.py:_save_file():1365] saving file output\wandb\run-20241016_001113-4wu92acj\files\state_dicts\*.pth with policy live
+2024-10-16 00:11:24,972 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: partial_history
+2024-10-16 00:11:25,261 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output.log
+2024-10-16 00:11:25,262 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\output\wandb\run-20241016_001113-4wu92acj\files\generators.pth
+2024-10-16 00:11:25,262 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\reals.pth
+2024-10-16 00:11:25,264 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\generators.pth
+2024-10-16 00:11:25,265 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\noise_amplitudes.pth
+2024-10-16 00:11:25,266 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\output\wandb\run-20241016_001113-4wu92acj\files\0\z_opt.pth
+2024-10-16 00:11:25,267 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\token_list.pth
+2024-10-16 00:11:25,268 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\output\wandb\run-20241016_001113-4wu92acj\files\0\D.pth
+2024-10-16 00:11:25,269 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\output\wandb\run-20241016_001113-4wu92acj\files\num_layer.pth
+2024-10-16 00:11:25,270 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\num_layer.pth
+2024-10-16 00:11:25,271 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\output\wandb\run-20241016_001113-4wu92acj\files\state_dicts\G_0.pth
+2024-10-16 00:11:25,271 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\output\wandb\run-20241016_001113-4wu92acj\files\0\G.pth
+2024-10-16 00:11:25,272 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\state_dicts\G_0.pth
+2024-10-16 00:11:25,273 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\output\wandb\run-20241016_001113-4wu92acj\files\noise_maps.pth
+2024-10-16 00:11:25,273 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\output\wandb\run-20241016_001113-4wu92acj\files\reals.pth
+2024-10-16 00:11:25,274 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\0\z_opt.pth
+2024-10-16 00:11:25,274 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\output\wandb\run-20241016_001113-4wu92acj\files\noise_amplitudes.pth
+2024-10-16 00:11:25,275 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\0\G.pth
+2024-10-16 00:11:25,275 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\output\wandb\run-20241016_001113-4wu92acj\files\token_list.pth
+2024-10-16 00:11:25,275 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\0\D.pth
+2024-10-16 00:11:25,276 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\noise_maps.pth
+2024-10-16 00:11:25,277 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\0
+2024-10-16 00:11:25,277 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\state_dicts
+2024-10-16 00:11:25,278 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\output\wandb
+2024-10-16 00:11:25,278 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\1
+2024-10-16 00:11:25,278 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\output
+2024-10-16 00:11:25,278 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\output\wandb\run-20241016_001113-4wu92acj
+2024-10-16 00:11:25,279 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\output\wandb\run-20241016_001113-4wu92acj\files
+2024-10-16 00:11:25,279 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\output\wandb\run-20241016_001113-4wu92acj\files\state_dicts
+2024-10-16 00:11:25,279 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_moved():296] file/dir moved: output\wandb\run-20241016_001113-4wu92acj\files\0 -> output\wandb\run-20241016_001113-4wu92acj\files\output\wandb\run-20241016_001113-4wu92acj\files\0
+2024-10-16 00:11:25,305 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: partial_history
+2024-10-16 00:11:25,681 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: partial_history
+2024-10-16 00:11:26,269 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output.log
+2024-10-16 00:11:27,063 INFO    wandb-upload_5:24880 [upload_job.py:push():131] Uploaded file C:\Users\isabe\AppData\Local\Temp\tmp2x58qh72wandb\q5zaspji-noise_maps.pth
+2024-10-16 00:11:27,381 INFO    wandb-upload_0:24880 [upload_job.py:push():131] Uploaded file C:\Users\isabe\AppData\Local\Temp\tmp2x58qh72wandb\wbbik0s8-reals.pth
+2024-10-16 00:11:27,430 INFO    wandb-upload_2:24880 [upload_job.py:push():131] Uploaded file C:\Users\isabe\AppData\Local\Temp\tmp2x58qh72wandb\f0izzapj-noise_amplitudes.pth
+2024-10-16 00:11:27,465 INFO    wandb-upload_4:24880 [upload_job.py:push():131] Uploaded file C:\Users\isabe\AppData\Local\Temp\tmp2x58qh72wandb\m1wm0u2x-num_layer.pth
+2024-10-16 00:11:27,473 INFO    wandb-upload_3:24880 [upload_job.py:push():131] Uploaded file C:\Users\isabe\AppData\Local\Temp\tmp2x58qh72wandb\f1ywv2s3-token_list.pth
+2024-10-16 00:11:27,476 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: partial_history
+2024-10-16 00:11:27,477 DEBUG   SenderThread:24880 [sender.py:send():378] send: history
+2024-10-16 00:11:27,477 DEBUG   SenderThread:24880 [sender.py:send_request():405] send_request: summary_record
+2024-10-16 00:11:27,478 INFO    SenderThread:24880 [sender.py:_save_file():1365] saving file wandb-summary.json with policy end
+2024-10-16 00:11:27,583 INFO    wandb-upload_1:24880 [upload_job.py:push():131] Uploaded file C:\Users\isabe\AppData\Local\Temp\tmp2x58qh72wandb\5x5d8840-generators.pth
+2024-10-16 00:11:28,292 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output.log
+2024-10-16 00:11:28,292 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\wandb-summary.json
+2024-10-16 00:11:29,218 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: status_report
+2024-10-16 00:11:29,975 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: internal_messages
+2024-10-16 00:11:29,976 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: stop_status
+2024-10-16 00:11:29,977 DEBUG   SenderThread:24880 [sender.py:send_request():405] send_request: stop_status
+2024-10-16 00:11:30,318 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output.log
+2024-10-16 00:11:32,347 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output.log
+2024-10-16 00:11:34,365 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output.log
+2024-10-16 00:11:34,788 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: status_report
+2024-10-16 00:11:36,394 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output.log
+2024-10-16 00:11:38,430 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output.log
+2024-10-16 00:11:40,250 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: status_report
+2024-10-16 00:11:40,459 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output.log
+2024-10-16 00:11:42,480 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output.log
+2024-10-16 00:11:43,665 DEBUG   SenderThread:24880 [sender.py:send():378] send: files
+2024-10-16 00:11:43,666 INFO    SenderThread:24880 [sender.py:_save_file():1365] saving file output\wandb\run-20241016_001113-4wu92acj\files\1 with policy live
+2024-10-16 00:11:43,724 DEBUG   SenderThread:24880 [sender.py:send():378] send: files
+2024-10-16 00:11:43,724 INFO    SenderThread:24880 [sender.py:_save_file():1365] saving file output\wandb\run-20241016_001113-4wu92acj\files\*.pth with policy live
+2024-10-16 00:11:43,730 DEBUG   SenderThread:24880 [sender.py:send():378] send: files
+2024-10-16 00:11:43,730 INFO    SenderThread:24880 [sender.py:_save_file():1365] saving file output\wandb\run-20241016_001113-4wu92acj\files\state_dicts\*.pth with policy live
+2024-10-16 00:11:44,505 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\token_list.pth
+2024-10-16 00:11:44,506 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output\wandb\run-20241016_001113-4wu92acj\files\num_layer.pth
+2024-10-16 00:11:44,506 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output\wandb\run-20241016_001113-4wu92acj\files\noise_maps.pth
+2024-10-16 00:11:44,507 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\num_layer.pth
+2024-10-16 00:11:44,507 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output\wandb\run-20241016_001113-4wu92acj\files\generators.pth
+2024-10-16 00:11:44,508 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output\wandb\run-20241016_001113-4wu92acj\files\token_list.pth
+2024-10-16 00:11:44,508 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output\wandb\run-20241016_001113-4wu92acj\files\reals.pth
+2024-10-16 00:11:44,509 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\reals.pth
+2024-10-16 00:11:44,509 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output\wandb\run-20241016_001113-4wu92acj\files\noise_amplitudes.pth
+2024-10-16 00:11:44,510 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\noise_maps.pth
+2024-10-16 00:11:44,510 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\generators.pth
+2024-10-16 00:11:44,511 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\noise_amplitudes.pth
+2024-10-16 00:11:44,511 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output.log
+2024-10-16 00:11:44,512 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\1\D.pth
+2024-10-16 00:11:44,512 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\output\wandb\run-20241016_001113-4wu92acj\files\1\z_opt.pth
+2024-10-16 00:11:44,513 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\output\wandb\run-20241016_001113-4wu92acj\files\state_dicts\G_1.pth
+2024-10-16 00:11:44,513 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\1\z_opt.pth
+2024-10-16 00:11:44,514 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\output\wandb\run-20241016_001113-4wu92acj\files\1\D.pth
+2024-10-16 00:11:44,515 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\output\wandb\run-20241016_001113-4wu92acj\files\1\G.pth
+2024-10-16 00:11:44,517 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\1\G.pth
+2024-10-16 00:11:44,519 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\state_dicts\G_1.pth
+2024-10-16 00:11:44,520 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output\wandb\run-20241016_001113-4wu92acj\files\state_dicts
+2024-10-16 00:11:44,520 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\state_dicts
+2024-10-16 00:11:44,521 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\1
+2024-10-16 00:11:44,521 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output\wandb\run-20241016_001113-4wu92acj\files
+2024-10-16 00:11:44,521 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\2
+2024-10-16 00:11:44,521 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_moved():296] file/dir moved: output\wandb\run-20241016_001113-4wu92acj\files\1 -> output\wandb\run-20241016_001113-4wu92acj\files\output\wandb\run-20241016_001113-4wu92acj\files\1
+2024-10-16 00:11:44,609 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: partial_history
+2024-10-16 00:11:44,981 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: stop_status
+2024-10-16 00:11:44,982 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: internal_messages
+2024-10-16 00:11:44,982 DEBUG   SenderThread:24880 [sender.py:send_request():405] send_request: stop_status
+2024-10-16 00:11:45,245 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: partial_history
+2024-10-16 00:11:45,518 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output.log
+2024-10-16 00:11:45,866 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: partial_history
+2024-10-16 00:11:46,079 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: status_report
+2024-10-16 00:11:46,538 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output.log
+2024-10-16 00:11:46,539 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\config.yaml
+2024-10-16 00:11:47,658 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: partial_history
+2024-10-16 00:11:47,659 DEBUG   SenderThread:24880 [sender.py:send():378] send: history
+2024-10-16 00:11:47,660 DEBUG   SenderThread:24880 [sender.py:send_request():405] send_request: summary_record
+2024-10-16 00:11:47,660 INFO    SenderThread:24880 [sender.py:_save_file():1365] saving file wandb-summary.json with policy end
+2024-10-16 00:11:48,576 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\wandb-summary.json
+2024-10-16 00:11:50,611 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output.log
+2024-10-16 00:11:51,319 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: status_report
+2024-10-16 00:11:52,641 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output.log
+2024-10-16 00:11:56,724 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output.log
+2024-10-16 00:11:56,797 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: status_report
+2024-10-16 00:11:59,977 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: internal_messages
+2024-10-16 00:11:59,994 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: stop_status
+2024-10-16 00:11:59,995 DEBUG   SenderThread:24880 [sender.py:send_request():405] send_request: stop_status
+2024-10-16 00:12:00,779 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output.log
+2024-10-16 00:12:02,795 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: status_report
+2024-10-16 00:12:04,845 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output.log
+2024-10-16 00:12:06,872 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output.log
+2024-10-16 00:12:08,495 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: status_report
+2024-10-16 00:12:10,921 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output.log
+2024-10-16 00:12:13,684 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: status_report
+2024-10-16 00:12:14,719 DEBUG   SystemMonitor:24880 [system_monitor.py:_start():172] Starting system metrics aggregation loop
+2024-10-16 00:12:14,720 DEBUG   SenderThread:24880 [sender.py:send():378] send: stats
+2024-10-16 00:12:14,960 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output.log
+2024-10-16 00:12:14,986 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: internal_messages
+2024-10-16 00:12:15,002 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: stop_status
+2024-10-16 00:12:15,003 DEBUG   SenderThread:24880 [sender.py:send_request():405] send_request: stop_status
+2024-10-16 00:12:17,997 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output.log
+2024-10-16 00:12:19,379 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: status_report
+2024-10-16 00:12:19,908 DEBUG   SenderThread:24880 [sender.py:send():378] send: files
+2024-10-16 00:12:19,908 INFO    SenderThread:24880 [sender.py:_save_file():1365] saving file output\wandb\run-20241016_001113-4wu92acj\files\2 with policy live
+2024-10-16 00:12:19,991 DEBUG   SenderThread:24880 [sender.py:send():378] send: files
+2024-10-16 00:12:19,991 INFO    SenderThread:24880 [sender.py:_save_file():1365] saving file output\wandb\run-20241016_001113-4wu92acj\files\*.pth with policy live
+2024-10-16 00:12:20,000 DEBUG   SenderThread:24880 [sender.py:send():378] send: files
+2024-10-16 00:12:20,000 INFO    SenderThread:24880 [sender.py:_save_file():1365] saving file output\wandb\run-20241016_001113-4wu92acj\files\state_dicts\*.pth with policy live
+2024-10-16 00:12:20,021 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\token_list.pth
+2024-10-16 00:12:20,022 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output\wandb\run-20241016_001113-4wu92acj\files\num_layer.pth
+2024-10-16 00:12:20,022 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output\wandb\run-20241016_001113-4wu92acj\files\noise_maps.pth
+2024-10-16 00:12:20,023 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\num_layer.pth
+2024-10-16 00:12:20,023 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output\wandb\run-20241016_001113-4wu92acj\files\generators.pth
+2024-10-16 00:12:20,023 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output\wandb\run-20241016_001113-4wu92acj\files\token_list.pth
+2024-10-16 00:12:20,024 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output\wandb\run-20241016_001113-4wu92acj\files\reals.pth
+2024-10-16 00:12:20,024 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\reals.pth
+2024-10-16 00:12:20,025 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output\wandb\run-20241016_001113-4wu92acj\files\noise_amplitudes.pth
+2024-10-16 00:12:20,025 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\noise_maps.pth
+2024-10-16 00:12:20,025 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\generators.pth
+2024-10-16 00:12:20,026 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\noise_amplitudes.pth
+2024-10-16 00:12:20,027 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output.log
+2024-10-16 00:12:20,027 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\output\wandb\run-20241016_001113-4wu92acj\files\2\D.pth
+2024-10-16 00:12:20,028 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\output\wandb\run-20241016_001113-4wu92acj\files\state_dicts\G_2.pth
+2024-10-16 00:12:20,028 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\2\z_opt.pth
+2024-10-16 00:12:20,029 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\2\D.pth
+2024-10-16 00:12:20,029 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\output\wandb\run-20241016_001113-4wu92acj\files\2\z_opt.pth
+2024-10-16 00:12:20,030 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\state_dicts\G_2.pth
+2024-10-16 00:12:20,031 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\output\wandb\run-20241016_001113-4wu92acj\files\2\G.pth
+2024-10-16 00:12:20,032 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\2\G.pth
+2024-10-16 00:12:20,032 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output\wandb\run-20241016_001113-4wu92acj\files\state_dicts
+2024-10-16 00:12:20,033 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\state_dicts
+2024-10-16 00:12:20,033 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output\wandb\run-20241016_001113-4wu92acj\files
+2024-10-16 00:12:20,033 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\2
+2024-10-16 00:12:20,033 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\3
+2024-10-16 00:12:20,034 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_moved():296] file/dir moved: output\wandb\run-20241016_001113-4wu92acj\files\2 -> output\wandb\run-20241016_001113-4wu92acj\files\output\wandb\run-20241016_001113-4wu92acj\files\2
+2024-10-16 00:12:22,078 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output.log
+2024-10-16 00:12:22,211 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: partial_history
+2024-10-16 00:12:23,896 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: partial_history
+2024-10-16 00:12:25,153 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: status_report
+2024-10-16 00:12:25,487 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: partial_history
+2024-10-16 00:12:29,417 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: partial_history
+2024-10-16 00:12:29,419 DEBUG   SenderThread:24880 [sender.py:send():378] send: history
+2024-10-16 00:12:29,419 DEBUG   SenderThread:24880 [sender.py:send_request():405] send_request: summary_record
+2024-10-16 00:12:29,420 INFO    SenderThread:24880 [sender.py:_save_file():1365] saving file wandb-summary.json with policy end
+2024-10-16 00:12:29,996 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: internal_messages
+2024-10-16 00:12:30,012 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: stop_status
+2024-10-16 00:12:30,012 DEBUG   SenderThread:24880 [sender.py:send_request():405] send_request: stop_status
+2024-10-16 00:12:30,177 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: status_report
+2024-10-16 00:12:30,208 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output.log
+2024-10-16 00:12:30,209 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\wandb-summary.json
+2024-10-16 00:12:35,236 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: status_report
+2024-10-16 00:12:40,333 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output.log
+2024-10-16 00:12:40,576 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: status_report
+2024-10-16 00:12:44,727 DEBUG   SenderThread:24880 [sender.py:send():378] send: stats
+2024-10-16 00:12:45,007 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: internal_messages
+2024-10-16 00:12:45,021 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: stop_status
+2024-10-16 00:12:45,022 DEBUG   SenderThread:24880 [sender.py:send_request():405] send_request: stop_status
+2024-10-16 00:12:46,147 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: status_report
+2024-10-16 00:12:48,444 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output.log
+2024-10-16 00:12:51,834 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: status_report
+2024-10-16 00:12:57,737 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: status_report
+2024-10-16 00:12:58,621 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output.log
+2024-10-16 00:13:00,024 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: stop_status
+2024-10-16 00:13:00,024 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: internal_messages
+2024-10-16 00:13:00,024 DEBUG   SenderThread:24880 [sender.py:send_request():405] send_request: stop_status
+2024-10-16 00:13:03,146 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: status_report
+2024-10-16 00:13:06,739 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output.log
+2024-10-16 00:13:08,580 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: status_report
+2024-10-16 00:13:13,640 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: status_report
+2024-10-16 00:13:14,741 DEBUG   SenderThread:24880 [sender.py:send():378] send: stats
+2024-10-16 00:13:15,032 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: internal_messages
+2024-10-16 00:13:15,032 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: stop_status
+2024-10-16 00:13:15,033 DEBUG   SenderThread:24880 [sender.py:send_request():405] send_request: stop_status
+2024-10-16 00:13:16,913 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output.log
+2024-10-16 00:13:19,169 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: status_report
+2024-10-16 00:13:24,256 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: status_report
+2024-10-16 00:13:25,050 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output.log
+2024-10-16 00:13:29,297 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: status_report
+2024-10-16 00:13:30,049 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: stop_status
+2024-10-16 00:13:30,049 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: internal_messages
+2024-10-16 00:13:30,050 DEBUG   SenderThread:24880 [sender.py:send_request():405] send_request: stop_status
+2024-10-16 00:13:33,195 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output.log
+2024-10-16 00:13:35,080 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: status_report
+2024-10-16 00:13:40,142 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: status_report
+2024-10-16 00:13:43,364 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output.log
+2024-10-16 00:13:44,756 DEBUG   SenderThread:24880 [sender.py:send():378] send: stats
+2024-10-16 00:13:45,055 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: internal_messages
+2024-10-16 00:13:45,055 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: stop_status
+2024-10-16 00:13:45,056 DEBUG   SenderThread:24880 [sender.py:send_request():405] send_request: stop_status
+2024-10-16 00:13:45,234 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: status_report
+2024-10-16 00:13:49,805 DEBUG   SenderThread:24880 [sender.py:send():378] send: files
+2024-10-16 00:13:49,805 INFO    SenderThread:24880 [sender.py:_save_file():1365] saving file output\wandb\run-20241016_001113-4wu92acj\files\3 with policy live
+2024-10-16 00:13:49,951 DEBUG   SenderThread:24880 [sender.py:send():378] send: files
+2024-10-16 00:13:49,951 INFO    SenderThread:24880 [sender.py:_save_file():1365] saving file output\wandb\run-20241016_001113-4wu92acj\files\*.pth with policy live
+2024-10-16 00:13:49,959 DEBUG   SenderThread:24880 [sender.py:send():378] send: files
+2024-10-16 00:13:49,959 INFO    SenderThread:24880 [sender.py:_save_file():1365] saving file output\wandb\run-20241016_001113-4wu92acj\files\state_dicts\*.pth with policy live
+2024-10-16 00:13:50,317 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: status_report
+2024-10-16 00:13:50,465 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\token_list.pth
+2024-10-16 00:13:50,466 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output\wandb\run-20241016_001113-4wu92acj\files\num_layer.pth
+2024-10-16 00:13:50,466 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output\wandb\run-20241016_001113-4wu92acj\files\noise_maps.pth
+2024-10-16 00:13:50,467 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\num_layer.pth
+2024-10-16 00:13:50,467 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output\wandb\run-20241016_001113-4wu92acj\files\generators.pth
+2024-10-16 00:13:50,467 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output\wandb\run-20241016_001113-4wu92acj\files\token_list.pth
+2024-10-16 00:13:50,468 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output\wandb\run-20241016_001113-4wu92acj\files\reals.pth
+2024-10-16 00:13:50,468 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\reals.pth
+2024-10-16 00:13:50,468 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output\wandb\run-20241016_001113-4wu92acj\files\noise_amplitudes.pth
+2024-10-16 00:13:50,469 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\noise_maps.pth
+2024-10-16 00:13:50,470 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\generators.pth
+2024-10-16 00:13:50,471 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\noise_amplitudes.pth
+2024-10-16 00:13:50,472 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output.log
+2024-10-16 00:13:50,473 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\3\z_opt.pth
+2024-10-16 00:13:50,474 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\3\G.pth
+2024-10-16 00:13:50,475 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\3\D.pth
+2024-10-16 00:13:50,477 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\output\wandb\run-20241016_001113-4wu92acj\files\3\G.pth
+2024-10-16 00:13:50,478 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\state_dicts\G_3.pth
+2024-10-16 00:13:50,479 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\output\wandb\run-20241016_001113-4wu92acj\files\3\D.pth
+2024-10-16 00:13:50,481 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\output\wandb\run-20241016_001113-4wu92acj\files\3\z_opt.pth
+2024-10-16 00:13:50,482 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\output\wandb\run-20241016_001113-4wu92acj\files\state_dicts\G_3.pth
+2024-10-16 00:13:50,482 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output\wandb\run-20241016_001113-4wu92acj\files\state_dicts
+2024-10-16 00:13:50,482 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\state_dicts
+2024-10-16 00:13:50,482 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\3
+2024-10-16 00:13:50,483 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output\wandb\run-20241016_001113-4wu92acj\files
+2024-10-16 00:13:50,483 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\random_samples
+2024-10-16 00:13:50,483 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_moved():296] file/dir moved: output\wandb\run-20241016_001113-4wu92acj\files\3 -> output\wandb\run-20241016_001113-4wu92acj\files\output\wandb\run-20241016_001113-4wu92acj\files\3
+2024-10-16 00:13:50,866 INFO    wandb-upload_2:24880 [upload_job.py:push():131] Uploaded file C:\Users\isabe\AppData\Local\Temp\tmp2x58qh72wandb\5nc2jq9s-noise_amplitudes.pth
+2024-10-16 00:13:51,182 INFO    wandb-upload_5:24880 [upload_job.py:push():131] Uploaded file C:\Users\isabe\AppData\Local\Temp\tmp2x58qh72wandb\dzh5kxdl-generators.pth
+2024-10-16 00:13:52,485 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output.log
+2024-10-16 00:13:54,508 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output.log
+2024-10-16 00:13:55,361 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: status_report
+2024-10-16 00:13:56,532 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output.log
+2024-10-16 00:13:58,563 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output.log
+2024-10-16 00:14:00,054 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: stop_status
+2024-10-16 00:14:00,055 DEBUG   SenderThread:24880 [sender.py:send_request():405] send_request: stop_status
+2024-10-16 00:14:00,071 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: internal_messages
+2024-10-16 00:14:00,424 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: status_report
+2024-10-16 00:14:00,587 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output.log
+2024-10-16 00:14:02,614 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output.log
+2024-10-16 00:14:04,634 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output.log
+2024-10-16 00:14:05,566 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: status_report
+2024-10-16 00:14:06,665 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output.log
+2024-10-16 00:14:08,688 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output.log
+2024-10-16 00:14:10,587 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: status_report
+2024-10-16 00:14:10,738 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output.log
+2024-10-16 00:14:12,783 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output.log
+2024-10-16 00:14:12,784 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\random_samples
+2024-10-16 00:14:12,784 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata
+2024-10-16 00:14:14,760 DEBUG   SenderThread:24880 [sender.py:send():378] send: stats
+2024-10-16 00:14:14,811 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output.log
+2024-10-16 00:14:14,811 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\real_bdata.pt
+2024-10-16 00:14:14,812 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\token_list.pt
+2024-10-16 00:14:14,812 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\random_samples
+2024-10-16 00:14:15,075 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: internal_messages
+2024-10-16 00:14:15,076 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: stop_status
+2024-10-16 00:14:15,076 DEBUG   SenderThread:24880 [sender.py:send_request():405] send_request: stop_status
+2024-10-16 00:14:15,981 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: status_report
+2024-10-16 00:14:16,839 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output.log
+2024-10-16 00:14:16,840 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\0_sc3.pt
+2024-10-16 00:14:16,841 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata
+2024-10-16 00:14:18,876 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output.log
+2024-10-16 00:14:18,877 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\1_sc3.pt
+2024-10-16 00:14:18,877 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata
+2024-10-16 00:14:19,894 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\2_sc3.pt
+2024-10-16 00:14:19,895 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata
+2024-10-16 00:14:20,912 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output.log
+2024-10-16 00:14:21,779 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: status_report
+2024-10-16 00:14:21,927 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\3_sc3.pt
+2024-10-16 00:14:21,928 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata
+2024-10-16 00:14:22,940 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output.log
+2024-10-16 00:14:23,955 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\4_sc3.pt
+2024-10-16 00:14:23,957 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata
+2024-10-16 00:14:24,966 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output.log
+2024-10-16 00:14:25,980 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\5_sc3.pt
+2024-10-16 00:14:25,982 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata
+2024-10-16 00:14:26,998 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output.log
+2024-10-16 00:14:27,558 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: status_report
+2024-10-16 00:14:28,006 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\6_sc3.pt
+2024-10-16 00:14:28,006 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata
+2024-10-16 00:14:29,019 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output.log
+2024-10-16 00:14:30,033 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\7_sc3.pt
+2024-10-16 00:14:30,034 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata
+2024-10-16 00:14:30,075 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: internal_messages
+2024-10-16 00:14:30,091 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: stop_status
+2024-10-16 00:14:30,091 DEBUG   SenderThread:24880 [sender.py:send_request():405] send_request: stop_status
+2024-10-16 00:14:31,051 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output.log
+2024-10-16 00:14:32,071 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\8_sc3.pt
+2024-10-16 00:14:32,073 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata
+2024-10-16 00:14:33,082 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output.log
+2024-10-16 00:14:33,403 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: status_report
+2024-10-16 00:14:34,095 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\9_sc3.pt
+2024-10-16 00:14:34,095 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata
+2024-10-16 00:14:35,113 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output.log
+2024-10-16 00:14:36,128 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\10_sc3.pt
+2024-10-16 00:14:36,129 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata
+2024-10-16 00:14:37,136 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output.log
+2024-10-16 00:14:38,151 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\11_sc3.pt
+2024-10-16 00:14:38,152 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata
+2024-10-16 00:14:39,167 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output.log
+2024-10-16 00:14:39,188 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: status_report
+2024-10-16 00:14:40,184 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\12_sc3.pt
+2024-10-16 00:14:40,184 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata
+2024-10-16 00:14:41,201 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output.log
+2024-10-16 00:14:41,201 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\13_sc3.pt
+2024-10-16 00:14:41,202 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata
+2024-10-16 00:14:43,235 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output.log
+2024-10-16 00:14:43,236 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\14_sc3.pt
+2024-10-16 00:14:43,237 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata
+2024-10-16 00:14:44,770 DEBUG   SenderThread:24880 [sender.py:send():378] send: stats
+2024-10-16 00:14:44,771 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: status_report
+2024-10-16 00:14:45,090 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: internal_messages
+2024-10-16 00:14:45,105 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: stop_status
+2024-10-16 00:14:45,105 DEBUG   SenderThread:24880 [sender.py:send_request():405] send_request: stop_status
+2024-10-16 00:14:45,271 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output.log
+2024-10-16 00:14:45,272 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\15_sc3.pt
+2024-10-16 00:14:45,273 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata
+2024-10-16 00:14:47,298 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output.log
+2024-10-16 00:14:47,299 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\16_sc3.pt
+2024-10-16 00:14:47,299 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata
+2024-10-16 00:14:49,318 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output.log
+2024-10-16 00:14:49,318 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\17_sc3.pt
+2024-10-16 00:14:49,319 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata
+2024-10-16 00:14:49,823 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: status_report
+2024-10-16 00:14:51,343 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output.log
+2024-10-16 00:14:51,343 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\18_sc3.pt
+2024-10-16 00:14:51,344 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata
+2024-10-16 00:14:53,364 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output.log
+2024-10-16 00:14:53,365 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\19_sc3.pt
+2024-10-16 00:14:53,366 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata
+2024-10-16 00:14:55,387 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output.log
+2024-10-16 00:14:55,387 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\20_sc3.pt
+2024-10-16 00:14:55,389 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata
+2024-10-16 00:14:55,506 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: status_report
+2024-10-16 00:14:57,411 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output.log
+2024-10-16 00:14:57,411 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\21_sc3.pt
+2024-10-16 00:14:57,412 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata
+2024-10-16 00:14:58,427 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\22_sc3.pt
+2024-10-16 00:14:58,428 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata
+2024-10-16 00:14:59,440 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output.log
+2024-10-16 00:15:00,091 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: internal_messages
+2024-10-16 00:15:00,108 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: stop_status
+2024-10-16 00:15:00,108 DEBUG   SenderThread:24880 [sender.py:send_request():405] send_request: stop_status
+2024-10-16 00:15:00,462 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\23_sc3.pt
+2024-10-16 00:15:00,463 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata
+2024-10-16 00:15:01,258 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: status_report
+2024-10-16 00:15:01,482 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output.log
+2024-10-16 00:15:02,497 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\24_sc3.pt
+2024-10-16 00:15:02,498 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata
+2024-10-16 00:15:03,507 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output.log
+2024-10-16 00:15:04,529 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\25_sc3.pt
+2024-10-16 00:15:04,530 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata
+2024-10-16 00:15:05,541 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output.log
+2024-10-16 00:15:06,563 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\26_sc3.pt
+2024-10-16 00:15:06,564 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata
+2024-10-16 00:15:07,113 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: status_report
+2024-10-16 00:15:07,575 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output.log
+2024-10-16 00:15:08,589 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\27_sc3.pt
+2024-10-16 00:15:08,590 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata
+2024-10-16 00:15:09,610 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output.log
+2024-10-16 00:15:10,627 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\28_sc3.pt
+2024-10-16 00:15:10,628 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata
+2024-10-16 00:15:11,642 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output.log
+2024-10-16 00:15:12,660 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\29_sc3.pt
+2024-10-16 00:15:12,661 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata
+2024-10-16 00:15:13,089 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: status_report
+2024-10-16 00:15:13,676 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output.log
+2024-10-16 00:15:14,693 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\30_sc3.pt
+2024-10-16 00:15:14,695 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata
+2024-10-16 00:15:14,764 DEBUG   SenderThread:24880 [sender.py:send():378] send: stats
+2024-10-16 00:15:15,107 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: internal_messages
+2024-10-16 00:15:15,123 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: stop_status
+2024-10-16 00:15:15,123 DEBUG   SenderThread:24880 [sender.py:send_request():405] send_request: stop_status
+2024-10-16 00:15:15,708 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output.log
+2024-10-16 00:15:16,732 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\31_sc3.pt
+2024-10-16 00:15:16,733 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata
+2024-10-16 00:15:17,750 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output.log
+2024-10-16 00:15:18,767 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\32_sc3.pt
+2024-10-16 00:15:18,768 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata
+2024-10-16 00:15:18,931 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: status_report
+2024-10-16 00:15:19,782 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output.log
+2024-10-16 00:15:20,796 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\33_sc3.pt
+2024-10-16 00:15:20,797 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata
+2024-10-16 00:15:21,836 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output.log
+2024-10-16 00:15:21,836 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\34_sc3.pt
+2024-10-16 00:15:21,838 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata
+2024-10-16 00:15:23,879 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output.log
+2024-10-16 00:15:23,879 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\35_sc3.pt
+2024-10-16 00:15:23,880 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata
+2024-10-16 00:15:24,583 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: status_report
+2024-10-16 00:15:25,908 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output.log
+2024-10-16 00:15:25,909 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\36_sc3.pt
+2024-10-16 00:15:25,909 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata
+2024-10-16 00:15:27,944 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output.log
+2024-10-16 00:15:27,945 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\37_sc3.pt
+2024-10-16 00:15:27,945 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata
+2024-10-16 00:15:29,969 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output.log
+2024-10-16 00:15:29,969 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\38_sc3.pt
+2024-10-16 00:15:29,970 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata
+2024-10-16 00:15:30,116 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: internal_messages
+2024-10-16 00:15:30,116 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: status_report
+2024-10-16 00:15:30,130 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: stop_status
+2024-10-16 00:15:30,131 DEBUG   SenderThread:24880 [sender.py:send_request():405] send_request: stop_status
+2024-10-16 00:15:31,994 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output.log
+2024-10-16 00:15:31,995 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\39_sc3.pt
+2024-10-16 00:15:31,995 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata
+2024-10-16 00:15:34,028 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output.log
+2024-10-16 00:15:34,028 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\40_sc3.pt
+2024-10-16 00:15:34,029 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata
+2024-10-16 00:15:35,226 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: status_report
+2024-10-16 00:15:36,060 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output.log
+2024-10-16 00:15:36,061 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\41_sc3.pt
+2024-10-16 00:15:36,061 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata
+2024-10-16 00:15:38,088 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output.log
+2024-10-16 00:15:38,089 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\42_sc3.pt
+2024-10-16 00:15:38,090 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata
+2024-10-16 00:15:39,100 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\43_sc3.pt
+2024-10-16 00:15:39,101 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata
+2024-10-16 00:15:40,114 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output.log
+2024-10-16 00:15:41,029 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: status_report
+2024-10-16 00:15:41,133 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\44_sc3.pt
+2024-10-16 00:15:41,134 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata
+2024-10-16 00:15:42,146 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output.log
+2024-10-16 00:15:43,165 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\45_sc3.pt
+2024-10-16 00:15:43,167 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata
+2024-10-16 00:15:44,177 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output.log
+2024-10-16 00:15:44,765 DEBUG   SenderThread:24880 [sender.py:send():378] send: stats
+2024-10-16 00:15:45,124 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: stop_status
+2024-10-16 00:15:45,125 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: internal_messages
+2024-10-16 00:15:45,125 DEBUG   SenderThread:24880 [sender.py:send_request():405] send_request: stop_status
+2024-10-16 00:15:45,198 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\46_sc3.pt
+2024-10-16 00:15:45,198 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata
+2024-10-16 00:15:46,208 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: status_report
+2024-10-16 00:15:46,215 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output.log
+2024-10-16 00:15:47,225 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\47_sc3.pt
+2024-10-16 00:15:47,226 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata
+2024-10-16 00:15:48,236 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output.log
+2024-10-16 00:15:49,263 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output.log
+2024-10-16 00:15:49,264 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\48_sc3.pt
+2024-10-16 00:15:49,264 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata
+2024-10-16 00:15:50,282 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\49_sc3.pt
+2024-10-16 00:15:50,283 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata
+2024-10-16 00:15:51,275 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: status_report
+2024-10-16 00:15:52,316 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output.log
+2024-10-16 00:15:52,316 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\50_sc3.pt
+2024-10-16 00:15:52,318 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata
+2024-10-16 00:15:54,332 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output.log
+2024-10-16 00:15:54,332 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\51_sc3.pt
+2024-10-16 00:15:54,333 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata
+2024-10-16 00:15:56,346 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output.log
+2024-10-16 00:15:56,347 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\52_sc3.pt
+2024-10-16 00:15:56,347 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata
+2024-10-16 00:15:56,748 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: status_report
+2024-10-16 00:15:58,360 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output.log
+2024-10-16 00:15:58,360 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\53_sc3.pt
+2024-10-16 00:15:58,360 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata
+2024-10-16 00:16:00,140 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: stop_status
+2024-10-16 00:16:00,141 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: internal_messages
+2024-10-16 00:16:00,141 DEBUG   SenderThread:24880 [sender.py:send_request():405] send_request: stop_status
+2024-10-16 00:16:00,380 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output.log
+2024-10-16 00:16:00,380 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\54_sc3.pt
+2024-10-16 00:16:00,381 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata
+2024-10-16 00:16:02,256 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: status_report
+2024-10-16 00:16:02,392 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output.log
+2024-10-16 00:16:02,393 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\55_sc3.pt
+2024-10-16 00:16:02,394 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata
+2024-10-16 00:16:04,413 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output.log
+2024-10-16 00:16:04,413 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\56_sc3.pt
+2024-10-16 00:16:04,414 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata
+2024-10-16 00:16:06,422 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output.log
+2024-10-16 00:16:06,422 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\57_sc3.pt
+2024-10-16 00:16:06,423 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata
+2024-10-16 00:16:07,938 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: status_report
+2024-10-16 00:16:08,444 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output.log
+2024-10-16 00:16:08,445 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\58_sc3.pt
+2024-10-16 00:16:08,445 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata
+2024-10-16 00:16:10,456 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output.log
+2024-10-16 00:16:10,456 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\59_sc3.pt
+2024-10-16 00:16:10,457 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata
+2024-10-16 00:16:12,475 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output.log
+2024-10-16 00:16:12,475 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\60_sc3.pt
+2024-10-16 00:16:12,476 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata
+2024-10-16 00:16:13,662 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: status_report
+2024-10-16 00:16:14,491 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output.log
+2024-10-16 00:16:14,491 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\61_sc3.pt
+2024-10-16 00:16:14,492 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata
+2024-10-16 00:16:14,779 DEBUG   SenderThread:24880 [sender.py:send():378] send: stats
+2024-10-16 00:16:15,150 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: internal_messages
+2024-10-16 00:16:15,150 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: stop_status
+2024-10-16 00:16:15,151 DEBUG   SenderThread:24880 [sender.py:send_request():405] send_request: stop_status
+2024-10-16 00:16:16,510 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output.log
+2024-10-16 00:16:16,511 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\63_sc3.pt
+2024-10-16 00:16:16,512 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\62_sc3.pt
+2024-10-16 00:16:16,512 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata
+2024-10-16 00:16:18,535 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output.log
+2024-10-16 00:16:18,536 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\64_sc3.pt
+2024-10-16 00:16:18,536 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata
+2024-10-16 00:16:19,490 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: status_report
+2024-10-16 00:16:20,557 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output.log
+2024-10-16 00:16:20,557 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\65_sc3.pt
+2024-10-16 00:16:20,558 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata
+2024-10-16 00:16:22,585 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output.log
+2024-10-16 00:16:22,586 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\66_sc3.pt
+2024-10-16 00:16:22,587 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata
+2024-10-16 00:16:24,601 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output.log
+2024-10-16 00:16:24,602 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\67_sc3.pt
+2024-10-16 00:16:24,603 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata
+2024-10-16 00:16:25,280 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: status_report
+2024-10-16 00:16:26,616 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output.log
+2024-10-16 00:16:26,617 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\68_sc3.pt
+2024-10-16 00:16:26,617 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata
+2024-10-16 00:16:28,627 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output.log
+2024-10-16 00:16:28,628 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\69_sc3.pt
+2024-10-16 00:16:28,629 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata
+2024-10-16 00:16:30,148 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: stop_status
+2024-10-16 00:16:30,149 DEBUG   SenderThread:24880 [sender.py:send_request():405] send_request: stop_status
+2024-10-16 00:16:30,164 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: internal_messages
+2024-10-16 00:16:30,309 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: status_report
+2024-10-16 00:16:30,644 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output.log
+2024-10-16 00:16:30,645 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\70_sc3.pt
+2024-10-16 00:16:30,645 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata
+2024-10-16 00:16:32,656 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output.log
+2024-10-16 00:16:32,657 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\71_sc3.pt
+2024-10-16 00:16:32,658 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata
+2024-10-16 00:16:34,674 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output.log
+2024-10-16 00:16:34,675 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\72_sc3.pt
+2024-10-16 00:16:34,675 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata
+2024-10-16 00:16:35,852 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: status_report
+2024-10-16 00:16:36,684 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output.log
+2024-10-16 00:16:36,685 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\73_sc3.pt
+2024-10-16 00:16:36,685 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata
+2024-10-16 00:16:38,694 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output.log
+2024-10-16 00:16:38,694 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\74_sc3.pt
+2024-10-16 00:16:38,695 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata
+2024-10-16 00:16:40,715 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output.log
+2024-10-16 00:16:40,715 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\75_sc3.pt
+2024-10-16 00:16:40,716 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata
+2024-10-16 00:16:41,634 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: status_report
+2024-10-16 00:16:42,734 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output.log
+2024-10-16 00:16:42,734 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\76_sc3.pt
+2024-10-16 00:16:42,735 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata
+2024-10-16 00:16:44,745 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output.log
+2024-10-16 00:16:44,746 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\77_sc3.pt
+2024-10-16 00:16:44,747 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata
+2024-10-16 00:16:44,784 DEBUG   SenderThread:24880 [sender.py:send():378] send: stats
+2024-10-16 00:16:45,144 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: stop_status
+2024-10-16 00:16:45,145 DEBUG   SenderThread:24880 [sender.py:send_request():405] send_request: stop_status
+2024-10-16 00:16:45,176 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: internal_messages
+2024-10-16 00:16:46,761 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output.log
+2024-10-16 00:16:46,762 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\78_sc3.pt
+2024-10-16 00:16:46,762 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata
+2024-10-16 00:16:47,445 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: status_report
+2024-10-16 00:16:48,772 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output.log
+2024-10-16 00:16:48,772 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\79_sc3.pt
+2024-10-16 00:16:48,773 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata
+2024-10-16 00:16:50,788 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output.log
+2024-10-16 00:16:50,788 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\80_sc3.pt
+2024-10-16 00:16:50,789 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata
+2024-10-16 00:16:52,805 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output.log
+2024-10-16 00:16:52,805 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\81_sc3.pt
+2024-10-16 00:16:52,806 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata
+2024-10-16 00:16:53,255 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: status_report
+2024-10-16 00:16:54,829 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output.log
+2024-10-16 00:16:54,830 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\82_sc3.pt
+2024-10-16 00:16:54,830 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata
+2024-10-16 00:16:56,866 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output.log
+2024-10-16 00:16:56,866 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\83_sc3.pt
+2024-10-16 00:16:56,867 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata
+2024-10-16 00:16:58,516 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: status_report
+2024-10-16 00:16:58,887 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output.log
+2024-10-16 00:16:58,887 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\84_sc3.pt
+2024-10-16 00:16:58,888 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata
+2024-10-16 00:17:00,150 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: stop_status
+2024-10-16 00:17:00,151 DEBUG   SenderThread:24880 [sender.py:send_request():405] send_request: stop_status
+2024-10-16 00:17:00,180 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: internal_messages
+2024-10-16 00:17:00,914 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output.log
+2024-10-16 00:17:00,915 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\85_sc3.pt
+2024-10-16 00:17:00,915 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata
+2024-10-16 00:17:02,931 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output.log
+2024-10-16 00:17:02,932 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\86_sc3.pt
+2024-10-16 00:17:02,932 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata
+2024-10-16 00:17:04,374 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: status_report
+2024-10-16 00:17:04,950 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output.log
+2024-10-16 00:17:04,950 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\87_sc3.pt
+2024-10-16 00:17:04,951 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata
+2024-10-16 00:17:06,963 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output.log
+2024-10-16 00:17:06,963 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\88_sc3.pt
+2024-10-16 00:17:06,964 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata
+2024-10-16 00:17:08,980 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output.log
+2024-10-16 00:17:08,980 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\89_sc3.pt
+2024-10-16 00:17:08,981 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata
+2024-10-16 00:17:10,127 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: status_report
+2024-10-16 00:17:10,995 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output.log
+2024-10-16 00:17:10,995 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\90_sc3.pt
+2024-10-16 00:17:10,996 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata
+2024-10-16 00:17:13,009 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output.log
+2024-10-16 00:17:13,010 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\92_sc3.pt
+2024-10-16 00:17:13,011 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\91_sc3.pt
+2024-10-16 00:17:13,011 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata
+2024-10-16 00:17:14,793 DEBUG   SenderThread:24880 [sender.py:send():378] send: stats
+2024-10-16 00:17:15,025 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output.log
+2024-10-16 00:17:15,026 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\93_sc3.pt
+2024-10-16 00:17:15,027 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata
+2024-10-16 00:17:15,155 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: stop_status
+2024-10-16 00:17:15,155 DEBUG   SenderThread:24880 [sender.py:send_request():405] send_request: stop_status
+2024-10-16 00:17:15,183 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: internal_messages
+2024-10-16 00:17:15,291 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: status_report
+2024-10-16 00:17:17,055 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output.log
+2024-10-16 00:17:17,055 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\94_sc3.pt
+2024-10-16 00:17:17,057 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata
+2024-10-16 00:17:19,077 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output.log
+2024-10-16 00:17:19,077 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\95_sc3.pt
+2024-10-16 00:17:19,078 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata
+2024-10-16 00:17:20,593 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: status_report
+2024-10-16 00:17:21,100 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output.log
+2024-10-16 00:17:21,100 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\96_sc3.pt
+2024-10-16 00:17:21,101 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata
+2024-10-16 00:17:23,113 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output.log
+2024-10-16 00:17:23,114 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\97_sc3.pt
+2024-10-16 00:17:23,114 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata
+2024-10-16 00:17:25,126 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output.log
+2024-10-16 00:17:25,127 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\98_sc3.pt
+2024-10-16 00:17:25,127 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata
+2024-10-16 00:17:26,081 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: status_report
+2024-10-16 00:17:26,097 DEBUG   SenderThread:24880 [sender.py:send():378] send: exit
+2024-10-16 00:17:26,097 INFO    SenderThread:24880 [sender.py:send_exit():585] handling exit code: 0
+2024-10-16 00:17:26,097 INFO    SenderThread:24880 [sender.py:send_exit():587] handling runtime: 371
+2024-10-16 00:17:26,097 INFO    SenderThread:24880 [sender.py:_save_file():1365] saving file wandb-summary.json with policy end
+2024-10-16 00:17:26,098 INFO    SenderThread:24880 [sender.py:send_exit():593] send defer
+2024-10-16 00:17:26,098 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: defer
+2024-10-16 00:17:26,098 INFO    HandlerThread:24880 [handler.py:handle_request_defer():172] handle defer: 0
+2024-10-16 00:17:26,098 DEBUG   SenderThread:24880 [sender.py:send_request():405] send_request: defer
+2024-10-16 00:17:26,098 INFO    SenderThread:24880 [sender.py:send_request_defer():609] handle sender defer: 0
+2024-10-16 00:17:26,098 INFO    SenderThread:24880 [sender.py:transition_state():613] send defer: 1
+2024-10-16 00:17:26,098 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: defer
+2024-10-16 00:17:26,098 INFO    HandlerThread:24880 [handler.py:handle_request_defer():172] handle defer: 1
+2024-10-16 00:17:26,098 DEBUG   SenderThread:24880 [sender.py:send_request():405] send_request: defer
+2024-10-16 00:17:26,098 INFO    SenderThread:24880 [sender.py:send_request_defer():609] handle sender defer: 1
+2024-10-16 00:17:26,098 INFO    SenderThread:24880 [sender.py:transition_state():613] send defer: 2
+2024-10-16 00:17:26,100 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: defer
+2024-10-16 00:17:26,100 INFO    HandlerThread:24880 [handler.py:handle_request_defer():172] handle defer: 2
+2024-10-16 00:17:26,100 INFO    HandlerThread:24880 [system_monitor.py:finish():203] Stopping system monitor
+2024-10-16 00:17:26,100 INFO    HandlerThread:24880 [interfaces.py:finish():202] Joined cpu monitor
+2024-10-16 00:17:26,100 DEBUG   SystemMonitor:24880 [system_monitor.py:_start():179] Finished system metrics aggregation loop
+2024-10-16 00:17:26,100 INFO    HandlerThread:24880 [interfaces.py:finish():202] Joined disk monitor
+2024-10-16 00:17:26,100 DEBUG   SystemMonitor:24880 [system_monitor.py:_start():183] Publishing last batch of metrics
+2024-10-16 00:17:26,100 INFO    HandlerThread:24880 [interfaces.py:finish():202] Joined memory monitor
+2024-10-16 00:17:26,101 INFO    HandlerThread:24880 [interfaces.py:finish():202] Joined network monitor
+2024-10-16 00:17:26,101 DEBUG   SenderThread:24880 [sender.py:send_request():405] send_request: defer
+2024-10-16 00:17:26,102 INFO    SenderThread:24880 [sender.py:send_request_defer():609] handle sender defer: 2
+2024-10-16 00:17:26,102 INFO    SenderThread:24880 [sender.py:transition_state():613] send defer: 3
+2024-10-16 00:17:26,102 DEBUG   SenderThread:24880 [sender.py:send():378] send: stats
+2024-10-16 00:17:26,102 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: defer
+2024-10-16 00:17:26,102 INFO    HandlerThread:24880 [handler.py:handle_request_defer():172] handle defer: 3
+2024-10-16 00:17:26,102 DEBUG   SenderThread:24880 [sender.py:send_request():405] send_request: defer
+2024-10-16 00:17:26,102 INFO    SenderThread:24880 [sender.py:send_request_defer():609] handle sender defer: 3
+2024-10-16 00:17:26,102 INFO    SenderThread:24880 [sender.py:transition_state():613] send defer: 4
+2024-10-16 00:17:26,102 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: defer
+2024-10-16 00:17:26,102 INFO    HandlerThread:24880 [handler.py:handle_request_defer():172] handle defer: 4
+2024-10-16 00:17:26,104 DEBUG   SenderThread:24880 [sender.py:send_request():405] send_request: defer
+2024-10-16 00:17:26,104 INFO    SenderThread:24880 [sender.py:send_request_defer():609] handle sender defer: 4
+2024-10-16 00:17:26,104 INFO    SenderThread:24880 [sender.py:transition_state():613] send defer: 5
+2024-10-16 00:17:26,104 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: defer
+2024-10-16 00:17:26,104 INFO    HandlerThread:24880 [handler.py:handle_request_defer():172] handle defer: 5
+2024-10-16 00:17:26,106 DEBUG   SenderThread:24880 [sender.py:send():378] send: summary
+2024-10-16 00:17:26,108 INFO    SenderThread:24880 [sender.py:_save_file():1365] saving file wandb-summary.json with policy end
+2024-10-16 00:17:26,108 DEBUG   SenderThread:24880 [sender.py:send_request():405] send_request: defer
+2024-10-16 00:17:26,108 INFO    SenderThread:24880 [sender.py:send_request_defer():609] handle sender defer: 5
+2024-10-16 00:17:26,108 INFO    SenderThread:24880 [sender.py:transition_state():613] send defer: 6
+2024-10-16 00:17:26,108 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: defer
+2024-10-16 00:17:26,108 INFO    HandlerThread:24880 [handler.py:handle_request_defer():172] handle defer: 6
+2024-10-16 00:17:26,108 DEBUG   SenderThread:24880 [sender.py:send_request():405] send_request: defer
+2024-10-16 00:17:26,109 INFO    SenderThread:24880 [sender.py:send_request_defer():609] handle sender defer: 6
+2024-10-16 00:17:26,109 INFO    SenderThread:24880 [sender.py:transition_state():613] send defer: 7
+2024-10-16 00:17:26,109 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: status_report
+2024-10-16 00:17:26,109 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: defer
+2024-10-16 00:17:26,109 INFO    HandlerThread:24880 [handler.py:handle_request_defer():172] handle defer: 7
+2024-10-16 00:17:26,109 DEBUG   SenderThread:24880 [sender.py:send_request():405] send_request: defer
+2024-10-16 00:17:26,109 INFO    SenderThread:24880 [sender.py:send_request_defer():609] handle sender defer: 7
+2024-10-16 00:17:27,112 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: poll_exit
+2024-10-16 00:17:27,138 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output.log
+2024-10-16 00:17:27,138 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\wandb-summary.json
+2024-10-16 00:17:27,139 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\99_sc3.pt
+2024-10-16 00:17:27,139 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata
+2024-10-16 00:17:28,014 INFO    SenderThread:24880 [sender.py:transition_state():613] send defer: 8
+2024-10-16 00:17:28,014 DEBUG   SenderThread:24880 [sender.py:send_request():405] send_request: poll_exit
+2024-10-16 00:17:28,015 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: defer
+2024-10-16 00:17:28,015 INFO    HandlerThread:24880 [handler.py:handle_request_defer():172] handle defer: 8
+2024-10-16 00:17:28,015 DEBUG   SenderThread:24880 [sender.py:send_request():405] send_request: defer
+2024-10-16 00:17:28,015 INFO    SenderThread:24880 [sender.py:send_request_defer():609] handle sender defer: 8
+2024-10-16 00:17:28,015 INFO    SenderThread:24880 [job_builder.py:build():298] Attempting to build job artifact
+2024-10-16 00:17:28,028 INFO    SenderThread:24880 [job_builder.py:_get_source_type():428] is repo sourced job
+2024-10-16 00:17:28,075 INFO    SenderThread:24880 [job_builder.py:build():404] adding wandb-job metadata file
+2024-10-16 00:17:28,095 INFO    SenderThread:24880 [sender.py:transition_state():613] send defer: 9
+2024-10-16 00:17:28,095 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: defer
+2024-10-16 00:17:28,095 DEBUG   SenderThread:24880 [sender.py:send():378] send: artifact
+2024-10-16 00:17:28,095 INFO    HandlerThread:24880 [handler.py:handle_request_defer():172] handle defer: 9
+2024-10-16 00:17:28,119 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: poll_exit
+2024-10-16 00:17:28,889 INFO    wandb-upload_3:24880 [upload_job.py:push():86] Skipped uploading C:\Users\isabe\AppData\Local\wandb\wandb\artifacts\staging\tmpz8s_mqvm
+2024-10-16 00:17:29,071 INFO    wandb-upload_1:24880 [upload_job.py:push():89] Uploaded file C:\Users\isabe\AppData\Local\wandb\wandb\artifacts\staging\tmp5ft9g_is
+2024-10-16 00:17:29,160 INFO    Thread-16 :24880 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241016_001113-4wu92acj\files\output.log
+2024-10-16 00:17:29,783 INFO    SenderThread:24880 [sender.py:send_artifact():1443] sent artifact job-https___github.com_shauncomino_text2mc-dataprocessor.git_World_GAN_main.py - {'id': 'QXJ0aWZhY3Q6MTI4MjQyMDYwMg==', 'state': 'PENDING', 'artifactSequence': {'id': 'QXJ0aWZhY3RDb2xsZWN0aW9uOjQ3NzkxNjc1MA==', 'latestArtifact': {'id': 'QXJ0aWZhY3Q6MTI4MjQxMzU2NQ==', 'versionIndex': 0}}}
+2024-10-16 00:17:29,783 DEBUG   SenderThread:24880 [sender.py:send_request():405] send_request: defer
+2024-10-16 00:17:29,783 INFO    SenderThread:24880 [sender.py:send_request_defer():609] handle sender defer: 9
+2024-10-16 00:17:29,783 INFO    SenderThread:24880 [dir_watcher.py:finish():358] shutting down directory watcher
+2024-10-16 00:17:30,185 INFO    SenderThread:24880 [dir_watcher.py:finish():388] scan: output\wandb\run-20241016_001113-4wu92acj\files
+2024-10-16 00:17:30,186 INFO    SenderThread:24880 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241016_001113-4wu92acj\files\conda-environment.yaml conda-environment.yaml
+2024-10-16 00:17:30,186 INFO    SenderThread:24880 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241016_001113-4wu92acj\files\config.yaml config.yaml
+2024-10-16 00:17:30,187 INFO    SenderThread:24880 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241016_001113-4wu92acj\files\generators.pth generators.pth
+2024-10-16 00:17:30,188 INFO    SenderThread:24880 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241016_001113-4wu92acj\files\noise_amplitudes.pth noise_amplitudes.pth
+2024-10-16 00:17:30,189 INFO    SenderThread:24880 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241016_001113-4wu92acj\files\noise_maps.pth noise_maps.pth
+2024-10-16 00:17:30,190 INFO    SenderThread:24880 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241016_001113-4wu92acj\files\num_layer.pth num_layer.pth
+2024-10-16 00:17:30,190 INFO    SenderThread:24880 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241016_001113-4wu92acj\files\output.log output.log
+2024-10-16 00:17:30,191 INFO    SenderThread:24880 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241016_001113-4wu92acj\files\reals.pth reals.pth
+2024-10-16 00:17:30,191 INFO    SenderThread:24880 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241016_001113-4wu92acj\files\requirements.txt requirements.txt
+2024-10-16 00:17:30,191 INFO    SenderThread:24880 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241016_001113-4wu92acj\files\token_list.pth token_list.pth
+2024-10-16 00:17:30,192 INFO    SenderThread:24880 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241016_001113-4wu92acj\files\wandb-metadata.json wandb-metadata.json
+2024-10-16 00:17:30,192 INFO    SenderThread:24880 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241016_001113-4wu92acj\files\wandb-summary.json wandb-summary.json
+2024-10-16 00:17:30,193 INFO    SenderThread:24880 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241016_001113-4wu92acj\files\0\D.pth 0/D.pth
+2024-10-16 00:17:30,193 INFO    SenderThread:24880 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241016_001113-4wu92acj\files\0\G.pth 0/G.pth
+2024-10-16 00:17:30,193 INFO    SenderThread:24880 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241016_001113-4wu92acj\files\0\z_opt.pth 0/z_opt.pth
+2024-10-16 00:17:30,193 INFO    SenderThread:24880 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241016_001113-4wu92acj\files\1\D.pth 1/D.pth
+2024-10-16 00:17:30,193 INFO    SenderThread:24880 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241016_001113-4wu92acj\files\1\G.pth 1/G.pth
+2024-10-16 00:17:30,194 INFO    SenderThread:24880 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241016_001113-4wu92acj\files\1\z_opt.pth 1/z_opt.pth
+2024-10-16 00:17:30,194 INFO    SenderThread:24880 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241016_001113-4wu92acj\files\2\D.pth 2/D.pth
+2024-10-16 00:17:30,194 INFO    SenderThread:24880 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241016_001113-4wu92acj\files\2\G.pth 2/G.pth
+2024-10-16 00:17:30,194 INFO    SenderThread:24880 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241016_001113-4wu92acj\files\2\z_opt.pth 2/z_opt.pth
+2024-10-16 00:17:30,196 INFO    SenderThread:24880 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241016_001113-4wu92acj\files\3\D.pth 3/D.pth
+2024-10-16 00:17:30,196 INFO    SenderThread:24880 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241016_001113-4wu92acj\files\3\G.pth 3/G.pth
+2024-10-16 00:17:30,196 INFO    SenderThread:24880 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241016_001113-4wu92acj\files\3\z_opt.pth 3/z_opt.pth
+2024-10-16 00:17:30,202 INFO    SenderThread:24880 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241016_001113-4wu92acj\files\output\wandb\run-20241016_001113-4wu92acj\files\generators.pth output/wandb/run-20241016_001113-4wu92acj/files/generators.pth
+2024-10-16 00:17:30,203 INFO    SenderThread:24880 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241016_001113-4wu92acj\files\output\wandb\run-20241016_001113-4wu92acj\files\noise_amplitudes.pth output/wandb/run-20241016_001113-4wu92acj/files/noise_amplitudes.pth
+2024-10-16 00:17:30,203 INFO    SenderThread:24880 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241016_001113-4wu92acj\files\output\wandb\run-20241016_001113-4wu92acj\files\noise_maps.pth output/wandb/run-20241016_001113-4wu92acj/files/noise_maps.pth
+2024-10-16 00:17:30,204 INFO    SenderThread:24880 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241016_001113-4wu92acj\files\output\wandb\run-20241016_001113-4wu92acj\files\num_layer.pth output/wandb/run-20241016_001113-4wu92acj/files/num_layer.pth
+2024-10-16 00:17:30,204 INFO    SenderThread:24880 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241016_001113-4wu92acj\files\output\wandb\run-20241016_001113-4wu92acj\files\reals.pth output/wandb/run-20241016_001113-4wu92acj/files/reals.pth
+2024-10-16 00:17:30,205 INFO    SenderThread:24880 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241016_001113-4wu92acj\files\output\wandb\run-20241016_001113-4wu92acj\files\token_list.pth output/wandb/run-20241016_001113-4wu92acj/files/token_list.pth
+2024-10-16 00:17:30,206 INFO    SenderThread:24880 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241016_001113-4wu92acj\files\output\wandb\run-20241016_001113-4wu92acj\files\state_dicts\G_0.pth output/wandb/run-20241016_001113-4wu92acj/files/state_dicts/G_0.pth
+2024-10-16 00:17:30,206 INFO    SenderThread:24880 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241016_001113-4wu92acj\files\output\wandb\run-20241016_001113-4wu92acj\files\state_dicts\G_1.pth output/wandb/run-20241016_001113-4wu92acj/files/state_dicts/G_1.pth
+2024-10-16 00:17:30,206 INFO    SenderThread:24880 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241016_001113-4wu92acj\files\output\wandb\run-20241016_001113-4wu92acj\files\state_dicts\G_2.pth output/wandb/run-20241016_001113-4wu92acj/files/state_dicts/G_2.pth
+2024-10-16 00:17:30,207 INFO    SenderThread:24880 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241016_001113-4wu92acj\files\output\wandb\run-20241016_001113-4wu92acj\files\state_dicts\G_3.pth output/wandb/run-20241016_001113-4wu92acj/files/state_dicts/G_3.pth
+2024-10-16 00:17:30,207 INFO    SenderThread:24880 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\real_bdata.pt random_samples/real_bdata.pt
+2024-10-16 00:17:30,207 INFO    SenderThread:24880 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\token_list.pt random_samples/token_list.pt
+2024-10-16 00:17:30,208 INFO    SenderThread:24880 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\0_sc3.pt random_samples/torch_blockdata/0_sc3.pt
+2024-10-16 00:17:30,208 INFO    SenderThread:24880 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\10_sc3.pt random_samples/torch_blockdata/10_sc3.pt
+2024-10-16 00:17:30,209 INFO    SenderThread:24880 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\11_sc3.pt random_samples/torch_blockdata/11_sc3.pt
+2024-10-16 00:17:30,209 INFO    SenderThread:24880 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\12_sc3.pt random_samples/torch_blockdata/12_sc3.pt
+2024-10-16 00:17:30,209 INFO    SenderThread:24880 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\13_sc3.pt random_samples/torch_blockdata/13_sc3.pt
+2024-10-16 00:17:30,210 INFO    SenderThread:24880 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\14_sc3.pt random_samples/torch_blockdata/14_sc3.pt
+2024-10-16 00:17:30,210 INFO    SenderThread:24880 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\15_sc3.pt random_samples/torch_blockdata/15_sc3.pt
+2024-10-16 00:17:30,210 INFO    SenderThread:24880 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\16_sc3.pt random_samples/torch_blockdata/16_sc3.pt
+2024-10-16 00:17:30,211 INFO    SenderThread:24880 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\17_sc3.pt random_samples/torch_blockdata/17_sc3.pt
+2024-10-16 00:17:30,211 INFO    SenderThread:24880 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\18_sc3.pt random_samples/torch_blockdata/18_sc3.pt
+2024-10-16 00:17:30,211 INFO    SenderThread:24880 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\19_sc3.pt random_samples/torch_blockdata/19_sc3.pt
+2024-10-16 00:17:30,211 INFO    SenderThread:24880 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\1_sc3.pt random_samples/torch_blockdata/1_sc3.pt
+2024-10-16 00:17:30,212 INFO    SenderThread:24880 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\20_sc3.pt random_samples/torch_blockdata/20_sc3.pt
+2024-10-16 00:17:30,212 INFO    SenderThread:24880 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\21_sc3.pt random_samples/torch_blockdata/21_sc3.pt
+2024-10-16 00:17:30,212 INFO    SenderThread:24880 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\22_sc3.pt random_samples/torch_blockdata/22_sc3.pt
+2024-10-16 00:17:30,213 INFO    SenderThread:24880 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\23_sc3.pt random_samples/torch_blockdata/23_sc3.pt
+2024-10-16 00:17:30,213 INFO    SenderThread:24880 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\24_sc3.pt random_samples/torch_blockdata/24_sc3.pt
+2024-10-16 00:17:30,213 INFO    SenderThread:24880 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\25_sc3.pt random_samples/torch_blockdata/25_sc3.pt
+2024-10-16 00:17:30,214 INFO    SenderThread:24880 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\26_sc3.pt random_samples/torch_blockdata/26_sc3.pt
+2024-10-16 00:17:30,214 INFO    SenderThread:24880 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\27_sc3.pt random_samples/torch_blockdata/27_sc3.pt
+2024-10-16 00:17:30,214 INFO    SenderThread:24880 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\28_sc3.pt random_samples/torch_blockdata/28_sc3.pt
+2024-10-16 00:17:30,214 INFO    SenderThread:24880 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\29_sc3.pt random_samples/torch_blockdata/29_sc3.pt
+2024-10-16 00:17:30,215 INFO    SenderThread:24880 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\2_sc3.pt random_samples/torch_blockdata/2_sc3.pt
+2024-10-16 00:17:30,215 INFO    SenderThread:24880 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\30_sc3.pt random_samples/torch_blockdata/30_sc3.pt
+2024-10-16 00:17:30,215 INFO    SenderThread:24880 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\31_sc3.pt random_samples/torch_blockdata/31_sc3.pt
+2024-10-16 00:17:30,216 INFO    SenderThread:24880 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\32_sc3.pt random_samples/torch_blockdata/32_sc3.pt
+2024-10-16 00:17:30,216 INFO    SenderThread:24880 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\33_sc3.pt random_samples/torch_blockdata/33_sc3.pt
+2024-10-16 00:17:30,216 INFO    SenderThread:24880 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\34_sc3.pt random_samples/torch_blockdata/34_sc3.pt
+2024-10-16 00:17:30,217 INFO    SenderThread:24880 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\35_sc3.pt random_samples/torch_blockdata/35_sc3.pt
+2024-10-16 00:17:30,217 INFO    SenderThread:24880 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\36_sc3.pt random_samples/torch_blockdata/36_sc3.pt
+2024-10-16 00:17:30,217 INFO    SenderThread:24880 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\37_sc3.pt random_samples/torch_blockdata/37_sc3.pt
+2024-10-16 00:17:30,218 INFO    SenderThread:24880 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\38_sc3.pt random_samples/torch_blockdata/38_sc3.pt
+2024-10-16 00:17:30,218 INFO    SenderThread:24880 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\39_sc3.pt random_samples/torch_blockdata/39_sc3.pt
+2024-10-16 00:17:30,218 INFO    SenderThread:24880 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\3_sc3.pt random_samples/torch_blockdata/3_sc3.pt
+2024-10-16 00:17:30,218 INFO    SenderThread:24880 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\40_sc3.pt random_samples/torch_blockdata/40_sc3.pt
+2024-10-16 00:17:30,219 INFO    SenderThread:24880 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\41_sc3.pt random_samples/torch_blockdata/41_sc3.pt
+2024-10-16 00:17:30,219 INFO    SenderThread:24880 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\42_sc3.pt random_samples/torch_blockdata/42_sc3.pt
+2024-10-16 00:17:30,219 INFO    SenderThread:24880 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\43_sc3.pt random_samples/torch_blockdata/43_sc3.pt
+2024-10-16 00:17:30,220 INFO    SenderThread:24880 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\44_sc3.pt random_samples/torch_blockdata/44_sc3.pt
+2024-10-16 00:17:30,220 INFO    SenderThread:24880 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\45_sc3.pt random_samples/torch_blockdata/45_sc3.pt
+2024-10-16 00:17:30,220 INFO    SenderThread:24880 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\46_sc3.pt random_samples/torch_blockdata/46_sc3.pt
+2024-10-16 00:17:30,221 INFO    SenderThread:24880 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\47_sc3.pt random_samples/torch_blockdata/47_sc3.pt
+2024-10-16 00:17:30,221 INFO    SenderThread:24880 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\48_sc3.pt random_samples/torch_blockdata/48_sc3.pt
+2024-10-16 00:17:30,221 INFO    SenderThread:24880 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\49_sc3.pt random_samples/torch_blockdata/49_sc3.pt
+2024-10-16 00:17:30,222 INFO    SenderThread:24880 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\4_sc3.pt random_samples/torch_blockdata/4_sc3.pt
+2024-10-16 00:17:30,222 INFO    SenderThread:24880 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\50_sc3.pt random_samples/torch_blockdata/50_sc3.pt
+2024-10-16 00:17:30,222 INFO    SenderThread:24880 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\51_sc3.pt random_samples/torch_blockdata/51_sc3.pt
+2024-10-16 00:17:30,223 INFO    SenderThread:24880 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\52_sc3.pt random_samples/torch_blockdata/52_sc3.pt
+2024-10-16 00:17:30,223 INFO    SenderThread:24880 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\53_sc3.pt random_samples/torch_blockdata/53_sc3.pt
+2024-10-16 00:17:30,223 INFO    SenderThread:24880 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\54_sc3.pt random_samples/torch_blockdata/54_sc3.pt
+2024-10-16 00:17:30,224 INFO    SenderThread:24880 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\55_sc3.pt random_samples/torch_blockdata/55_sc3.pt
+2024-10-16 00:17:30,224 INFO    SenderThread:24880 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\56_sc3.pt random_samples/torch_blockdata/56_sc3.pt
+2024-10-16 00:17:30,224 INFO    SenderThread:24880 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\57_sc3.pt random_samples/torch_blockdata/57_sc3.pt
+2024-10-16 00:17:30,225 INFO    SenderThread:24880 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\58_sc3.pt random_samples/torch_blockdata/58_sc3.pt
+2024-10-16 00:17:30,225 INFO    SenderThread:24880 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\59_sc3.pt random_samples/torch_blockdata/59_sc3.pt
+2024-10-16 00:17:30,225 INFO    SenderThread:24880 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\5_sc3.pt random_samples/torch_blockdata/5_sc3.pt
+2024-10-16 00:17:30,225 INFO    SenderThread:24880 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\60_sc3.pt random_samples/torch_blockdata/60_sc3.pt
+2024-10-16 00:17:30,226 INFO    SenderThread:24880 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\61_sc3.pt random_samples/torch_blockdata/61_sc3.pt
+2024-10-16 00:17:30,226 INFO    SenderThread:24880 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\62_sc3.pt random_samples/torch_blockdata/62_sc3.pt
+2024-10-16 00:17:30,226 INFO    SenderThread:24880 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\63_sc3.pt random_samples/torch_blockdata/63_sc3.pt
+2024-10-16 00:17:30,227 INFO    SenderThread:24880 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\64_sc3.pt random_samples/torch_blockdata/64_sc3.pt
+2024-10-16 00:17:30,227 INFO    SenderThread:24880 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\65_sc3.pt random_samples/torch_blockdata/65_sc3.pt
+2024-10-16 00:17:30,227 INFO    SenderThread:24880 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\66_sc3.pt random_samples/torch_blockdata/66_sc3.pt
+2024-10-16 00:17:30,228 INFO    SenderThread:24880 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\67_sc3.pt random_samples/torch_blockdata/67_sc3.pt
+2024-10-16 00:17:30,228 INFO    SenderThread:24880 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\68_sc3.pt random_samples/torch_blockdata/68_sc3.pt
+2024-10-16 00:17:30,228 INFO    SenderThread:24880 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\69_sc3.pt random_samples/torch_blockdata/69_sc3.pt
+2024-10-16 00:17:30,228 INFO    SenderThread:24880 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\6_sc3.pt random_samples/torch_blockdata/6_sc3.pt
+2024-10-16 00:17:30,229 INFO    SenderThread:24880 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\70_sc3.pt random_samples/torch_blockdata/70_sc3.pt
+2024-10-16 00:17:30,229 INFO    SenderThread:24880 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\71_sc3.pt random_samples/torch_blockdata/71_sc3.pt
+2024-10-16 00:17:30,229 INFO    SenderThread:24880 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\72_sc3.pt random_samples/torch_blockdata/72_sc3.pt
+2024-10-16 00:17:30,230 INFO    SenderThread:24880 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\73_sc3.pt random_samples/torch_blockdata/73_sc3.pt
+2024-10-16 00:17:30,230 INFO    SenderThread:24880 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\74_sc3.pt random_samples/torch_blockdata/74_sc3.pt
+2024-10-16 00:17:30,230 INFO    SenderThread:24880 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\75_sc3.pt random_samples/torch_blockdata/75_sc3.pt
+2024-10-16 00:17:30,231 INFO    SenderThread:24880 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\76_sc3.pt random_samples/torch_blockdata/76_sc3.pt
+2024-10-16 00:17:30,231 INFO    SenderThread:24880 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\77_sc3.pt random_samples/torch_blockdata/77_sc3.pt
+2024-10-16 00:17:30,231 INFO    SenderThread:24880 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\78_sc3.pt random_samples/torch_blockdata/78_sc3.pt
+2024-10-16 00:17:30,232 INFO    SenderThread:24880 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\79_sc3.pt random_samples/torch_blockdata/79_sc3.pt
+2024-10-16 00:17:30,232 INFO    SenderThread:24880 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\7_sc3.pt random_samples/torch_blockdata/7_sc3.pt
+2024-10-16 00:17:30,232 INFO    SenderThread:24880 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\80_sc3.pt random_samples/torch_blockdata/80_sc3.pt
+2024-10-16 00:17:30,233 INFO    SenderThread:24880 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\81_sc3.pt random_samples/torch_blockdata/81_sc3.pt
+2024-10-16 00:17:30,233 INFO    SenderThread:24880 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\82_sc3.pt random_samples/torch_blockdata/82_sc3.pt
+2024-10-16 00:17:30,233 INFO    SenderThread:24880 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\83_sc3.pt random_samples/torch_blockdata/83_sc3.pt
+2024-10-16 00:17:30,234 INFO    SenderThread:24880 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\84_sc3.pt random_samples/torch_blockdata/84_sc3.pt
+2024-10-16 00:17:30,234 INFO    SenderThread:24880 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\85_sc3.pt random_samples/torch_blockdata/85_sc3.pt
+2024-10-16 00:17:30,234 INFO    SenderThread:24880 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\86_sc3.pt random_samples/torch_blockdata/86_sc3.pt
+2024-10-16 00:17:30,235 INFO    SenderThread:24880 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\87_sc3.pt random_samples/torch_blockdata/87_sc3.pt
+2024-10-16 00:17:30,235 INFO    SenderThread:24880 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\88_sc3.pt random_samples/torch_blockdata/88_sc3.pt
+2024-10-16 00:17:30,235 INFO    SenderThread:24880 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\89_sc3.pt random_samples/torch_blockdata/89_sc3.pt
+2024-10-16 00:17:30,236 INFO    SenderThread:24880 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\8_sc3.pt random_samples/torch_blockdata/8_sc3.pt
+2024-10-16 00:17:30,236 INFO    SenderThread:24880 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\90_sc3.pt random_samples/torch_blockdata/90_sc3.pt
+2024-10-16 00:17:30,236 INFO    SenderThread:24880 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\91_sc3.pt random_samples/torch_blockdata/91_sc3.pt
+2024-10-16 00:17:30,237 INFO    SenderThread:24880 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\92_sc3.pt random_samples/torch_blockdata/92_sc3.pt
+2024-10-16 00:17:30,237 INFO    SenderThread:24880 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\93_sc3.pt random_samples/torch_blockdata/93_sc3.pt
+2024-10-16 00:17:30,238 INFO    SenderThread:24880 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\94_sc3.pt random_samples/torch_blockdata/94_sc3.pt
+2024-10-16 00:17:30,238 INFO    SenderThread:24880 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\95_sc3.pt random_samples/torch_blockdata/95_sc3.pt
+2024-10-16 00:17:30,238 INFO    SenderThread:24880 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\96_sc3.pt random_samples/torch_blockdata/96_sc3.pt
+2024-10-16 00:17:30,239 INFO    SenderThread:24880 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\97_sc3.pt random_samples/torch_blockdata/97_sc3.pt
+2024-10-16 00:17:30,239 INFO    SenderThread:24880 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\98_sc3.pt random_samples/torch_blockdata/98_sc3.pt
+2024-10-16 00:17:30,239 INFO    SenderThread:24880 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\99_sc3.pt random_samples/torch_blockdata/99_sc3.pt
+2024-10-16 00:17:30,239 INFO    SenderThread:24880 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\9_sc3.pt random_samples/torch_blockdata/9_sc3.pt
+2024-10-16 00:17:30,240 INFO    SenderThread:24880 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241016_001113-4wu92acj\files\state_dicts\G_0.pth state_dicts/G_0.pth
+2024-10-16 00:17:30,240 INFO    SenderThread:24880 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241016_001113-4wu92acj\files\state_dicts\G_1.pth state_dicts/G_1.pth
+2024-10-16 00:17:30,240 INFO    SenderThread:24880 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241016_001113-4wu92acj\files\state_dicts\G_2.pth state_dicts/G_2.pth
+2024-10-16 00:17:30,240 INFO    SenderThread:24880 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241016_001113-4wu92acj\files\state_dicts\G_3.pth state_dicts/G_3.pth
+2024-10-16 00:17:30,241 INFO    SenderThread:24880 [sender.py:transition_state():613] send defer: 10
+2024-10-16 00:17:30,241 DEBUG   SenderThread:24880 [sender.py:send_request():405] send_request: poll_exit
+2024-10-16 00:17:30,241 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: defer
+2024-10-16 00:17:30,242 INFO    HandlerThread:24880 [handler.py:handle_request_defer():172] handle defer: 10
+2024-10-16 00:17:30,242 DEBUG   SenderThread:24880 [sender.py:send_request():405] send_request: defer
+2024-10-16 00:17:30,242 INFO    SenderThread:24880 [sender.py:send_request_defer():609] handle sender defer: 10
+2024-10-16 00:17:30,242 INFO    SenderThread:24880 [file_pusher.py:finish():172] shutting down file pusher
+2024-10-16 00:17:30,527 INFO    wandb-upload_4:24880 [upload_job.py:push():131] Uploaded file output\wandb\run-20241016_001113-4wu92acj\files\config.yaml
+2024-10-16 00:17:30,887 INFO    wandb-upload_29:24880 [upload_job.py:push():131] Uploaded file output\wandb\run-20241016_001113-4wu92acj\files\output\wandb\run-20241016_001113-4wu92acj\files\state_dicts\G_3.pth
+2024-10-16 00:17:31,158 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: poll_exit
+2024-10-16 00:17:31,159 DEBUG   SenderThread:24880 [sender.py:send_request():405] send_request: poll_exit
+2024-10-16 00:17:31,160 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: status_report
+2024-10-16 00:17:31,304 INFO    wandb-upload_29:24880 [upload_job.py:push():131] Uploaded file output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\3_sc3.pt
+2024-10-16 00:17:31,729 INFO    wandb-upload_29:24880 [upload_job.py:push():131] Uploaded file output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\40_sc3.pt
+2024-10-16 00:17:32,123 INFO    wandb-upload_29:24880 [upload_job.py:push():131] Uploaded file output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\41_sc3.pt
+2024-10-16 00:17:32,165 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: poll_exit
+2024-10-16 00:17:32,166 DEBUG   SenderThread:24880 [sender.py:send_request():405] send_request: poll_exit
+2024-10-16 00:17:32,586 INFO    wandb-upload_29:24880 [upload_job.py:push():131] Uploaded file output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\42_sc3.pt
+2024-10-16 00:17:33,045 INFO    wandb-upload_29:24880 [upload_job.py:push():131] Uploaded file output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\43_sc3.pt
+2024-10-16 00:17:33,171 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: poll_exit
+2024-10-16 00:17:33,172 DEBUG   SenderThread:24880 [sender.py:send_request():405] send_request: poll_exit
+2024-10-16 00:17:33,227 INFO    wandb-upload_5:24880 [upload_job.py:push():131] Uploaded file C:\Users\isabe\AppData\Local\Temp\tmp2x58qh72wandb\wx196kk6-noise_maps.pth
+2024-10-16 00:17:33,409 INFO    wandb-upload_29:24880 [upload_job.py:push():131] Uploaded file output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\44_sc3.pt
+2024-10-16 00:17:33,578 INFO    wandb-upload_5:24880 [upload_job.py:push():131] Uploaded file output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\45_sc3.pt
+2024-10-16 00:17:33,743 INFO    wandb-upload_29:24880 [upload_job.py:push():131] Uploaded file output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\46_sc3.pt
+2024-10-16 00:17:33,914 INFO    wandb-upload_5:24880 [upload_job.py:push():131] Uploaded file output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\47_sc3.pt
+2024-10-16 00:17:34,063 INFO    wandb-upload_29:24880 [upload_job.py:push():131] Uploaded file output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\48_sc3.pt
+2024-10-16 00:17:34,182 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: poll_exit
+2024-10-16 00:17:34,183 DEBUG   SenderThread:24880 [sender.py:send_request():405] send_request: poll_exit
+2024-10-16 00:17:34,253 INFO    wandb-upload_5:24880 [upload_job.py:push():131] Uploaded file output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\49_sc3.pt
+2024-10-16 00:17:34,417 INFO    wandb-upload_29:24880 [upload_job.py:push():131] Uploaded file output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\4_sc3.pt
+2024-10-16 00:17:34,599 INFO    wandb-upload_5:24880 [upload_job.py:push():131] Uploaded file output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\50_sc3.pt
+2024-10-16 00:17:34,746 INFO    wandb-upload_29:24880 [upload_job.py:push():131] Uploaded file output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\51_sc3.pt
+2024-10-16 00:17:34,938 INFO    wandb-upload_5:24880 [upload_job.py:push():131] Uploaded file output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\52_sc3.pt
+2024-10-16 00:17:35,077 INFO    wandb-upload_29:24880 [upload_job.py:push():131] Uploaded file output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\53_sc3.pt
+2024-10-16 00:17:35,196 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: poll_exit
+2024-10-16 00:17:35,197 DEBUG   SenderThread:24880 [sender.py:send_request():405] send_request: poll_exit
+2024-10-16 00:17:35,281 INFO    wandb-upload_5:24880 [upload_job.py:push():131] Uploaded file output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\54_sc3.pt
+2024-10-16 00:17:35,415 INFO    wandb-upload_29:24880 [upload_job.py:push():131] Uploaded file output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\55_sc3.pt
+2024-10-16 00:17:35,622 INFO    wandb-upload_5:24880 [upload_job.py:push():131] Uploaded file output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\56_sc3.pt
+2024-10-16 00:17:35,747 INFO    wandb-upload_29:24880 [upload_job.py:push():131] Uploaded file output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\57_sc3.pt
+2024-10-16 00:17:35,951 INFO    wandb-upload_5:24880 [upload_job.py:push():131] Uploaded file output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\58_sc3.pt
+2024-10-16 00:17:36,043 INFO    wandb-upload_29:24880 [upload_job.py:push():131] Uploaded file output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\59_sc3.pt
+2024-10-16 00:17:36,204 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: status_report
+2024-10-16 00:17:36,205 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: poll_exit
+2024-10-16 00:17:36,205 DEBUG   SenderThread:24880 [sender.py:send_request():405] send_request: poll_exit
+2024-10-16 00:17:36,277 INFO    wandb-upload_5:24880 [upload_job.py:push():131] Uploaded file output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\5_sc3.pt
+2024-10-16 00:17:36,374 INFO    wandb-upload_29:24880 [upload_job.py:push():131] Uploaded file output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\60_sc3.pt
+2024-10-16 00:17:36,527 INFO    wandb-upload_3:24880 [upload_job.py:push():131] Uploaded file C:\Users\isabe\AppData\Local\Temp\tmp2x58qh72wandb\bti2cypz-num_layer.pth
+2024-10-16 00:17:36,567 INFO    wandb-upload_14:24880 [upload_job.py:push():131] Uploaded file output\wandb\run-20241016_001113-4wu92acj\files\2\D.pth
+2024-10-16 00:17:36,632 INFO    wandb-upload_1:24880 [upload_job.py:push():131] Uploaded file output\wandb\run-20241016_001113-4wu92acj\files\output.log
+2024-10-16 00:17:36,727 INFO    wandb-upload_2:24880 [upload_job.py:push():131] Uploaded file output\wandb\run-20241016_001113-4wu92acj\files\requirements.txt
+2024-10-16 00:17:36,754 INFO    wandb-upload_18:24880 [upload_job.py:push():131] Uploaded file output\wandb\run-20241016_001113-4wu92acj\files\3\G.pth
+2024-10-16 00:17:36,777 INFO    wandb-upload_6:24880 [upload_job.py:push():131] Uploaded file C:\Users\isabe\AppData\Local\Temp\tmp2x58qh72wandb\kq9k485x-token_list.pth
+2024-10-16 00:17:36,777 INFO    wandb-upload_23:24880 [upload_job.py:push():131] Uploaded file output\wandb\run-20241016_001113-4wu92acj\files\output\wandb\run-20241016_001113-4wu92acj\files\num_layer.pth
+2024-10-16 00:17:37,221 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: poll_exit
+2024-10-16 00:17:37,222 DEBUG   SenderThread:24880 [sender.py:send_request():405] send_request: poll_exit
+2024-10-16 00:17:37,229 INFO    wandb-upload_2:24880 [upload_job.py:push():131] Uploaded file output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\66_sc3.pt
+2024-10-16 00:17:37,353 INFO    wandb-upload_39:24880 [upload_job.py:push():131] Uploaded file output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\16_sc3.pt
+2024-10-16 00:17:37,371 INFO    wandb-upload_46:24880 [upload_job.py:push():131] Uploaded file output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\22_sc3.pt
+2024-10-16 00:17:37,425 INFO    wandb-upload_4:24880 [upload_job.py:push():131] Uploaded file output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\33_sc3.pt
+2024-10-16 00:17:37,440 INFO    wandb-upload_48:24880 [upload_job.py:push():131] Uploaded file output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\24_sc3.pt
+2024-10-16 00:17:37,441 INFO    wandb-upload_9:24880 [upload_job.py:push():131] Uploaded file output\wandb\run-20241016_001113-4wu92acj\files\0\G.pth
+2024-10-16 00:17:37,465 INFO    wandb-upload_58:24880 [upload_job.py:push():131] Uploaded file output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\34_sc3.pt
+2024-10-16 00:17:37,487 INFO    wandb-upload_60:24880 [upload_job.py:push():131] Uploaded file output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\36_sc3.pt
+2024-10-16 00:17:37,680 INFO    wandb-upload_2:24880 [upload_job.py:push():131] Uploaded file output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\6_sc3.pt
+2024-10-16 00:17:37,680 INFO    wandb-upload_43:24880 [upload_job.py:push():131] Uploaded file output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\1_sc3.pt
+2024-10-16 00:17:37,726 INFO    wandb-upload_26:24880 [upload_job.py:push():131] Uploaded file output\wandb\run-20241016_001113-4wu92acj\files\output\wandb\run-20241016_001113-4wu92acj\files\state_dicts\G_0.pth
+2024-10-16 00:17:37,750 INFO    wandb-upload_53:24880 [upload_job.py:push():131] Uploaded file output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\29_sc3.pt
+2024-10-16 00:17:37,797 INFO    wandb-upload_12:24880 [upload_job.py:push():131] Uploaded file output\wandb\run-20241016_001113-4wu92acj\files\1\G.pth
+2024-10-16 00:17:37,823 INFO    wandb-upload_46:24880 [upload_job.py:push():131] Uploaded file output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\71_sc3.pt
+2024-10-16 00:17:37,852 INFO    wandb-upload_52:24880 [upload_job.py:push():131] Uploaded file output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\28_sc3.pt
+2024-10-16 00:17:37,853 INFO    wandb-upload_37:24880 [upload_job.py:push():131] Uploaded file output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\14_sc3.pt
+2024-10-16 00:17:37,859 INFO    wandb-upload_39:24880 [upload_job.py:push():131] Uploaded file output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\70_sc3.pt
+2024-10-16 00:17:37,865 INFO    wandb-upload_48:24880 [upload_job.py:push():131] Uploaded file output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\73_sc3.pt
+2024-10-16 00:17:37,893 INFO    wandb-upload_3:24880 [upload_job.py:push():131] Uploaded file output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\63_sc3.pt
+2024-10-16 00:17:37,895 INFO    wandb-upload_9:24880 [upload_job.py:push():131] Uploaded file output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\74_sc3.pt
+2024-10-16 00:17:37,902 INFO    wandb-upload_4:24880 [upload_job.py:push():131] Uploaded file output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\72_sc3.pt
+2024-10-16 00:17:37,938 INFO    wandb-upload_27:24880 [upload_job.py:push():131] Uploaded file output\wandb\run-20241016_001113-4wu92acj\files\output\wandb\run-20241016_001113-4wu92acj\files\state_dicts\G_1.pth
+2024-10-16 00:17:38,030 INFO    wandb-upload_55:24880 [upload_job.py:push():131] Uploaded file output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\30_sc3.pt
+2024-10-16 00:17:38,069 INFO    wandb-upload_2:24880 [upload_job.py:push():131] Uploaded file output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\77_sc3.pt
+2024-10-16 00:17:38,099 INFO    wandb-upload_43:24880 [upload_job.py:push():131] Uploaded file output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\78_sc3.pt
+2024-10-16 00:17:38,110 INFO    wandb-upload_26:24880 [upload_job.py:push():131] Uploaded file output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\79_sc3.pt
+2024-10-16 00:17:38,116 INFO    wandb-upload_53:24880 [upload_job.py:push():131] Uploaded file output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\7_sc3.pt
+2024-10-16 00:17:38,201 INFO    wandb-upload_12:24880 [upload_job.py:push():131] Uploaded file output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\80_sc3.pt
+2024-10-16 00:17:38,201 INFO    wandb-upload_56:24880 [upload_job.py:push():131] Uploaded file output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\31_sc3.pt
+2024-10-16 00:17:38,214 INFO    wandb-upload_46:24880 [upload_job.py:push():131] Uploaded file output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\81_sc3.pt
+2024-10-16 00:17:38,230 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: poll_exit
+2024-10-16 00:17:38,231 DEBUG   SenderThread:24880 [sender.py:send_request():405] send_request: poll_exit
+2024-10-16 00:17:38,264 INFO    wandb-upload_39:24880 [upload_job.py:push():131] Uploaded file output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\84_sc3.pt
+2024-10-16 00:17:38,276 INFO    wandb-upload_52:24880 [upload_job.py:push():131] Uploaded file output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\82_sc3.pt
+2024-10-16 00:17:38,286 INFO    wandb-upload_9:24880 [upload_job.py:push():131] Uploaded file output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\87_sc3.pt
+2024-10-16 00:17:38,317 INFO    wandb-upload_4:24880 [upload_job.py:push():131] Uploaded file output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\88_sc3.pt
+2024-10-16 00:17:38,341 INFO    wandb-upload_48:24880 [upload_job.py:push():131] Uploaded file output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\85_sc3.pt
+2024-10-16 00:17:38,391 INFO    wandb-upload_3:24880 [upload_job.py:push():131] Uploaded file output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\86_sc3.pt
+2024-10-16 00:17:38,391 INFO    wandb-upload_37:24880 [upload_job.py:push():131] Uploaded file output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\83_sc3.pt
+2024-10-16 00:17:38,410 INFO    wandb-upload_38:24880 [upload_job.py:push():131] Uploaded file output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\15_sc3.pt
+2024-10-16 00:17:38,419 INFO    wandb-upload_55:24880 [upload_job.py:push():131] Uploaded file output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\8_sc3.pt
+2024-10-16 00:17:38,458 INFO    wandb-upload_2:24880 [upload_job.py:push():131] Uploaded file output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\90_sc3.pt
+2024-10-16 00:17:38,464 INFO    wandb-upload_45:24880 [upload_job.py:push():131] Uploaded file output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\21_sc3.pt
+2024-10-16 00:17:38,474 INFO    wandb-upload_27:24880 [upload_job.py:push():131] Uploaded file output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\89_sc3.pt
+2024-10-16 00:17:38,481 INFO    wandb-upload_43:24880 [upload_job.py:push():131] Uploaded file output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\91_sc3.pt
+2024-10-16 00:17:38,483 INFO    wandb-upload_28:24880 [upload_job.py:push():131] Uploaded file output\wandb\run-20241016_001113-4wu92acj\files\output\wandb\run-20241016_001113-4wu92acj\files\state_dicts\G_2.pth
+2024-10-16 00:17:38,524 INFO    wandb-upload_53:24880 [upload_job.py:push():131] Uploaded file output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\93_sc3.pt
+2024-10-16 00:17:38,585 INFO    wandb-upload_56:24880 [upload_job.py:push():131] Uploaded file output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\95_sc3.pt
+2024-10-16 00:17:38,611 INFO    wandb-upload_46:24880 [upload_job.py:push():131] Uploaded file output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\96_sc3.pt
+2024-10-16 00:17:38,618 INFO    wandb-upload_12:24880 [upload_job.py:push():131] Uploaded file output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\94_sc3.pt
+2024-10-16 00:17:38,621 INFO    wandb-upload_26:24880 [upload_job.py:push():131] Uploaded file output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\92_sc3.pt
+2024-10-16 00:17:38,655 INFO    wandb-upload_52:24880 [upload_job.py:push():131] Uploaded file output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\98_sc3.pt
+2024-10-16 00:17:38,655 INFO    wandb-upload_4:24880 [upload_job.py:push():131] Uploaded file output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\9_sc3.pt
+2024-10-16 00:17:38,710 INFO    wandb-upload_39:24880 [upload_job.py:push():131] Uploaded file output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\97_sc3.pt
+2024-10-16 00:17:38,726 INFO    wandb-upload_9:24880 [upload_job.py:push():131] Uploaded file output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\99_sc3.pt
+2024-10-16 00:17:39,038 INFO    wandb-upload_37:24880 [upload_job.py:push():131] Uploaded file output\wandb\run-20241016_001113-4wu92acj\files\state_dicts\G_2.pth
+2024-10-16 00:17:39,233 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: poll_exit
+2024-10-16 00:17:39,234 DEBUG   SenderThread:24880 [sender.py:send_request():405] send_request: poll_exit
+2024-10-16 00:17:39,447 INFO    wandb-upload_3:24880 [upload_job.py:push():131] Uploaded file output\wandb\run-20241016_001113-4wu92acj\files\state_dicts\G_1.pth
+2024-10-16 00:17:39,880 INFO    wandb-upload_38:24880 [upload_job.py:push():131] Uploaded file output\wandb\run-20241016_001113-4wu92acj\files\state_dicts\G_3.pth
+2024-10-16 00:17:40,242 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: poll_exit
+2024-10-16 00:17:40,242 DEBUG   SenderThread:24880 [sender.py:send_request():405] send_request: poll_exit
+2024-10-16 00:17:40,323 INFO    wandb-upload_19:24880 [upload_job.py:push():131] Uploaded file output\wandb\run-20241016_001113-4wu92acj\files\3\z_opt.pth
+2024-10-16 00:17:40,360 INFO    wandb-upload_48:24880 [upload_job.py:push():131] Uploaded file output\wandb\run-20241016_001113-4wu92acj\files\state_dicts\G_0.pth
+2024-10-16 00:17:40,893 INFO    wandb-upload_0:24880 [upload_job.py:push():131] Uploaded file C:\Users\isabe\AppData\Local\Temp\tmp2x58qh72wandb\2dxud6ns-reals.pth
+2024-10-16 00:17:40,916 INFO    wandb-upload_7:24880 [upload_job.py:push():131] Uploaded file output\wandb\run-20241016_001113-4wu92acj\files\wandb-summary.json
+2024-10-16 00:17:40,963 INFO    wandb-upload_33:24880 [upload_job.py:push():131] Uploaded file output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\10_sc3.pt
+2024-10-16 00:17:41,000 INFO    wandb-upload_17:24880 [upload_job.py:push():131] Uploaded file output\wandb\run-20241016_001113-4wu92acj\files\3\D.pth
+2024-10-16 00:17:41,014 INFO    wandb-upload_31:24880 [upload_job.py:push():131] Uploaded file output\wandb\run-20241016_001113-4wu92acj\files\random_samples\token_list.pt
+2024-10-16 00:17:41,105 INFO    wandb-upload_21:24880 [upload_job.py:push():131] Uploaded file output\wandb\run-20241016_001113-4wu92acj\files\output\wandb\run-20241016_001113-4wu92acj\files\noise_amplitudes.pth
+2024-10-16 00:17:41,119 INFO    wandb-upload_25:24880 [upload_job.py:push():131] Uploaded file output\wandb\run-20241016_001113-4wu92acj\files\output\wandb\run-20241016_001113-4wu92acj\files\token_list.pth
+2024-10-16 00:17:41,175 INFO    wandb-upload_35:24880 [upload_job.py:push():131] Uploaded file output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\12_sc3.pt
+2024-10-16 00:17:41,247 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: status_report
+2024-10-16 00:17:41,248 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: poll_exit
+2024-10-16 00:17:41,248 DEBUG   SenderThread:24880 [sender.py:send_request():405] send_request: poll_exit
+2024-10-16 00:17:41,266 INFO    wandb-upload_36:24880 [upload_job.py:push():131] Uploaded file output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\13_sc3.pt
+2024-10-16 00:17:41,317 INFO    wandb-upload_34:24880 [upload_job.py:push():131] Uploaded file output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\11_sc3.pt
+2024-10-16 00:17:41,402 INFO    wandb-upload_30:24880 [upload_job.py:push():131] Uploaded file output\wandb\run-20241016_001113-4wu92acj\files\random_samples\real_bdata.pt
+2024-10-16 00:17:41,413 INFO    wandb-upload_42:24880 [upload_job.py:push():131] Uploaded file output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\19_sc3.pt
+2024-10-16 00:17:41,442 INFO    wandb-upload_40:24880 [upload_job.py:push():131] Uploaded file output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\17_sc3.pt
+2024-10-16 00:17:41,461 INFO    wandb-upload_29:24880 [upload_job.py:push():131] Uploaded file output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\62_sc3.pt
+2024-10-16 00:17:41,474 INFO    wandb-upload_41:24880 [upload_job.py:push():131] Uploaded file output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\18_sc3.pt
+2024-10-16 00:17:41,502 INFO    wandb-upload_8:24880 [upload_job.py:push():131] Uploaded file output\wandb\run-20241016_001113-4wu92acj\files\0\D.pth
+2024-10-16 00:17:41,559 INFO    wandb-upload_1:24880 [upload_job.py:push():131] Uploaded file output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\65_sc3.pt
+2024-10-16 00:17:41,641 INFO    wandb-upload_54:24880 [upload_job.py:push():131] Uploaded file output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\2_sc3.pt
+2024-10-16 00:17:41,646 INFO    wandb-upload_18:24880 [upload_job.py:push():131] Uploaded file output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\67_sc3.pt
+2024-10-16 00:17:41,734 INFO    wandb-upload_62:24880 [upload_job.py:push():131] Uploaded file output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\38_sc3.pt
+2024-10-16 00:17:41,828 INFO    wandb-upload_32:24880 [upload_job.py:push():131] Uploaded file output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\0_sc3.pt
+2024-10-16 00:17:41,848 INFO    wandb-upload_63:24880 [upload_job.py:push():131] Uploaded file output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\39_sc3.pt
+2024-10-16 00:17:41,877 INFO    wandb-upload_11:24880 [upload_job.py:push():131] Uploaded file output\wandb\run-20241016_001113-4wu92acj\files\1\D.pth
+2024-10-16 00:17:41,891 INFO    wandb-upload_10:24880 [upload_job.py:push():131] Uploaded file output\wandb\run-20241016_001113-4wu92acj\files\0\z_opt.pth
+2024-10-16 00:17:41,902 INFO    wandb-upload_20:24880 [upload_job.py:push():131] Uploaded file output\wandb\run-20241016_001113-4wu92acj\files\output\wandb\run-20241016_001113-4wu92acj\files\generators.pth
+2024-10-16 00:17:41,913 INFO    wandb-upload_57:24880 [upload_job.py:push():131] Uploaded file output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\32_sc3.pt
+2024-10-16 00:17:41,922 INFO    wandb-upload_61:24880 [upload_job.py:push():131] Uploaded file output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\37_sc3.pt
+2024-10-16 00:17:42,003 INFO    wandb-upload_44:24880 [upload_job.py:push():131] Uploaded file output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\20_sc3.pt
+2024-10-16 00:17:42,007 INFO    wandb-upload_23:24880 [upload_job.py:push():131] Uploaded file output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\68_sc3.pt
+2024-10-16 00:17:42,020 INFO    wandb-upload_15:24880 [upload_job.py:push():131] Uploaded file output\wandb\run-20241016_001113-4wu92acj\files\2\G.pth
+2024-10-16 00:17:42,030 INFO    wandb-upload_5:24880 [upload_job.py:push():131] Uploaded file output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\61_sc3.pt
+2024-10-16 00:17:42,038 INFO    wandb-upload_14:24880 [upload_job.py:push():131] Uploaded file output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\64_sc3.pt
+2024-10-16 00:17:42,120 INFO    wandb-upload_59:24880 [upload_job.py:push():131] Uploaded file output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\35_sc3.pt
+2024-10-16 00:17:42,248 INFO    wandb-upload_49:24880 [upload_job.py:push():131] Uploaded file output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\25_sc3.pt
+2024-10-16 00:17:42,254 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: poll_exit
+2024-10-16 00:17:42,254 DEBUG   SenderThread:24880 [sender.py:send_request():405] send_request: poll_exit
+2024-10-16 00:17:42,335 INFO    wandb-upload_58:24880 [upload_job.py:push():131] Uploaded file output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\75_sc3.pt
+2024-10-16 00:17:42,370 INFO    wandb-upload_51:24880 [upload_job.py:push():131] Uploaded file output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\27_sc3.pt
+2024-10-16 00:17:42,483 INFO    wandb-upload_6:24880 [upload_job.py:push():131] Uploaded file output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\69_sc3.pt
+2024-10-16 00:17:42,516 INFO    wandb-upload_50:24880 [upload_job.py:push():131] Uploaded file output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\26_sc3.pt
+2024-10-16 00:17:42,569 INFO    wandb-upload_47:24880 [upload_job.py:push():131] Uploaded file output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\23_sc3.pt
+2024-10-16 00:17:43,022 INFO    wandb-upload_60:24880 [upload_job.py:push():131] Uploaded file output\wandb\run-20241016_001113-4wu92acj\files\random_samples\torch_blockdata\76_sc3.pt
+2024-10-16 00:17:43,264 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: poll_exit
+2024-10-16 00:17:43,265 DEBUG   SenderThread:24880 [sender.py:send_request():405] send_request: poll_exit
+2024-10-16 00:17:44,276 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: poll_exit
+2024-10-16 00:17:44,276 DEBUG   SenderThread:24880 [sender.py:send_request():405] send_request: poll_exit
+2024-10-16 00:17:44,776 INFO    wandb-upload_22:24880 [upload_job.py:push():131] Uploaded file output\wandb\run-20241016_001113-4wu92acj\files\output\wandb\run-20241016_001113-4wu92acj\files\noise_maps.pth
+2024-10-16 00:17:45,147 INFO    wandb-upload_13:24880 [upload_job.py:push():131] Uploaded file output\wandb\run-20241016_001113-4wu92acj\files\1\z_opt.pth
+2024-10-16 00:17:45,285 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: poll_exit
+2024-10-16 00:17:45,285 DEBUG   SenderThread:24880 [sender.py:send_request():405] send_request: poll_exit
+2024-10-16 00:17:45,845 INFO    wandb-upload_16:24880 [upload_job.py:push():131] Uploaded file output\wandb\run-20241016_001113-4wu92acj\files\2\z_opt.pth
+2024-10-16 00:17:46,297 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: status_report
+2024-10-16 00:17:46,297 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: poll_exit
+2024-10-16 00:17:46,298 DEBUG   SenderThread:24880 [sender.py:send_request():405] send_request: poll_exit
+2024-10-16 00:17:46,620 INFO    wandb-upload_24:24880 [upload_job.py:push():131] Uploaded file output\wandb\run-20241016_001113-4wu92acj\files\output\wandb\run-20241016_001113-4wu92acj\files\reals.pth
+2024-10-16 00:17:46,825 INFO    Thread-15 (_thread_body):24880 [sender.py:transition_state():613] send defer: 11
+2024-10-16 00:17:46,826 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: defer
+2024-10-16 00:17:46,826 INFO    HandlerThread:24880 [handler.py:handle_request_defer():172] handle defer: 11
+2024-10-16 00:17:46,826 DEBUG   SenderThread:24880 [sender.py:send_request():405] send_request: defer
+2024-10-16 00:17:46,826 INFO    SenderThread:24880 [sender.py:send_request_defer():609] handle sender defer: 11
+2024-10-16 00:17:46,827 INFO    SenderThread:24880 [file_pusher.py:join():178] waiting for file pusher
+2024-10-16 00:17:46,828 INFO    SenderThread:24880 [sender.py:transition_state():613] send defer: 12
+2024-10-16 00:17:46,828 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: defer
+2024-10-16 00:17:46,828 INFO    HandlerThread:24880 [handler.py:handle_request_defer():172] handle defer: 12
+2024-10-16 00:17:46,828 DEBUG   SenderThread:24880 [sender.py:send_request():405] send_request: defer
+2024-10-16 00:17:46,828 INFO    SenderThread:24880 [sender.py:send_request_defer():609] handle sender defer: 12
+2024-10-16 00:17:46,828 INFO    SenderThread:24880 [file_stream.py:finish():595] file stream finish called
+2024-10-16 00:17:46,928 INFO    SenderThread:24880 [file_stream.py:finish():599] file stream finish is done
+2024-10-16 00:17:46,928 INFO    SenderThread:24880 [sender.py:transition_state():613] send defer: 13
+2024-10-16 00:17:46,928 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: defer
+2024-10-16 00:17:46,928 INFO    HandlerThread:24880 [handler.py:handle_request_defer():172] handle defer: 13
+2024-10-16 00:17:46,929 DEBUG   SenderThread:24880 [sender.py:send_request():405] send_request: defer
+2024-10-16 00:17:46,929 INFO    SenderThread:24880 [sender.py:send_request_defer():609] handle sender defer: 13
+2024-10-16 00:17:46,929 INFO    SenderThread:24880 [sender.py:transition_state():613] send defer: 14
+2024-10-16 00:17:46,929 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: defer
+2024-10-16 00:17:46,929 DEBUG   SenderThread:24880 [sender.py:send():378] send: final
+2024-10-16 00:17:46,929 INFO    HandlerThread:24880 [handler.py:handle_request_defer():172] handle defer: 14
+2024-10-16 00:17:46,929 DEBUG   SenderThread:24880 [sender.py:send():378] send: footer
+2024-10-16 00:17:46,929 DEBUG   SenderThread:24880 [sender.py:send_request():405] send_request: defer
+2024-10-16 00:17:46,930 INFO    SenderThread:24880 [sender.py:send_request_defer():609] handle sender defer: 14
+2024-10-16 00:17:46,930 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: poll_exit
+2024-10-16 00:17:46,930 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: poll_exit
+2024-10-16 00:17:46,931 DEBUG   SenderThread:24880 [sender.py:send_request():405] send_request: poll_exit
+2024-10-16 00:17:46,931 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: server_info
+2024-10-16 00:17:46,931 DEBUG   SenderThread:24880 [sender.py:send_request():405] send_request: poll_exit
+2024-10-16 00:17:46,931 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: get_summary
+2024-10-16 00:17:46,932 DEBUG   SenderThread:24880 [sender.py:send_request():405] send_request: server_info
+2024-10-16 00:17:46,932 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: sampled_history
+2024-10-16 00:17:46,934 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: internal_messages
+2024-10-16 00:17:46,934 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: job_info
+2024-10-16 00:17:47,004 DEBUG   SenderThread:24880 [sender.py:send_request():405] send_request: job_info
+2024-10-16 00:17:47,005 INFO    MainThread:24880 [wandb_run.py:_footer_history_summary_info():3851] rendering history
+2024-10-16 00:17:47,005 INFO    MainThread:24880 [wandb_run.py:_footer_history_summary_info():3883] rendering summary
+2024-10-16 00:17:47,009 INFO    MainThread:24880 [wandb_run.py:_footer_sync_info():3810] logging synced files
+2024-10-16 00:17:47,010 DEBUG   HandlerThread:24880 [handler.py:handle_request():146] handle_request: shutdown
+2024-10-16 00:17:47,010 INFO    HandlerThread:24880 [handler.py:finish():869] shutting down handler
+2024-10-16 00:17:47,942 INFO    WriterThread:24880 [datastore.py:close():296] close: output\wandb\run-20241016_001113-4wu92acj\run-4wu92acj.wandb
+2024-10-16 00:17:48,005 INFO    SenderThread:24880 [sender.py:finish():1521] shutting down sender
+2024-10-16 00:17:48,005 INFO    SenderThread:24880 [file_pusher.py:finish():172] shutting down file pusher
+2024-10-16 00:17:48,005 INFO    SenderThread:24880 [file_pusher.py:join():178] waiting for file pusher

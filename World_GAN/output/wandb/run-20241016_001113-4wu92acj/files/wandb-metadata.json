@@ -1,0 +1,45 @@
+{
+    "os": "Windows-10-10.0.22631-SP0",
+    "python": "3.10.13",
+    "heartbeatAt": "2024-10-16T04:11:14.691440",
+    "startedAt": "2024-10-16T04:11:13.416846",
+    "docker": null,
+    "cuda": null,
+    "args": [],
+    "state": "running",
+    "program": "C:\\Projects\\text2mc\\text2mc-dataprocessor\\World_GAN\\main.py",
+    "codePathLocal": "main.py",
+    "codePath": "World_GAN\\main.py",
+    "git": {
+        "remote": "https://github.com/shauncomino/text2mc-dataprocessor.git",
+        "commit": "edf61955ace14e994392af3543af9889adf84f84"
+    },
+    "email": "thatonepersonnobodyknows@gmail.com",
+    "root": "C:/Projects/text2mc/text2mc-dataprocessor",
+    "host": "MorgueParty",
+    "username": "isabe",
+    "executable": "C:\\Users\\isabe\\anaconda3\\envs\\world_gan\\python.exe",
+    "cpu_count": 8,
+    "cpu_count_logical": 16,
+    "cpu_freq": {
+        "current": 2000.0,
+        "min": 0.0,
+        "max": 2000.0
+    },
+    "cpu_freq_per_core": [
+        {
+            "current": 2000.0,
+            "min": 0.0,
+            "max": 2000.0
+        }
+    ],
+    "disk": {
+        "/": {
+            "total": 475.94042587280273,
+            "used": 282.4106330871582
+        }
+    },
+    "memory": {
+        "total": 15.342613220214844
+    }
+}
