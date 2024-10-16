@@ -17,7 +17,7 @@ import torch.nn as nn
 from sklearn.metrics import precision_score, recall_score, f1_score  # Added for classification metrics
 
 batch_size = 2
-num_epochs = 64
+num_epochs = 128
 fixed_size = (64, 64, 64)
 embedding_dim = 32
 on_arcc = True
