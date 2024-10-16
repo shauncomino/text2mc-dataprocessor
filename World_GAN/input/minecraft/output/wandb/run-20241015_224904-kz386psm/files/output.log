@@ -1,0 +1,12 @@
+Traceback (most recent call last):
+  File "C:\Projects\World-GAN\World-GAN\main.py", line 84, in <module>
+    main()
+  File "C:\Projects\World-GAN\World-GAN\main.py", line 40, in main
+    opt.out_ = os.path.join(run.dir)
+NameError: name 'os' is not defined
+Traceback (most recent call last):
+  File "C:\Projects\World-GAN\World-GAN\main.py", line 84, in <module>
+    main()
+  File "C:\Projects\World-GAN\World-GAN\main.py", line 40, in main
+    opt.out_ = os.path.join(run.dir)
+NameError: name 'os' is not defined

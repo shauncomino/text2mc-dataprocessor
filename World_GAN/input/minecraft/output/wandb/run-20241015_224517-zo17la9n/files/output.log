@@ -1,0 +1,85 @@
+[32m2024-10-15 22:45:19.019[39m | [1mINFO[22m | [90mC:\Projects\World-GAN\World-GAN\minecraft\level_utils.py:186[39m | batch_101_2618.h5 loaded.
+coords are  ((0, 96), (0, 13), (0, 64))
+[32m2024-10-15 22:45:19.751[39m | [1mINFO[22m | [90mC:\Projects\World-GAN\World-GAN\minecraft\level_utils.py:171[39m | Tokens in level ['minecraft:air', 'minecraft:cactus', 'minecraft:water', 'minecraft:acacia_leaves', 'minecraft:oak_leaves', 'minecraft:tall_grass', 'minecraft:sandstone_stairs', 'minecraft:oak_fence', 'minecraft:cut_sandstone_slab', 'minecraft:sweet_berry_bush', 'minecraft:birch_button', 'minecraft:oak_door', 'minecraft:gray_bed', 'minecraft:stripped_oak_log', 'minecraft:oak_slab', 'minecraft:oak_wood', 'minecraft:chest', 'minecraft:lantern', 'minecraft:sandstone_wall', 'minecraft:sandstone_slab', 'minecraft:oak_button', 'minecraft:oak_log', 'minecraft:oak_fence_gate', 'minecraft:white_bed', 'minecraft:smooth_sandstone_stairs', 'minecraft:oak_planks', 'minecraft:grindstone', 'minecraft:barrel', 'minecraft:oak_stairs', 'minecraft:cyan_bed', 'minecraft:oak_trapdoor', 'minecraft:oak_wall_sign', 'minecraft:hay_block', 'minecraft:farmland', 'minecraft:wheat', 'minecraft:composter', 'minecraft:campfire', 'minecraft:green_bed', 'minecraft:smooth_sandstone_slab', 'minecraft:brewing_stand', 'minecraft:purple_bed', 'minecraft:sea_pickle', 'minecraft:cauldron', 'minecraft:tripwire', 'minecraft:brick_slab', 'minecraft:podzol', 'minecraft:loom', 'minecraft:red_bed', 'minecraft:smooth_sandstone', 'minecraft:brown_bed', 'minecraft:stonecutter', 'minecraft:bell', 'minecraft:brick_stairs', 'minecraft:spruce_trapdoor', 'minecraft:blast_furnace', 'minecraft:blue_bed', 'minecraft:lectern', 'minecraft:smoker', 'minecraft:light_blue_bed', 'minecraft:furnace', 'minecraft:orange_bed', 'minecraft:yellow_bed', 'minecraft:stone_slab']
+Scale Info:
+[[0.75, 0.75, 0.75], [0.5, 0.6153846153846154, 0.5], [0.25, 0.6153846153846154, 0.25]]
+C:\Users\isabe\anaconda3\envs\world_gan\lib\site-packages\torch\functional.py:507: UserWarning: torch.meshgrid: in an upcoming release, it will be required to pass the indexing argument. (Triggered internally at ..\aten\src\ATen\native\TensorShape.cpp:3550.)
+  return _VF.meshgrid(tensors, **kwargs)  # type: ignore[attr-defined]
+Scaled Shapes:
+torch.Size([1, 63, 24, 8, 16])
+torch.Size([1, 63, 48, 8, 32])
+torch.Size([1, 63, 72, 9, 48])
+torch.Size([1, 63, 96, 13, 64])
+Level_GeneratorConcatSkip2CleanAdd(
+  (head): ConvBlock(
+    (conv): Conv3d(63, 64, kernel_size=(3, 3, 3), stride=(1, 1, 1))
+    (norm): BatchNorm3d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    (LeakyRelu): LeakyReLU(negative_slope=0.2, inplace=True)
+  )
+  (body): Sequential(
+    (block1): ConvBlock(
+      (conv): Conv3d(64, 64, kernel_size=(3, 3, 3), stride=(1, 1, 1))
+      (norm): BatchNorm3d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (LeakyRelu): LeakyReLU(negative_slope=0.2, inplace=True)
+    )
+  )
+  (tail): Sequential(
+    (0): Conv3d(64, 63, kernel_size=(3, 3, 3), stride=(1, 1, 1))
+  )
+)
+Level_WDiscriminator(
+  (head): ConvBlock(
+    (conv): Conv3d(63, 64, kernel_size=(3, 3, 3), stride=(1, 1, 1))
+    (norm): BatchNorm3d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    (LeakyRelu): LeakyReLU(negative_slope=0.2, inplace=True)
+  )
+  (body): Sequential(
+    (block1): ConvBlock(
+      (conv): Conv3d(64, 64, kernel_size=(3, 3, 3), stride=(1, 1, 1))
+      (norm): BatchNorm3d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (LeakyRelu): LeakyReLU(negative_slope=0.2, inplace=True)
+    )
+  )
+  (tail): Conv3d(64, 1, kernel_size=(3, 3, 3), stride=(1, 1, 1))
+)
+[32m2024-10-15 22:45:22.220[39m | [1mINFO[22m | [90mC:\Projects\World-GAN\World-GAN\train_single_scale.py:95[39m | Training at scale 0
+  0%|                                                                                                                                                                                                                                   | 0/10 [00:00<?, ?it/s][34m[1mwandb[39m[22m: [33mWARNING[39m `sync` argument is deprecated and does not affect the behaviour of `wandb.log`
+
+
+100%|██████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 10/10 [00:06<00:00,  1.53it/s]
+Traceback (most recent call last):
+  File "C:\Projects\World-GAN\World-GAN\main.py", line 83, in <module>
+    main()
+  File "C:\Projects\World-GAN\World-GAN\main.py", line 67, in main
+    generators, noise_maps, reals, noise_amplitudes = train(real, opt)
+  File "C:\Projects\World-GAN\World-GAN\train.py", line 122, in train
+    z_opt, input_from_prev_scale, G = train_single_scale(D,  G, reals, generators, noise_maps,
+  File "C:\Projects\World-GAN\World-GAN\train_single_scale.py", line 312, in train_single_scale
+    wandb.save(opt.outf)
+  File "C:\Users\isabe\anaconda3\envs\world_gan\lib\site-packages\wandb\sdk\wandb_run.py", line 371, in wrapper_fn
+    return func(self, *args, **kwargs)
+  File "C:\Users\isabe\anaconda3\envs\world_gan\lib\site-packages\wandb\sdk\wandb_run.py", line 361, in wrapper
+    return func(self, *args, **kwargs)
+  File "C:\Users\isabe\anaconda3\envs\world_gan\lib\site-packages\wandb\sdk\wandb_run.py", line 1860, in save
+    return self._save(glob_str, base_path, policy)
+  File "C:\Users\isabe\anaconda3\envs\world_gan\lib\site-packages\wandb\sdk\wandb_run.py", line 1914, in _save
+    os.symlink(abs_path, wandb_path)
+OSError: [WinError 1314] A required privilege is not held by the client: 'C:\\Projects\\World-GAN\\World-GAN\\output\\wandb\\run-20241015_224517-zo17la9n\\files\\0' -> 'output\\wandb\\run-20241015_224517-zo17la9n\\files\\output\\wandb\\run-20241015_224517-zo17la9n\\files\\0'
+Traceback (most recent call last):
+  File "C:\Projects\World-GAN\World-GAN\main.py", line 83, in <module>
+    main()
+  File "C:\Projects\World-GAN\World-GAN\main.py", line 67, in main
+    generators, noise_maps, reals, noise_amplitudes = train(real, opt)
+  File "C:\Projects\World-GAN\World-GAN\train.py", line 122, in train
+    z_opt, input_from_prev_scale, G = train_single_scale(D,  G, reals, generators, noise_maps,
+  File "C:\Projects\World-GAN\World-GAN\train_single_scale.py", line 312, in train_single_scale
+    wandb.save(opt.outf)
+  File "C:\Users\isabe\anaconda3\envs\world_gan\lib\site-packages\wandb\sdk\wandb_run.py", line 371, in wrapper_fn
+    return func(self, *args, **kwargs)
+  File "C:\Users\isabe\anaconda3\envs\world_gan\lib\site-packages\wandb\sdk\wandb_run.py", line 361, in wrapper
+    return func(self, *args, **kwargs)
+  File "C:\Users\isabe\anaconda3\envs\world_gan\lib\site-packages\wandb\sdk\wandb_run.py", line 1860, in save
+    return self._save(glob_str, base_path, policy)
+  File "C:\Users\isabe\anaconda3\envs\world_gan\lib\site-packages\wandb\sdk\wandb_run.py", line 1914, in _save
+    os.symlink(abs_path, wandb_path)
+OSError: [WinError 1314] A required privilege is not held by the client: 'C:\\Projects\\World-GAN\\World-GAN\\output\\wandb\\run-20241015_224517-zo17la9n\\files\\0' -> 'output\\wandb\\run-20241015_224517-zo17la9n\\files\\output\\wandb\\run-20241015_224517-zo17la9n\\files\\0'
