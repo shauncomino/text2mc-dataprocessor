@@ -337,8 +337,8 @@ def process_h5_files():
         bpy.context.scene.render.filepath = output_path
 
         # Set square render resolution
-        bpy.context.scene.render.resolution_x = 6000
-        bpy.context.scene.render.resolution_y = 6000
+        bpy.context.scene.render.resolution_x = 1024
+        bpy.context.scene.render.resolution_y = 1024
 
         # Increase samples for better quality
         bpy.context.scene.cycles.samples = 256  # Increase as needed
