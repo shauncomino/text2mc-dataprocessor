@@ -14,7 +14,7 @@ import numpy as np
 import random
 import torch.nn.functional as F
 import torch.nn as nn
-from sklearn.metrics import precision_score, recall_score, f1_score  # Import metrics
+from sklearn.metrics import precision_score, recall_score, f1_score
 
 batch_size = 2
 num_epochs = 64
@@ -188,6 +188,114 @@ def loss_function(embeddings_pred, block_air_pred, x, mu, logvar, data_tokens, a
 
     return total_loss, recon_loss, bce_loss, KLD
 
+# Function to convert embeddings back to tokens
+def embedding_to_tokens(embeddings_pred, embedding_matrix):
+    # embeddings_pred: PyTorch tensor of shape (Batch_Size, Embedding_Dim, D, H, W)
+    # embedding_matrix: NumPy array of shape (Num_Tokens, Embedding_Dim)
+
+    # Move Embedding_Dim to last dimension
+    embeddings_pred = embeddings_pred.permute(0, 2, 3, 4, 1).contiguous()  # Shape: (Batch_Size, D, H, W, Embedding_Dim)
+    batch_size, D, H, W, embedding_dim = embeddings_pred.shape
+    N = batch_size * D * H * W
+
+    # Flatten embeddings
+    embeddings_pred_flat = embeddings_pred.view(-1, embedding_dim).cpu().numpy()  # Shape: (N, Embedding_Dim)
+
+    # Normalize embeddings_pred_flat
+    embeddings_pred_flat_norm = embeddings_pred_flat / (np.linalg.norm(embeddings_pred_flat, axis=1, keepdims=True) + 1e-8)
+
+    # Normalize embedding_matrix
+    embedding_matrix_norm = embedding_matrix / (np.linalg.norm(embedding_matrix, axis=1, keepdims=True) + 1e-8)
+
+    # Compute cosine similarity
+    cosine_similarity = np.dot(embeddings_pred_flat_norm, embedding_matrix_norm.T)  # Shape: (N, Num_Tokens)
+
+    # Find the token with the highest cosine similarity
+    tokens_flat = np.argmax(cosine_similarity, axis=1)  # Shape: (N,)
+
+    # Reshape tokens back to (Batch_Size, D, H, W)
+    tokens = tokens_flat.reshape(batch_size, D, H, W)
+    tokens = torch.from_numpy(tokens).long()  # Convert to torch tensor
+
+    return tokens
+
+# Function to interpolate and generate builds
+def interpolate_and_generate(encoder, decoder, build1_path, build2_path, save_dir, epoch, num_interpolations=5):
+    encoder.eval()
+    decoder.eval()
+    with torch.no_grad():
+        # Load the two builds
+        dataset = text2mcVAEDataset(
+            file_paths=[build1_path, build2_path],
+            block2tok=block2tok,
+            block2embedding=block2embedding,
+            fixed_size=fixed_size,
+            augment=False  # Disable augmentation for consistent reconstructions
+        )
+        data_loader = DataLoader(dataset, batch_size=1, shuffle=False)
+
+        data_list = []
+        data_tokens_list = []
+        for data, data_tokens in data_loader:
+            data = data.to(device)
+            data_tokens = data_tokens.to(device)
+            data_list.append(data)
+            data_tokens_list.append(data_tokens)
+
+        z_list = []
+        for data in data_list:
+            z, mu, logvar = encoder(data)
+            z_list.append(z)
+
+        # Generate reconstructions of the original builds
+        for idx, (data, z, data_tokens) in enumerate(zip(data_list, z_list, data_tokens_list)):
+            embeddings_pred, block_air_pred = decoder(z)
+            # Convert embeddings back to tokens
+            recon_tokens = embedding_to_tokens(embeddings_pred, train_dataset.embedding_matrix).to(device)
+            # Apply block-air mask
+            block_air_pred_labels = (block_air_pred.squeeze(1) >= 0.5).long()
+            air_mask = (block_air_pred_labels == 0)
+            # Assign air_token_id to air voxels
+            recon_tokens[air_mask] = air_token_id
+            # Convert to numpy array
+            recon_tokens_np = recon_tokens.cpu().numpy().squeeze(0)  # Shape: (Depth, Height, Width)
+
+            # Save the reconstructed build as an HDF5 file
+            save_path = os.path.join(save_dir, f'epoch_{epoch}_recon_{idx}.h5')
+            with h5py.File(save_path, 'w') as h5f:
+                h5f.create_dataset('build', data=recon_tokens_np, compression='gzip')
+
+            print(f'Saved reconstruction of build {idx + 1} at {save_path}')
+
+        # Interpolate between z1 and z2
+        z1 = z_list[0]
+        z2 = z_list[1]
+
+        interpolations = []
+        for alpha in np.linspace(0, 1, num_interpolations):
+            z_interp = (1 - alpha) * z1 + alpha * z2
+            interpolations.append(z_interp)
+
+        # Generate builds from interpolated latent vectors
+        for idx, z in enumerate(interpolations):
+            embeddings_pred, block_air_pred = decoder(z)
+            # Convert embeddings back to tokens
+            recon_tokens = embedding_to_tokens(embeddings_pred, train_dataset.embedding_matrix).to(device)
+            # Apply block-air mask
+            block_air_pred_labels = (block_air_pred.squeeze(1) >= 0.5).long()
+            air_mask = (block_air_pred_labels == 0)
+            # Assign air_token_id to air voxels
+            recon_tokens[air_mask] = air_token_id
+            # Convert to numpy array
+            recon_tokens_np = recon_tokens.cpu().numpy().squeeze(0)  # Shape: (Depth, Height, Width)
+
+            # Save the interpolated build as an HDF5 file
+            save_path = os.path.join(save_dir, f'epoch_{epoch}_interp_{idx}.h5')
+            with h5py.File(save_path, 'w') as h5f:
+                h5f.create_dataset('build', data=recon_tokens_np, compression='gzip')
+
+            print(f'Saved interpolated build at {save_path}')
+
 # Training loop
 os.makedirs(save_dir, exist_ok=True)
 
@@ -359,3 +467,10 @@ for epoch in range(start_epoch, num_epochs + 1):
     }
     torch.save(checkpoint, checkpoint_path)
     print(f"Saved checkpoint at epoch {epoch}")
+
+    # Interpolate and generate builds
+    print(f'Interpolating between builds at the end of epoch {epoch}')
+    try:
+        interpolate_and_generate(encoder, decoder, build1_path, build2_path, save_dir, epoch, num_interpolations=5)
+    except Exception as e:
+        print(f"Unable to generate interpolations for this epoch due to error: {e}")
