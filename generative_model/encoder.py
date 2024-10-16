@@ -84,36 +84,30 @@ class AxialAttentionBlock3D(nn.Module):
         return out
 
 class PositionalEncoding3D(nn.Module):
-    def __init__(self, D, H, W, channels):
+    def __init__(self, channels):
         super().__init__()
-        self.D = D
-        self.H = H
-        self.W = W
         self.channels = channels
-
-        # Create coordinate grids
-        z = torch.arange(D).unsqueeze(1).unsqueeze(2).expand(D, H, W)
-        y = torch.arange(H).unsqueeze(0).unsqueeze(2).expand(D, H, W)
-        x = torch.arange(W).unsqueeze(0).unsqueeze(1).expand(D, H, W)
-
-        # Normalize coordinates
-        z = z.float() / D
-        y = y.float() / H
-        x = x.float() / W
-
-        # Stack coordinates
-        self.register_buffer('coords', torch.stack((z, y, x), dim=3).unsqueeze(0))
-
         self.linear = nn.Linear(3, channels)
 
     def forward(self, x):
-        batch_size = x.size(0)
-        coords = self.coords.repeat(batch_size, 1, 1, 1, 1)
-        coords = coords.to(x.device)
-        coords = coords.view(-1, 3)
-        pos_embed = self.linear(coords)
-        pos_embed = pos_embed.view(batch_size, self.D, self.H, self.W, self.channels)
-        pos_embed = pos_embed.permute(0, 4, 1, 2, 3)
+        # x shape: (batch_size, channels, D, H, W)
+        batch_size, _, D, H, W = x.size()
+
+        # Create coordinate grids
+        z = torch.arange(D, dtype=torch.float32, device=x.device).unsqueeze(1).unsqueeze(2).expand(D, H, W) / D
+        y = torch.arange(H, dtype=torch.float32, device=x.device).unsqueeze(0).unsqueeze(2).expand(D, H, W) / H
+        x_coords = torch.arange(W, dtype=torch.float32, device=x.device).unsqueeze(0).unsqueeze(1).expand(D, H, W) / W
+
+        # Stack coordinates
+        coords = torch.stack((z, y, x_coords), dim=3).unsqueeze(0)  # Shape: (1, D, H, W, 3)
+
+        coords = coords.repeat(batch_size, 1, 1, 1, 1)  # Shape: (batch_size, D, H, W, 3)
+        coords = coords.view(-1, 3)  # Shape: (batch_size * D * H * W, 3)
+
+        # Apply linear layer
+        pos_embed = self.linear(coords)  # Shape: (batch_size * D * H * W, channels)
+        pos_embed = pos_embed.view(batch_size, D, H, W, self.channels)
+        pos_embed = pos_embed.permute(0, 4, 1, 2, 3)  # Shape: (batch_size, channels, D, H, W)
         return pos_embed
 
 class text2mcVAEResidualBlock(nn.Module):
@@ -137,12 +131,12 @@ class text2mcVAEResidualBlock(nn.Module):
         x = F.silu(x)
         x = self.conv_2(x)
         return x + self.residual_layer(residue)
-
+    
 class text2mcVAEEncoder(nn.Module):
     def __init__(self, embedding_dim=32):
         super().__init__()
         self.embedding_dim = embedding_dim
-        self.positional_encoding = None
+        self.positional_encoding = PositionalEncoding3D(embedding_dim)
 
         self.initial_layers = nn.Sequential(
             nn.Conv3d(embedding_dim, 64, kernel_size=3, padding=1),
@@ -171,9 +165,6 @@ class text2mcVAEEncoder(nn.Module):
         return mu + eps * std
 
     def forward(self, x):
-        batch_size, embedding_dim, D, H, W = x.shape
-        if self.positional_encoding is None or self.positional_encoding.D != D or self.positional_encoding.H != H or self.positional_encoding.W != W:
-            self.positional_encoding = PositionalEncoding3D(D, H, W, embedding_dim).to(x.device)
         x = x + self.positional_encoding(x)
         x = self.initial_layers(x)
         x = self.groupnorm(x)
@@ -182,3 +173,4 @@ class text2mcVAEEncoder(nn.Module):
         logvar = torch.clamp(logvar, -20, 20)
         z = self.reparameterize(mu, logvar)
         return z, mu, logvar
+
