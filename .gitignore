@@ -3,6 +3,8 @@ __pycache__
 .vscode/
 env/
 builds/
+test_builds/
+rendering/output/
 /.vscode
 /.vs
 block2vec/lightning_logs/
