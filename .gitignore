@@ -2,6 +2,8 @@ __pycache__
 .vs/
 .vscode/
 env/
+test_builds/
+rendering/output/
 builds/
 /.vscode
 /.vs
