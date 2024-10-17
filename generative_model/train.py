@@ -24,14 +24,14 @@ on_arcc = True
 
 if on_arcc:
     # Paths and configurations
-    checkpoint_path = r'/lustre/fs1/home/scomino/training_lattice/checkpoint.pth'
-    tok2block_file_path = r'/lustre/fs1/home/scomino/text2mc_lattice/text2mc-dataprocessor/world2vec/tok2block.json'
+    checkpoint_path = r'/lustre/fs1/home/scomino/madscientist_training/checkpoint.pth'
+    tok2block_file_path = r'/lustre/fs1/home/scomino/madscientist/text2mc-dataprocessor/world2vec/tok2block.json'
     builds_folder_path = r'/lustre/fs1/groups/jaedo/processed_builds'
     build1_path = r'/lustre/fs1/groups/jaedo/processed_builds/batch_319_8281.h5'
     build2_path = r'/lustre/fs1/groups/jaedo/processed_builds/batch_225_5840.h5'
-    save_dir = r'/lustre/fs1/home/scomino/training_lattice/interpolations'
-    best_model_path = r'/lustre/fs1/home/scomino/training_lattice/best_model.pth'
-    block2embedding_file_path = r'/lustre/fs1/home/scomino/text2mc_lattice/text2mc-dataprocessor/block2vec/output/block2vec/embeddings.json'
+    save_dir = r'/lustre/fs1/home/scomino/madscientist_training/interpolations'
+    best_model_path = r'/lustre/fs1/home/scomino/madscientist_training/best_model.pth'
+    block2embedding_file_path = r'/lustre/fs1/home/scomino/madscientist/text2mc-dataprocessor/block2vec/output/block2vec/embeddings.json'
     
     # Device type for arcc
     device_type = 'cuda' if torch.cuda.is_available() else 'cpu'
@@ -168,12 +168,9 @@ def loss_function(embeddings_pred, block_air_pred, x, mu, logvar, data_tokens, a
     # Flatten data_tokens
     data_tokens_flat = data_tokens.reshape(-1)  # Shape: (N,)
 
-    # Prepare labels for Cosine Embedding Loss
-    y = torch.ones(N, device=x_flat.device)  # Shape: (N,)
-
-    # Compute Cosine Embedding Loss per voxel without reduction
-    cosine_loss_fn = nn.CosineEmbeddingLoss(margin=0.0, reduction='none')
-    loss_per_voxel = cosine_loss_fn(embeddings_pred_flat, x_flat, y)  # Shape: (N,)
+    # Compute the dot product per voxel without normalization
+    dot_products = torch.sum(embeddings_pred_flat * x_flat, dim=1)  # Shape: (N,)
+    loss_per_voxel = (dot_products) ** 2                            # Shape: (N,)
 
     # Mask out the error tensor to include only the errors of the non-air blocks
     mask = (data_tokens_flat != air_token_id)  # Shape: (N,)
@@ -183,21 +180,35 @@ def loss_function(embeddings_pred, block_air_pred, x, mu, logvar, data_tokens, a
     num_non_air_voxels = loss_per_voxel.numel() + epsilon  # To prevent division by zero
     recon_loss = loss_per_voxel.sum() / num_non_air_voxels
 
+    # Compute L2 norm penalty on embeddings (regularization term)
+    # Only consider embeddings corresponding to non-air blocks
+    embeddings_pred_non_air = embeddings_pred_flat[mask]  # Shape: (num_non_air_voxels, Embedding_Dim)
+    x_non_air = x_flat[mask]                              # Shape: (num_non_air_voxels, Embedding_Dim)
+
+    # Compute L2 norms
+    embeddings_pred_norms = torch.norm(embeddings_pred_non_air, p=2, dim=1)  # Shape: (num_non_air_voxels,)
+    x_norms = torch.norm(x_non_air, p=2, dim=1)                              # Shape: (num_non_air_voxels,)
+
+    # Compute the L2 norm penalty (mean of squared norms)
+    norm_reg_loss = (embeddings_pred_norms ** 2).mean() + (x_norms ** 2).mean()
+
     # Prepare ground truth labels for block vs. air
     block_air_labels = (data_tokens != air_token_id).float()  # Shape: (Batch_Size, D, H, W)
 
     # Compute binary cross-entropy loss for block vs. air prediction over all voxels
     bce_loss_fn = nn.BCELoss()
-    block_air_pred = block_air_pred.squeeze(1)  # Shape: (Batch_Size, D, H, W)
-    bce_loss = bce_loss_fn(block_air_pred, block_air_labels)
+    block_air_pred_probs = block_air_pred.squeeze(1)  # Shape: (Batch_Size, D, H, W)
+    bce_loss = bce_loss_fn(block_air_pred_probs, block_air_labels)
 
     # Compute KL Divergence
     KLD = -0.5 * torch.mean(1 + logvar - mu.pow(2) - logvar.exp())
 
     # Combine losses
-    total_loss = recon_loss + bce_loss + KLD
+    lambda_reg = 1e-4  # Regularization hyperparameter (adjust as needed)
+    total_loss = recon_loss + bce_loss + KLD + lambda_reg * norm_reg_loss
 
     return total_loss, recon_loss, bce_loss, KLD
+
 
 
 
