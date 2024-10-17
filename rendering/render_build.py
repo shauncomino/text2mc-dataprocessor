@@ -7,6 +7,8 @@ import math
 import glob
 import json
 from mathutils import Vector, Matrix
+from PIL import Image  # Make sure Pillow is installed
+import re
 
 warnings.filterwarnings("ignore", category=UserWarning, module='numpy')
 
@@ -27,6 +29,9 @@ block_size = 1  # Adjust if necessary
 
 # Air block token
 AIR_TOKEN = 102  # The integer representing air blocks
+
+# Time between frames in the GIF (in milliseconds)
+gif_frame_duration = 100  # Adjust as needed
 
 # Load the token to block mapping
 with open(tok2block_path, 'r') as f:
@@ -299,57 +304,148 @@ def setup_scene(grid_shape):
     bpy.context.scene.render.image_settings.file_format = 'PNG'
     bpy.context.scene.render.image_settings.color_mode = 'RGBA'
 
-def process_h5_files():
-    # Ensure output folder exists
-    if not os.path.exists(output_folder):
-        os.makedirs(output_folder)
+def render_and_save(build_data, output_path):
+    clear_scene()
+    # Create voxel mesh
+    obj = create_voxel_mesh(build_data)
 
-    # List all .h5 files in the folder
+    # Get grid shape
+    grid_shape = build_data.shape
+
+    # Set up the scene
+    setup_scene(grid_shape)
+
+    # Render settings
+    bpy.context.scene.render.engine = 'CYCLES'
+    bpy.context.scene.cycles.device = 'GPU'  # Use GPU if available
+
+    # Set output path
+    bpy.context.scene.render.filepath = output_path
+
+    # Set square render resolution
+    bpy.context.scene.render.resolution_x = 1024
+    bpy.context.scene.render.resolution_y = 1024
+
+    # Increase samples for better quality
+    bpy.context.scene.cycles.samples = 256  # Increase as needed
+
+    # Enable denoising
+    bpy.context.scene.cycles.use_denoising = True
+
+    # Render the image
+    bpy.ops.render.render(write_still=True)
+    print(f"Rendered {output_path}")
+
+from PIL import Image
+
+def create_gif(image_paths, gif_output_path, duration):
+    images = []
+    for image_path in image_paths:
+        img = Image.open(image_path).convert('RGBA')
+        images.append(img)
+
+    # Step 1: Create a shared palette using the first image
+    # Convert to 'RGB' before quantizing
+    palette_image = images[0].convert('RGB').quantize(method=Image.ADAPTIVE, colors=255)
+    palette = palette_image.getpalette()
+
+    # Step 2: Add a unique transparency color to the palette
+    transparency_color = (255, 0, 255)  # Magenta (unlikely to be used in textures)
+    palette += [0]*(768 - len(palette))  # Ensure palette has 256 colors (256*3=768)
+    palette[-3:] = transparency_color      # Set the last color to transparency color
+    palette_image.putpalette(palette)
+
+    transparency_index = 255  # Index of the transparency color in the palette
+
+    frames = []
+    for img in images:
+        # Step 3a: Composite the image onto the transparency color background
+        background = Image.new('RGB', img.size, transparency_color)
+        img_rgb = Image.alpha_composite(background.convert('RGBA'), img).convert('RGB')
+
+        # Step 3b: Quantize the image using the shared palette
+        p = img_rgb.quantize(palette=palette_image, method=Image.NONE)
+
+        # Step 3c: Create a transparency mask based on the original alpha channel
+        alpha = img.getchannel('A')
+        mask = Image.eval(alpha, lambda a: 255 if a <= 128 else 0)
+        p.paste(transparency_index, mask=mask)
+
+        frames.append(p)
+
+    # Step 4: Save the GIF with the designated transparency index
+    frames[0].save(
+        gif_output_path,
+        save_all=True,
+        append_images=frames[1:],
+        duration=duration,          # Duration per frame in milliseconds
+        loop=0,                     # 0 means the GIF will loop indefinitely
+        transparency=transparency_index,
+        disposal=2                  # Ensure that the previous frame is cleared before the next
+    )
+    print(f"Created GIF: {gif_output_path}")
+
+
+
+
+def process_epochs():
+    # Find all h5 files and group them by epoch
     h5_files = [f for f in os.listdir(h5_folder) if f.endswith('.h5')]
 
+    # Regex pattern to extract epoch and interpolation numbers
+    pattern = r'epoch_(\d+)_interp_(\d+)\.h5'
+
+    # Dictionary to hold epochs and their corresponding h5 files
+    epochs = {}
+
     for h5_file in h5_files:
-        print(f"Processing {h5_file}...")
-        clear_scene()
+        match = re.match(pattern, h5_file)
+        if match:
+            epoch_num = int(match.group(1))
+            interp_num = int(match.group(2))
+            if epoch_num not in epochs:
+                epochs[epoch_num] = []
+            epochs[epoch_num].append((interp_num, h5_file))
+        else:
+            print(f"Filename {h5_file} does not match expected pattern.")
 
-        # Load block data from .h5 file
-        h5_path = os.path.join(h5_folder, h5_file)
-        with h5py.File(h5_path, 'r') as hf:
-            build_folder_in_hdf5 = list(hf.keys())[0]
-            block_data = hf[build_folder_in_hdf5][()]
-            # Transpose to match Blender's coordinate system
-            block_data = np.transpose(block_data, (0, 2, 1))  # Adjusted transpose
+    # Process each epoch
+    for epoch_num in sorted(epochs.keys()):
+        image_paths = []
+        epoch_images_exist = True
+        # Sort interpolations by interp_num
+        epochs[epoch_num].sort(key=lambda x: x[0])
+        for interp_num, h5_file in epochs[epoch_num]:
+            image_filename = f'epoch_{epoch_num}_interp_{interp_num}.png'
+            image_path = os.path.join(output_folder, image_filename)
+            if not os.path.exists(image_path):
+                epoch_images_exist = False
+                break  # If any image is missing, we need to render all
+            image_paths.append(image_path)
 
-        # Create voxel mesh
-        obj = create_voxel_mesh(block_data)
+        if not epoch_images_exist:
+            print(f"Rendering images for epoch {epoch_num}...")
+            image_paths = []
+            for interp_num, h5_file in epochs[epoch_num]:
+                h5_path = os.path.join(h5_folder, h5_file)
+                with h5py.File(h5_path, 'r') as hf:
+                    build_folder_in_hdf5 = list(hf.keys())[0]
+                    block_data = hf[build_folder_in_hdf5][()]
+                    # Transpose to match Blender's coordinate system
+                    block_data = np.transpose(block_data, (0, 2, 1))  # Adjusted transpose
 
-        # Get grid shape
-        grid_shape = block_data.shape
+                image_filename = f'epoch_{epoch_num}_interp_{interp_num}.png'
+                image_path = os.path.join(output_folder, image_filename)
+                render_and_save(block_data, image_path)
+                image_paths.append(image_path)
+        else:
+            print(f"Images for epoch {epoch_num} already exist. Creating GIF...")
 
-        # Set up the scene
-        setup_scene(grid_shape)
-
-        # Render settings
-        bpy.context.scene.render.engine = 'CYCLES'
-        bpy.context.scene.cycles.device = 'GPU'  # Use GPU if available
-
-        # Set output path
-        output_path = os.path.join(output_folder, os.path.splitext(os.path.basename(h5_file))[0] + '.png')
-        bpy.context.scene.render.filepath = output_path
-
-        # Set square render resolution
-        bpy.context.scene.render.resolution_x = 6000
-        bpy.context.scene.render.resolution_y = 6000
-
-        # Increase samples for better quality
-        bpy.context.scene.cycles.samples = 256  # Increase as needed
-
-        # Enable denoising
-        bpy.context.scene.cycles.use_denoising = True
-
-        # Render the image
-        bpy.ops.render.render(write_still=True)
-        print(f"Rendered {output_path}")
+        # Create GIF from images
+        gif_output_path = os.path.join(output_folder, f'epoch_{epoch_num}.gif')
+        create_gif(image_paths, gif_output_path, gif_frame_duration)
+        print(f"GIF created for epoch {epoch_num}")
 
 # Entry point
 if __name__ == "__main__":
-    process_h5_files()
+    process_epochs()
