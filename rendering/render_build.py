@@ -323,11 +323,11 @@ def render_and_save(build_data, output_path):
     bpy.context.scene.render.filepath = output_path
 
     # Set square render resolution
-    bpy.context.scene.render.resolution_x = 1024
-    bpy.context.scene.render.resolution_y = 1024
+    bpy.context.scene.render.resolution_x = 2000
+    bpy.context.scene.render.resolution_y = 2000
 
     # Increase samples for better quality
-    bpy.context.scene.cycles.samples = 256  # Increase as needed
+    bpy.context.scene.cycles.samples = 1  # Increase as needed
 
     # Enable denoising
     bpy.context.scene.cycles.use_denoising = True
