@@ -241,7 +241,7 @@ def embedding_to_tokens(embedded_data, embeddings_matrix):
     return tokens
 
 # Function to interpolate and generate builds
-def interpolate_and_generate(encoder, decoder, build1_path, build2_path, save_dir, epoch, num_interpolations=10):
+def interpolate_and_generate(encoder, decoder, build1_path, build2_path, save_dir, epoch, num_interpolations=20):
     encoder.eval()
     decoder.eval()
     with torch.no_grad():
@@ -477,6 +477,6 @@ for epoch in range(start_epoch, num_epochs + 1):
     # Interpolate and generate builds
     print(f'Interpolating between builds at the end of epoch {epoch}')
     try:
-        interpolate_and_generate(encoder, decoder, build1_path, build2_path, save_dir, epoch, num_interpolations=5)
+        interpolate_and_generate(encoder, decoder, build1_path, build2_path, save_dir, epoch)
     except Exception as e:
         print(f"Unable to generate interpolations for this epoch due to error: {e}")
