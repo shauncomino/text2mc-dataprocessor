@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name=VAE                      # Job name
+#SBATCH --job-name=MADSCIENTIST                      # Job name
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1                 # Number of processes (GPUs)
 #SBATCH --partition=normal                  # Partition (queue) name
