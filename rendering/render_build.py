@@ -354,6 +354,9 @@ def create_gif(image_paths, gif_output_path, duration):
         print(f"No non-empty images to create GIF: {gif_output_path}")
         return
 
+    images.reverse()
+    valid_image_paths.reverse()
+
     # Step 1: Create a shared palette using the first non-empty image
     palette_image = images[0].convert('RGB').quantize(method=Image.ADAPTIVE, colors=255)
     palette = palette_image.getpalette()
