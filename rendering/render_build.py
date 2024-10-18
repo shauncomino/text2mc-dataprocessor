@@ -323,8 +323,8 @@ def render_and_save(build_data, output_path):
     bpy.context.scene.render.filepath = output_path
 
     # Set square render resolution
-    bpy.context.scene.render.resolution_x = 2000
-    bpy.context.scene.render.resolution_y = 2000
+    bpy.context.scene.render.resolution_x = 1024
+    bpy.context.scene.render.resolution_y = 1024
 
     # Increase samples for better quality
     bpy.context.scene.cycles.samples = 1  # Increase as needed
@@ -340,50 +340,68 @@ from PIL import Image
 
 def create_gif(image_paths, gif_output_path, duration):
     images = []
+    valid_image_paths = []
     for image_path in image_paths:
         img = Image.open(image_path).convert('RGBA')
+        if not img.getbbox():
+            # Image is empty (fully transparent)
+            print(f"Skipping empty image: {image_path}")
+            continue
         images.append(img)
+        valid_image_paths.append(image_path)
 
-    # Step 1: Create a shared palette using the first image
-    # Convert to 'RGB' before quantizing
+    if not images:
+        print(f"No non-empty images to create GIF: {gif_output_path}")
+        return
+
+    # Step 1: Create a shared palette using the first non-empty image
     palette_image = images[0].convert('RGB').quantize(method=Image.ADAPTIVE, colors=255)
     palette = palette_image.getpalette()
 
     # Step 2: Add a unique transparency color to the palette
     transparency_color = (255, 0, 255)  # Magenta (unlikely to be used in textures)
     palette += [0]*(768 - len(palette))  # Ensure palette has 256 colors (256*3=768)
-    palette[-3:] = transparency_color      # Set the last color to transparency color
+    palette[-3:] = transparency_color     # Set the last color to transparency color
     palette_image.putpalette(palette)
 
     transparency_index = 255  # Index of the transparency color in the palette
 
     frames = []
-    for img in images:
-        # Step 3a: Composite the image onto the transparency color background
-        background = Image.new('RGB', img.size, transparency_color)
-        img_rgb = Image.alpha_composite(background.convert('RGBA'), img).convert('RGB')
+    for idx, img in enumerate(images):
+        try:
+            # Step 3a: Composite the image onto the transparency color background
+            background = Image.new('RGB', img.size, transparency_color)
+            img_rgb = Image.alpha_composite(background.convert('RGBA'), img).convert('RGB')
 
-        # Step 3b: Quantize the image using the shared palette
-        p = img_rgb.quantize(palette=palette_image, method=Image.NONE)
+            # Step 3b: Quantize the image using the shared palette
+            p = img_rgb.quantize(palette=palette_image, method=Image.NONE)
 
-        # Step 3c: Create a transparency mask based on the original alpha channel
-        alpha = img.getchannel('A')
-        mask = Image.eval(alpha, lambda a: 255 if a <= 128 else 0)
-        p.paste(transparency_index, mask=mask)
+            # Step 3c: Create a transparency mask based on the original alpha channel
+            alpha = img.getchannel('A')
+            mask = Image.eval(alpha, lambda a: 255 if a <= 128 else 0)
+            p.paste(transparency_index, mask=mask)
 
-        frames.append(p)
+            frames.append(p)
+        except Exception as e:
+            print(f"Error processing image {valid_image_paths[idx]}: {e}")
+            continue
+
+    if not frames:
+        print(f"No frames to save in GIF: {gif_output_path}")
+        return
 
     # Step 4: Save the GIF with the designated transparency index
     frames[0].save(
         gif_output_path,
         save_all=True,
-        append_images=frames[1:],
+        append_images=frames[1:] if len(frames) > 1 else None,
         duration=duration,          # Duration per frame in milliseconds
         loop=0,                     # 0 means the GIF will loop indefinitely
         transparency=transparency_index,
         disposal=2                  # Ensure that the previous frame is cleared before the next
     )
     print(f"Created GIF: {gif_output_path}")
+
 
 
 
