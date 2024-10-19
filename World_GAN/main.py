@@ -53,6 +53,8 @@ def main():
     # Read level according to input arguments
     real = mc_read_level(opt)
 
+    print(real.shape)
+
     # Multi-Input is taken over from old code but not implemented for Minecraft
     if opt.use_multiple_inputs:
         logger.info("Multiple inputs are not implemented yet for Minecraft.")
