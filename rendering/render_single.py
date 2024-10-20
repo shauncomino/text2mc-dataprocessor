@@ -323,18 +323,12 @@ def render_and_save(build_data, output_path):
     bpy.ops.render.render(write_still=True)
     print(f"Rendered {output_path}")
 
-def process_hdf5_file(hdf5_file):
-    # Path to the HDF5 file
+def process_hdf5_file(block_data, file_name):
 
-    # Open the HDF5 file
-    with h5py.File(hdf5_file, 'r') as hf:
-        build_folder_in_hdf5 = list(hf.keys())[0]
-        block_data = hf[build_folder_in_hdf5][()]
-        # Transpose to match Blender's coordinate system
-        block_data = np.transpose(block_data, (0, 2, 1))
+    block_data = np.transpose(block_data, (0, 2, 1))
 
     # Extract the filename without extension to use for image
-    image_filename = os.path.splitext(hdf5_file)[0] + '.png'
+    image_filename = file_name + '.png'
     image_path = os.path.join(output_folder, image_filename)
 
     # Render and save the image
