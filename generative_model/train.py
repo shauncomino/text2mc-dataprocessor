@@ -150,54 +150,97 @@ if os.path.exists(checkpoint_path):
 else:
     print("No checkpoint found, starting from scratch")
 
-def loss_function(embeddings_pred, block_air_pred, x, mu, logvar, data_tokens, air_token_id, epsilon=1e-8):
+def loss_function(
+    embeddings_pred, block_air_pred, x, mu, logvar,
+    data_tokens, air_token_id, token_probs_tensor, epsilon=1e-8
+):
     # embeddings_pred and x: (Batch_Size, Embedding_Dim, D, H, W)
     # block_air_pred: (Batch_Size, 1, D, H, W)
     # data_tokens: (Batch_Size, D, H, W)
 
     # Move Embedding_Dim to the last dimension
-    embeddings_pred = embeddings_pred.permute(0, 2, 3, 4, 1)  # Shape: (Batch_Size, D, H, W, Embedding_Dim)
-    x = x.permute(0, 2, 3, 4, 1)                              # Shape: (Batch_Size, D, H, W, Embedding_Dim)
+    embeddings_pred = embeddings_pred.permute(0, 2, 3, 4, 1)  # Shape: (B, D, H, W, E)
+    x = x.permute(0, 2, 3, 4, 1)                              # Shape: (B, D, H, W, E)
 
     # Flatten spatial dimensions
     batch_size, D, H, W, embedding_dim = embeddings_pred.shape
     N = batch_size * D * H * W
-    embeddings_pred_flat = embeddings_pred.reshape(N, embedding_dim)  # Shape: (N, Embedding_Dim)
-    x_flat = x.reshape(N, embedding_dim)                              # Shape: (N, Embedding_Dim)
+    embeddings_pred_flat = embeddings_pred.reshape(N, embedding_dim)  # Shape: (N, E)
+    x_flat = x.reshape(N, embedding_dim)                              # Shape: (N, E)
+    data_tokens_flat = data_tokens.reshape(N)                         # Shape: (N,)
 
-    # Flatten data_tokens
-    data_tokens_flat = data_tokens.reshape(-1)  # Shape: (N,)
-
+    # Compute Cosine Embedding Loss per voxel without reduction
     # Prepare labels for Cosine Embedding Loss
     y = torch.ones(N, device=x_flat.device)  # Shape: (N,)
 
-    # Compute Cosine Embedding Loss per voxel without reduction
-    cosine_loss_fn = nn.CosineEmbeddingLoss(margin=0.0, reduction='none')
-    loss_per_voxel = cosine_loss_fn(embeddings_pred_flat, x_flat, y)  # Shape: (N,)
+    # Normalize embeddings for cosine similarity computation
+    embeddings_pred_norm = F.normalize(embeddings_pred_flat, p=2, dim=1)
+    x_norm = F.normalize(x_flat, p=2, dim=1)
 
-    # Mask out the error tensor to include only the errors of the non-air blocks
-    mask = (data_tokens_flat != air_token_id)  # Shape: (N,)
-    loss_per_voxel = loss_per_voxel[mask]      # Shape: (num_non_air_voxels,)
+    # Compute cosine similarity
+    cosine_similarity = torch.sum(embeddings_pred_norm * x_norm, dim=1)  # Shape: (N,)
 
-    # Compute mean over non-air blocks
-    num_non_air_voxels = loss_per_voxel.numel() + epsilon  # To prevent division by zero
-    recon_loss = loss_per_voxel.sum() / num_non_air_voxels
+    # Compute per-voxel loss
+    loss_per_voxel = 1 - cosine_similarity  # Shape: (N,)
+
+    # Retrieve probabilities for each token
+    token_probs_flat = token_probs_tensor[data_tokens_flat]  # Shape: (N,)
+
+    # Compute weights: w = 1 - probability_of_token
+    token_weights_flat = 1.0 - token_probs_flat
+
+    # Mask out air blocks
+    mask = (data_tokens_flat != air_token_id)
+    loss_per_voxel = loss_per_voxel[mask]           # Shape: (num_non_air_voxels,)
+    token_weights_flat = token_weights_flat[mask]   # Shape: (num_non_air_voxels,)
+
+    # Apply weights to the per-voxel losses
+    weighted_loss_per_voxel = loss_per_voxel * token_weights_flat
+
+    # Compute mean over non-air voxels
+    recon_loss = weighted_loss_per_voxel.sum() / (token_weights_flat.sum() + epsilon)
+
+    # Compute L2 norm penalty on embeddings (regularization term), if desired
+    embeddings_pred_non_air = embeddings_pred_flat[mask]
+    x_non_air = x_flat[mask]
+
+    embeddings_pred_norms = torch.norm(embeddings_pred_non_air, p=2, dim=1)
+    x_norms = torch.norm(x_non_air, p=2, dim=1)
+
+    norm_reg_loss = (embeddings_pred_norms ** 2).mean() + (x_norms ** 2).mean()
 
     # Prepare ground truth labels for block vs. air
-    block_air_labels = (data_tokens != air_token_id).float()  # Shape: (Batch_Size, D, H, W)
+    block_air_labels = (data_tokens != air_token_id).float()  # Shape: (B, D, H, W)
 
-    # Compute binary cross-entropy loss for block vs. air prediction over all voxels
-    bce_loss_fn = nn.BCELoss()
-    block_air_pred = block_air_pred.squeeze(1)  # Shape: (Batch_Size, D, H, W)
-    bce_loss = bce_loss_fn(block_air_pred, block_air_labels)
+    # Compute element-wise weights for BCE loss
+    # We need to reshape token_weights_flat to match block_air_labels shape
+    token_weights_full = token_weights_flat.view(batch_size, D, H, W)
+
+    # For BCE loss, include air tokens but don't weight them
+    bce_weights = torch.ones_like(block_air_labels)
+    bce_weights[mask.view(batch_size, D, H, W)] = token_weights_full
+
+    # Compute BCE loss per element
+    block_air_pred_probs = block_air_pred.squeeze(1)  # Shape: (B, D, H, W)
+    bce_loss_per_element = F.binary_cross_entropy(
+        block_air_pred_probs, block_air_labels, reduction='none'
+    )
+
+    # Apply weights
+    weighted_bce_loss_per_element = bce_loss_per_element * bce_weights
+
+    # Compute mean BCE loss
+    bce_loss = weighted_bce_loss_per_element.sum() / (bce_weights.sum() + epsilon)
 
     # Compute KL Divergence
     KLD = -0.5 * torch.mean(1 + logvar - mu.pow(2) - logvar.exp())
 
     # Combine losses
-    total_loss = recon_loss + bce_loss + KLD
+    lambda_reg = 1e-4  # Adjust as needed
+    total_loss = recon_loss + bce_loss + KLD + lambda_reg * norm_reg_loss
 
     return total_loss, recon_loss, bce_loss, KLD
+
 
 
 
