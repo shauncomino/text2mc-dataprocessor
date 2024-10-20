@@ -1,16 +1,21 @@
 import json
 import torch
 import torch.nn as nn
+from torch.utils.data import DataLoader
 from encoder import text2mcVAEEncoder
 from decoder import text2mcVAEDecoder
 from text2mcVAEDataset import text2mcVAEDataset
 import scipy
 import numpy as np
 import os
+import sys
 import h5py
-import vec2world
 from datetime import datetime
 from sklearn.neighbors import NearestNeighbors
+
+sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'vec2world'))
+
+from vec2world import convert_numpy_array_to_blocks, create_schematic_file
 
 class text2mcPredictor(nn.Module):
     def __init__(self):
@@ -19,24 +24,29 @@ class text2mcPredictor(nn.Module):
         self.EMBEDDINGS_FILE = "../block2vec/output/block2vec/embeddings.json"
         self.EMBEDDING_MODEL_PATH = "../block2vec/checkpoints/best_model.pth"
 
-        self.ENCODER_MODEL_PATH = "generative_model/checkpoints/encoder.pth"
-        self.DECODER_MODEL_PATH = "generative_model/checkpoints/decoder.pth"
+        # Update the path to the model checkpoint
+        self.MODEL_PATH = "checkpoints/best_model.pth"
 
         self.BLOCK_TO_TOK = "../world2vec/block2tok.json"
 
         self.SAVE_DIRECTORY = "../generated_builds/"
-        self.GENERATED_HDF5S_PATH = "../generated_hdf5s/"
 
         # Load the pre-trained embeddings and the encoder and decoder models and set them to eval mode
         self.embeddings = json.load(open(self.EMBEDDINGS_FILE))
         self.block2tok = json.load(open(self.BLOCK_TO_TOK))
 
-        self.encoder = text2mcVAEEncoder()
-        self.encoder.load_state_dict(torch.load(self.ENCODER_MODEL_PATH, weights_only=True))
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+        self.air_token_id = self.block2tok["minecraft:air"]
+
+        checkpoint = torch.load(self.MODEL_PATH, map_location=self.device,weights_only=True)
+
+        self.encoder = text2mcVAEEncoder().to(self.device)
+        self.encoder.load_state_dict(checkpoint["encoder_state_dict"])
         self.encoder.eval()
 
-        self.decoder = text2mcVAEDecoder()
-        self.decoder.load_state_dict(torch.load(self.DECODER_MODEL_PATH, weights_only=True))
+        self.decoder = text2mcVAEDecoder().to(self.device)
+        self.decoder.load_state_dict(checkpoint["decoder_state_dict"])
         self.decoder.eval()
 
     # 1. Loads two builds from the dataset (user specified)
@@ -46,18 +56,20 @@ class text2mcPredictor(nn.Module):
 
         dataset = text2mcVAEDataset(file_paths=hdf5_files, block2embedding=self.embeddings, block2tok=self.block2tok, block_ignore_list=[102], fixed_size=(64, 64, 64))
         
-        '''
-        Get the data and mask for the two builds by calling the __getitem__ method which converts the build into the embeddings.
-        Do we need the mask part for anything or is that is only for figuring out the loss?
-        '''
-        building1_data, building1_mask = dataset.__getitem__(0)
-        building2_data, building2_mask = dataset.__getitem__(1)
+        data_loader = DataLoader(dataset, batch_size=1, shuffle=False)
+
+        data_list = []
+        for data, _ in data_loader:
+            data = data.to(self.device)
+            data_list.append(data)
+
+        building1_data = data_list[0]
+        building2_data = data_list[1]
 
         return building1_data, building2_data, dataset.embedding_matrix
 
     # 3. Sends the two embedded builds through the encoder portion of the VAE
     def encode_builds(self, embedding1, embedding2):
-
         '''
         Get the latent points for the two builds
         Do we need the mu and logvar for anything?
@@ -69,7 +81,6 @@ class text2mcPredictor(nn.Module):
         
     # 4. Linearly interpolate between those n-dimensional latent points to get other latent points connecting the two
     def interpolate_latent_points(self, z1, z2, num_interpolations=1):
-
         interpolations = []
         for alpha in np.linspace(0, 1, num_interpolations):
             z_interp = (1 - alpha) * z1 + alpha * z2
@@ -82,8 +93,8 @@ class text2mcPredictor(nn.Module):
         batch_size, embedding_dim, D, H, W = embedded_data.shape
         N = D * H * W
         embedded_data_flat = embedded_data.view(batch_size, embedding_dim, -1).permute(0, 2, 1).contiguous()
-        embedded_data_flat = embedded_data_flat[0].numpy()  # (N, Embedding_Dim)
-
+        embedded_data_flat = embedded_data_flat[0].detach().numpy()  # (N, Embedding_Dim)
+    
         nbrs = NearestNeighbors(n_neighbors=1, algorithm='auto').fit(embedding_matrix)
         distances, indices = nbrs.kneighbors(embedded_data_flat)
         tokens = indices.flatten().reshape(D, H, W)
@@ -91,35 +102,39 @@ class text2mcPredictor(nn.Module):
     
     # 5. Send those intermediate latent points through the decoder portion of the VAE    
     def decode_and_generate(self, interpolations, embedding_matrix):
-        
         for z in interpolations:
-            recon_embedding = self.decoder(z)
+            recon_embedding, block_air_pred = self.decoder(z)
 
             # Convert to numpy array
             recon_embedding = recon_embedding.cpu()
 
-            # Convert tokens to block names
-            tokens = text2mcPredictor.embeddings_to_tokens(recon_embedding, embedding_matrix) # 3d Array Of Integers
+            # Convert embeddings to tokens
+            recon_tokens = self.embeddings_to_tokens(recon_embedding, embedding_matrix)  # 3D Array Of Integers
 
-            # Call functions from vec2world to convert tokens to blocks and same it as a schematics
-            string_world = vec2world.convert_numpy_array_to_blocks(tokens)
+            # Apply block-air mask
+            block_air_pred_labels = (block_air_pred.squeeze(1) >= 0.5).long()
+            air_mask = (block_air_pred_labels == 0).cpu()  # Move air_mask to CPU
+
+            # Ensure recon_tokens and air_mask are 3-dimensional
+            if recon_tokens.ndim == 4:
+                recon_tokens = recon_tokens.squeeze(0)
+            if air_mask.ndim == 4:
+                air_mask = air_mask.squeeze(0)
+
+            # Assign air_token_id to air voxels
+            recon_tokens[air_mask] = self.air_token_id
+
+            # Convert to numpy array
+            recon_tokens_np = recon_tokens  # Shape: (Depth, Height, Width)
+
+            # Call functions from vec2world to convert tokens to blocks and save it as a schematic
+            string_world = convert_numpy_array_to_blocks(recon_tokens_np)
             file_name = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
-            vec2world.create_schematic_file(string_world, self.SAVE_DIRECTORY, file_name)
-
-    def encode_build_find_latent_point(self, building_path):
-        hdf5_files = [building_path]
-
-        dataset = text2mcVAEDataset(file_paths=hdf5_files, block2embedding=self.embeddings, block2tok=self.block2tok, block_ignore_list=[102], fixed_size=(64, 64, 64))
-
-        building_data, building_mask = dataset.__get__item(0)
-
-        z, mu, logvar = self.encoder(building_data)
-
-        return z
+            create_schematic_file(string_world, self.SAVE_DIRECTORY, file_name)
 
 def main():
-    building1_path = "rar_test5_Desert+Tavern+2.h5"
-    building2_path = "rar_test6_Desert_Tavern.h5"
+    building1_path = "batch_108_2789.h5"
+    building2_path = "batch_116_3001.h5"
 
     predictor = text2mcPredictor()
     
