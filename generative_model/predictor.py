@@ -127,9 +127,14 @@ class text2mcPredictor(nn.Module):
             # Convert to numpy array
             recon_tokens_np = recon_tokens  # Shape: (Depth, Height, Width)
 
+            file_name = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+            # Save the tokens as an HDF5 file to use the rendering script.
+            hdf5_file_path = f"{self.SAVE_DIRECTORY}/{file_name}.h5"
+            with h5py.File(hdf5_file_path, 'w') as hdf5_file:
+                hdf5_file.create_dataset('recon_tokens', data=recon_tokens_np)
+
             # Call functions from vec2world to convert tokens to blocks and save it as a schematic
             string_world = convert_numpy_array_to_blocks(recon_tokens_np)
-            file_name = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
             create_schematic_file(string_world, self.SAVE_DIRECTORY, file_name)
 
 def main():
