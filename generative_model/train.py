@@ -17,7 +17,7 @@ import torch.nn as nn
 from sklearn.metrics import precision_score, recall_score, f1_score  # Added for classification metrics
 from collections import Counter
 
-batch_size = 6
+batch_size = 8
 num_epochs = 128
 fixed_size = (64, 64, 64)
 embedding_dim = 32
