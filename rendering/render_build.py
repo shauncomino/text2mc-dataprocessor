@@ -13,19 +13,25 @@ import re
 warnings.filterwarnings("ignore", category=UserWarning, module='numpy')
 
 # Specify the folder containing the .h5 files
-h5_folder = '/home/shaun/projects/text2mc-dataprocessor/test_builds'  # Update this path
+h5_folder = '../test_builds'  # Update this path
 
 # Output folder for rendered images
-output_folder = '/home/shaun/projects/text2mc-dataprocessor/rendering/output'  # Update this path
+output_folder = r'C:\Users\alanl\Documents\School\Senior Design\text2mc-dataprocessor\rendering/output'  # Update this path
 
 # Path to the tok2block.json file
-tok2block_path = '/home/shaun/projects/text2mc-dataprocessor/world2vec/tok2block.json'  # Update this path
+tok2block_path = '../world2vec/tok2block.json'  # Update this path
 
 # Path to the Minecraft texture pack block textures
-texture_folder = '/home/shaun/projects/text2mc-dataprocessor/rendering/VanillaDefault 1.21/assets/minecraft/textures/block'  # Update this path
+texture_folder = r'C:\Users\alanl\Documents\School\Senior Design\text2mc-dataprocessor\rendering\VanillaDefault 1.21\assets\minecraft\textures\block'  # Update this path
 
 # Block size
 block_size = 1  # Adjust if necessary
+
+# Vertical Block List
+vertical_block_tok = ["1511", "1658"]
+
+# Horizontal Block List
+horizontal_block_tok = ["1697"]
 
 # Air block token
 AIR_TOKEN = 102  # The integer representing air blocks
@@ -92,9 +98,20 @@ def create_voxel_mesh(block_data):
     for block_token in np.unique(block_types):
         block_token_str = str(block_token)
         block_name = tok2block.get(block_token_str, 'minecraft:unknown')
+        
+        # Get base block for stairs and slabs
+        if "_stairs" in block_name:
+            block_name = block_name.split("_stairs")[0]
+            
+        if "_slab" in block_name:
+            block_name = block_name.split("_slab")[0]
+        
         texture_paths = get_texture_paths(block_name)
         if not any(texture_paths.values()):
-            continue  # Skip if no texture found
+            print(f"No texture found for {block_name}")
+            # texture_paths = get_texture_paths('minecraft:dirt') # Uncomment to use default texture (dirt)
+            continue  # Skip if no texture found; Comment out if using default texture
+           
         materials_dict[block_token_str] = {}
         for face_type in ['top', 'bottom', 'side']:
             texture_path = texture_paths.get(face_type)
@@ -135,32 +152,54 @@ def create_voxel_mesh(block_data):
         x, y, z = pos * block_size
         block_token = block_types[i]
         block_token_str = str(block_token)
+        block_name = tok2block.get(block_token_str, 'minecraft:unknown')
         block_materials = materials_dict.get(block_token_str)
+        verts_to_add = 0
+        
         if block_materials is None:
             continue  # No materials found for this block type
+        
+        # Determine if block is a stair, create the mesh, and orient it correctly
+        if "_stairs" in block_name:
+            verts, cube_faces, uv_face = create_stair_mesh(x, y, z, vertex_index)
+            verts_to_add = 12
+            angle = 0
+            if "west" in block_name:
+                 angle = 90
+            elif "east" in block_name:
+                 angle = 270
+            elif "south" in block_name: 
+                 angle = 180 
+            
+            center = np.mean(verts, axis=0)
+            angle = np.radians(angle)
+            rotation_matrix = np.array([[np.cos(angle), -np.sin(angle), 0], [np.sin(angle), np.cos(angle), 0], [0, 0, 1]])
+            verts = np.dot(verts - center, rotation_matrix) + center
 
-        # Define vertices of the cube
-        verts = [
-            (x, y, z),
-            (x + block_size, y, z),
-            (x + block_size, y + block_size, z),
-            (x, y + block_size, z),
-            (x, y, z + block_size),
-            (x + block_size, y, z + block_size),
-            (x + block_size, y + block_size, z + block_size),
-            (x, y + block_size, z + block_size),
-        ]
+        # Determine if block is a slab, create the mesh, and orient it correctly
+        elif "_slab" in block_name:
+            verts, cube_faces, uv_face = create_slab_mesh(x, y, z, vertex_index)
+            if "top" in block_name:
+                translation_amount = block_size / 2
+                verts = verts + np.array([0, 0, translation_amount])
+            verts_to_add = 8
+        
+        # Code for "flat" blocks. Determined from premade list of tokens
+        elif block_token_str in horizontal_block_tok:
+            verts, cube_faces, uv_face = create_horizontal_mesh(x, y, z, vertex_index)
+            verts_to_add = 4
+
+        elif block_token_str in vertical_block_tok:
+            verts, cube_faces, uv_face = create_vertical_mesh(x, y, z, vertex_index)
+            verts_to_add = 4
+        
+        # If nothing else just make a cube
+        else:
+            verts, cube_faces, uv_face = create_cube_mesh(x, y, z, vertex_index)
+            verts_to_add = 8
+            
         vertices.extend(verts)
-
-        # Define faces of the cube with face types
-        cube_faces = [
-            ((vertex_index, vertex_index + 1, vertex_index + 2, vertex_index + 3), 'bottom'),  # Bottom
-            ((vertex_index + 4, vertex_index + 5, vertex_index + 6, vertex_index + 7), 'top'),  # Top
-            ((vertex_index + 3, vertex_index + 2, vertex_index + 6, vertex_index + 7), 'side'),  # Front
-            ((vertex_index + 1, vertex_index + 0, vertex_index + 4, vertex_index + 5), 'side'),  # Back
-            ((vertex_index + 0, vertex_index + 3, vertex_index + 7, vertex_index + 4), 'side'),  # Left
-            ((vertex_index + 2, vertex_index + 1, vertex_index + 5, vertex_index + 6), 'side'),  # Right
-        ]
+        
         for face_vertices, face_type in cube_faces:
             # Get the material for this face type
             material = block_materials.get(face_type)
@@ -178,10 +217,9 @@ def create_voxel_mesh(block_data):
                 obj.data.materials.append(material)
                 material_index = obj.data.materials.find(material.name)
             material_indices.append(material_index)
-            # Assign UVs
-            uv_face = [(0, 0), (1, 0), (1, 1), (0, 1)]
+            
             uvs.append(uv_face)
-        vertex_index += 8
+        vertex_index += verts_to_add
 
     # Create the mesh
     mesh.from_pydata(vertices, [], faces)
@@ -235,13 +273,13 @@ def calculate_camera_position(grid_shape, fov_deg):
 
     # Calculate the distance from the center to fit the entire build in view
     fov_rad = math.radians(fov_deg)
-    distance = (max_dim / 2) / math.tan(fov_rad / 2)
+    distance = (max_dim / 2) / math.tan(fov_rad / 2) 
 
     return distance, Vector((center_x, center_y, center_z))
 
 def setup_scene(grid_shape):
     # Set the field of view
-    fov_deg = 50
+    fov_deg = 50 
 
     # Calculate camera distance and grid center
     distance, grid_center = calculate_camera_position(grid_shape, fov_deg)
@@ -257,7 +295,7 @@ def setup_scene(grid_shape):
     cam_obj.location = initial_cam_location
 
     # Rotate the camera position horizontally by 90 degrees to the right
-    rotation_angle = math.radians(90)
+    rotation_angle = math.radians(90) 
     rot_matrix = Matrix.Rotation(rotation_angle, 4, 'Z')
     relative_cam_loc = cam_obj.location - grid_center
     new_relative_cam_loc = rot_matrix @ relative_cam_loc
@@ -462,10 +500,166 @@ def process_epochs():
         else:
             print(f"Images for epoch {epoch_num} already exist. Creating GIF...")
 
-        # Create GIF from images
+        # Create GIF from images Change these comments
         gif_output_path = os.path.join(output_folder, f'epoch_{epoch_num}.gif')
         create_gif(image_paths, gif_output_path, gif_frame_duration)
         print(f"GIF created for epoch {epoch_num}")
+
+def create_stair_mesh(x, y, z, vertex_index):  
+    
+    # Define vertices
+    verts = [
+    (x, y, z),  # 0
+    (x + block_size, y, z),  # 1
+    (x + block_size, y + block_size, z),  # 2
+    (x, y + block_size, z),  # 3
+    (x + block_size, y + block_size, z + block_size / 2),  # 4
+    (x, y + block_size, z + block_size / 2),  # 5
+    (x, y, z + block_size),  # 6
+    (x + block_size, y, z + block_size),  # 7
+    (x + block_size, y + block_size / 2, z + block_size / 2),  # 8
+    (x, y + block_size / 2 , z + block_size / 2),  # 9
+    (x, y +block_size /2 , z + block_size),  # 10
+    (x + block_size, y + block_size /2 , z + block_size),  # 11
+    ]
+    
+    # Defne faces
+    faces = [
+    ((vertex_index, vertex_index + 1, vertex_index + 2, vertex_index + 3), 'bottom'),  # Bottom
+    ((vertex_index, vertex_index + 1, vertex_index + 7, vertex_index + 6), 'side'),  # back
+    ((vertex_index + 6, vertex_index + 7, vertex_index + 11, vertex_index + 10), 'top'),  # top
+    ((vertex_index + 4, vertex_index + 5, vertex_index + 9, vertex_index + 8), 'top'),  # top
+    ((vertex_index + 8, vertex_index + 9, vertex_index + 10, vertex_index + 11), 'side'), # front
+    ((vertex_index + 2, vertex_index + 3, vertex_index + 5, vertex_index + 4), 'side'),  # front
+    ((vertex_index, vertex_index + 3, vertex_index + 5, vertex_index + 9, vertex_index + 10, vertex_index + 6), 'side'),  # right
+    ((vertex_index + 1, vertex_index + 2, vertex_index + 4, vertex_index + 8, vertex_index + 11, vertex_index + 7), 'side'),  # left
+    ]
+    
+    # Define UV coordinates
+    uv_face = [
+                (0, 0),  # 0 (bottom-left corner)
+                (1, 0),  # 1 (bottom-right corner)
+                (1, 1),  # 2 (top-right corner)
+                (0, 1),  # 3 (top-left corner)
+                (0, 0),  # 4 (bottom-left corner, back face)
+                (1,1),  # 5 (top-left corner, back face)
+            ]
+    
+    return verts, faces, uv_face
+
+  
+def create_cube_mesh(x, y, z, vertex_index):  
+    
+    # Define vertices of the cube
+        verts = [
+            (x, y, z),
+            (x + block_size, y, z),
+            (x + block_size, y + block_size, z),
+            (x, y + block_size, z),
+            (x, y, z + block_size),
+            (x + block_size, y, z + block_size),
+            (x + block_size, y + block_size, z + block_size),
+            (x, y + block_size, z + block_size),
+        ]
+
+        # Define faces of the cube with face types
+        cube_faces = [
+            ((vertex_index, vertex_index + 1, vertex_index + 2, vertex_index + 3), 'bottom'),  # Bottom
+            ((vertex_index + 4, vertex_index + 5, vertex_index + 6, vertex_index + 7), 'top'),  # Top
+            ((vertex_index + 3, vertex_index + 2, vertex_index + 6, vertex_index + 7), 'side'),  # Front
+            ((vertex_index + 1, vertex_index + 0, vertex_index + 4, vertex_index + 5), 'side'),  # Back
+            ((vertex_index + 0, vertex_index + 3, vertex_index + 7, vertex_index + 4), 'side'),  # Left
+            ((vertex_index + 2, vertex_index + 1, vertex_index + 5, vertex_index + 6), 'side'),  # Right
+        ]
+        
+        # Define UV coordinates
+        uv_face = [
+                (0, 0),  # 0 (bottom-left corner)
+                (1, 0),  # 1 (bottom-right corner)
+                (1, 1),  # 2 (top-right corner)
+                (0, 1),  # 3 (top-left corner)
+        ]
+        return verts, cube_faces, uv_face
+ 
+def create_slab_mesh(x, y, z, vertex_index):
+     # Define vertices of the slab
+        verts = [
+            (x, y, z),
+            (x + block_size, y, z),
+            (x + block_size, y + block_size, z),
+            (x, y + block_size, z),
+            (x, y, z + block_size / 2),
+            (x + block_size, y, z + block_size / 2),
+            (x + block_size, y + block_size, z + block_size / 2),
+            (x, y + block_size, z + block_size / 2),
+        ]
+
+        # Define faces of the slab with face types
+        cube_faces = [
+            ((vertex_index, vertex_index + 1, vertex_index + 2, vertex_index + 3), 'bottom'),  # Bottom
+            ((vertex_index + 4, vertex_index + 5, vertex_index + 6, vertex_index + 7), 'top'),  # Top
+            ((vertex_index + 3, vertex_index + 2, vertex_index + 6, vertex_index + 7), 'side'),  # Front
+            ((vertex_index + 1, vertex_index + 0, vertex_index + 4, vertex_index + 5), 'side'),  # Back
+            ((vertex_index + 0, vertex_index + 3, vertex_index + 7, vertex_index + 4), 'side'),  # Left
+            ((vertex_index + 2, vertex_index + 1, vertex_index + 5, vertex_index + 6), 'side'),  # Right
+        ]
+        
+        # Define UV coordinates
+        uv_face = [
+                (0, 0),  # 0 (bottom-left corner)
+                (1, 0),  # 1 (bottom-right corner)
+                (1, 1),  # 2 (top-right corner)
+                (0, 1),  # 3 (top-left corner)
+            ]
+        return verts, cube_faces, uv_face
+    
+def create_vertical_mesh(x, y, z, vertex_index):
+          # Define vertices of the square
+        verts = [
+            (x, y + block_size / 2, z),
+            (x + block_size, y + block_size / 2, z),
+            (x + block_size, y + block_size / 2, z + block_size),
+            (x, y + block_size / 2, z + block_size),
+        ]
+
+        # Define the face of the square
+        faces = [
+            ((vertex_index, vertex_index + 1, vertex_index + 2, vertex_index + 3), 'side'),  # Front
+
+        ]
+        
+        # Define UV coordinates
+        uv_face = [
+                (0, 0),  # 0 (bottom-left corner)
+                (1, 0),  # 1 (bottom-right corner)
+                (1, 1),  # 2 (top-right corner)
+                (0, 1),  # 3 (top-left corner)
+            ]
+        return verts, faces, uv_face
+
+def create_horizontal_mesh(x, y, z, vertex_index):
+        # Define vertices of the square
+        verts = [
+            (x, y, z + block_size),
+            (x + block_size, y, z + block_size),
+            (x + block_size, y + block_size, z + block_size),
+            (x, y + block_size, z + block_size),
+        ]
+
+        # Define the face of the square
+        faces = [
+            ((vertex_index, vertex_index + 1, vertex_index + 2, vertex_index + 3), 'top'),  # Bottom
+
+        ]
+        
+        # Define UV coordinates
+        uv_face = [
+                (0, 0),  # 0 (bottom-left corner)
+                (1, 0),  # 1 (bottom-right corner)
+                (1, 1),  # 2 (top-right corner)
+                (0, 1),  # 3 (top-left corner)
+            ]
+        return verts, faces, uv_face   
 
 # Entry point
 if __name__ == "__main__":
