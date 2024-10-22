@@ -13,9 +13,13 @@ import h5py
 from datetime import datetime
 from sklearn.neighbors import NearestNeighbors
 
+# Add the vec2world and rendering directories to the sys.path
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'vec2world'))
+sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'rendering'))
 
 from vec2world import convert_numpy_array_to_blocks, create_schematic_file
+from render_build import process_h5_files  # Import the function from render_single.py
+
 
 class text2mcPredictor(nn.Module):
     def __init__(self):
@@ -39,7 +43,7 @@ class text2mcPredictor(nn.Module):
 
         self.air_token_id = self.block2tok["minecraft:air"]
 
-        checkpoint = torch.load(self.MODEL_PATH, map_location=self.device,weights_only=True)
+        checkpoint = torch.load(self.MODEL_PATH, map_location=self.device, weights_only=True)
 
         self.encoder = text2mcVAEEncoder().to(self.device)
         self.encoder.load_state_dict(checkpoint["encoder_state_dict"])
@@ -49,7 +53,6 @@ class text2mcPredictor(nn.Module):
         self.decoder.load_state_dict(checkpoint["decoder_state_dict"])
         self.decoder.eval()
 
-    # 1. Loads two builds from the dataset (user specified)
     # 2. Embeds builds using trained embedding model
     def embed_builds(self, building1_path: str, building2_path: str):
         hdf5_files = [building1_path, building2_path]
@@ -102,6 +105,12 @@ class text2mcPredictor(nn.Module):
     
     # 5. Send those intermediate latent points through the decoder portion of the VAE    
     def decode_and_generate(self, interpolations, embedding_matrix):
+    
+        # Create a new folder with the current timestamp
+        timestamp = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+        self.SAVE_DIRECTORY = os.path.join(self.SAVE_DIRECTORY, timestamp)
+        os.makedirs(self.SAVE_DIRECTORY, exist_ok=True)
+
         for z in interpolations:
             recon_embedding, block_air_pred = self.decoder(z)
 
@@ -128,14 +137,17 @@ class text2mcPredictor(nn.Module):
             recon_tokens_np = recon_tokens  # Shape: (Depth, Height, Width)
 
             file_name = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
-            # Save the tokens as an HDF5 file to use the rendering script.
+
             hdf5_file_path = f"{self.SAVE_DIRECTORY}/{file_name}.h5"
             with h5py.File(hdf5_file_path, 'w') as hdf5_file:
                 hdf5_file.create_dataset('recon_tokens', data=recon_tokens_np)
-
+            
             # Call functions from vec2world to convert tokens to blocks and save it as a schematic
             string_world = convert_numpy_array_to_blocks(recon_tokens_np)
             create_schematic_file(string_world, self.SAVE_DIRECTORY, file_name)
+        
+        # Save the tokens as an HDF5 file to use the rendering script.
+        process_h5_files(self.SAVE_DIRECTORY)
 
 def main():
     building1_path = "batch_108_2789.h5"
@@ -145,7 +157,7 @@ def main():
     
     building1_embedding, building2_embedding, embedding_matrix = predictor.embed_builds(building1_path, building2_path)
     building1_latent, building2_latent = predictor.encode_builds(building1_embedding, building2_embedding)
-    interpolations = predictor.interpolate_latent_points(building1_latent, building2_latent, num_interpolations=1)
+    interpolations = predictor.interpolate_latent_points(building1_latent, building2_latent, num_interpolations=60)
     predictor.decode_and_generate(interpolations, embedding_matrix)
 
 if __name__ == "__main__":

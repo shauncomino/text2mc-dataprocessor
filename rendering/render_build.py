@@ -10,18 +10,11 @@ from mathutils import Vector, Matrix
 
 warnings.filterwarnings("ignore", category=UserWarning, module='numpy')
 
-# Specify the folder containing the .h5 files
-h5_folder = '/home/shaun/projects/text2mc-dataprocessor/test_builds'  # Update this path
-
-# Output folder for rendered images
-output_folder = '/home/shaun/projects/text2mc-dataprocessor/rendering/output'  # Update this path
-
 # Path to the tok2block.json file
-tok2block_path = '/home/shaun/projects/text2mc-dataprocessor/world2vec/tok2block.json'  # Update this path
+tok2block_path = "/lustre/fs1/groups/jaedo/world2vec/tok2block.json"  # Update this path
 
 # Path to the Minecraft texture pack block textures
-texture_folder = '/home/shaun/projects/text2mc-dataprocessor/rendering/VanillaDefault 1.21/assets/minecraft/textures/block'  # Update this path
-
+texture_folder = '/lustre/fs1/groups/jaedo/rendering/VanillaDefault 1.21/assets/minecraft/textures/block'  # Update this path
 # Block size
 block_size = 1  # Adjust if necessary
 
@@ -299,7 +292,9 @@ def setup_scene(grid_shape):
     bpy.context.scene.render.image_settings.file_format = 'PNG'
     bpy.context.scene.render.image_settings.color_mode = 'RGBA'
 
-def process_h5_files():
+def process_h5_files(h5_folder):
+
+    output_folder = os.path.join(h5_folder, 'renders')
     # Ensure output folder exists
     if not os.path.exists(output_folder):
         os.makedirs(output_folder)
