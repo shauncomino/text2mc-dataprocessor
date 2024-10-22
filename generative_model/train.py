@@ -259,8 +259,13 @@ def loss_function(
     # Compute KL Divergence
     KLD = -0.5 * torch.mean(1 + logvar - mu.pow(2) - logvar.exp())
 
+    # Beta values to weight each loss term by desired functionality
+    beta_1 = 2
+    beta_2 = 2
+    beta_3 = 1
+
     # Combine losses
-    total_loss = recon_loss + bce_loss + KLD
+    total_loss = (beta_1*recon_loss) + (beta_2*bce_loss) + (beta_3*KLD)
 
     return total_loss, recon_loss, bce_loss, KLD
 
