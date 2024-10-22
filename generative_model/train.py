@@ -313,7 +313,7 @@ def embedding_to_tokens(embedded_data, embeddings_matrix):
     return tokens
 
 # Function to interpolate and generate builds
-def interpolate_and_generate(encoder, decoder, build1_path, build2_path, save_dir, epoch, num_interpolations=60):
+def interpolate_and_generate(encoder, decoder, build1_path, build2_path, save_dir, epoch, num_interpolations=120):
     encoder.eval()
     decoder.eval()
     with torch.no_grad():
