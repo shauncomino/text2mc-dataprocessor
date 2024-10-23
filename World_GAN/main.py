@@ -9,7 +9,7 @@ from loguru import logger
 import wandb
 import sys
 import torch
-
+from world_gan_dataset import WorldGANDataset
 
 def get_tags(opt):
     """ Get Tags for logging from input name. Helpful for wandb. """
@@ -50,16 +50,29 @@ def main():
     except OSError:
         pass
 
+  
+
     # Read level according to input arguments
+
+    #TODO
+    # Implement dataloader Here 
+    """
+    dataset = WorldGANDataset(
+        file_paths=opt.input_dir,
+        tok2block_filepath=opt.tok2block_filepath
+    )
+    train_loader = DataLoader(dataset, batch_size=2, shuffle=True)
+    
+    """
     real = mc_read_level(opt)
+    
+   
 
     # Multi-Input is taken over from old code but not implemented for Minecraft
-    if opt.use_multiple_inputs:
-        logger.info("Multiple inputs are not implemented yet for Minecraft.")
-        raise NotImplementedError
-        # for i, r in enumerate(real):
-        #     real[i] = r.to(opt.device)
-        # opt.level_shape = real[0].shape[2:]
+    if opt.use_multiple_inputs:        
+        for i, r in enumerate(real):
+            real[i] = r.to(opt.device)
+        opt.level_shape = real[0].shape[2:]
     else:
         real = real.to(opt.device)
         opt.level_shape = real.shape[2:]

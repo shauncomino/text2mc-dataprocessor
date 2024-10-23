@@ -51,6 +51,8 @@ def train(real, opt: Config):
             tmp_reals = [*scaled_list, level]
             reals.append(tmp_reals)
     else:
+        
+
         # Get the "real" sample
         # Depending on if representations are used, downsampling is different
         use_hierarchy = False if opt.repr_type else True
@@ -100,6 +102,8 @@ def train(real, opt: Config):
         os.makedirs("%s/state_dicts" % (opt.out_), exist_ok=True)
 
     # Training Loop
+
+    #TODO: IMPLEMENT DATALOADER HERE
     for current_scale in range(0, stop_scale):
         opt.outf = "%s/%d" % (opt.out_, current_scale)
         try:

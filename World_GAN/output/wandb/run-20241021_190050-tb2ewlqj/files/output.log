@@ -1,0 +1,38 @@
+path is:  output\wandb\run-20241021_190050-tb2ewlqj\files
+opt.block2repr is:  None
+opt.repr_type is:  None
+[32m2024-10-21 19:00:51.834[39m | [1mINFO[22m | [90mC:\Projects\text2mc\text2mc-dataprocessor\World_GAN\minecraft\level_utils.py:189[39m | batch_101_2618.h5 loaded.
+coords are  ((0, 96), (0, 13), (0, 64))
+[32m2024-10-21 19:00:52.591[39m | [1mINFO[22m | [90mC:\Projects\text2mc\text2mc-dataprocessor\World_GAN\minecraft\level_utils.py:174[39m | Tokens in level ['minecraft:air', 'minecraft:cactus', 'minecraft:water', 'minecraft:acacia_leaves', 'minecraft:oak_leaves', 'minecraft:tall_grass', 'minecraft:sandstone_stairs', 'minecraft:oak_fence', 'minecraft:cut_sandstone_slab', 'minecraft:sweet_berry_bush', 'minecraft:birch_button', 'minecraft:oak_door', 'minecraft:gray_bed', 'minecraft:stripped_oak_log', 'minecraft:oak_slab', 'minecraft:oak_wood', 'minecraft:chest', 'minecraft:lantern', 'minecraft:sandstone_wall', 'minecraft:sandstone_slab', 'minecraft:oak_button', 'minecraft:oak_log', 'minecraft:oak_fence_gate', 'minecraft:white_bed', 'minecraft:smooth_sandstone_stairs', 'minecraft:oak_planks', 'minecraft:grindstone', 'minecraft:barrel', 'minecraft:oak_stairs', 'minecraft:cyan_bed', 'minecraft:oak_trapdoor', 'minecraft:oak_wall_sign', 'minecraft:hay_block', 'minecraft:farmland', 'minecraft:wheat', 'minecraft:composter', 'minecraft:campfire', 'minecraft:green_bed', 'minecraft:smooth_sandstone_slab', 'minecraft:brewing_stand', 'minecraft:purple_bed', 'minecraft:sea_pickle', 'minecraft:cauldron', 'minecraft:tripwire', 'minecraft:brick_slab', 'minecraft:podzol', 'minecraft:loom', 'minecraft:red_bed', 'minecraft:smooth_sandstone', 'minecraft:brown_bed', 'minecraft:stonecutter', 'minecraft:bell', 'minecraft:brick_stairs', 'minecraft:spruce_trapdoor', 'minecraft:blast_furnace', 'minecraft:blue_bed', 'minecraft:lectern', 'minecraft:smoker', 'minecraft:light_blue_bed', 'minecraft:furnace', 'minecraft:orange_bed', 'minecraft:yellow_bed', 'minecraft:stone_slab']
+Scale Info:
+[[0.75, 0.75, 0.75], [0.5, 0.6153846153846154, 0.5], [0.25, 0.6153846153846154, 0.25]]
+C:\Users\isabe\anaconda3\envs\world_gan\lib\site-packages\torch\functional.py:507: UserWarning: torch.meshgrid: in an upcoming release, it will be required to pass the indexing argument. (Triggered internally at ..\aten\src\ATen\native\TensorShape.cpp:3550.)
+  return _VF.meshgrid(tensors, **kwargs)  # type: ignore[attr-defined]
+Traceback (most recent call last):
+  File "C:\Projects\text2mc\text2mc-dataprocessor\World_GAN\main.py", line 97, in <module>
+    main()
+  File "C:\Projects\text2mc\text2mc-dataprocessor\World_GAN\main.py", line 81, in main
+    generators, noise_maps, reals, noise_amplitudes = train(real, opt)
+  File "C:\Projects\text2mc\text2mc-dataprocessor\World_GAN\train.py", line 50, in train
+    scaled_list = special_minecraft_downsampling(opt.num_scales, scales, level, opt.token_list)
+  File "C:\Projects\text2mc\text2mc-dataprocessor\World_GAN\minecraft\special_minecraft_downsampling.py", line 62, in special_minecraft_downsampling
+    level_scaled = interpolate3D(data, shape, align_corners=True)
+  File "C:\Projects\text2mc\text2mc-dataprocessor\World_GAN\utils.py", line 30, in interpolate3D
+    scaled = grid_sample(data, grid, mode=mode, align_corners=align_corners)
+  File "C:\Users\isabe\anaconda3\envs\world_gan\lib\site-packages\torch\nn\functional.py", line 4324, in grid_sample
+    return torch.grid_sampler(input, grid, mode_enum, padding_mode_enum, align_corners)
+RuntimeError: grid_sampler(): expected grid and input to have same batch size, but got input with sizes [63, 96, 13, 64] and grid with sizes [1, 72, 9, 48, 3]
+Traceback (most recent call last):
+  File "C:\Projects\text2mc\text2mc-dataprocessor\World_GAN\main.py", line 97, in <module>
+    main()
+  File "C:\Projects\text2mc\text2mc-dataprocessor\World_GAN\main.py", line 81, in main
+    generators, noise_maps, reals, noise_amplitudes = train(real, opt)
+  File "C:\Projects\text2mc\text2mc-dataprocessor\World_GAN\train.py", line 50, in train
+    scaled_list = special_minecraft_downsampling(opt.num_scales, scales, level, opt.token_list)
+  File "C:\Projects\text2mc\text2mc-dataprocessor\World_GAN\minecraft\special_minecraft_downsampling.py", line 62, in special_minecraft_downsampling
+    level_scaled = interpolate3D(data, shape, align_corners=True)
+  File "C:\Projects\text2mc\text2mc-dataprocessor\World_GAN\utils.py", line 30, in interpolate3D
+    scaled = grid_sample(data, grid, mode=mode, align_corners=align_corners)
+  File "C:\Users\isabe\anaconda3\envs\world_gan\lib\site-packages\torch\nn\functional.py", line 4324, in grid_sample
+    return torch.grid_sampler(input, grid, mode_enum, padding_mode_enum, align_corners)
+RuntimeError: grid_sampler(): expected grid and input to have same batch size, but got input with sizes [63, 96, 13, 64] and grid with sizes [1, 72, 9, 48, 3]

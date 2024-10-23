@@ -2,7 +2,6 @@
 import argparse
 import random
 from typing import List, Literal, Optional, Union
-
 import numpy as np
 import torch
 from torch import cuda
@@ -25,7 +24,7 @@ class Config(Tap):
     # input level names (if multiple inputs are used)
     input_names: List[str] = ["lvl_1-1.txt", "lvl_1-2.txt"]
     # use mulitple inputs for training (use --input-names instead of --input-name)
-    use_multiple_inputs: bool = False
+    use_multiple_inputs: bool = False # Original: false 
 
     # if minecraft is used, which coords are used from the world? Which world do we save to?
     input_area_name: str = "ruins"  # needs to be a string from the coord dictionary in input folder
@@ -55,7 +54,7 @@ class Config(Tap):
     token_list: List[str] = ['!', '#', '-', '1', '@', 'C', 'S',
                              'U', 'X', 'g', 'k', 't']  # default list of 1-1
 
-    repr_type: str = None  # Which representation type to use, currently [None, block2vec, autoencoder]
+    repr_type: str = "block2vec"  # Which representation type to use, currently [None, block2vec, autoencoder]
 
     def __init__(self,
                    underscores_to_dashes: bool = False,

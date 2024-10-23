@@ -1,0 +1,611 @@
+wandb_version: 1
+
+_initialized:
+  desc: null
+  value: true
+_explicit_bool:
+  desc: null
+  value: false
+_underscores_to_dashes:
+  desc: null
+  value: false
+_parsed:
+  desc: null
+  value: true
+extra_args:
+  desc: null
+  value: []
+argument_buffer:
+  desc: null
+  value:
+    help:
+    - - -h
+      - --help
+    - action: help
+      default: ==SUPPRESS==
+      help: show this help message and exit
+_subparser_buffer:
+  desc: null
+  value: []
+class_variables:
+  desc: null
+  value:
+    tok2block_filepath:
+      comment: ''
+    not_cuda:
+      comment: disables cuda
+    netG:
+      comment: path to netG (to continue training)
+    netD:
+      comment: path to netD (to continue training)
+    manualSeed:
+      comment: ''
+    out:
+      comment: output directory
+    input_dir:
+      comment: input directory
+    input_name:
+      comment: input level filename
+    input_names:
+      comment: ''
+    use_multiple_inputs:
+      comment: ''
+    input_area_name:
+      comment: needs to be a string from the coord dictionary in input folder
+    output_dir:
+      comment: folder with worlds
+    output_name:
+      comment: name of the world to generate in
+    sub_coords:
+      comment: defines which coords of the full coord are are
+    nfc:
+      comment: number of filters for conv layers
+    ker_size:
+      comment: kernel size for conv layers
+    num_layer:
+      comment: number of layers
+    scales:
+      comment: Scales descending (< 1 and > 0)
+    noise_update:
+      comment: additive noise weight
+    pad_with_noise:
+      comment: ''
+    niter:
+      comment: ''
+    gamma:
+      comment: scheduler gamma
+    lr_g:
+      comment: generator learning rate
+    lr_d:
+      comment: discriminator learning rate
+    beta1:
+      comment: optimizer beta
+    Gsteps:
+      comment: generator inner steps
+    Dsteps:
+      comment: discriminator inner steps
+    lambda_grad:
+      comment: gradient penalty weight
+    alpha:
+      comment: reconstruction loss weight
+    token_list:
+      comment: U
+    repr_type:
+      comment: Which representation type to use, currently [None, block2vec, autoencoder]
+_annotations:
+  desc: null
+  value:
+    tok2block_filepath: builtins.str
+    not_cuda: builtins.bool
+    netG: builtins.str
+    netD: builtins.str
+    manualSeed: typing.Optional
+    out: builtins.str
+    input_dir: builtins.str
+    input_name: builtins.str
+    input_names: typing.List
+    use_multiple_inputs: builtins.bool
+    input_area_name: builtins.str
+    output_dir: builtins.str
+    output_name: builtins.str
+    sub_coords: typing.List
+    nfc: builtins.int
+    ker_size: builtins.int
+    num_layer: builtins.int
+    scales: typing.List
+    noise_update: builtins.float
+    pad_with_noise: builtins.bool
+    niter: builtins.int
+    gamma: builtins.float
+    lr_g: builtins.float
+    lr_d: builtins.float
+    beta1: builtins.float
+    Gsteps: builtins.int
+    Dsteps: builtins.int
+    lambda_grad: builtins.float
+    alpha: builtins.int
+    token_list: typing.List
+    repr_type: builtins.str
+description:
+  desc: null
+  value: null
+argument_default:
+  desc: null
+  value: null
+prefix_chars:
+  desc: null
+  value: '-'
+conflict_handler:
+  desc: null
+  value: error
+_registries:
+  desc: null
+  value:
+    action:
+      'null': argparse._StoreAction
+      store: argparse._StoreAction
+      store_const: argparse._StoreConstAction
+      store_true: argparse._StoreTrueAction
+      store_false: argparse._StoreFalseAction
+      append: argparse._AppendAction
+      append_const: argparse._AppendConstAction
+      count: argparse._CountAction
+      help: argparse._HelpAction
+      version: argparse._VersionAction
+      parsers: argparse._SubParsersAction
+      extend: argparse._ExtendAction
+    type:
+      'null': argparse.ArgumentParser.__init__.<locals>.identity
+_actions:
+  desc: null
+  value:
+  - _StoreAction(option_strings=['--tok2block_filepath'], dest='tok2block_filepath',
+    nargs=None, const=None, default='tok2block.json', type=<class 'str'>, choices=None,
+    required=False, help='(str, default=tok2block.json) ', metavar=None)
+  - _StoreFalseAction(option_strings=['--not_cuda'], dest='not_cuda', nargs=0, const=False,
+    default=True, type=None, choices=None, required=False, help='(bool, default=True)
+    disables cuda', metavar=None)
+  - _StoreAction(option_strings=['--netG'], dest='netG', nargs=None, const=None, default='',
+    type=<class 'str'>, choices=None, required=False, help='(str, default=) path to
+    netG (to continue training)', metavar=None)
+  - _StoreAction(option_strings=['--netD'], dest='netD', nargs=None, const=None, default='',
+    type=<class 'str'>, choices=None, required=False, help='(str, default=) path to
+    netD (to continue training)', metavar=None)
+  - _StoreAction(option_strings=['--manualSeed'], dest='manualSeed', nargs=None, const=None,
+    default=None, type=<class 'int'>, choices=None, required=False, help='(Optional[int],
+    default=None) ', metavar=None)
+  - _StoreAction(option_strings=['--out'], dest='out', nargs=None, const=None, default='output',
+    type=<class 'str'>, choices=None, required=False, help='(str, default=output)
+    output directory', metavar=None)
+  - _StoreAction(option_strings=['--input_dir'], dest='input_dir', nargs=None, const=None,
+    default='input\\minecraft', type=<class 'str'>, choices=None, required=False,
+    help='(str, default=input\\minecraft) input directory', metavar=None)
+  - _StoreAction(option_strings=['--input_name'], dest='input_name', nargs=None, const=None,
+    default='batch_101_2618.h5', type=<class 'str'>, choices=None, required=False,
+    help='(str, default=batch_101_2618.h5) input level filename', metavar=None)
+  - _StoreAction(option_strings=['--input_names'], dest='input_names', nargs='*',
+    const=None, default=['lvl_1-1.txt', 'lvl_1-2.txt'], type=<class 'str'>, choices=None,
+    required=False, help="(List[str], default=['lvl_1-1.txt', 'lvl_1-2.txt']) ", metavar=None)
+  - _StoreTrueAction(option_strings=['--use_multiple_inputs'], dest='use_multiple_inputs',
+    nargs=0, const=True, default=False, type=None, choices=None, required=False, help='(bool,
+    default=False) ', metavar=None)
+  - _StoreAction(option_strings=['--input_area_name'], dest='input_area_name', nargs=None,
+    const=None, default='ruins', type=<class 'str'>, choices=None, required=False,
+    help='(str, default=ruins) needs to be a string from the coord dictionary in input
+    folder', metavar=None)
+  - _StoreAction(option_strings=['--output_dir'], dest='output_dir', nargs=None, const=None,
+    default='output\\minecraft', type=<class 'str'>, choices=None, required=False,
+    help='(str, default=output\\minecraft) folder with worlds', metavar=None)
+  - _StoreAction(option_strings=['--output_name'], dest='output_name', nargs=None,
+    const=None, default='Gen_Empty_World', type=<class 'str'>, choices=None, required=False,
+    help='(str, default=Gen_Empty_World) name of the world to generate in', metavar=None)
+  - _StoreAction(option_strings=['--sub_coords'], dest='sub_coords', nargs='*', const=None,
+    default=[0.0, 1.0, 0.0, 1.0, 0.0, 1.0], type=<class 'float'>, choices=None, required=False,
+    help='(List[float], default=[0.0, 1.0, 0.0, 1.0, 0.0, 1.0]) defines which coords
+    of the full coord are are', metavar=None)
+  - _StoreAction(option_strings=['--nfc'], dest='nfc', nargs=None, const=None, default=64,
+    type=<class 'int'>, choices=None, required=False, help='(int, default=64) number
+    of filters for conv layers', metavar=None)
+  - _StoreAction(option_strings=['--ker_size'], dest='ker_size', nargs=None, const=None,
+    default=3, type=<class 'int'>, choices=None, required=False, help='(int, default=3)
+    kernel size for conv layers', metavar=None)
+  - _StoreAction(option_strings=['--num_layer'], dest='num_layer', nargs=None, const=None,
+    default=3, type=<class 'int'>, choices=None, required=False, help='(int, default=3)
+    number of layers', metavar=None)
+  - _StoreAction(option_strings=['--scales'], dest='scales', nargs='*', const=None,
+    default=[0.75, 0.5, 0.25], type=<class 'float'>, choices=None, required=False,
+    help='(List[float], default=[0.75, 0.5, 0.25]) Scales descending (< 1 and > 0)',
+    metavar=None)
+  - _StoreAction(option_strings=['--noise_update'], dest='noise_update', nargs=None,
+    const=None, default=0.1, type=<class 'float'>, choices=None, required=False, help='(float,
+    default=0.1) additive noise weight', metavar=None)
+  - _StoreTrueAction(option_strings=['--pad_with_noise'], dest='pad_with_noise', nargs=0,
+    const=True, default=False, type=None, choices=None, required=False, help='(bool,
+    default=False) ', metavar=None)
+  - _StoreAction(option_strings=['--niter'], dest='niter', nargs=None, const=None,
+    default=10, type=<class 'int'>, choices=None, required=False, help='(int, default=10)
+    ', metavar=None)
+  - _StoreAction(option_strings=['--gamma'], dest='gamma', nargs=None, const=None,
+    default=0.1, type=<class 'float'>, choices=None, required=False, help='(float,
+    default=0.1) scheduler gamma', metavar=None)
+  - _StoreAction(option_strings=['--lr_g'], dest='lr_g', nargs=None, const=None, default=0.0005,
+    type=<class 'float'>, choices=None, required=False, help='(float, default=0.0005)
+    generator learning rate', metavar=None)
+  - _StoreAction(option_strings=['--lr_d'], dest='lr_d', nargs=None, const=None, default=0.0005,
+    type=<class 'float'>, choices=None, required=False, help='(float, default=0.0005)
+    discriminator learning rate', metavar=None)
+  - _StoreAction(option_strings=['--beta1'], dest='beta1', nargs=None, const=None,
+    default=0.5, type=<class 'float'>, choices=None, required=False, help='(float,
+    default=0.5) optimizer beta', metavar=None)
+  - _StoreAction(option_strings=['--Gsteps'], dest='Gsteps', nargs=None, const=None,
+    default=3, type=<class 'int'>, choices=None, required=False, help='(int, default=3)
+    generator inner steps', metavar=None)
+  - _StoreAction(option_strings=['--Dsteps'], dest='Dsteps', nargs=None, const=None,
+    default=3, type=<class 'int'>, choices=None, required=False, help='(int, default=3)
+    discriminator inner steps', metavar=None)
+  - _StoreAction(option_strings=['--lambda_grad'], dest='lambda_grad', nargs=None,
+    const=None, default=0.1, type=<class 'float'>, choices=None, required=False, help='(float,
+    default=0.1) gradient penalty weight', metavar=None)
+  - _StoreAction(option_strings=['--alpha'], dest='alpha', nargs=None, const=None,
+    default=100, type=<class 'int'>, choices=None, required=False, help='(int, default=100)
+    reconstruction loss weight', metavar=None)
+  - _StoreAction(option_strings=['--token_list'], dest='token_list', nargs='*', const=None,
+    default=['!', '#', '-', '1', '@', 'C', 'S', 'U', 'X', 'g', 'k', 't'], type=<class
+    'str'>, choices=None, required=False, help="(List[str], default=['!', '#', '-',
+    '1', '@', 'C', 'S', 'U', 'X', 'g', 'k', 't']) U", metavar=None)
+  - _StoreAction(option_strings=['--repr_type'], dest='repr_type', nargs=None, const=None,
+    default=None, type=<class 'str'>, choices=None, required=False, help='(str, default=None)
+    Which representation type to use, currently [None, block2vec, autoencoder]', metavar=None)
+  - _HelpAction(option_strings=['-h', '--help'], dest='help', nargs=0, const=None,
+    default='==SUPPRESS==', type=None, choices=None, required=False, help='show this
+    help message and exit', metavar=None)
+_option_string_actions:
+  desc: null
+  value:
+    --tok2block_filepath: _StoreAction(option_strings=['--tok2block_filepath'], dest='tok2block_filepath',
+      nargs=None, const=None, default='tok2block.json', type=<class 'str'>, choices=None,
+      required=False, help='(str, default=tok2block.json) ', metavar=None)
+    --not_cuda: _StoreFalseAction(option_strings=['--not_cuda'], dest='not_cuda',
+      nargs=0, const=False, default=True, type=None, choices=None, required=False,
+      help='(bool, default=True) disables cuda', metavar=None)
+    --netG: _StoreAction(option_strings=['--netG'], dest='netG', nargs=None, const=None,
+      default='', type=<class 'str'>, choices=None, required=False, help='(str, default=)
+      path to netG (to continue training)', metavar=None)
+    --netD: _StoreAction(option_strings=['--netD'], dest='netD', nargs=None, const=None,
+      default='', type=<class 'str'>, choices=None, required=False, help='(str, default=)
+      path to netD (to continue training)', metavar=None)
+    --manualSeed: _StoreAction(option_strings=['--manualSeed'], dest='manualSeed',
+      nargs=None, const=None, default=None, type=<class 'int'>, choices=None, required=False,
+      help='(Optional[int], default=None) ', metavar=None)
+    --out: _StoreAction(option_strings=['--out'], dest='out', nargs=None, const=None,
+      default='output', type=<class 'str'>, choices=None, required=False, help='(str,
+      default=output) output directory', metavar=None)
+    --input_dir: _StoreAction(option_strings=['--input_dir'], dest='input_dir', nargs=None,
+      const=None, default='input\\minecraft', type=<class 'str'>, choices=None, required=False,
+      help='(str, default=input\\minecraft) input directory', metavar=None)
+    --input_name: _StoreAction(option_strings=['--input_name'], dest='input_name',
+      nargs=None, const=None, default='batch_101_2618.h5', type=<class 'str'>, choices=None,
+      required=False, help='(str, default=batch_101_2618.h5) input level filename',
+      metavar=None)
+    --input_names: _StoreAction(option_strings=['--input_names'], dest='input_names',
+      nargs='*', const=None, default=['lvl_1-1.txt', 'lvl_1-2.txt'], type=<class 'str'>,
+      choices=None, required=False, help="(List[str], default=['lvl_1-1.txt', 'lvl_1-2.txt'])
+      ", metavar=None)
+    --use_multiple_inputs: _StoreTrueAction(option_strings=['--use_multiple_inputs'],
+      dest='use_multiple_inputs', nargs=0, const=True, default=False, type=None, choices=None,
+      required=False, help='(bool, default=False) ', metavar=None)
+    --input_area_name: _StoreAction(option_strings=['--input_area_name'], dest='input_area_name',
+      nargs=None, const=None, default='ruins', type=<class 'str'>, choices=None, required=False,
+      help='(str, default=ruins) needs to be a string from the coord dictionary in
+      input folder', metavar=None)
+    --output_dir: _StoreAction(option_strings=['--output_dir'], dest='output_dir',
+      nargs=None, const=None, default='output\\minecraft', type=<class 'str'>, choices=None,
+      required=False, help='(str, default=output\\minecraft) folder with worlds',
+      metavar=None)
+    --output_name: _StoreAction(option_strings=['--output_name'], dest='output_name',
+      nargs=None, const=None, default='Gen_Empty_World', type=<class 'str'>, choices=None,
+      required=False, help='(str, default=Gen_Empty_World) name of the world to generate
+      in', metavar=None)
+    --sub_coords: _StoreAction(option_strings=['--sub_coords'], dest='sub_coords',
+      nargs='*', const=None, default=[0.0, 1.0, 0.0, 1.0, 0.0, 1.0], type=<class 'float'>,
+      choices=None, required=False, help='(List[float], default=[0.0, 1.0, 0.0, 1.0,
+      0.0, 1.0]) defines which coords of the full coord are are', metavar=None)
+    --nfc: _StoreAction(option_strings=['--nfc'], dest='nfc', nargs=None, const=None,
+      default=64, type=<class 'int'>, choices=None, required=False, help='(int, default=64)
+      number of filters for conv layers', metavar=None)
+    --ker_size: _StoreAction(option_strings=['--ker_size'], dest='ker_size', nargs=None,
+      const=None, default=3, type=<class 'int'>, choices=None, required=False, help='(int,
+      default=3) kernel size for conv layers', metavar=None)
+    --num_layer: _StoreAction(option_strings=['--num_layer'], dest='num_layer', nargs=None,
+      const=None, default=3, type=<class 'int'>, choices=None, required=False, help='(int,
+      default=3) number of layers', metavar=None)
+    --scales: _StoreAction(option_strings=['--scales'], dest='scales', nargs='*',
+      const=None, default=[0.75, 0.5, 0.25], type=<class 'float'>, choices=None, required=False,
+      help='(List[float], default=[0.75, 0.5, 0.25]) Scales descending (< 1 and >
+      0)', metavar=None)
+    --noise_update: _StoreAction(option_strings=['--noise_update'], dest='noise_update',
+      nargs=None, const=None, default=0.1, type=<class 'float'>, choices=None, required=False,
+      help='(float, default=0.1) additive noise weight', metavar=None)
+    --pad_with_noise: _StoreTrueAction(option_strings=['--pad_with_noise'], dest='pad_with_noise',
+      nargs=0, const=True, default=False, type=None, choices=None, required=False,
+      help='(bool, default=False) ', metavar=None)
+    --niter: _StoreAction(option_strings=['--niter'], dest='niter', nargs=None, const=None,
+      default=10, type=<class 'int'>, choices=None, required=False, help='(int, default=10)
+      ', metavar=None)
+    --gamma: _StoreAction(option_strings=['--gamma'], dest='gamma', nargs=None, const=None,
+      default=0.1, type=<class 'float'>, choices=None, required=False, help='(float,
+      default=0.1) scheduler gamma', metavar=None)
+    --lr_g: _StoreAction(option_strings=['--lr_g'], dest='lr_g', nargs=None, const=None,
+      default=0.0005, type=<class 'float'>, choices=None, required=False, help='(float,
+      default=0.0005) generator learning rate', metavar=None)
+    --lr_d: _StoreAction(option_strings=['--lr_d'], dest='lr_d', nargs=None, const=None,
+      default=0.0005, type=<class 'float'>, choices=None, required=False, help='(float,
+      default=0.0005) discriminator learning rate', metavar=None)
+    --beta1: _StoreAction(option_strings=['--beta1'], dest='beta1', nargs=None, const=None,
+      default=0.5, type=<class 'float'>, choices=None, required=False, help='(float,
+      default=0.5) optimizer beta', metavar=None)
+    --Gsteps: _StoreAction(option_strings=['--Gsteps'], dest='Gsteps', nargs=None,
+      const=None, default=3, type=<class 'int'>, choices=None, required=False, help='(int,
+      default=3) generator inner steps', metavar=None)
+    --Dsteps: _StoreAction(option_strings=['--Dsteps'], dest='Dsteps', nargs=None,
+      const=None, default=3, type=<class 'int'>, choices=None, required=False, help='(int,
+      default=3) discriminator inner steps', metavar=None)
+    --lambda_grad: _StoreAction(option_strings=['--lambda_grad'], dest='lambda_grad',
+      nargs=None, const=None, default=0.1, type=<class 'float'>, choices=None, required=False,
+      help='(float, default=0.1) gradient penalty weight', metavar=None)
+    --alpha: _StoreAction(option_strings=['--alpha'], dest='alpha', nargs=None, const=None,
+      default=100, type=<class 'int'>, choices=None, required=False, help='(int, default=100)
+      reconstruction loss weight', metavar=None)
+    --token_list: _StoreAction(option_strings=['--token_list'], dest='token_list',
+      nargs='*', const=None, default=['!', '#', '-', '1', '@', 'C', 'S', 'U', 'X',
+      'g', 'k', 't'], type=<class 'str'>, choices=None, required=False, help="(List[str],
+      default=['!', '#', '-', '1', '@', 'C', 'S', 'U', 'X', 'g', 'k', 't']) U", metavar=None)
+    --repr_type: _StoreAction(option_strings=['--repr_type'], dest='repr_type', nargs=None,
+      const=None, default=None, type=<class 'str'>, choices=None, required=False,
+      help='(str, default=None) Which representation type to use, currently [None,
+      block2vec, autoencoder]', metavar=None)
+    -h: _HelpAction(option_strings=['-h', '--help'], dest='help', nargs=0, const=None,
+      default='==SUPPRESS==', type=None, choices=None, required=False, help='show
+      this help message and exit', metavar=None)
+    --help: _HelpAction(option_strings=['-h', '--help'], dest='help', nargs=0, const=None,
+      default='==SUPPRESS==', type=None, choices=None, required=False, help='show
+      this help message and exit', metavar=None)
+_action_groups:
+  desc: null
+  value:
+  - <argparse._ArgumentGroup object at 0x0000014077D17E80>
+  - <argparse._ArgumentGroup object at 0x0000014077D17EB0>
+_mutually_exclusive_groups:
+  desc: null
+  value: []
+_defaults:
+  desc: null
+  value: {}
+_negative_number_matcher:
+  desc: null
+  value: re.compile('^-\\d+$|^-\\d*\\.\\d+$')
+_has_negative_number_optionals:
+  desc: null
+  value: []
+prog:
+  desc: null
+  value: {}
+usage:
+  desc: null
+  value: null
+epilog:
+  desc: null
+  value: null
+formatter_class:
+  desc: null
+  value: argparse.HelpFormatter
+fromfile_prefix_chars:
+  desc: null
+  value: null
+add_help:
+  desc: null
+  value: true
+allow_abbrev:
+  desc: null
+  value: true
+exit_on_error:
+  desc: null
+  value: true
+_positionals:
+  desc: null
+  value: <argparse._ArgumentGroup object at 0x0000014077D17E80>
+_optionals:
+  desc: null
+  value: <argparse._ArgumentGroup object at 0x0000014077D17EB0>
+_subparsers:
+  desc: null
+  value: null
+args_from_configs:
+  desc: null
+  value: []
+tok2block_filepath:
+  desc: null
+  value: tok2block.json
+not_cuda:
+  desc: null
+  value: true
+netG:
+  desc: null
+  value: ''
+netD:
+  desc: null
+  value: ''
+manualSeed:
+  desc: null
+  value: 7257
+out:
+  desc: null
+  value: output
+input_dir:
+  desc: null
+  value: input\minecraft
+input_name:
+  desc: null
+  value: batch_101_2618.h5
+input_names:
+  desc: null
+  value:
+  - lvl_1-1.txt
+  - lvl_1-2.txt
+use_multiple_inputs:
+  desc: null
+  value: false
+input_area_name:
+  desc: null
+  value: ruins
+output_dir:
+  desc: null
+  value: output\minecraft
+output_name:
+  desc: null
+  value: Gen_Empty_World
+sub_coords:
+  desc: null
+  value:
+  - 0.0
+  - 1.0
+  - 0.0
+  - 1.0
+  - 0.0
+  - 1.0
+nfc:
+  desc: null
+  value: 64
+ker_size:
+  desc: null
+  value: 3
+num_layer:
+  desc: null
+  value: 3
+scales:
+  desc: null
+  value:
+  - 0.75
+  - 0.5
+  - 0.25
+noise_update:
+  desc: null
+  value: 0.1
+pad_with_noise:
+  desc: null
+  value: false
+niter:
+  desc: null
+  value: 10
+gamma:
+  desc: null
+  value: 0.1
+lr_g:
+  desc: null
+  value: 0.0005
+lr_d:
+  desc: null
+  value: 0.0005
+beta1:
+  desc: null
+  value: 0.5
+Gsteps:
+  desc: null
+  value: 3
+Dsteps:
+  desc: null
+  value: 3
+lambda_grad:
+  desc: null
+  value: 0.1
+alpha:
+  desc: null
+  value: 100
+token_list:
+  desc: null
+  value:
+  - '!'
+  - '#'
+  - '-'
+  - '1'
+  - '@'
+  - C
+  - S
+  - U
+  - X
+  - g
+  - k
+  - t
+repr_type:
+  desc: null
+  value: null
+device:
+  desc: null
+  value: cpu
+nc_current:
+  desc: null
+  value: 12
+outf:
+  desc: null
+  value: '0'
+num_scales:
+  desc: null
+  value: 3
+noise_amp:
+  desc: null
+  value: 1.0
+seed_road:
+  desc: null
+  value: null
+stop_scale:
+  desc: null
+  value: 4
+coords:
+  desc: null
+  value:
+  - - 1026
+    - 1077
+  - - 63
+    - 73
+  - - 1088
+    - 1152
+block2repr:
+  desc: null
+  value: null
+_wandb:
+  desc: null
+  value:
+    python_version: 3.10.13
+    cli_version: 0.16.4
+    framework: huggingface
+    huggingface_version: 4.38.2
+    is_jupyter_run: false
+    is_kaggle_kernel: false
+    start_time: 1729545228.0
+    t:
+      1:
+      - 1
+      - 11
+      - 41
+      - 49
+      - 55
+      2:
+      - 1
+      - 11
+      - 41
+      - 49
+      - 55
+      3:
+      - 3
+      - 15
+      - 16
+      - 23
+      4: 3.10.13
+      5: 0.16.4
+      6: 4.38.2
+      8:
+      - 3
+      - 5
+      10:
+      - 6
+      13: windows-amd64

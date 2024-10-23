@@ -158,6 +158,9 @@ def read_level(opt: Config):
         # Default coords: Ruins
         opt.coords = ((1044, 1060), (64, 80), (1104, 1120))  # y, z, x
     """
+
+    print("opt.block2repr is: ", opt.block2repr)
+    print("opt.repr_type is: ", opt.repr_type)
     level, uniques, props = read_level_from_file(opt.input_dir, opt.input_name, opt.coords,
                                                 opt.block2repr, opt.repr_type)
     # Adjust token list depending on representation
