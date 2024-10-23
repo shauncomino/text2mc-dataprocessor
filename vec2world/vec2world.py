@@ -40,18 +40,18 @@ def convert_numpy_array_to_blocks(world_array):
 def trim_folder_path(folder_path):
     return folder_path.strip().lstrip('/').rstrip('/')
 
-hdf5_folder = sys.argv[1]
-hdf5_files = glob.glob(os.path.join(hdf5_folder, "*.h5"))
+# hdf5_folder = sys.argv[1]
+# hdf5_files = glob.glob(os.path.join(hdf5_folder, "*.h5"))
 
-schem_folder_path = "" if len(sys.argv) <= 2 else trim_folder_path(sys.argv[2])
+# schem_folder_path = "" if len(sys.argv) <= 2 else trim_folder_path(sys.argv[2])
 
-for path in hdf5_files:
-    print("Processing " + path)
-    schem_file_name = path.removesuffix(".h5")
-    integer_world_array = convert_hdf5_file_to_numpy_array(path)
-    string_world_array = convert_numpy_array_to_blocks(integer_world_array)
-    create_schematic_file(string_world_array, schem_folder_path, schem_file_name)
+# for path in hdf5_files:
+#     print("Processing " + path)
+#     schem_file_name = path.removesuffix(".h5")
+#     integer_world_array = convert_hdf5_file_to_numpy_array(path)
+#     string_world_array = convert_numpy_array_to_blocks(integer_world_array)
+#     create_schematic_file(string_world_array, schem_folder_path, schem_file_name)
 
-if schem_folder_path != "" and not os.path.isdir(schem_folder_path):
-    os.makedirs(schem_folder_path)
+# if schem_folder_path != "" and not os.path.isdir(schem_folder_path):
+#     os.makedirs(schem_folder_path)
 

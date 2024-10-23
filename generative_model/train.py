@@ -17,7 +17,7 @@ import torch.nn as nn
 from sklearn.metrics import precision_score, recall_score, f1_score  # Added for classification metrics
 
 batch_size = 2
-num_epochs = 64
+num_epochs = 128
 fixed_size = (64, 64, 64)
 embedding_dim = 32
 on_arcc = True
@@ -241,7 +241,7 @@ def embedding_to_tokens(embedded_data, embeddings_matrix):
     return tokens
 
 # Function to interpolate and generate builds
-def interpolate_and_generate(encoder, decoder, build1_path, build2_path, save_dir, epoch, num_interpolations=5):
+def interpolate_and_generate(encoder, decoder, build1_path, build2_path, save_dir, epoch, num_interpolations=60):
     encoder.eval()
     decoder.eval()
     with torch.no_grad():
@@ -477,6 +477,6 @@ for epoch in range(start_epoch, num_epochs + 1):
     # Interpolate and generate builds
     print(f'Interpolating between builds at the end of epoch {epoch}')
     try:
-        interpolate_and_generate(encoder, decoder, build1_path, build2_path, save_dir, epoch, num_interpolations=5)
+        interpolate_and_generate(encoder, decoder, build1_path, build2_path, save_dir, epoch)
     except Exception as e:
         print(f"Unable to generate interpolations for this epoch due to error: {e}")
