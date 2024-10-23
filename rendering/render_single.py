@@ -33,7 +33,7 @@ horizontal_block_tok = ["1697"]
 AIR_TOKEN = 102  # The integer representing air blocks
 
 # Time between frames in the GIF (in milliseconds)
-gif_frame_duration = 100  # Adjust as needed
+gif_frame_duration = 500  # Adjust as needed
 
 # Load the token to block mapping
 with open(tok2block_path, 'r') as f:

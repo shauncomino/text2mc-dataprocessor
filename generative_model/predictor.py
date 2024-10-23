@@ -18,7 +18,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'vec2world'))
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'rendering'))
 
 from vec2world import convert_numpy_array_to_blocks, create_schematic_file
-from render_single import process_hdf5_files  # Import the function from render_single.py
+from render_single import process_hdf5_file  # Import the function from render_single.py
 
 
 class text2mcPredictor(nn.Module):
@@ -147,7 +147,7 @@ class text2mcPredictor(nn.Module):
             create_schematic_file(string_world, self.SAVE_DIRECTORY, file_name)
         
         # Save the tokens as an HDF5 file to use the rendering script.
-        process_hdf5_files(self.SAVE_DIRECTORY)
+        process_hdf5_file(self.SAVE_DIRECTORY)
 
 def main():
     building1_path = "batch_108_2789.h5"
