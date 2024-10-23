@@ -6,6 +6,8 @@ import numpy as np
 import torch
 from torch import cuda
 from tap import Tap
+import pickle
+import json
 import os 
 
 from utils import set_seed, load_pkl
@@ -13,6 +15,7 @@ from utils import set_seed, load_pkl
 
 class Config(Tap):
     tok2block_filepath: str = os.path.join("tok2block.json")
+    block2tok_filepath: str = os.path.join("block2tok.json")
     # game: Literal["minecraft"] = "minecraft"  # Which game is to be used? ONLY MINECRAFT
     not_cuda: bool = True  # disables cuda 
     netG: str = ""  # path to netG (to continue training)
@@ -64,6 +67,12 @@ class Config(Tap):
         super().__init__(underscores_to_dashes, explicit_bool, args, kwargs)
 
     def process_args(self):
+
+        with open(self.tok2block_filepath, 'r') as f:
+            self.tok2block = json.load(f)
+
+        with open(self.block2tok_filepath, 'r') as f:
+            self.block2tok = json.load(f)
         self.device = torch.device("cpu" if self.not_cuda else "cuda:0")
         if cuda.is_available() and self.not_cuda:
             print(
@@ -85,7 +94,6 @@ class Config(Tap):
         self.seed_road = None  # for mario kart seed roads after training
         # which scale to stop on - usually always last scale defined
         self.stop_scale = self.num_scales + 1
-
         coord_dict = load_pkl('primordial_coords_dict', 'input/minecraft/')
         tmp_coords = coord_dict[self.input_area_name]
         sub_coords = [(self.sub_coords[0], self.sub_coords[1]),
@@ -106,14 +114,17 @@ class Config(Tap):
                 tmp_end = tmp_coords[i][1]
 
             self.coords.append((int(tmp_start), int(tmp_end)))
-
         if not self.repr_type:
             self.block2repr = None
         elif self.repr_type == "block2vec":
-            # self.block2repr = load_pkl('prim_cutout_representations_ruins',
-            #                            prepath='/home/awiszus/Project/TOAD-GAN/input/minecraft/')
-            self.block2repr = load_pkl("representations",
-                                        f"/home/schubert/projects/TOAD-GAN/input/minecraft/{self.input_area_name}/")
-        
+            self.block2repr = {}
+            embeddings_pkl_path = os.path.join("..", "block2vec", "output", "block2vec", "representations.pkl")
+            with open(embeddings_pkl_path, 'rb') as f:
+                embeddings_dict = pickle.load(f)
+                for key, value in embeddings_dict.items(): 
+                    print("key is: ", key)
+                    print("value is: ", value)
+                    self.block2repr[key] = value 
+            
         else:
             AttributeError("unexpected repr_type, use [None, block2vec, autoencoder]")

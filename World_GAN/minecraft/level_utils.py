@@ -214,10 +214,15 @@ def read_level_from_file(input_dir, input_name, coords, block2repr, repr_type, d
                     block_tok = build_array[(j, k, l)]
                     if (str(block_tok) == "4000"): 
                         block_tok = 3714
-                    block_name = re.sub(pattern, '', tok2block[str(block_tok)])
+                    block_name = tok2block[str(block_tok)]
                     #print("block is ", block_tok, ": ", block_name) 
 
                     if repr_type == "block2vec":
+                        # Handle no embedding for block 
+                        if (block_name not in block2repr):
+                            block2repr[block_name] = block2repr["UNKNOWN_BLOCK"]    
+                            uniques.append(block_name)
+                            props.append(re.search(pattern, block_name))
                         level[0, :, j - coords[0][0], k - coords[1][0], l - coords[2][0]] = block2repr[block_name]
                         if not props[uniques.index(block_name)]:
                             props[uniques.index(block_name)] = re.search(pattern, block_name)
