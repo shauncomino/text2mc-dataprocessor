@@ -68,6 +68,8 @@ def main():
     
    
 
+    print(real.shape)
+
     # Multi-Input is taken over from old code but not implemented for Minecraft
     if opt.use_multiple_inputs:        
         for i, r in enumerate(real):
