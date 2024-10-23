@@ -5,7 +5,9 @@ import numpy as np
 import warnings
 import math
 import json
+import glob
 from mathutils import Vector, Matrix
+from PIL import Image
 
 warnings.filterwarnings("ignore", category=UserWarning, module='numpy')
 
@@ -21,16 +23,28 @@ texture_folder = '/lustre/fs1/groups/jaedo/rendering/VanillaDefault 1.21/assets/
 # Block size
 block_size = 1  # Adjust if necessary
 
+# Vertical Block List
+vertical_block_tok = ["1511", "1658"]
+
+# Horizontal Block List
+horizontal_block_tok = ["1697"]
+
 # Air block token
 AIR_TOKEN = 102  # The integer representing air blocks
+
+# Time between frames in the GIF (in milliseconds)
+gif_frame_duration = 100  # Adjust as needed
 
 # Load the token to block mapping
 with open(tok2block_path, 'r') as f:
     tok2block = json.load(f)
 
 # Build a mapping from texture names to file paths
-texture_files = os.listdir(texture_folder)
-texture_name_to_path = {os.path.splitext(f)[0]: os.path.join(texture_folder, f) for f in texture_files}
+texture_files = glob.glob(os.path.join(texture_folder, '*.png'))
+texture_name_to_path = {}
+for texture_file in texture_files:
+    texture_name = os.path.splitext(os.path.basename(texture_file))[0]  # e.g., 'acacia_log'
+    texture_name_to_path[texture_name] = texture_file
 
 def get_texture_paths(block_name):
     # Remove 'minecraft:' prefix
@@ -80,9 +94,20 @@ def create_voxel_mesh(block_data):
     for block_token in np.unique(block_types):
         block_token_str = str(block_token)
         block_name = tok2block.get(block_token_str, 'minecraft:unknown')
+        
+        # Get base block for stairs and slabs
+        if "_stairs" in block_name:
+            block_name = block_name.split("_stairs")[0]
+            
+        if "_slab" in block_name:
+            block_name = block_name.split("_slab")[0]
+        
         texture_paths = get_texture_paths(block_name)
         if not any(texture_paths.values()):
-            continue  # Skip if no texture found
+            print(f"No texture found for {block_name}")
+            # texture_paths = get_texture_paths('minecraft:dirt') # Uncomment to use default texture (dirt)
+            continue  # Skip if no texture found; Comment out if using default texture
+           
         materials_dict[block_token_str] = {}
         for face_type in ['top', 'bottom', 'side']:
             texture_path = texture_paths.get(face_type)
@@ -123,32 +148,54 @@ def create_voxel_mesh(block_data):
         x, y, z = pos * block_size
         block_token = block_types[i]
         block_token_str = str(block_token)
+        block_name = tok2block.get(block_token_str, 'minecraft:unknown')
         block_materials = materials_dict.get(block_token_str)
+        verts_to_add = 0
+        
         if block_materials is None:
             continue  # No materials found for this block type
+        
+        # Determine if block is a stair, create the mesh, and orient it correctly
+        if "_stairs" in block_name:
+            verts, cube_faces, uv_face = create_stair_mesh(x, y, z, vertex_index)
+            verts_to_add = 12
+            angle = 0
+            if "west" in block_name:
+                 angle = 90
+            elif "east" in block_name:
+                 angle = 270
+            elif "south" in block_name: 
+                 angle = 180 
+            
+            center = np.mean(verts, axis=0)
+            angle = np.radians(angle)
+            rotation_matrix = np.array([[np.cos(angle), -np.sin(angle), 0], [np.sin(angle), np.cos(angle), 0], [0, 0, 1]])
+            verts = np.dot(verts - center, rotation_matrix) + center
 
-        # Define vertices of the cube
-        verts = [
-            (x, y, z),
-            (x + block_size, y, z),
-            (x + block_size, y + block_size, z),
-            (x, y + block_size, z),
-            (x, y, z + block_size),
-            (x + block_size, y, z + block_size),
-            (x + block_size, y + block_size, z + block_size),
-            (x, y + block_size, z + block_size),
-        ]
+        # Determine if block is a slab, create the mesh, and orient it correctly
+        elif "_slab" in block_name:
+            verts, cube_faces, uv_face = create_slab_mesh(x, y, z, vertex_index)
+            if "top" in block_name:
+                translation_amount = block_size / 2
+                verts = verts + np.array([0, 0, translation_amount])
+            verts_to_add = 8
+        
+        # Code for "flat" blocks. Determined from premade list of tokens
+        elif block_token_str in horizontal_block_tok:
+            verts, cube_faces, uv_face = create_horizontal_mesh(x, y, z, vertex_index)
+            verts_to_add = 4
+
+        elif block_token_str in vertical_block_tok:
+            verts, cube_faces, uv_face = create_vertical_mesh(x, y, z, vertex_index)
+            verts_to_add = 4
+        
+        # If nothing else just make a cube
+        else:
+            verts, cube_faces, uv_face = create_cube_mesh(x, y, z, vertex_index)
+            verts_to_add = 8
+            
         vertices.extend(verts)
-
-        # Define faces of the cube with face types
-        cube_faces = [
-            ((vertex_index, vertex_index + 1, vertex_index + 2, vertex_index + 3), 'bottom'),  # Bottom
-            ((vertex_index + 4, vertex_index + 5, vertex_index + 6, vertex_index + 7), 'top'),  # Top
-            ((vertex_index + 3, vertex_index + 2, vertex_index + 6, vertex_index + 7), 'side'),  # Front
-            ((vertex_index + 1, vertex_index + 0, vertex_index + 4, vertex_index + 5), 'side'),  # Back
-            ((vertex_index + 0, vertex_index + 3, vertex_index + 7, vertex_index + 4), 'side'),  # Left
-            ((vertex_index + 2, vertex_index + 1, vertex_index + 5, vertex_index + 6), 'side'),  # Right
-        ]
+        
         for face_vertices, face_type in cube_faces:
             # Get the material for this face type
             material = block_materials.get(face_type)
@@ -166,10 +213,9 @@ def create_voxel_mesh(block_data):
                 obj.data.materials.append(material)
                 material_index = obj.data.materials.find(material.name)
             material_indices.append(material_index)
-            # Assign UVs
-            uv_face = [(0, 0), (1, 0), (1, 1), (0, 1)]
+            
             uvs.append(uv_face)
-        vertex_index += 8
+        vertex_index += verts_to_add
 
     # Create the mesh
     mesh.from_pydata(vertices, [], faces)
@@ -223,12 +269,13 @@ def calculate_camera_position(grid_shape, fov_deg):
 
     # Calculate the distance from the center to fit the entire build in view
     fov_rad = math.radians(fov_deg)
-    distance = (max_dim / 2) / math.tan(fov_rad / 2)
+    distance = (max_dim / 2) / math.tan(fov_rad / 2) 
 
     return distance, Vector((center_x, center_y, center_z))
+
 def setup_scene(grid_shape):
     # Set the field of view
-    fov_deg = 50
+    fov_deg = 50 
 
     # Calculate camera distance and grid center
     distance, grid_center = calculate_camera_position(grid_shape, fov_deg)
@@ -244,7 +291,7 @@ def setup_scene(grid_shape):
     cam_obj.location = initial_cam_location
 
     # Rotate the camera position horizontally by 90 degrees to the right
-    rotation_angle = math.radians(90)
+    rotation_angle = math.radians(90) 
     rot_matrix = Matrix.Rotation(rotation_angle, 4, 'Z')
     relative_cam_loc = cam_obj.location - grid_center
     new_relative_cam_loc = rot_matrix @ relative_cam_loc
@@ -323,16 +370,263 @@ def render_and_save(build_data, output_path):
     bpy.ops.render.render(write_still=True)
     print(f"Rendered {output_path}")
 
-def process_hdf5_file(block_data, file_name):
+def create_gif(image_paths, gif_output_path, duration):
+    images = []
+    valid_image_paths = []
+    for image_path in image_paths:
+        img = Image.open(image_path).convert('RGBA')
+        if not img.getbbox():
+            # Image is empty (fully transparent)
+            print(f"Skipping empty image: {image_path}")
+            continue
+        images.append(img)
+        valid_image_paths.append(image_path)
 
-    block_data = np.transpose(block_data, (0, 2, 1))
+    if not images:
+        print(f"No non-empty images to create GIF: {gif_output_path}")
+        return
 
-    # Extract the filename without extension to use for image
-    image_filename = file_name + '.png'
-    image_path = os.path.join(output_folder, image_filename)
+    images.reverse()
+    valid_image_paths.reverse()
 
-    # Render and save the image
-    render_and_save(block_data, image_path)
+    # Step 1: Create a shared palette using the first non-empty image
+    palette_image = images[0].convert('RGB').quantize(method=Image.ADAPTIVE, colors=255)
+    palette = palette_image.getpalette()
+
+    # Step 2: Add a unique transparency color to the palette
+    transparency_color = (255, 0, 255)  # Magenta (unlikely to be used in textures)
+    palette += [0]*(768 - len(palette))  # Ensure palette has 256 colors (256*3=768)
+    palette[-3:] = transparency_color     # Set the last color to transparency color
+    palette_image.putpalette(palette)
+
+    transparency_index = 255  # Index of the transparency color in the palette
+
+    frames = []
+    for idx, img in enumerate(images):
+        try:
+            # Step 3a: Composite the image onto the transparency color background
+            background = Image.new('RGB', img.size, transparency_color)
+            img_rgb = Image.alpha_composite(background.convert('RGBA'), img).convert('RGB')
+
+            # Step 3b: Quantize the image using the shared palette
+            p = img_rgb.quantize(palette=palette_image, method=Image.NONE)
+
+            # Step 3c: Create a transparency mask based on the original alpha channel
+            alpha = img.getchannel('A')
+            mask = Image.eval(alpha, lambda a: 255 if a <= 128 else 0)
+            p.paste(transparency_index, mask=mask)
+
+            frames.append(p)
+        except Exception as e:
+            print(f"Error processing image {valid_image_paths[idx]}: {e}")
+            continue
+
+    if not frames:
+        print(f"No frames to save in GIF: {gif_output_path}")
+        return
+
+    # Step 4: Save the GIF with the designated transparency index
+    frames[0].save(
+        gif_output_path,
+        save_all=True,
+        append_images=frames[1:] if len(frames) > 1 else None,
+        duration=duration,          # Duration per frame in milliseconds
+        loop=0,                     # 0 means the GIF will loop indefinitely
+        transparency=transparency_index,
+        disposal=2                  # Ensure that the previous frame is cleared before the next
+    )
+    print(f"Created GIF: {gif_output_path}")
+
+def create_stair_mesh(x, y, z, vertex_index):  
+    
+    # Define vertices
+    verts = [
+    (x, y, z),  # 0
+    (x + block_size, y, z),  # 1
+    (x + block_size, y + block_size, z),  # 2
+    (x, y + block_size, z),  # 3
+    (x + block_size, y + block_size, z + block_size / 2),  # 4
+    (x, y + block_size, z + block_size / 2),  # 5
+    (x, y, z + block_size),  # 6
+    (x + block_size, y, z + block_size),  # 7
+    (x + block_size, y + block_size / 2, z + block_size / 2),  # 8
+    (x, y + block_size / 2 , z + block_size / 2),  # 9
+    (x, y +block_size /2 , z + block_size),  # 10
+    (x + block_size, y + block_size /2 , z + block_size),  # 11
+    ]
+    
+    # Defne faces
+    faces = [
+    ((vertex_index, vertex_index + 1, vertex_index + 2, vertex_index + 3), 'bottom'),  # Bottom
+    ((vertex_index, vertex_index + 1, vertex_index + 7, vertex_index + 6), 'side'),  # back
+    ((vertex_index + 6, vertex_index + 7, vertex_index + 11, vertex_index + 10), 'top'),  # top
+    ((vertex_index + 4, vertex_index + 5, vertex_index + 9, vertex_index + 8), 'top'),  # top
+    ((vertex_index + 8, vertex_index + 9, vertex_index + 10, vertex_index + 11), 'side'), # front
+    ((vertex_index + 2, vertex_index + 3, vertex_index + 5, vertex_index + 4), 'side'),  # front
+    ((vertex_index, vertex_index + 3, vertex_index + 5, vertex_index + 9, vertex_index + 10, vertex_index + 6), 'side'),  # right
+    ((vertex_index + 1, vertex_index + 2, vertex_index + 4, vertex_index + 8, vertex_index + 11, vertex_index + 7), 'side'),  # left
+    ]
+    
+    # Define UV coordinates
+    uv_face = [
+                (0, 0),  # 0 (bottom-left corner)
+                (1, 0),  # 1 (bottom-right corner)
+                (1, 1),  # 2 (top-right corner)
+                (0, 1),  # 3 (top-left corner)
+                (0, 0),  # 4 (bottom-left corner, back face)
+                (1,1),  # 5 (top-left corner, back face)
+            ]
+    
+    return verts, faces, uv_face
+
+  
+def create_cube_mesh(x, y, z, vertex_index):  
+    
+    # Define vertices of the cube
+        verts = [
+            (x, y, z),
+            (x + block_size, y, z),
+            (x + block_size, y + block_size, z),
+            (x, y + block_size, z),
+            (x, y, z + block_size),
+            (x + block_size, y, z + block_size),
+            (x + block_size, y + block_size, z + block_size),
+            (x, y + block_size, z + block_size),
+        ]
+
+        # Define faces of the cube with face types
+        cube_faces = [
+            ((vertex_index, vertex_index + 1, vertex_index + 2, vertex_index + 3), 'bottom'),  # Bottom
+            ((vertex_index + 4, vertex_index + 5, vertex_index + 6, vertex_index + 7), 'top'),  # Top
+            ((vertex_index + 3, vertex_index + 2, vertex_index + 6, vertex_index + 7), 'side'),  # Front
+            ((vertex_index + 1, vertex_index + 0, vertex_index + 4, vertex_index + 5), 'side'),  # Back
+            ((vertex_index + 0, vertex_index + 3, vertex_index + 7, vertex_index + 4), 'side'),  # Left
+            ((vertex_index + 2, vertex_index + 1, vertex_index + 5, vertex_index + 6), 'side'),  # Right
+        ]
+        
+        # Define UV coordinates
+        uv_face = [
+                (0, 0),  # 0 (bottom-left corner)
+                (1, 0),  # 1 (bottom-right corner)
+                (1, 1),  # 2 (top-right corner)
+                (0, 1),  # 3 (top-left corner)
+        ]
+        return verts, cube_faces, uv_face
+ 
+def create_slab_mesh(x, y, z, vertex_index):
+     # Define vertices of the slab
+        verts = [
+            (x, y, z),
+            (x + block_size, y, z),
+            (x + block_size, y + block_size, z),
+            (x, y + block_size, z),
+            (x, y, z + block_size / 2),
+            (x + block_size, y, z + block_size / 2),
+            (x + block_size, y + block_size, z + block_size / 2),
+            (x, y + block_size, z + block_size / 2),
+        ]
+
+        # Define faces of the slab with face types
+        cube_faces = [
+            ((vertex_index, vertex_index + 1, vertex_index + 2, vertex_index + 3), 'bottom'),  # Bottom
+            ((vertex_index + 4, vertex_index + 5, vertex_index + 6, vertex_index + 7), 'top'),  # Top
+            ((vertex_index + 3, vertex_index + 2, vertex_index + 6, vertex_index + 7), 'side'),  # Front
+            ((vertex_index + 1, vertex_index + 0, vertex_index + 4, vertex_index + 5), 'side'),  # Back
+            ((vertex_index + 0, vertex_index + 3, vertex_index + 7, vertex_index + 4), 'side'),  # Left
+            ((vertex_index + 2, vertex_index + 1, vertex_index + 5, vertex_index + 6), 'side'),  # Right
+        ]
+        
+        # Define UV coordinates
+        uv_face = [
+                (0, 0),  # 0 (bottom-left corner)
+                (1, 0),  # 1 (bottom-right corner)
+                (1, 1),  # 2 (top-right corner)
+                (0, 1),  # 3 (top-left corner)
+            ]
+        return verts, cube_faces, uv_face
+    
+def create_vertical_mesh(x, y, z, vertex_index):
+          # Define vertices of the square
+        verts = [
+            (x, y + block_size / 2, z),
+            (x + block_size, y + block_size / 2, z),
+            (x + block_size, y + block_size / 2, z + block_size),
+            (x, y + block_size / 2, z + block_size),
+        ]
+
+        # Define the face of the square
+        faces = [
+            ((vertex_index, vertex_index + 1, vertex_index + 2, vertex_index + 3), 'side'),  # Front
+
+        ]
+        
+        # Define UV coordinates
+        uv_face = [
+                (0, 0),  # 0 (bottom-left corner)
+                (1, 0),  # 1 (bottom-right corner)
+                (1, 1),  # 2 (top-right corner)
+                (0, 1),  # 3 (top-left corner)
+            ]
+        return verts, faces, uv_face
+
+def create_horizontal_mesh(x, y, z, vertex_index):
+        # Define vertices of the square
+        verts = [
+            (x, y, z + block_size),
+            (x + block_size, y, z + block_size),
+            (x + block_size, y + block_size, z + block_size),
+            (x, y + block_size, z + block_size),
+        ]
+
+        # Define the face of the square
+        faces = [
+            ((vertex_index, vertex_index + 1, vertex_index + 2, vertex_index + 3), 'top'),  # Bottom
+
+        ]
+        
+        # Define UV coordinates
+        uv_face = [
+                (0, 0),  # 0 (bottom-left corner)
+                (1, 0),  # 1 (bottom-right corner)
+                (1, 1),  # 2 (top-right corner)
+                (0, 1),  # 3 (top-left corner)
+            ]
+        return verts, faces, uv_face   
+
+def process_hdf5_file(h5_folder):
+
+    output_folder = os.path.join(h5_folder, 'renders')
+    # Ensure output folder exists
+    if not os.path.exists(output_folder):
+        os.makedirs(output_folder)
+
+    # List all .h5 files in the folder
+    h5_files = [f for f in os.listdir(h5_folder) if f.endswith('.h5')]
+    image_paths = []
+    for h5_file in h5_files:
+        print(f"Processing {h5_file}...")
+        clear_scene()
+
+        # Load block data from .h5 file
+        h5_path = os.path.join(h5_folder, h5_file)
+        with h5py.File(h5_path, 'r') as hf:
+            build_folder_in_hdf5 = list(hf.keys())[0]
+            block_data = hf[build_folder_in_hdf5][()]
+            # Transpose to match Blender's coordinate system
+            block_data = np.transpose(block_data, (0, 2, 1))  # Adjusted transpose
+            
+        file_name = os.path.splitext(h5_file)[0]
+        # Extract the filename without extension to use for image
+        image_filename = file_name + '.png'
+        image_path = os.path.join(output_folder, image_filename)
+
+        # Render and save the image
+        render_and_save(block_data, image_path)
+        image_paths.append(image_path)
+
+    # Create GIF from images
+    gif_output_path = os.path.join(h5_folder, 'build.gif')
+    create_gif(image_paths, gif_output_path, gif_frame_duration)
 
 # # Example usage
 # if __name__ == "__main__":
