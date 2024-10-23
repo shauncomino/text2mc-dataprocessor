@@ -443,10 +443,6 @@ def create_gif(image_paths, gif_output_path, duration):
     )
     print(f"Created GIF: {gif_output_path}")
 
-
-
-
-
 def process_epochs():
     # Find all h5 files and group them by epoch
     h5_files = [f for f in os.listdir(h5_folder) if f.endswith('.h5')]
