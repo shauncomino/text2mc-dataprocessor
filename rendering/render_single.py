@@ -8,6 +8,7 @@ import json
 import glob
 from mathutils import Vector, Matrix
 from PIL import Image
+from datetime import datetime
 
 warnings.filterwarnings("ignore", category=UserWarning, module='numpy')
 
@@ -592,6 +593,10 @@ def create_horizontal_mesh(x, y, z, vertex_index):
                 (0, 1),  # 3 (top-left corner)
             ]
         return verts, faces, uv_face   
+def extract_timestamp(file_path):
+    file_name = os.path.basename(file_path)
+    timestamp_str = os.path.splitext(file_name)[0]
+    return datetime.strptime(timestamp_str, "%Y-%m-%d_%H-%M-%S")
 
 def process_hdf5_file(h5_folder):
 
@@ -602,8 +607,11 @@ def process_hdf5_file(h5_folder):
 
     # List all .h5 files in the folder
     h5_files = [f for f in os.listdir(h5_folder) if f.endswith('.h5')]
+
+    sorted_h5_files = sorted(h5_files, key=extract_timestamp)
+
     image_paths = []
-    for h5_file in h5_files:
+    for h5_file in sorted_h5_files:
         print(f"Processing {h5_file}...")
         clear_scene()
 
