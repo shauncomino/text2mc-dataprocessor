@@ -2,7 +2,7 @@ import os
 import pandas as pd
 
 # Define the folder containing the CSV files
-folder_path = 'your_folder_path'  # Replace with your actual path to the folder containing CSVs
+folder_path = "/lustre/fs1/groups/jaedo/batch_csvs/"  # Replace with your actual path to the folder containing CSVs
 
 # List to store data from each CSV
 dataframes = []
