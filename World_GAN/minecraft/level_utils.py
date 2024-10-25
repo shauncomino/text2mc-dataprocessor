@@ -135,7 +135,8 @@ def one_hot_to_blockdata_level(oh_level, tokens, block2repr, repr_type):
         elif repr_type == "block2vec":
             reprs = torch.stack(list(block2repr.values()))
             o = oh_level.squeeze().permute(1, 2, 3, 0)[..., None]
-            r = reprs.to("cuda").permute(1, 0)[None, None, None, ...]
+            # r = reprs.to("cuda").permute(1, 0)[None, None, None, ...]
+            r = reprs.to("cpu").permute(1, 0)[None, None, None, ...]
             d = (o - r).pow(2).sum(dim=-2)
             bdata = d.argmin(dim=-1).cpu()
         else:  # No repr

@@ -1,0 +1,562 @@
+2024-10-23 19:57:55,355 INFO    StreamThr :17396 [internal.py:wandb_internal():86] W&B internal server running at pid: 17396, started at: 2024-10-23 19:57:55.354904
+2024-10-23 19:57:55,355 DEBUG   HandlerThread:17396 [handler.py:handle_request():146] handle_request: status
+2024-10-23 19:57:55,872 INFO    WriterThread:17396 [datastore.py:open_for_write():87] open: output\wandb\run-20241023_195754-ga1aw01l\run-ga1aw01l.wandb
+2024-10-23 19:57:55,873 DEBUG   SenderThread:17396 [sender.py:send():378] send: header
+2024-10-23 19:57:56,130 DEBUG   SenderThread:17396 [sender.py:send():378] send: run
+2024-10-23 19:58:01,134 DEBUG   HandlerThread:17396 [handler.py:handle_request():146] handle_request: keepalive
+2024-10-23 19:58:02,630 INFO    SenderThread:17396 [dir_watcher.py:__init__():211] watching files in: output\wandb\run-20241023_195754-ga1aw01l\files
+2024-10-23 19:58:02,630 INFO    SenderThread:17396 [sender.py:_start_run_threads():1099] run started: ga1aw01l with start time 1729727875.355903
+2024-10-23 19:58:02,630 DEBUG   HandlerThread:17396 [handler.py:handle_request():146] handle_request: status_report
+2024-10-23 19:58:03,181 DEBUG   HandlerThread:17396 [handler.py:handle_request():146] handle_request: check_version
+2024-10-23 19:58:03,181 DEBUG   SenderThread:17396 [sender.py:send_request():405] send_request: check_version
+2024-10-23 19:58:03,716 DEBUG   HandlerThread:17396 [handler.py:handle_request():146] handle_request: run_start
+2024-10-23 19:58:03,730 DEBUG   HandlerThread:17396 [system_info.py:__init__():26] System info init
+2024-10-23 19:58:03,730 DEBUG   HandlerThread:17396 [system_info.py:__init__():41] System info init done
+2024-10-23 19:58:03,730 INFO    HandlerThread:17396 [system_monitor.py:start():194] Starting system monitor
+2024-10-23 19:58:03,731 INFO    SystemMonitor:17396 [system_monitor.py:_start():158] Starting system asset monitoring threads
+2024-10-23 19:58:03,731 INFO    HandlerThread:17396 [system_monitor.py:probe():214] Collecting system info
+2024-10-23 19:58:03,737 INFO    SystemMonitor:17396 [interfaces.py:start():190] Started cpu monitoring
+2024-10-23 19:58:03,742 DEBUG   HandlerThread:17396 [system_info.py:probe():150] Probing system
+2024-10-23 19:58:03,743 INFO    SystemMonitor:17396 [interfaces.py:start():190] Started disk monitoring
+2024-10-23 19:58:03,755 INFO    SystemMonitor:17396 [interfaces.py:start():190] Started memory monitoring
+2024-10-23 19:58:03,767 INFO    SystemMonitor:17396 [interfaces.py:start():190] Started network monitoring
+2024-10-23 19:58:03,770 DEBUG   HandlerThread:17396 [system_info.py:_probe_git():135] Probing git
+2024-10-23 19:58:03,845 DEBUG   HandlerThread:17396 [system_info.py:_probe_git():143] Probing git done
+2024-10-23 19:58:03,845 DEBUG   HandlerThread:17396 [system_info.py:probe():198] Probing system done
+2024-10-23 19:58:03,845 DEBUG   HandlerThread:17396 [system_monitor.py:probe():223] {'os': 'Windows-10-10.0.22631-SP0', 'python': '3.10.13', 'heartbeatAt': '2024-10-23T23:58:03.742703', 'startedAt': '2024-10-23T23:57:54.219381', 'docker': None, 'cuda': None, 'args': (), 'state': 'running', 'program': 'C:\\Projects\\text2mc\\text2mc-dataprocessor\\World_GAN\\main.py', 'codePathLocal': 'main.py', 'codePath': 'World_GAN\\main.py', 'git': {'remote': 'https://github.com/shauncomino/text2mc-dataprocessor.git', 'commit': '3ab4d179a7dce49acdedb8ff0e74e9f21ea84844'}, 'email': 'thatonepersonnobodyknows@gmail.com', 'root': 'C:/Projects/text2mc/text2mc-dataprocessor', 'host': 'MorgueParty', 'username': 'isabe', 'executable': 'C:\\Users\\isabe\\anaconda3\\envs\\world_gan\\python.exe', 'cpu_count': 8, 'cpu_count_logical': 16, 'cpu_freq': {'current': 2000.0, 'min': 0.0, 'max': 2000.0}, 'cpu_freq_per_core': [{'current': 2000.0, 'min': 0.0, 'max': 2000.0}], 'disk': {'/': {'total': 475.94042587280273, 'used': 286.1824760437012}}, 'memory': {'total': 15.342613220214844}}
+2024-10-23 19:58:03,845 INFO    HandlerThread:17396 [system_monitor.py:probe():224] Finished collecting system info
+2024-10-23 19:58:03,845 INFO    HandlerThread:17396 [system_monitor.py:probe():227] Publishing system info
+2024-10-23 19:58:03,846 DEBUG   HandlerThread:17396 [system_info.py:_save_conda():207] Saving list of conda packages installed into the current environment
+2024-10-23 19:58:03,850 ERROR   HandlerThread:17396 [system_info.py:_save_conda():218] Error saving conda packages: [WinError 2] The system cannot find the file specified
+Traceback (most recent call last):
+  File "C:\Users\isabe\anaconda3\envs\world_gan\lib\site-packages\wandb\sdk\internal\system\system_info.py", line 214, in _save_conda
+    subprocess.call(
+  File "C:\Users\isabe\anaconda3\envs\world_gan\lib\subprocess.py", line 345, in call
+    with Popen(*popenargs, **kwargs) as p:
+  File "C:\Users\isabe\anaconda3\envs\world_gan\lib\subprocess.py", line 971, in __init__
+    self._execute_child(args, executable, preexec_fn, close_fds,
+  File "C:\Users\isabe\anaconda3\envs\world_gan\lib\subprocess.py", line 1456, in _execute_child
+    hp, ht, pid, tid = _winapi.CreateProcess(executable, args,
+FileNotFoundError: [WinError 2] The system cannot find the file specified
+2024-10-23 19:58:03,851 DEBUG   HandlerThread:17396 [system_info.py:_save_conda():219] Saving conda packages done
+2024-10-23 19:58:03,852 INFO    HandlerThread:17396 [system_monitor.py:probe():229] Finished publishing system info
+2024-10-23 19:58:03,855 DEBUG   SenderThread:17396 [sender.py:send():378] send: files
+2024-10-23 19:58:03,855 INFO    SenderThread:17396 [sender.py:_save_file():1365] saving file wandb-metadata.json with policy now
+2024-10-23 19:58:04,033 DEBUG   HandlerThread:17396 [handler.py:handle_request():146] handle_request: python_packages
+2024-10-23 19:58:04,033 DEBUG   SenderThread:17396 [sender.py:send_request():405] send_request: python_packages
+2024-10-23 19:58:04,033 DEBUG   HandlerThread:17396 [handler.py:handle_request():146] handle_request: stop_status
+2024-10-23 19:58:04,034 DEBUG   HandlerThread:17396 [handler.py:handle_request():146] handle_request: internal_messages
+2024-10-23 19:58:04,034 DEBUG   SenderThread:17396 [sender.py:send_request():405] send_request: stop_status
+2024-10-23 19:58:04,156 DEBUG   SenderThread:17396 [sender.py:send():378] send: telemetry
+2024-10-23 19:58:04,645 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241023_195754-ga1aw01l\files\wandb-metadata.json
+2024-10-23 19:58:04,645 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241023_195754-ga1aw01l\files\requirements.txt
+2024-10-23 19:58:04,645 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241023_195754-ga1aw01l\files\conda-environment.yaml
+2024-10-23 19:58:04,645 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241023_195754-ga1aw01l\files\output.log
+2024-10-23 19:58:04,656 INFO    wandb-upload_0:17396 [upload_job.py:push():131] Uploaded file C:\Users\isabe\AppData\Local\Temp\tmppye0f00pwandb\xmuka8qa-wandb-metadata.json
+2024-10-23 19:58:06,874 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241023_195754-ga1aw01l\files\output.log
+2024-10-23 19:58:07,693 DEBUG   HandlerThread:17396 [handler.py:handle_request():146] handle_request: partial_history
+2024-10-23 19:58:07,709 DEBUG   HandlerThread:17396 [handler.py:handle_request():146] handle_request: partial_history
+2024-10-23 19:58:07,865 DEBUG   HandlerThread:17396 [handler.py:handle_request():146] handle_request: partial_history
+2024-10-23 19:58:07,952 DEBUG   HandlerThread:17396 [handler.py:handle_request():146] handle_request: status_report
+2024-10-23 19:58:08,012 DEBUG   SenderThread:17396 [sender.py:send():378] send: telemetry
+2024-10-23 19:58:08,148 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241023_195754-ga1aw01l\files\0
+2024-10-23 19:58:08,179 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241023_195754-ga1aw01l\files\state_dicts
+2024-10-23 19:58:08,179 DEBUG   HandlerThread:17396 [handler.py:handle_request():146] handle_request: partial_history
+2024-10-23 19:58:08,254 DEBUG   SenderThread:17396 [sender.py:send():378] send: history
+2024-10-23 19:58:08,284 DEBUG   SenderThread:17396 [sender.py:send_request():405] send_request: summary_record
+2024-10-23 19:58:08,573 INFO    SenderThread:17396 [sender.py:_save_file():1365] saving file wandb-summary.json with policy end
+2024-10-23 19:58:09,646 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241023_195754-ga1aw01l\files\wandb-summary.json
+2024-10-23 19:58:10,964 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241023_195754-ga1aw01l\files\output.log
+2024-10-23 19:58:12,358 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241023_195754-ga1aw01l\files\output.log
+2024-10-23 19:58:13,449 DEBUG   HandlerThread:17396 [handler.py:handle_request():146] handle_request: status_report
+2024-10-23 19:58:14,041 DEBUG   SenderThread:17396 [sender.py:send():378] send: telemetry
+2024-10-23 19:58:14,117 DEBUG   SenderThread:17396 [sender.py:send():378] send: files
+2024-10-23 19:58:14,162 INFO    SenderThread:17396 [sender.py:_save_file():1365] saving file output\wandb\run-20241023_195754-ga1aw01l\files\0 with policy live
+2024-10-23 19:58:14,223 DEBUG   SenderThread:17396 [sender.py:send():378] send: files
+2024-10-23 19:58:14,238 INFO    SenderThread:17396 [sender.py:_save_file():1365] saving file output\wandb\run-20241023_195754-ga1aw01l\files\*.pth with policy live
+2024-10-23 19:58:14,555 DEBUG   HandlerThread:17396 [handler.py:handle_request():146] handle_request: partial_history
+2024-10-23 19:58:15,205 DEBUG   HandlerThread:17396 [handler.py:handle_request():146] handle_request: partial_history
+2024-10-23 19:58:15,677 DEBUG   HandlerThread:17396 [handler.py:handle_request():146] handle_request: partial_history
+2024-10-23 19:58:16,720 DEBUG   HandlerThread:17396 [handler.py:handle_request():146] handle_request: partial_history
+2024-10-23 19:58:18,443 DEBUG   SenderThread:17396 [sender.py:send():378] send: files
+2024-10-23 19:58:18,443 DEBUG   HandlerThread:17396 [handler.py:handle_request():146] handle_request: status_report
+2024-10-23 19:58:18,444 INFO    SenderThread:17396 [sender.py:_save_file():1365] saving file output\wandb\run-20241023_195754-ga1aw01l\files\state_dicts\*.pth with policy live
+2024-10-23 19:58:18,446 DEBUG   SenderThread:17396 [sender.py:send():378] send: history
+2024-10-23 19:58:18,446 DEBUG   SenderThread:17396 [sender.py:send_request():405] send_request: summary_record
+2024-10-23 19:58:18,448 INFO    SenderThread:17396 [sender.py:_save_file():1365] saving file wandb-summary.json with policy end
+2024-10-23 19:58:18,448 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241023_195754-ga1aw01l\files\output.log
+2024-10-23 19:58:18,449 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241023_195754-ga1aw01l\files\noise_amplitudes.pth
+2024-10-23 19:58:18,450 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241023_195754-ga1aw01l\files\0\G.pth
+2024-10-23 19:58:18,451 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241023_195754-ga1aw01l\files\output\wandb\run-20241023_195754-ga1aw01l\files\noise_maps.pth
+2024-10-23 19:58:18,451 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241023_195754-ga1aw01l\files\num_layer.pth
+2024-10-23 19:58:18,455 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241023_195754-ga1aw01l\files\reals.pth
+2024-10-23 19:58:18,460 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241023_195754-ga1aw01l\files\output\wandb\run-20241023_195754-ga1aw01l\files\token_list.pth
+2024-10-23 19:58:18,461 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241023_195754-ga1aw01l\files\output\wandb\run-20241023_195754-ga1aw01l\files\0\z_opt.pth
+2024-10-23 19:58:18,462 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241023_195754-ga1aw01l\files\output\wandb\run-20241023_195754-ga1aw01l\files\generators.pth
+2024-10-23 19:58:18,463 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241023_195754-ga1aw01l\files\generators.pth
+2024-10-23 19:58:18,469 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241023_195754-ga1aw01l\files\output\wandb\run-20241023_195754-ga1aw01l\files\0\G.pth
+2024-10-23 19:58:18,471 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241023_195754-ga1aw01l\files\output\wandb\run-20241023_195754-ga1aw01l\files\noise_amplitudes.pth
+2024-10-23 19:58:18,472 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241023_195754-ga1aw01l\files\output\wandb\run-20241023_195754-ga1aw01l\files\state_dicts\G_0.pth
+2024-10-23 19:58:18,473 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241023_195754-ga1aw01l\files\state_dicts\G_0.pth
+2024-10-23 19:58:18,474 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241023_195754-ga1aw01l\files\output\wandb\run-20241023_195754-ga1aw01l\files\num_layer.pth
+2024-10-23 19:58:18,474 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241023_195754-ga1aw01l\files\0\z_opt.pth
+2024-10-23 19:58:18,475 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241023_195754-ga1aw01l\files\noise_maps.pth
+2024-10-23 19:58:18,477 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241023_195754-ga1aw01l\files\0\D.pth
+2024-10-23 19:58:18,478 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241023_195754-ga1aw01l\files\token_list.pth
+2024-10-23 19:58:18,480 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241023_195754-ga1aw01l\files\output\wandb\run-20241023_195754-ga1aw01l\files\0\D.pth
+2024-10-23 19:58:18,481 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241023_195754-ga1aw01l\files\output\wandb\run-20241023_195754-ga1aw01l\files\reals.pth
+2024-10-23 19:58:18,481 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241023_195754-ga1aw01l\files\0
+2024-10-23 19:58:18,481 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241023_195754-ga1aw01l\files\state_dicts
+2024-10-23 19:58:18,481 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241023_195754-ga1aw01l\files\1
+2024-10-23 19:58:18,482 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241023_195754-ga1aw01l\files\output\wandb\run-20241023_195754-ga1aw01l\files\state_dicts
+2024-10-23 19:58:18,482 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241023_195754-ga1aw01l\files\output\wandb\run-20241023_195754-ga1aw01l\files
+2024-10-23 19:58:18,482 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241023_195754-ga1aw01l\files\output
+2024-10-23 19:58:18,483 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241023_195754-ga1aw01l\files\output\wandb
+2024-10-23 19:58:18,483 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241023_195754-ga1aw01l\files\output\wandb\run-20241023_195754-ga1aw01l
+2024-10-23 19:58:18,484 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_moved():296] file/dir moved: output\wandb\run-20241023_195754-ga1aw01l\files\0 -> output\wandb\run-20241023_195754-ga1aw01l\files\output\wandb\run-20241023_195754-ga1aw01l\files\0
+2024-10-23 19:58:18,802 INFO    wandb-upload_0:17396 [upload_job.py:push():131] Uploaded file C:\Users\isabe\AppData\Local\Temp\tmppye0f00pwandb\85xaj0ly-noise_amplitudes.pth
+2024-10-23 19:58:19,043 DEBUG   HandlerThread:17396 [handler.py:handle_request():146] handle_request: internal_messages
+2024-10-23 19:58:19,043 DEBUG   HandlerThread:17396 [handler.py:handle_request():146] handle_request: stop_status
+2024-10-23 19:58:19,045 DEBUG   SenderThread:17396 [sender.py:send_request():405] send_request: stop_status
+2024-10-23 19:58:19,455 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241023_195754-ga1aw01l\files\wandb-summary.json
+2024-10-23 19:58:19,456 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241023_195754-ga1aw01l\files\output.log
+2024-10-23 19:58:19,824 INFO    wandb-upload_1:17396 [upload_job.py:push():131] Uploaded file C:\Users\isabe\AppData\Local\Temp\tmppye0f00pwandb\e0wxqxyw-num_layer.pth
+2024-10-23 19:58:19,930 INFO    wandb-upload_4:17396 [upload_job.py:push():131] Uploaded file C:\Users\isabe\AppData\Local\Temp\tmppye0f00pwandb\1pfqqiur-noise_maps.pth
+2024-10-23 19:58:21,224 INFO    wandb-upload_5:17396 [upload_job.py:push():131] Uploaded file C:\Users\isabe\AppData\Local\Temp\tmppye0f00pwandb\n52na37u-token_list.pth
+2024-10-23 19:58:21,346 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241023_195754-ga1aw01l\files\output.log
+2024-10-23 19:58:21,953 INFO    wandb-upload_3:17396 [upload_job.py:push():131] Uploaded file C:\Users\isabe\AppData\Local\Temp\tmppye0f00pwandb\ll8tfmpd-generators.pth
+2024-10-23 19:58:23,497 DEBUG   HandlerThread:17396 [handler.py:handle_request():146] handle_request: status_report
+2024-10-23 19:58:23,556 INFO    wandb-upload_2:17396 [upload_job.py:push():131] Uploaded file C:\Users\isabe\AppData\Local\Temp\tmppye0f00pwandb\28m1bhpa-reals.pth
+2024-10-23 19:58:23,755 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241023_195754-ga1aw01l\files\output.log
+2024-10-23 19:58:25,309 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241023_195754-ga1aw01l\files\output.log
+2024-10-23 19:58:27,843 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241023_195754-ga1aw01l\files\output.log
+2024-10-23 19:58:28,720 DEBUG   HandlerThread:17396 [handler.py:handle_request():146] handle_request: status_report
+2024-10-23 19:58:28,855 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241023_195754-ga1aw01l\files\output.log
+2024-10-23 19:58:32,628 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241023_195754-ga1aw01l\files\output\wandb\run-20241023_195754-ga1aw01l\files\generators.pth
+2024-10-23 19:58:32,659 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241023_195754-ga1aw01l\files\output\wandb\run-20241023_195754-ga1aw01l\files\token_list.pth
+2024-10-23 19:58:32,673 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241023_195754-ga1aw01l\files\output\wandb\run-20241023_195754-ga1aw01l\files\noise_maps.pth
+2024-10-23 19:58:32,703 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241023_195754-ga1aw01l\files\output\wandb\run-20241023_195754-ga1aw01l\files\reals.pth
+2024-10-23 19:58:32,856 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241023_195754-ga1aw01l\files\output\wandb\run-20241023_195754-ga1aw01l\files\num_layer.pth
+2024-10-23 19:58:32,916 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241023_195754-ga1aw01l\files\state_dicts\G_1.pth
+2024-10-23 19:58:32,916 DEBUG   HandlerThread:17396 [handler.py:handle_request():146] handle_request: partial_history
+2024-10-23 19:58:33,340 DEBUG   HandlerThread:17396 [handler.py:handle_request():146] handle_request: partial_history
+2024-10-23 19:58:33,400 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241023_195754-ga1aw01l\files\output\wandb\run-20241023_195754-ga1aw01l\files\state_dicts\G_1.pth
+2024-10-23 19:58:33,719 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241023_195754-ga1aw01l\files\output\wandb\run-20241023_195754-ga1aw01l\files\state_dicts
+2024-10-23 19:58:33,840 DEBUG   HandlerThread:17396 [handler.py:handle_request():146] handle_request: partial_history
+2024-10-23 19:58:34,143 DEBUG   HandlerThread:17396 [handler.py:handle_request():146] handle_request: stop_status
+2024-10-23 19:58:34,176 DEBUG   HandlerThread:17396 [handler.py:handle_request():146] handle_request: internal_messages
+2024-10-23 19:58:35,305 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241023_195754-ga1aw01l\files\output\wandb\run-20241023_195754-ga1aw01l\files\generators.pth
+2024-10-23 19:58:35,336 DEBUG   HandlerThread:17396 [handler.py:handle_request():146] handle_request: partial_history
+2024-10-23 19:58:35,336 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241023_195754-ga1aw01l\files\noise_amplitudes.pth
+2024-10-23 19:58:35,489 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241023_195754-ga1aw01l\files\reals.pth
+2024-10-23 19:58:35,565 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241023_195754-ga1aw01l\files\generators.pth
+2024-10-23 19:58:35,656 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241023_195754-ga1aw01l\files\noise_maps.pth
+2024-10-23 19:58:35,794 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241023_195754-ga1aw01l\files\output\wandb\run-20241023_195754-ga1aw01l\files\noise_amplitudes.pth
+2024-10-23 19:58:35,916 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241023_195754-ga1aw01l\files\token_list.pth
+2024-10-23 19:58:36,008 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241023_195754-ga1aw01l\files\num_layer.pth
+2024-10-23 19:58:36,084 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241023_195754-ga1aw01l\files\1\G.pth
+2024-10-23 19:58:36,535 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241023_195754-ga1aw01l\files\output\wandb\run-20241023_195754-ga1aw01l\files\1\D.pth
+2024-10-23 19:58:36,974 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241023_195754-ga1aw01l\files\output\wandb\run-20241023_195754-ga1aw01l\files\1\z_opt.pth
+2024-10-23 19:58:37,169 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241023_195754-ga1aw01l\files\1\D.pth
+2024-10-23 19:58:37,400 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241023_195754-ga1aw01l\files\output\wandb\run-20241023_195754-ga1aw01l\files\1\G.pth
+2024-10-23 19:58:37,613 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241023_195754-ga1aw01l\files\1\z_opt.pth
+2024-10-23 19:58:37,855 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241023_195754-ga1aw01l\files\output\wandb\run-20241023_195754-ga1aw01l\files
+2024-10-23 19:58:37,885 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241023_195754-ga1aw01l\files\1
+2024-10-23 19:58:37,915 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241023_195754-ga1aw01l\files\state_dicts
+2024-10-23 19:58:37,961 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241023_195754-ga1aw01l\files\2
+2024-10-23 19:58:37,991 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_moved():296] file/dir moved: output\wandb\run-20241023_195754-ga1aw01l\files\1 -> output\wandb\run-20241023_195754-ga1aw01l\files\output\wandb\run-20241023_195754-ga1aw01l\files\1
+2024-10-23 19:58:39,154 DEBUG   HandlerThread:17396 [handler.py:handle_request():146] handle_request: keepalive
+2024-10-23 19:58:40,091 DEBUG   SenderThread:17396 [sender.py:send():378] send: files
+2024-10-23 19:58:40,105 INFO    SenderThread:17396 [sender.py:_save_file():1365] saving file output\wandb\run-20241023_195754-ga1aw01l\files\1 with policy live
+2024-10-23 19:58:40,184 DEBUG   SenderThread:17396 [sender.py:send():378] send: files
+2024-10-23 19:58:40,185 INFO    SenderThread:17396 [sender.py:_save_file():1365] saving file output\wandb\run-20241023_195754-ga1aw01l\files\*.pth with policy live
+2024-10-23 19:58:40,206 DEBUG   SenderThread:17396 [sender.py:send():378] send: files
+2024-10-23 19:58:40,206 INFO    SenderThread:17396 [sender.py:_save_file():1365] saving file output\wandb\run-20241023_195754-ga1aw01l\files\state_dicts\*.pth with policy live
+2024-10-23 19:58:40,208 DEBUG   SenderThread:17396 [sender.py:send_request():405] send_request: stop_status
+2024-10-23 19:58:40,300 DEBUG   SenderThread:17396 [sender.py:send():378] send: history
+2024-10-23 19:58:40,300 DEBUG   SenderThread:17396 [sender.py:send_request():405] send_request: summary_record
+2024-10-23 19:58:40,302 INFO    SenderThread:17396 [sender.py:_save_file():1365] saving file wandb-summary.json with policy end
+2024-10-23 19:58:41,230 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241023_195754-ga1aw01l\files\config.yaml
+2024-10-23 19:58:41,231 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241023_195754-ga1aw01l\files\wandb-summary.json
+2024-10-23 19:58:41,233 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241023_195754-ga1aw01l\files\output.log
+2024-10-23 19:58:44,057 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241023_195754-ga1aw01l\files\output.log
+2024-10-23 19:58:45,070 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241023_195754-ga1aw01l\files\output.log
+2024-10-23 19:58:46,033 DEBUG   HandlerThread:17396 [handler.py:handle_request():146] handle_request: status_report
+2024-10-23 19:58:47,601 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241023_195754-ga1aw01l\files\output.log
+2024-10-23 19:58:49,100 DEBUG   HandlerThread:17396 [handler.py:handle_request():146] handle_request: keepalive
+2024-10-23 19:58:49,122 DEBUG   HandlerThread:17396 [handler.py:handle_request():146] handle_request: internal_messages
+2024-10-23 19:58:49,123 DEBUG   HandlerThread:17396 [handler.py:handle_request():146] handle_request: stop_status
+2024-10-23 19:58:49,123 DEBUG   SenderThread:17396 [sender.py:send_request():405] send_request: stop_status
+2024-10-23 19:58:51,433 DEBUG   HandlerThread:17396 [handler.py:handle_request():146] handle_request: status_report
+2024-10-23 19:58:51,738 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241023_195754-ga1aw01l\files\output.log
+2024-10-23 19:58:54,316 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241023_195754-ga1aw01l\files\output.log
+2024-10-23 19:58:56,959 DEBUG   HandlerThread:17396 [handler.py:handle_request():146] handle_request: status_report
+2024-10-23 19:58:57,947 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241023_195754-ga1aw01l\files\output.log
+2024-10-23 19:59:00,500 DEBUG   SenderThread:17396 [sender.py:send():378] send: files
+2024-10-23 19:59:00,501 INFO    SenderThread:17396 [sender.py:_save_file():1365] saving file output\wandb\run-20241023_195754-ga1aw01l\files\2 with policy live
+2024-10-23 19:59:00,529 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241023_195754-ga1aw01l\files\output\wandb\run-20241023_195754-ga1aw01l\files\generators.pth
+2024-10-23 19:59:00,530 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241023_195754-ga1aw01l\files\reals.pth
+2024-10-23 19:59:00,531 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241023_195754-ga1aw01l\files\generators.pth
+2024-10-23 19:59:00,532 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241023_195754-ga1aw01l\files\noise_maps.pth
+2024-10-23 19:59:00,532 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241023_195754-ga1aw01l\files\output\wandb\run-20241023_195754-ga1aw01l\files\noise_maps.pth
+2024-10-23 19:59:00,533 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241023_195754-ga1aw01l\files\output\wandb\run-20241023_195754-ga1aw01l\files\reals.pth
+2024-10-23 19:59:00,533 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241023_195754-ga1aw01l\files\output.log
+2024-10-23 19:59:00,533 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241023_195754-ga1aw01l\files\output\wandb\run-20241023_195754-ga1aw01l\files\2\z_opt.pth
+2024-10-23 19:59:00,534 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241023_195754-ga1aw01l\files\2\D.pth
+2024-10-23 19:59:00,534 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241023_195754-ga1aw01l\files\output\wandb\run-20241023_195754-ga1aw01l\files\2\G.pth
+2024-10-23 19:59:00,535 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241023_195754-ga1aw01l\files\2\z_opt.pth
+2024-10-23 19:59:00,536 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241023_195754-ga1aw01l\files\output\wandb\run-20241023_195754-ga1aw01l\files\2\D.pth
+2024-10-23 19:59:00,536 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241023_195754-ga1aw01l\files\2\G.pth
+2024-10-23 19:59:00,537 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241023_195754-ga1aw01l\files\output\wandb\run-20241023_195754-ga1aw01l\files
+2024-10-23 19:59:00,537 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241023_195754-ga1aw01l\files\2
+2024-10-23 19:59:00,538 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_moved():296] file/dir moved: output\wandb\run-20241023_195754-ga1aw01l\files\2 -> output\wandb\run-20241023_195754-ga1aw01l\files\output\wandb\run-20241023_195754-ga1aw01l\files\2
+2024-10-23 19:59:00,543 DEBUG   SenderThread:17396 [sender.py:send():378] send: files
+2024-10-23 19:59:00,544 INFO    SenderThread:17396 [sender.py:_save_file():1365] saving file output\wandb\run-20241023_195754-ga1aw01l\files\*.pth with policy live
+2024-10-23 19:59:00,550 DEBUG   SenderThread:17396 [sender.py:send():378] send: files
+2024-10-23 19:59:00,550 INFO    SenderThread:17396 [sender.py:_save_file():1365] saving file output\wandb\run-20241023_195754-ga1aw01l\files\state_dicts\*.pth with policy live
+2024-10-23 19:59:02,299 DEBUG   HandlerThread:17396 [handler.py:handle_request():146] handle_request: partial_history
+2024-10-23 19:59:02,677 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241023_195754-ga1aw01l\files\noise_amplitudes.pth
+2024-10-23 19:59:02,723 DEBUG   HandlerThread:17396 [handler.py:handle_request():146] handle_request: status_report
+2024-10-23 19:59:02,768 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241023_195754-ga1aw01l\files\reals.pth
+2024-10-23 19:59:02,864 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241023_195754-ga1aw01l\files\output\wandb\run-20241023_195754-ga1aw01l\files\token_list.pth
+2024-10-23 19:59:02,866 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241023_195754-ga1aw01l\files\output\wandb\run-20241023_195754-ga1aw01l\files\noise_amplitudes.pth
+2024-10-23 19:59:02,875 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241023_195754-ga1aw01l\files\num_layer.pth
+2024-10-23 19:59:02,950 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241023_195754-ga1aw01l\files\token_list.pth
+2024-10-23 19:59:03,005 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241023_195754-ga1aw01l\files\output\wandb\run-20241023_195754-ga1aw01l\files\reals.pth
+2024-10-23 19:59:03,005 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241023_195754-ga1aw01l\files\output.log
+2024-10-23 19:59:03,006 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241023_195754-ga1aw01l\files\output\wandb\run-20241023_195754-ga1aw01l\files\num_layer.pth
+2024-10-23 19:59:03,006 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241023_195754-ga1aw01l\files\state_dicts\G_2.pth
+2024-10-23 19:59:03,008 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241023_195754-ga1aw01l\files\output\wandb\run-20241023_195754-ga1aw01l\files\state_dicts\G_2.pth
+2024-10-23 19:59:03,042 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241023_195754-ga1aw01l\files\output\wandb\run-20241023_195754-ga1aw01l\files
+2024-10-23 19:59:03,072 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241023_195754-ga1aw01l\files\output\wandb\run-20241023_195754-ga1aw01l\files\state_dicts
+2024-10-23 19:59:03,102 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241023_195754-ga1aw01l\files\state_dicts
+2024-10-23 19:59:03,148 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241023_195754-ga1aw01l\files\3
+2024-10-23 19:59:03,673 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241023_195754-ga1aw01l\files\output.log
+2024-10-23 19:59:03,702 DEBUG   HandlerThread:17396 [handler.py:handle_request():146] handle_request: partial_history
+2024-10-23 19:59:03,770 DEBUG   SystemMonitor:17396 [system_monitor.py:_start():172] Starting system metrics aggregation loop
+2024-10-23 19:59:03,771 DEBUG   SenderThread:17396 [sender.py:send():378] send: stats
+2024-10-23 19:59:04,061 DEBUG   HandlerThread:17396 [handler.py:handle_request():146] handle_request: stop_status
+2024-10-23 19:59:04,062 DEBUG   HandlerThread:17396 [handler.py:handle_request():146] handle_request: keepalive
+2024-10-23 19:59:04,062 DEBUG   SenderThread:17396 [sender.py:send_request():405] send_request: stop_status
+2024-10-23 19:59:04,077 DEBUG   HandlerThread:17396 [handler.py:handle_request():146] handle_request: internal_messages
+2024-10-23 19:59:05,062 DEBUG   HandlerThread:17396 [handler.py:handle_request():146] handle_request: partial_history
+2024-10-23 19:59:08,096 DEBUG   HandlerThread:17396 [handler.py:handle_request():146] handle_request: partial_history
+2024-10-23 19:59:08,098 DEBUG   SenderThread:17396 [sender.py:send():378] send: history
+2024-10-23 19:59:08,098 DEBUG   SenderThread:17396 [sender.py:send_request():405] send_request: summary_record
+2024-10-23 19:59:08,099 DEBUG   HandlerThread:17396 [handler.py:handle_request():146] handle_request: status_report
+2024-10-23 19:59:08,099 INFO    SenderThread:17396 [sender.py:_save_file():1365] saving file wandb-summary.json with policy end
+2024-10-23 19:59:08,750 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241023_195754-ga1aw01l\files\wandb-summary.json
+2024-10-23 19:59:09,767 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241023_195754-ga1aw01l\files\output.log
+2024-10-23 19:59:13,147 DEBUG   HandlerThread:17396 [handler.py:handle_request():146] handle_request: status_report
+2024-10-23 19:59:17,553 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241023_195754-ga1aw01l\files\output.log
+2024-10-23 19:59:18,291 DEBUG   HandlerThread:17396 [handler.py:handle_request():146] handle_request: status_report
+2024-10-23 19:59:19,107 DEBUG   HandlerThread:17396 [handler.py:handle_request():146] handle_request: keepalive
+2024-10-23 19:59:19,122 DEBUG   HandlerThread:17396 [handler.py:handle_request():146] handle_request: stop_status
+2024-10-23 19:59:19,168 DEBUG   HandlerThread:17396 [handler.py:handle_request():146] handle_request: internal_messages
+2024-10-23 19:59:19,201 DEBUG   SenderThread:17396 [sender.py:send_request():405] send_request: stop_status
+2024-10-23 19:59:23,293 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241023_195754-ga1aw01l\files\output.log
+2024-10-23 19:59:23,406 DEBUG   HandlerThread:17396 [handler.py:handle_request():146] handle_request: status_report
+2024-10-23 19:59:28,442 DEBUG   HandlerThread:17396 [handler.py:handle_request():146] handle_request: status_report
+2024-10-23 19:59:32,624 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241023_195754-ga1aw01l\files\output.log
+2024-10-23 19:59:33,543 DEBUG   HandlerThread:17396 [handler.py:handle_request():146] handle_request: status_report
+2024-10-23 19:59:33,786 DEBUG   SenderThread:17396 [sender.py:send():378] send: stats
+2024-10-23 19:59:34,074 DEBUG   HandlerThread:17396 [handler.py:handle_request():146] handle_request: keepalive
+2024-10-23 19:59:34,074 DEBUG   HandlerThread:17396 [handler.py:handle_request():146] handle_request: stop_status
+2024-10-23 19:59:34,075 DEBUG   SenderThread:17396 [sender.py:send_request():405] send_request: stop_status
+2024-10-23 19:59:34,089 DEBUG   HandlerThread:17396 [handler.py:handle_request():146] handle_request: internal_messages
+2024-10-23 19:59:37,871 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241023_195754-ga1aw01l\files\output.log
+2024-10-23 19:59:39,520 DEBUG   HandlerThread:17396 [handler.py:handle_request():146] handle_request: status_report
+2024-10-23 19:59:44,656 DEBUG   HandlerThread:17396 [handler.py:handle_request():146] handle_request: status_report
+2024-10-23 19:59:45,872 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241023_195754-ga1aw01l\files\output.log
+2024-10-23 19:59:49,084 DEBUG   HandlerThread:17396 [handler.py:handle_request():146] handle_request: stop_status
+2024-10-23 19:59:49,084 DEBUG   HandlerThread:17396 [handler.py:handle_request():146] handle_request: keepalive
+2024-10-23 19:59:49,085 DEBUG   SenderThread:17396 [sender.py:send_request():405] send_request: stop_status
+2024-10-23 19:59:49,099 DEBUG   HandlerThread:17396 [handler.py:handle_request():146] handle_request: internal_messages
+2024-10-23 19:59:50,201 DEBUG   HandlerThread:17396 [handler.py:handle_request():146] handle_request: status_report
+2024-10-23 19:59:52,060 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241023_195754-ga1aw01l\files\output.log
+2024-10-23 19:59:55,603 DEBUG   HandlerThread:17396 [handler.py:handle_request():146] handle_request: status_report
+2024-10-23 19:59:59,944 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241023_195754-ga1aw01l\files\output.log
+2024-10-23 20:00:01,510 DEBUG   HandlerThread:17396 [handler.py:handle_request():146] handle_request: status_report
+2024-10-23 20:00:03,801 DEBUG   SenderThread:17396 [sender.py:send():378] send: stats
+2024-10-23 20:00:04,112 DEBUG   HandlerThread:17396 [handler.py:handle_request():146] handle_request: stop_status
+2024-10-23 20:00:04,142 DEBUG   HandlerThread:17396 [handler.py:handle_request():146] handle_request: keepalive
+2024-10-23 20:00:04,158 DEBUG   HandlerThread:17396 [handler.py:handle_request():146] handle_request: internal_messages
+2024-10-23 20:00:04,173 DEBUG   SenderThread:17396 [sender.py:send_request():405] send_request: stop_status
+2024-10-23 20:00:06,525 DEBUG   HandlerThread:17396 [handler.py:handle_request():146] handle_request: status_report
+2024-10-23 20:00:07,183 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241023_195754-ga1aw01l\files\output.log
+2024-10-23 20:00:11,455 DEBUG   SenderThread:17396 [sender.py:send():378] send: files
+2024-10-23 20:00:11,455 INFO    SenderThread:17396 [sender.py:_save_file():1365] saving file output\wandb\run-20241023_195754-ga1aw01l\files\3 with policy live
+2024-10-23 20:00:11,516 DEBUG   SenderThread:17396 [sender.py:send():378] send: files
+2024-10-23 20:00:11,516 INFO    SenderThread:17396 [sender.py:_save_file():1365] saving file output\wandb\run-20241023_195754-ga1aw01l\files\*.pth with policy live
+2024-10-23 20:00:11,520 DEBUG   HandlerThread:17396 [handler.py:handle_request():146] handle_request: status_report
+2024-10-23 20:00:11,522 DEBUG   SenderThread:17396 [sender.py:send():378] send: files
+2024-10-23 20:00:11,522 INFO    SenderThread:17396 [sender.py:_save_file():1365] saving file output\wandb\run-20241023_195754-ga1aw01l\files\state_dicts\*.pth with policy live
+2024-10-23 20:00:12,515 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241023_195754-ga1aw01l\files\output\wandb\run-20241023_195754-ga1aw01l\files\generators.pth
+2024-10-23 20:00:12,515 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241023_195754-ga1aw01l\files\noise_amplitudes.pth
+2024-10-23 20:00:12,516 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241023_195754-ga1aw01l\files\reals.pth
+2024-10-23 20:00:12,517 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241023_195754-ga1aw01l\files\output\wandb\run-20241023_195754-ga1aw01l\files\token_list.pth
+2024-10-23 20:00:12,518 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241023_195754-ga1aw01l\files\generators.pth
+2024-10-23 20:00:12,519 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241023_195754-ga1aw01l\files\noise_maps.pth
+2024-10-23 20:00:12,519 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241023_195754-ga1aw01l\files\output\wandb\run-20241023_195754-ga1aw01l\files\noise_amplitudes.pth
+2024-10-23 20:00:12,520 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241023_195754-ga1aw01l\files\num_layer.pth
+2024-10-23 20:00:12,520 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241023_195754-ga1aw01l\files\token_list.pth
+2024-10-23 20:00:12,521 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241023_195754-ga1aw01l\files\output\wandb\run-20241023_195754-ga1aw01l\files\noise_maps.pth
+2024-10-23 20:00:12,521 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241023_195754-ga1aw01l\files\output\wandb\run-20241023_195754-ga1aw01l\files\reals.pth
+2024-10-23 20:00:12,521 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241023_195754-ga1aw01l\files\output\wandb\run-20241023_195754-ga1aw01l\files\num_layer.pth
+2024-10-23 20:00:12,522 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241023_195754-ga1aw01l\files\state_dicts\G_3.pth
+2024-10-23 20:00:12,523 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241023_195754-ga1aw01l\files\output\wandb\run-20241023_195754-ga1aw01l\files\3\D.pth
+2024-10-23 20:00:12,524 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241023_195754-ga1aw01l\files\3\D.pth
+2024-10-23 20:00:12,525 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241023_195754-ga1aw01l\files\3\G.pth
+2024-10-23 20:00:12,525 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241023_195754-ga1aw01l\files\3\z_opt.pth
+2024-10-23 20:00:12,527 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241023_195754-ga1aw01l\files\output\wandb\run-20241023_195754-ga1aw01l\files\3\G.pth
+2024-10-23 20:00:12,528 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241023_195754-ga1aw01l\files\output\wandb\run-20241023_195754-ga1aw01l\files\state_dicts\G_3.pth
+2024-10-23 20:00:12,528 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241023_195754-ga1aw01l\files\output\wandb\run-20241023_195754-ga1aw01l\files\3\z_opt.pth
+2024-10-23 20:00:12,530 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241023_195754-ga1aw01l\files\output\wandb\run-20241023_195754-ga1aw01l\files
+2024-10-23 20:00:12,530 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241023_195754-ga1aw01l\files\3
+2024-10-23 20:00:12,530 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241023_195754-ga1aw01l\files\output\wandb\run-20241023_195754-ga1aw01l\files\state_dicts
+2024-10-23 20:00:12,530 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241023_195754-ga1aw01l\files\state_dicts
+2024-10-23 20:00:12,531 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241023_195754-ga1aw01l\files\random_samples
+2024-10-23 20:00:12,531 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_moved():296] file/dir moved: output\wandb\run-20241023_195754-ga1aw01l\files\3 -> output\wandb\run-20241023_195754-ga1aw01l\files\output\wandb\run-20241023_195754-ga1aw01l\files\3
+2024-10-23 20:00:12,959 INFO    wandb-upload_0:17396 [upload_job.py:push():131] Uploaded file C:\Users\isabe\AppData\Local\Temp\tmppye0f00pwandb\lu1iqekb-noise_amplitudes.pth
+2024-10-23 20:00:13,116 INFO    wandb-upload_4:17396 [upload_job.py:push():131] Uploaded file C:\Users\isabe\AppData\Local\Temp\tmppye0f00pwandb\tm24ikg0-generators.pth
+2024-10-23 20:00:13,528 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241023_195754-ga1aw01l\files\output.log
+2024-10-23 20:00:16,586 DEBUG   HandlerThread:17396 [handler.py:handle_request():146] handle_request: status_report
+2024-10-23 20:00:16,974 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241023_195754-ga1aw01l\files\output.log
+2024-10-23 20:00:17,989 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241023_195754-ga1aw01l\files\output.log
+2024-10-23 20:00:19,189 DEBUG   HandlerThread:17396 [handler.py:handle_request():146] handle_request: internal_messages
+2024-10-23 20:00:19,201 DEBUG   HandlerThread:17396 [handler.py:handle_request():146] handle_request: stop_status
+2024-10-23 20:00:19,216 DEBUG   HandlerThread:17396 [handler.py:handle_request():146] handle_request: keepalive
+2024-10-23 20:00:19,255 DEBUG   SenderThread:17396 [sender.py:send_request():405] send_request: stop_status
+2024-10-23 20:00:21,318 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241023_195754-ga1aw01l\files\output.log
+2024-10-23 20:00:21,612 DEBUG   HandlerThread:17396 [handler.py:handle_request():146] handle_request: status_report
+2024-10-23 20:00:22,889 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241023_195754-ga1aw01l\files\output.log
+2024-10-23 20:00:23,908 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241023_195754-ga1aw01l\files\output.log
+2024-10-23 20:00:26,536 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241023_195754-ga1aw01l\files\output.log
+2024-10-23 20:00:26,641 DEBUG   HandlerThread:17396 [handler.py:handle_request():146] handle_request: status_report
+2024-10-23 20:00:27,343 DEBUG   SenderThread:17396 [sender.py:send():378] send: exit
+2024-10-23 20:00:27,343 INFO    SenderThread:17396 [sender.py:send_exit():585] handling exit code: 1
+2024-10-23 20:00:27,343 INFO    SenderThread:17396 [sender.py:send_exit():587] handling runtime: 143
+2024-10-23 20:00:27,344 INFO    SenderThread:17396 [sender.py:_save_file():1365] saving file wandb-summary.json with policy end
+2024-10-23 20:00:27,344 INFO    SenderThread:17396 [sender.py:send_exit():593] send defer
+2024-10-23 20:00:27,345 DEBUG   HandlerThread:17396 [handler.py:handle_request():146] handle_request: defer
+2024-10-23 20:00:27,345 INFO    HandlerThread:17396 [handler.py:handle_request_defer():172] handle defer: 0
+2024-10-23 20:00:27,345 DEBUG   SenderThread:17396 [sender.py:send_request():405] send_request: defer
+2024-10-23 20:00:27,345 INFO    SenderThread:17396 [sender.py:send_request_defer():609] handle sender defer: 0
+2024-10-23 20:00:27,345 INFO    SenderThread:17396 [sender.py:transition_state():613] send defer: 1
+2024-10-23 20:00:27,345 DEBUG   HandlerThread:17396 [handler.py:handle_request():146] handle_request: defer
+2024-10-23 20:00:27,345 INFO    HandlerThread:17396 [handler.py:handle_request_defer():172] handle defer: 1
+2024-10-23 20:00:27,346 DEBUG   SenderThread:17396 [sender.py:send_request():405] send_request: defer
+2024-10-23 20:00:27,346 INFO    SenderThread:17396 [sender.py:send_request_defer():609] handle sender defer: 1
+2024-10-23 20:00:27,346 INFO    SenderThread:17396 [sender.py:transition_state():613] send defer: 2
+2024-10-23 20:00:27,346 DEBUG   HandlerThread:17396 [handler.py:handle_request():146] handle_request: defer
+2024-10-23 20:00:27,346 INFO    HandlerThread:17396 [handler.py:handle_request_defer():172] handle defer: 2
+2024-10-23 20:00:27,346 INFO    HandlerThread:17396 [system_monitor.py:finish():203] Stopping system monitor
+2024-10-23 20:00:27,346 DEBUG   SystemMonitor:17396 [system_monitor.py:_start():179] Finished system metrics aggregation loop
+2024-10-23 20:00:27,346 INFO    HandlerThread:17396 [interfaces.py:finish():202] Joined cpu monitor
+2024-10-23 20:00:27,347 DEBUG   SystemMonitor:17396 [system_monitor.py:_start():183] Publishing last batch of metrics
+2024-10-23 20:00:27,347 INFO    HandlerThread:17396 [interfaces.py:finish():202] Joined disk monitor
+2024-10-23 20:00:27,348 INFO    HandlerThread:17396 [interfaces.py:finish():202] Joined memory monitor
+2024-10-23 20:00:27,348 INFO    HandlerThread:17396 [interfaces.py:finish():202] Joined network monitor
+2024-10-23 20:00:27,348 DEBUG   SenderThread:17396 [sender.py:send_request():405] send_request: defer
+2024-10-23 20:00:27,348 INFO    SenderThread:17396 [sender.py:send_request_defer():609] handle sender defer: 2
+2024-10-23 20:00:27,349 INFO    SenderThread:17396 [sender.py:transition_state():613] send defer: 3
+2024-10-23 20:00:27,349 DEBUG   SenderThread:17396 [sender.py:send():378] send: stats
+2024-10-23 20:00:27,349 DEBUG   HandlerThread:17396 [handler.py:handle_request():146] handle_request: defer
+2024-10-23 20:00:27,349 INFO    HandlerThread:17396 [handler.py:handle_request_defer():172] handle defer: 3
+2024-10-23 20:00:27,349 DEBUG   SenderThread:17396 [sender.py:send_request():405] send_request: defer
+2024-10-23 20:00:27,349 INFO    SenderThread:17396 [sender.py:send_request_defer():609] handle sender defer: 3
+2024-10-23 20:00:27,349 INFO    SenderThread:17396 [sender.py:transition_state():613] send defer: 4
+2024-10-23 20:00:27,349 DEBUG   HandlerThread:17396 [handler.py:handle_request():146] handle_request: defer
+2024-10-23 20:00:27,350 INFO    HandlerThread:17396 [handler.py:handle_request_defer():172] handle defer: 4
+2024-10-23 20:00:27,350 DEBUG   SenderThread:17396 [sender.py:send_request():405] send_request: defer
+2024-10-23 20:00:27,350 INFO    SenderThread:17396 [sender.py:send_request_defer():609] handle sender defer: 4
+2024-10-23 20:00:27,350 INFO    SenderThread:17396 [sender.py:transition_state():613] send defer: 5
+2024-10-23 20:00:27,350 DEBUG   HandlerThread:17396 [handler.py:handle_request():146] handle_request: defer
+2024-10-23 20:00:27,350 INFO    HandlerThread:17396 [handler.py:handle_request_defer():172] handle defer: 5
+2024-10-23 20:00:27,351 DEBUG   SenderThread:17396 [sender.py:send():378] send: summary
+2024-10-23 20:00:27,351 INFO    SenderThread:17396 [sender.py:_save_file():1365] saving file wandb-summary.json with policy end
+2024-10-23 20:00:27,352 DEBUG   SenderThread:17396 [sender.py:send_request():405] send_request: defer
+2024-10-23 20:00:27,352 INFO    SenderThread:17396 [sender.py:send_request_defer():609] handle sender defer: 5
+2024-10-23 20:00:27,352 INFO    SenderThread:17396 [sender.py:transition_state():613] send defer: 6
+2024-10-23 20:00:27,352 DEBUG   HandlerThread:17396 [handler.py:handle_request():146] handle_request: defer
+2024-10-23 20:00:27,352 INFO    HandlerThread:17396 [handler.py:handle_request_defer():172] handle defer: 6
+2024-10-23 20:00:27,352 DEBUG   SenderThread:17396 [sender.py:send_request():405] send_request: defer
+2024-10-23 20:00:27,352 INFO    SenderThread:17396 [sender.py:send_request_defer():609] handle sender defer: 6
+2024-10-23 20:00:27,352 INFO    SenderThread:17396 [sender.py:transition_state():613] send defer: 7
+2024-10-23 20:00:27,352 DEBUG   HandlerThread:17396 [handler.py:handle_request():146] handle_request: status_report
+2024-10-23 20:00:27,353 DEBUG   HandlerThread:17396 [handler.py:handle_request():146] handle_request: defer
+2024-10-23 20:00:27,353 INFO    HandlerThread:17396 [handler.py:handle_request_defer():172] handle defer: 7
+2024-10-23 20:00:27,353 DEBUG   SenderThread:17396 [sender.py:send_request():405] send_request: defer
+2024-10-23 20:00:27,353 INFO    SenderThread:17396 [sender.py:send_request_defer():609] handle sender defer: 7
+2024-10-23 20:00:28,407 DEBUG   HandlerThread:17396 [handler.py:handle_request():146] handle_request: poll_exit
+2024-10-23 20:00:28,591 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241023_195754-ga1aw01l\files\wandb-summary.json
+2024-10-23 20:00:28,604 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241023_195754-ga1aw01l\files\output.log
+2024-10-23 20:00:28,604 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241023_195754-ga1aw01l\files\random_samples
+2024-10-23 20:00:28,604 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_created():271] file/dir created: output\wandb\run-20241023_195754-ga1aw01l\files\random_samples\torch_blockdata
+2024-10-23 20:00:29,594 INFO    SenderThread:17396 [sender.py:transition_state():613] send defer: 8
+2024-10-23 20:00:29,595 DEBUG   SenderThread:17396 [sender.py:send_request():405] send_request: poll_exit
+2024-10-23 20:00:29,595 DEBUG   HandlerThread:17396 [handler.py:handle_request():146] handle_request: defer
+2024-10-23 20:00:29,595 INFO    HandlerThread:17396 [handler.py:handle_request_defer():172] handle defer: 8
+2024-10-23 20:00:29,595 DEBUG   SenderThread:17396 [sender.py:send_request():405] send_request: defer
+2024-10-23 20:00:29,595 INFO    SenderThread:17396 [sender.py:send_request_defer():609] handle sender defer: 8
+2024-10-23 20:00:29,595 INFO    SenderThread:17396 [job_builder.py:build():298] Attempting to build job artifact
+2024-10-23 20:00:29,807 INFO    SenderThread:17396 [job_builder.py:_get_source_type():428] is repo sourced job
+2024-10-23 20:00:29,813 INFO    Thread-16 :17396 [dir_watcher.py:_on_file_modified():288] file/dir modified: output\wandb\run-20241023_195754-ga1aw01l\files\output.log
+2024-10-23 20:00:29,862 INFO    SenderThread:17396 [job_builder.py:build():404] adding wandb-job metadata file
+2024-10-23 20:00:29,995 INFO    SenderThread:17396 [sender.py:transition_state():613] send defer: 9
+2024-10-23 20:00:29,995 DEBUG   HandlerThread:17396 [handler.py:handle_request():146] handle_request: defer
+2024-10-23 20:00:29,995 DEBUG   SenderThread:17396 [sender.py:send():378] send: artifact
+2024-10-23 20:00:29,995 INFO    HandlerThread:17396 [handler.py:handle_request_defer():172] handle defer: 9
+2024-10-23 20:00:30,358 DEBUG   HandlerThread:17396 [handler.py:handle_request():146] handle_request: poll_exit
+2024-10-23 20:00:30,542 INFO    wandb-upload_3:17396 [upload_job.py:push():86] Skipped uploading C:\Users\isabe\AppData\Local\wandb\wandb\artifacts\staging\tmpo2lb9v2n
+2024-10-23 20:00:31,113 INFO    wandb-upload_2:17396 [upload_job.py:push():89] Uploaded file C:\Users\isabe\AppData\Local\wandb\wandb\artifacts\staging\tmplpc35l7g
+2024-10-23 20:00:35,009 INFO    SenderThread:17396 [sender.py:send_artifact():1443] sent artifact job-https___github.com_shauncomino_text2mc-dataprocessor.git_World_GAN_main.py - {'id': 'QXJ0aWZhY3Q6MTI5MjE3MjE5MA==', 'state': 'PENDING', 'artifactSequence': {'id': 'QXJ0aWZhY3RDb2xsZWN0aW9uOjQ3NzkxNjc1MA==', 'latestArtifact': {'id': 'QXJ0aWZhY3Q6MTI5MjE2NTU2Mw==', 'versionIndex': 9}}}
+2024-10-23 20:00:35,010 DEBUG   SenderThread:17396 [sender.py:send_request():405] send_request: defer
+2024-10-23 20:00:35,010 DEBUG   HandlerThread:17396 [handler.py:handle_request():146] handle_request: status_report
+2024-10-23 20:00:35,010 INFO    SenderThread:17396 [sender.py:send_request_defer():609] handle sender defer: 9
+2024-10-23 20:00:35,010 INFO    SenderThread:17396 [dir_watcher.py:finish():358] shutting down directory watcher
+2024-10-23 20:00:35,395 DEBUG   HandlerThread:17396 [handler.py:handle_request():146] handle_request: keepalive
+2024-10-23 20:00:35,842 INFO    SenderThread:17396 [dir_watcher.py:finish():388] scan: output\wandb\run-20241023_195754-ga1aw01l\files
+2024-10-23 20:00:35,842 INFO    SenderThread:17396 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241023_195754-ga1aw01l\files\conda-environment.yaml conda-environment.yaml
+2024-10-23 20:00:35,843 INFO    SenderThread:17396 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241023_195754-ga1aw01l\files\config.yaml config.yaml
+2024-10-23 20:00:35,843 INFO    SenderThread:17396 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241023_195754-ga1aw01l\files\generators.pth generators.pth
+2024-10-23 20:00:35,843 INFO    SenderThread:17396 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241023_195754-ga1aw01l\files\noise_amplitudes.pth noise_amplitudes.pth
+2024-10-23 20:00:35,845 INFO    SenderThread:17396 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241023_195754-ga1aw01l\files\noise_maps.pth noise_maps.pth
+2024-10-23 20:00:35,845 INFO    SenderThread:17396 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241023_195754-ga1aw01l\files\num_layer.pth num_layer.pth
+2024-10-23 20:00:35,847 INFO    SenderThread:17396 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241023_195754-ga1aw01l\files\output.log output.log
+2024-10-23 20:00:35,847 INFO    SenderThread:17396 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241023_195754-ga1aw01l\files\reals.pth reals.pth
+2024-10-23 20:00:35,848 INFO    SenderThread:17396 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241023_195754-ga1aw01l\files\requirements.txt requirements.txt
+2024-10-23 20:00:35,848 INFO    SenderThread:17396 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241023_195754-ga1aw01l\files\token_list.pth token_list.pth
+2024-10-23 20:00:35,848 INFO    SenderThread:17396 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241023_195754-ga1aw01l\files\wandb-metadata.json wandb-metadata.json
+2024-10-23 20:00:35,848 INFO    SenderThread:17396 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241023_195754-ga1aw01l\files\wandb-summary.json wandb-summary.json
+2024-10-23 20:00:35,849 INFO    SenderThread:17396 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241023_195754-ga1aw01l\files\0\D.pth 0/D.pth
+2024-10-23 20:00:35,849 INFO    SenderThread:17396 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241023_195754-ga1aw01l\files\0\G.pth 0/G.pth
+2024-10-23 20:00:35,849 INFO    SenderThread:17396 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241023_195754-ga1aw01l\files\0\z_opt.pth 0/z_opt.pth
+2024-10-23 20:00:35,850 INFO    SenderThread:17396 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241023_195754-ga1aw01l\files\1\D.pth 1/D.pth
+2024-10-23 20:00:35,850 INFO    SenderThread:17396 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241023_195754-ga1aw01l\files\1\G.pth 1/G.pth
+2024-10-23 20:00:35,850 INFO    SenderThread:17396 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241023_195754-ga1aw01l\files\1\z_opt.pth 1/z_opt.pth
+2024-10-23 20:00:35,851 INFO    SenderThread:17396 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241023_195754-ga1aw01l\files\2\D.pth 2/D.pth
+2024-10-23 20:00:35,851 INFO    SenderThread:17396 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241023_195754-ga1aw01l\files\2\G.pth 2/G.pth
+2024-10-23 20:00:35,851 INFO    SenderThread:17396 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241023_195754-ga1aw01l\files\2\z_opt.pth 2/z_opt.pth
+2024-10-23 20:00:35,852 INFO    SenderThread:17396 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241023_195754-ga1aw01l\files\3\D.pth 3/D.pth
+2024-10-23 20:00:35,852 INFO    SenderThread:17396 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241023_195754-ga1aw01l\files\3\G.pth 3/G.pth
+2024-10-23 20:00:35,852 INFO    SenderThread:17396 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241023_195754-ga1aw01l\files\3\z_opt.pth 3/z_opt.pth
+2024-10-23 20:00:35,855 INFO    SenderThread:17396 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241023_195754-ga1aw01l\files\output\wandb\run-20241023_195754-ga1aw01l\files\generators.pth output/wandb/run-20241023_195754-ga1aw01l/files/generators.pth
+2024-10-23 20:00:35,855 INFO    SenderThread:17396 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241023_195754-ga1aw01l\files\output\wandb\run-20241023_195754-ga1aw01l\files\noise_amplitudes.pth output/wandb/run-20241023_195754-ga1aw01l/files/noise_amplitudes.pth
+2024-10-23 20:00:35,855 INFO    SenderThread:17396 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241023_195754-ga1aw01l\files\output\wandb\run-20241023_195754-ga1aw01l\files\noise_maps.pth output/wandb/run-20241023_195754-ga1aw01l/files/noise_maps.pth
+2024-10-23 20:00:35,856 INFO    SenderThread:17396 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241023_195754-ga1aw01l\files\output\wandb\run-20241023_195754-ga1aw01l\files\num_layer.pth output/wandb/run-20241023_195754-ga1aw01l/files/num_layer.pth
+2024-10-23 20:00:35,856 INFO    SenderThread:17396 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241023_195754-ga1aw01l\files\output\wandb\run-20241023_195754-ga1aw01l\files\reals.pth output/wandb/run-20241023_195754-ga1aw01l/files/reals.pth
+2024-10-23 20:00:35,857 INFO    SenderThread:17396 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241023_195754-ga1aw01l\files\output\wandb\run-20241023_195754-ga1aw01l\files\token_list.pth output/wandb/run-20241023_195754-ga1aw01l/files/token_list.pth
+2024-10-23 20:00:35,858 INFO    SenderThread:17396 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241023_195754-ga1aw01l\files\output\wandb\run-20241023_195754-ga1aw01l\files\state_dicts\G_0.pth output/wandb/run-20241023_195754-ga1aw01l/files/state_dicts/G_0.pth
+2024-10-23 20:00:35,858 INFO    SenderThread:17396 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241023_195754-ga1aw01l\files\output\wandb\run-20241023_195754-ga1aw01l\files\state_dicts\G_1.pth output/wandb/run-20241023_195754-ga1aw01l/files/state_dicts/G_1.pth
+2024-10-23 20:00:35,858 INFO    SenderThread:17396 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241023_195754-ga1aw01l\files\output\wandb\run-20241023_195754-ga1aw01l\files\state_dicts\G_2.pth output/wandb/run-20241023_195754-ga1aw01l/files/state_dicts/G_2.pth
+2024-10-23 20:00:35,859 INFO    SenderThread:17396 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241023_195754-ga1aw01l\files\output\wandb\run-20241023_195754-ga1aw01l\files\state_dicts\G_3.pth output/wandb/run-20241023_195754-ga1aw01l/files/state_dicts/G_3.pth
+2024-10-23 20:00:35,859 INFO    SenderThread:17396 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241023_195754-ga1aw01l\files\state_dicts\G_0.pth state_dicts/G_0.pth
+2024-10-23 20:00:35,860 INFO    SenderThread:17396 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241023_195754-ga1aw01l\files\state_dicts\G_1.pth state_dicts/G_1.pth
+2024-10-23 20:00:35,860 INFO    SenderThread:17396 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241023_195754-ga1aw01l\files\state_dicts\G_2.pth state_dicts/G_2.pth
+2024-10-23 20:00:35,860 INFO    SenderThread:17396 [dir_watcher.py:finish():402] scan save: output\wandb\run-20241023_195754-ga1aw01l\files\state_dicts\G_3.pth state_dicts/G_3.pth
+2024-10-23 20:00:35,861 INFO    SenderThread:17396 [sender.py:transition_state():613] send defer: 10
+2024-10-23 20:00:35,861 DEBUG   SenderThread:17396 [sender.py:send_request():405] send_request: poll_exit
+2024-10-23 20:00:35,861 DEBUG   HandlerThread:17396 [handler.py:handle_request():146] handle_request: defer
+2024-10-23 20:00:35,861 INFO    HandlerThread:17396 [handler.py:handle_request_defer():172] handle defer: 10
+2024-10-23 20:00:35,861 DEBUG   SenderThread:17396 [sender.py:send_request():405] send_request: defer
+2024-10-23 20:00:35,861 INFO    SenderThread:17396 [sender.py:send_request_defer():609] handle sender defer: 10
+2024-10-23 20:00:35,861 INFO    SenderThread:17396 [file_pusher.py:finish():172] shutting down file pusher
+2024-10-23 20:00:36,400 DEBUG   HandlerThread:17396 [handler.py:handle_request():146] handle_request: poll_exit
+2024-10-23 20:00:36,401 DEBUG   SenderThread:17396 [sender.py:send_request():405] send_request: poll_exit
+2024-10-23 20:00:37,053 INFO    wandb-upload_20:17396 [upload_job.py:push():131] Uploaded file output\wandb\run-20241023_195754-ga1aw01l\files\output\wandb\run-20241023_195754-ga1aw01l\files\generators.pth
+2024-10-23 20:00:37,404 DEBUG   HandlerThread:17396 [handler.py:handle_request():146] handle_request: poll_exit
+2024-10-23 20:00:37,405 DEBUG   SenderThread:17396 [sender.py:send_request():405] send_request: poll_exit
+2024-10-23 20:00:37,723 INFO    wandb-upload_25:17396 [upload_job.py:push():131] Uploaded file output\wandb\run-20241023_195754-ga1aw01l\files\output\wandb\run-20241023_195754-ga1aw01l\files\token_list.pth
+2024-10-23 20:00:38,171 INFO    wandb-upload_5:17396 [upload_job.py:push():131] Uploaded file output\wandb\run-20241023_195754-ga1aw01l\files\config.yaml
+2024-10-23 20:00:38,180 INFO    wandb-upload_1:17396 [upload_job.py:push():131] Uploaded file C:\Users\isabe\AppData\Local\Temp\tmppye0f00pwandb\azlaxct3-reals.pth
+2024-10-23 20:00:38,418 DEBUG   HandlerThread:17396 [handler.py:handle_request():146] handle_request: poll_exit
+2024-10-23 20:00:38,419 DEBUG   SenderThread:17396 [sender.py:send_request():405] send_request: poll_exit
+2024-10-23 20:00:38,930 INFO    wandb-upload_4:17396 [upload_job.py:push():131] Uploaded file C:\Users\isabe\AppData\Local\Temp\tmppye0f00pwandb\cp4w4jnf-noise_maps.pth
+2024-10-23 20:00:39,082 INFO    wandb-upload_21:17396 [upload_job.py:push():131] Uploaded file output\wandb\run-20241023_195754-ga1aw01l\files\output\wandb\run-20241023_195754-ga1aw01l\files\noise_amplitudes.pth
+2024-10-23 20:00:39,238 INFO    wandb-upload_8:17396 [upload_job.py:push():131] Uploaded file output\wandb\run-20241023_195754-ga1aw01l\files\0\D.pth
+2024-10-23 20:00:39,239 INFO    wandb-upload_3:17396 [upload_job.py:push():131] Uploaded file C:\Users\isabe\AppData\Local\Temp\tmppye0f00pwandb\fvyprozd-num_layer.pth
+2024-10-23 20:00:39,433 DEBUG   HandlerThread:17396 [handler.py:handle_request():146] handle_request: poll_exit
+2024-10-23 20:00:39,434 DEBUG   SenderThread:17396 [sender.py:send_request():405] send_request: poll_exit
+2024-10-23 20:00:39,458 INFO    wandb-upload_11:17396 [upload_job.py:push():131] Uploaded file output\wandb\run-20241023_195754-ga1aw01l\files\1\D.pth
+2024-10-23 20:00:39,600 INFO    wandb-upload_13:17396 [upload_job.py:push():131] Uploaded file output\wandb\run-20241023_195754-ga1aw01l\files\1\z_opt.pth
+2024-10-23 20:00:40,104 INFO    wandb-upload_2:17396 [upload_job.py:push():131] Uploaded file output\wandb\run-20241023_195754-ga1aw01l\files\output.log
+2024-10-23 20:00:40,435 DEBUG   HandlerThread:17396 [handler.py:handle_request():146] handle_request: status_report
+2024-10-23 20:00:40,436 DEBUG   HandlerThread:17396 [handler.py:handle_request():146] handle_request: poll_exit
+2024-10-23 20:00:40,437 DEBUG   SenderThread:17396 [sender.py:send_request():405] send_request: poll_exit
+2024-10-23 20:00:40,592 INFO    wandb-upload_19:17396 [upload_job.py:push():131] Uploaded file output\wandb\run-20241023_195754-ga1aw01l\files\3\z_opt.pth
+2024-10-23 20:00:41,371 INFO    wandb-upload_29:17396 [upload_job.py:push():131] Uploaded file output\wandb\run-20241023_195754-ga1aw01l\files\output\wandb\run-20241023_195754-ga1aw01l\files\state_dicts\G_3.pth
+2024-10-23 20:00:41,420 INFO    wandb-upload_12:17396 [upload_job.py:push():131] Uploaded file output\wandb\run-20241023_195754-ga1aw01l\files\1\G.pth
+2024-10-23 20:00:41,438 DEBUG   HandlerThread:17396 [handler.py:handle_request():146] handle_request: poll_exit
+2024-10-23 20:00:41,438 DEBUG   SenderThread:17396 [sender.py:send_request():405] send_request: poll_exit
+2024-10-23 20:00:41,471 INFO    wandb-upload_7:17396 [upload_job.py:push():131] Uploaded file output\wandb\run-20241023_195754-ga1aw01l\files\wandb-summary.json
+2024-10-23 20:00:41,486 INFO    wandb-upload_23:17396 [upload_job.py:push():131] Uploaded file output\wandb\run-20241023_195754-ga1aw01l\files\output\wandb\run-20241023_195754-ga1aw01l\files\num_layer.pth
+2024-10-23 20:00:41,566 INFO    wandb-upload_17:17396 [upload_job.py:push():131] Uploaded file output\wandb\run-20241023_195754-ga1aw01l\files\3\D.pth
+2024-10-23 20:00:41,592 INFO    wandb-upload_15:17396 [upload_job.py:push():131] Uploaded file output\wandb\run-20241023_195754-ga1aw01l\files\2\G.pth
+2024-10-23 20:00:41,639 INFO    wandb-upload_14:17396 [upload_job.py:push():131] Uploaded file output\wandb\run-20241023_195754-ga1aw01l\files\2\D.pth
+2024-10-23 20:00:41,643 INFO    wandb-upload_0:17396 [upload_job.py:push():131] Uploaded file output\wandb\run-20241023_195754-ga1aw01l\files\requirements.txt
+2024-10-23 20:00:41,720 INFO    wandb-upload_10:17396 [upload_job.py:push():131] Uploaded file output\wandb\run-20241023_195754-ga1aw01l\files\0\z_opt.pth
+2024-10-23 20:00:41,747 INFO    wandb-upload_6:17396 [upload_job.py:push():131] Uploaded file C:\Users\isabe\AppData\Local\Temp\tmppye0f00pwandb\0mjuauv2-token_list.pth
+2024-10-23 20:00:41,751 INFO    wandb-upload_27:17396 [upload_job.py:push():131] Uploaded file output\wandb\run-20241023_195754-ga1aw01l\files\output\wandb\run-20241023_195754-ga1aw01l\files\state_dicts\G_1.pth
+2024-10-23 20:00:41,860 INFO    wandb-upload_9:17396 [upload_job.py:push():131] Uploaded file output\wandb\run-20241023_195754-ga1aw01l\files\0\G.pth
+2024-10-23 20:00:41,912 INFO    wandb-upload_26:17396 [upload_job.py:push():131] Uploaded file output\wandb\run-20241023_195754-ga1aw01l\files\output\wandb\run-20241023_195754-ga1aw01l\files\state_dicts\G_0.pth
+2024-10-23 20:00:41,959 INFO    wandb-upload_28:17396 [upload_job.py:push():131] Uploaded file output\wandb\run-20241023_195754-ga1aw01l\files\output\wandb\run-20241023_195754-ga1aw01l\files\state_dicts\G_2.pth
+2024-10-23 20:00:42,079 INFO    wandb-upload_33:17396 [upload_job.py:push():131] Uploaded file output\wandb\run-20241023_195754-ga1aw01l\files\state_dicts\G_3.pth
+2024-10-23 20:00:42,082 INFO    wandb-upload_18:17396 [upload_job.py:push():131] Uploaded file output\wandb\run-20241023_195754-ga1aw01l\files\3\G.pth
+2024-10-23 20:00:42,092 INFO    wandb-upload_30:17396 [upload_job.py:push():131] Uploaded file output\wandb\run-20241023_195754-ga1aw01l\files\state_dicts\G_0.pth
+2024-10-23 20:00:42,125 INFO    wandb-upload_31:17396 [upload_job.py:push():131] Uploaded file output\wandb\run-20241023_195754-ga1aw01l\files\state_dicts\G_1.pth
+2024-10-23 20:00:42,131 INFO    wandb-upload_32:17396 [upload_job.py:push():131] Uploaded file output\wandb\run-20241023_195754-ga1aw01l\files\state_dicts\G_2.pth
+2024-10-23 20:00:42,439 DEBUG   HandlerThread:17396 [handler.py:handle_request():146] handle_request: poll_exit
+2024-10-23 20:00:42,440 DEBUG   SenderThread:17396 [sender.py:send_request():405] send_request: poll_exit
+2024-10-23 20:00:43,440 DEBUG   HandlerThread:17396 [handler.py:handle_request():146] handle_request: poll_exit
+2024-10-23 20:00:43,441 DEBUG   SenderThread:17396 [sender.py:send_request():405] send_request: poll_exit
+2024-10-23 20:00:43,559 INFO    wandb-upload_16:17396 [upload_job.py:push():131] Uploaded file output\wandb\run-20241023_195754-ga1aw01l\files\2\z_opt.pth
+2024-10-23 20:00:44,227 INFO    wandb-upload_24:17396 [upload_job.py:push():131] Uploaded file output\wandb\run-20241023_195754-ga1aw01l\files\output\wandb\run-20241023_195754-ga1aw01l\files\reals.pth
+2024-10-23 20:00:44,408 INFO    wandb-upload_22:17396 [upload_job.py:push():131] Uploaded file output\wandb\run-20241023_195754-ga1aw01l\files\output\wandb\run-20241023_195754-ga1aw01l\files\noise_maps.pth
+2024-10-23 20:00:44,443 DEBUG   HandlerThread:17396 [handler.py:handle_request():146] handle_request: poll_exit
+2024-10-23 20:00:44,444 DEBUG   SenderThread:17396 [sender.py:send_request():405] send_request: poll_exit
+2024-10-23 20:00:44,624 INFO    Thread-15 (_thread_body):17396 [sender.py:transition_state():613] send defer: 11
+2024-10-23 20:00:44,625 DEBUG   HandlerThread:17396 [handler.py:handle_request():146] handle_request: defer
+2024-10-23 20:00:44,625 INFO    HandlerThread:17396 [handler.py:handle_request_defer():172] handle defer: 11
+2024-10-23 20:00:44,625 DEBUG   SenderThread:17396 [sender.py:send_request():405] send_request: defer
+2024-10-23 20:00:44,625 INFO    SenderThread:17396 [sender.py:send_request_defer():609] handle sender defer: 11
+2024-10-23 20:00:44,625 INFO    SenderThread:17396 [file_pusher.py:join():178] waiting for file pusher
+2024-10-23 20:00:44,626 INFO    SenderThread:17396 [sender.py:transition_state():613] send defer: 12
+2024-10-23 20:00:44,626 DEBUG   HandlerThread:17396 [handler.py:handle_request():146] handle_request: defer
+2024-10-23 20:00:44,626 INFO    HandlerThread:17396 [handler.py:handle_request_defer():172] handle defer: 12
+2024-10-23 20:00:44,627 DEBUG   SenderThread:17396 [sender.py:send_request():405] send_request: defer
+2024-10-23 20:00:44,627 INFO    SenderThread:17396 [sender.py:send_request_defer():609] handle sender defer: 12
+2024-10-23 20:00:44,627 INFO    SenderThread:17396 [file_stream.py:finish():595] file stream finish called
+2024-10-23 20:00:44,873 INFO    SenderThread:17396 [file_stream.py:finish():599] file stream finish is done
+2024-10-23 20:00:44,873 INFO    SenderThread:17396 [sender.py:transition_state():613] send defer: 13
+2024-10-23 20:00:44,874 DEBUG   HandlerThread:17396 [handler.py:handle_request():146] handle_request: defer
+2024-10-23 20:00:44,874 INFO    HandlerThread:17396 [handler.py:handle_request_defer():172] handle defer: 13
+2024-10-23 20:00:44,874 DEBUG   SenderThread:17396 [sender.py:send_request():405] send_request: defer
+2024-10-23 20:00:44,874 INFO    SenderThread:17396 [sender.py:send_request_defer():609] handle sender defer: 13
+2024-10-23 20:00:44,874 INFO    SenderThread:17396 [sender.py:transition_state():613] send defer: 14
+2024-10-23 20:00:44,874 DEBUG   HandlerThread:17396 [handler.py:handle_request():146] handle_request: defer
+2024-10-23 20:00:44,874 DEBUG   SenderThread:17396 [sender.py:send():378] send: final
+2024-10-23 20:00:44,874 INFO    HandlerThread:17396 [handler.py:handle_request_defer():172] handle defer: 14
+2024-10-23 20:00:44,875 DEBUG   SenderThread:17396 [sender.py:send():378] send: footer
+2024-10-23 20:00:44,875 DEBUG   SenderThread:17396 [sender.py:send_request():405] send_request: defer
+2024-10-23 20:00:44,875 INFO    SenderThread:17396 [sender.py:send_request_defer():609] handle sender defer: 14
+2024-10-23 20:00:44,875 DEBUG   HandlerThread:17396 [handler.py:handle_request():146] handle_request: poll_exit
+2024-10-23 20:00:44,876 DEBUG   HandlerThread:17396 [handler.py:handle_request():146] handle_request: poll_exit
+2024-10-23 20:00:44,876 DEBUG   HandlerThread:17396 [handler.py:handle_request():146] handle_request: server_info
+2024-10-23 20:00:44,876 DEBUG   SenderThread:17396 [sender.py:send_request():405] send_request: poll_exit
+2024-10-23 20:00:44,876 DEBUG   HandlerThread:17396 [handler.py:handle_request():146] handle_request: get_summary
+2024-10-23 20:00:44,876 DEBUG   SenderThread:17396 [sender.py:send_request():405] send_request: poll_exit
+2024-10-23 20:00:44,877 DEBUG   HandlerThread:17396 [handler.py:handle_request():146] handle_request: sampled_history
+2024-10-23 20:00:44,877 DEBUG   SenderThread:17396 [sender.py:send_request():405] send_request: server_info
+2024-10-23 20:00:44,877 DEBUG   HandlerThread:17396 [handler.py:handle_request():146] handle_request: internal_messages
+2024-10-23 20:00:44,879 DEBUG   HandlerThread:17396 [handler.py:handle_request():146] handle_request: job_info
+2024-10-23 20:00:44,951 DEBUG   SenderThread:17396 [sender.py:send_request():405] send_request: job_info
+2024-10-23 20:00:44,952 INFO    MainThread:17396 [wandb_run.py:_footer_history_summary_info():3851] rendering history
+2024-10-23 20:00:44,952 INFO    MainThread:17396 [wandb_run.py:_footer_history_summary_info():3883] rendering summary
+2024-10-23 20:00:44,955 INFO    MainThread:17396 [wandb_run.py:_footer_sync_info():3810] logging synced files
+2024-10-23 20:00:44,956 DEBUG   HandlerThread:17396 [handler.py:handle_request():146] handle_request: shutdown
+2024-10-23 20:00:44,956 INFO    HandlerThread:17396 [handler.py:finish():869] shutting down handler
+2024-10-23 20:00:45,883 INFO    WriterThread:17396 [datastore.py:close():296] close: output\wandb\run-20241023_195754-ga1aw01l\run-ga1aw01l.wandb
+2024-10-23 20:00:45,959 INFO    SenderThread:17396 [sender.py:finish():1521] shutting down sender
+2024-10-23 20:00:45,959 INFO    SenderThread:17396 [file_pusher.py:finish():172] shutting down file pusher
+2024-10-23 20:00:45,959 INFO    SenderThread:17396 [file_pusher.py:join():178] waiting for file pusher

@@ -122,8 +122,6 @@ class Config(Tap):
             with open(embeddings_pkl_path, 'rb') as f:
                 embeddings_dict = pickle.load(f)
                 for key, value in embeddings_dict.items(): 
-                    print("key is: ", key)
-                    print("value is: ", value)
                     self.block2repr[key] = value 
             
         else:
