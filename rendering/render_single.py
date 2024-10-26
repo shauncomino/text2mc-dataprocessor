@@ -372,6 +372,7 @@ def render_and_save(build_data, output_path):
     print(f"Rendered {output_path}")
 
 def create_gif(image_paths, gif_output_path, duration):
+    image_paths = sorted(image_paths, key = extract_timestamp)
     images = []
     valid_image_paths = []
     for image_path in image_paths:
@@ -592,7 +593,8 @@ def create_horizontal_mesh(x, y, z, vertex_index):
                 (1, 1),  # 2 (top-right corner)
                 (0, 1),  # 3 (top-left corner)
             ]
-        return verts, faces, uv_face   
+        return verts, faces, uv_face  
+ 
 def extract_timestamp(file_path):
     file_name = os.path.basename(file_path)
     timestamp_str = os.path.splitext(file_name)[0]
