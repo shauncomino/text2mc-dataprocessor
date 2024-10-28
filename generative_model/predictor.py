@@ -149,11 +149,11 @@ class text2mcPredictor(nn.Module):
         # Save the tokens as an HDF5 file to use the rendering script.
         process_hdf5_file(self.SAVE_DIRECTORY)
 
-def predict(self, building1_path: str, building2_path: str):
+    def predict(self, building1_path: str, building2_path: str):
 
-    predictor = text2mcPredictor()
-    
-    building1_embedding, building2_embedding, embedding_matrix = predictor.embed_builds(building1_path, building2_path)
-    building1_latent, building2_latent = predictor.encode_builds(building1_embedding, building2_embedding)
-    interpolations = predictor.interpolate_latent_points(building1_latent, building2_latent, num_interpolations=60)
-    predictor.decode_and_generate(interpolations, embedding_matrix)
+        predictor = text2mcPredictor()
+        
+        building1_embedding, building2_embedding, embedding_matrix = predictor.embed_builds(building1_path, building2_path)
+        building1_latent, building2_latent = predictor.encode_builds(building1_embedding, building2_embedding)
+        interpolations = predictor.interpolate_latent_points(building1_latent, building2_latent, num_interpolations=60)
+        predictor.decode_and_generate(interpolations, embedding_matrix)

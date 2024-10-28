@@ -2,11 +2,10 @@ import os
 import sys
 import h5py
 from itertools import product
-from predictor import predict
 from predictor import text2mcPredictor
 
-builds1 = ['/lustre/fs1/groups/jaedo/processed_builds/batch_164_4259.h5','/lustre/fs1/groups/jaedo/processed_builds/batch_164_4256.h5','/lustre/fs1/groups/jaedo/processed_builds/batch_224_5804.h5','/lustre/fs1/groups/jaedo/processed_builds/batch_179_4650.h5','/lustre/fs1/groups/jaedo/processed_builds/batch_478_12414.h5']
-builds2 = ['/lustre/fs1/groups/jaedo/processed_builds/batch_443_11512.h5','/lustre/fs1/groups/jaedo/processed_builds/batch_443_11493.h5',' /lustre/fs1/groups/jaedo/processed_builds/batch_691_17960_1.h5','/lustre/fs1/groups/jaedo/processed_builds/batch_913_23712.h5','/lustre/fs1/groups/jaedo/processed_builds/batch_909_23629.h5']
+builds1 = ['/lustre/fs1/groups/jaedo/processed_builds/batch_229_5948.h5','/lustre/fs1/groups/jaedo/processed_builds/batch_342_8886.h5', '/lustre/fs1/groups/jaedo/processed_builds/batch_103_2663.h5','/lustre/fs1/groups/jaedo/processed_builds/batch_540_14037_1.h5','/lustre/fs1/groups/jaedo/processed_builds/batch_389_10111.h5']
+builds2 = ['/lustre/fs1/groups/jaedo/processed_builds/batch_254_6591.h5','/lustre/fs1/groups/jaedo/processed_builds/batch_486_12614.h5','/lustre/fs1/groups/jaedo/processed_builds/batch_868_22555_2.h5', '/lustre/fs1/groups/jaedo/processed_builds/batch_280_7257.h5','/lustre/fs1/groups/jaedo/processed_builds/batch_303_7867.h5','/lustre/fs1/groups/jaedo/processed_builds/batch_544_14142.h5']
 
 build_set = product(builds1, builds2)
 
