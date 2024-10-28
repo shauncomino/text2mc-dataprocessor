@@ -18,7 +18,7 @@ from sklearn.metrics import precision_score, recall_score, f1_score  # Added for
 from collections import Counter
 
 batch_size = 6
-num_epochs = 128
+num_epochs = 256
 fixed_size = (64, 64, 64)
 embedding_dim = 32
 on_arcc = True
