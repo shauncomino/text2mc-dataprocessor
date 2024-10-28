@@ -12,14 +12,11 @@ from datetime import datetime
 
 warnings.filterwarnings("ignore", category=UserWarning, module='numpy')
 
-# Output folder for rendered images
-output_folder = '/lustre/fs1/groups/jaedo/generated_builds/'  # Update this path
-
 # Path to the tok2block.json file
-tok2block_path = "/lustre/fs1/groups/jaedo/world2vec/tok2block.json"  # Update this path
+tok2block_path = "/mnt/c/Users/grees/OneDrive/Desktop/SD1/text2mc-dataprocessor/world2vec/tok2block.json"
 
 # Path to the Minecraft texture pack block textures
-texture_folder = '/lustre/fs1/groups/jaedo/rendering/VanillaDefault 1.21/assets/minecraft/textures/block'  # Update this path
+texture_folder = "/mnt/c/Users/grees/OneDrive/Desktop/SD1/text2mc-dataprocessor/rendering/VanillaDefault 1.21/assets/minecraft/textures/block"
 
 # Block size
 block_size = 1  # Adjust if necessary
@@ -358,8 +355,8 @@ def render_and_save(build_data, output_path):
     bpy.context.scene.render.filepath = output_path
 
     # Set square render resolution
-    bpy.context.scene.render.resolution_x = 1024
-    bpy.context.scene.render.resolution_y = 1024
+    bpy.context.scene.render.resolution_x = 1440
+    bpy.context.scene.render.resolution_y = 1440
 
     # Increase samples for better quality
     bpy.context.scene.cycles.samples = 1  # Increase as needed
@@ -601,8 +598,7 @@ def extract_timestamp(file_path):
     return datetime.strptime(timestamp_str, "%Y-%m-%d_%H-%M-%S")
 
 def process_hdf5_file(h5_folder):
-
-    output_folder = os.path.join(h5_folder, 'renders')
+    output_folder = "/mnt/c/Users/grees/OneDrive/Desktop/SD1/text2mc-dataprocessor/rendering/renders"
     # Ensure output folder exists
     if not os.path.exists(output_folder):
         os.makedirs(output_folder)
@@ -610,21 +606,29 @@ def process_hdf5_file(h5_folder):
     # List all .h5 files in the folder
     h5_files = [f for f in os.listdir(h5_folder) if f.endswith('.h5')]
 
-    sorted_h5_files = sorted(h5_files, key=extract_timestamp)
-
     image_paths = []
-    for h5_file in sorted_h5_files:
+    for h5_file in h5_files:
         print(f"Processing {h5_file}...")
         clear_scene()
 
         # Load block data from .h5 file
         h5_path = os.path.join(h5_folder, h5_file)
-        with h5py.File(h5_path, 'r') as hf:
-            build_folder_in_hdf5 = list(hf.keys())[0]
-            block_data = hf[build_folder_in_hdf5][()]
-            # Transpose to match Blender's coordinate system
-            block_data = np.transpose(block_data, (0, 2, 1))  # Adjusted transpose
-            
+        
+        # Check if the file exists and is a valid HDF5 file
+        if not os.path.isfile(h5_path):
+            print(f"File not found: {h5_path}")
+            continue
+        
+        try:
+            with h5py.File(h5_path, 'r') as hf:
+                build_folder_in_hdf5 = list(hf.keys())[0]
+                block_data = hf[build_folder_in_hdf5][()]
+                # Transpose to match Blender's coordinate system
+                block_data = np.transpose(block_data, (0, 2, 1))  # Adjusted transpose
+        except OSError as e:
+            print(f"Error opening file {h5_path}: {e}")
+            continue
+
         file_name = os.path.splitext(h5_file)[0]
         # Extract the filename without extension to use for image
         image_filename = file_name + '.png'
@@ -635,10 +639,11 @@ def process_hdf5_file(h5_folder):
         image_paths.append(image_path)
 
     # Create GIF from images
-    gif_output_path = os.path.join(h5_folder, 'build.gif')
-    create_gif(image_paths, gif_output_path, gif_frame_duration)
+    #gif_output_path = os.path.join(h5_folder, 'build.gif')
+    #create_gif(image_paths, gif_output_path, gif_frame_duration)
 
-# # Example usage
-# if __name__ == "__main__":
-#     h5_file_path = "/lustre/fs1/groups/jaedo/generated_builds/2024-10-20_14-07-38.h5"  # Replace with actual path to your hdf5 file
-#     process_hdf5_file(h5_file_path)
+# Example usage
+if __name__ == "__main__":
+    h5_file_path = "/mnt/c/Users/grees/OneDrive/Desktop/SD1/text2mc-dataprocessor/rendering/hdf5s"
+  # Replace with actual path to your hdf5 file
+    process_hdf5_file(h5_file_path)
