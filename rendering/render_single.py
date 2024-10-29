@@ -600,7 +600,7 @@ def extract_timestamp(file_path):
     timestamp_str = os.path.splitext(file_name)[0]
     return datetime.strptime(timestamp_str, "%Y-%m-%d_%H-%M-%S")
 
-def process_hdf5_file(h5_folder):
+def process_hdf5_file(h5_folder, building1_path, building2_path):
 
     output_folder = os.path.join(h5_folder, 'renders')
     # Ensure output folder exists
@@ -635,7 +635,7 @@ def process_hdf5_file(h5_folder):
         image_paths.append(image_path)
 
     # Create GIF from images
-    gif_output_path = os.path.join(h5_folder, 'build.gif')
+    gif_output_path = os.path.join(h5_folder, building1_path + '_' + building2_path + '.gif')
     create_gif(image_paths, gif_output_path, gif_frame_duration)
 
 # # Example usage
