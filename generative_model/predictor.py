@@ -29,7 +29,7 @@ class text2mcPredictor(nn.Module):
         self.EMBEDDING_MODEL_PATH = "../block2vec/checkpoints/best_model.pth"
 
         # Update the path to the model checkpoint
-        self.MODEL_PATH = "checkpoints/best_model.pth"
+        self.MODEL_PATH = "USE_THIS_MODEL.pth"
 
         self.BLOCK_TO_TOK = "../world2vec/block2tok.json"
 
@@ -70,6 +70,21 @@ class text2mcPredictor(nn.Module):
         building2_data = data_list[1]
 
         return building1_data, building2_data, dataset.embedding_matrix
+    
+    # Alternatively, embed a single build
+    def embed_single(self, build_path: str):
+        hdf5_files = [build_path]
+
+        dataset = text2mcVAEDataset(file_paths=hdf5_files, block2embedding=self.embeddings, block2tok=self.block2tok, block_ignore_list=[102], fixed_size=(64, 64, 64))
+        
+        data_loader = DataLoader(dataset, batch_size=1, shuffle=False)
+
+        data_list = []
+        for data, _ in data_loader:
+            data = data.to(self.device)
+            data_list.append(data)
+        
+        return data_list[0], dataset.embedding_matrix
 
     # 3. Sends the two embedded builds through the encoder portion of the VAE
     def encode_builds(self, embedding1, embedding2):
@@ -81,6 +96,11 @@ class text2mcPredictor(nn.Module):
         z2, mu2, logvar2 = self.encoder(embedding2)
 
         return z1, z2
+
+    # Alternatively, encode a single build
+    def encode_single(self, build):
+        z, mu, logvar = self.encoder(build)
+        return z
         
     # 4. Linearly interpolate between those n-dimensional latent points to get other latent points connecting the two
     def interpolate_latent_points(self, z1, z2, num_interpolations=1):
@@ -157,3 +177,38 @@ class text2mcPredictor(nn.Module):
         building1_latent, building2_latent = predictor.encode_builds(building1_embedding, building2_embedding)
         interpolations = predictor.interpolate_latent_points(building1_latent, building2_latent, num_interpolations=60)
         predictor.decode_and_generate(interpolations, embedding_matrix, building1_path, building2_path)
+
+def encode_and_reconstruct(self, build_paths: list):
+    predictor = text2mcPredictor()
+
+    for path in build_paths:
+        build_embedding, embedding_matrix = predictor.embed_single(path)
+        build_latent = predictor.encode_single(build_embedding)
+        predictor.decode_and_generate([build_latent], embedding_matrix)
+
+
+paths = ["batch_179_4650.h5",
+"batch_350_9081.h5",
+"batch_576_14958.h5",
+"batch_512_13289.h5",
+"batch_939_24388.h5",
+"batch_212_5488.h5",
+"batch_936_24311.h5",
+"batch_176_4551.h5",
+"batch_271_7040.h5",
+"batch_382_9917.h5",
+"batch_666_17304.h5",
+"batch_954_24785.h5",
+"batch_491_12753.h5",
+"batch_738_19184.h5",
+"batch_538_13984.h5",
+"batch_940_24422.h5",
+"batch_953_24774.h5",
+"batch_109_2825.h5",
+"batch_849_22052.h5",
+"batch_849_22052_1.h5",
+"batch_454_11789.h5"]
+
+encode_and_reconstruct(paths)
+
+
