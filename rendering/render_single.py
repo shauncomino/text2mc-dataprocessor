@@ -34,7 +34,7 @@ horizontal_block_tok = ["1697"]
 AIR_TOKEN = 102  # The integer representing air blocks
 
 # Time between frames in the GIF (in milliseconds)
-gif_frame_duration = 500  # Adjust as needed
+gif_frame_duration = 250  # Adjust as needed
 
 # Load the token to block mapping
 with open(tok2block_path, 'r') as f:
@@ -600,7 +600,7 @@ def extract_timestamp(file_path):
     timestamp_str = os.path.splitext(file_name)[0]
     return datetime.strptime(timestamp_str, "%Y-%m-%d_%H-%M-%S")
 
-def process_hdf5_file(h5_folder):
+def process_hdf5_file(h5_folder, building1_path, building2_path):
 
     output_folder = os.path.join(h5_folder, 'renders')
     # Ensure output folder exists
@@ -634,8 +634,18 @@ def process_hdf5_file(h5_folder):
         render_and_save(block_data, image_path)
         image_paths.append(image_path)
 
+    # Remove .h5 extension from building1_path and building2_path
+    building1_name = os.path.splitext(os.path.basename(building1_path))[0]
+    building2_name = os.path.splitext(os.path.basename(building2_path))[0]
+
     # Create GIF from images
-    gif_output_path = os.path.join(h5_folder, 'build.gif')
+    gif_output_path = os.path.join(output_folder, f"{building1_name}_{building2_name}.gif")
+    
+    # Ensure the directory for the GIF output path exists
+    gif_output_dir = os.path.dirname(gif_output_path)
+    if not os.path.exists(gif_output_dir):
+        os.makedirs(gif_output_dir)
+    
     create_gif(image_paths, gif_output_path, gif_frame_duration)
 
 # # Example usage
