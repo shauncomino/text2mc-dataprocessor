@@ -372,7 +372,6 @@ def render_and_save(build_data, output_path):
     print(f"Rendered {output_path}")
 
 def create_gif(image_paths, gif_output_path, duration):
-    image_paths = sorted(image_paths, key = extract_timestamp)
     images = []
     valid_image_paths = []
     for image_path in image_paths:
@@ -595,10 +594,12 @@ def create_horizontal_mesh(x, y, z, vertex_index):
             ]
         return verts, faces, uv_face  
  
-def extract_timestamp(file_path):
+def extract_interpolation_number(file_path):
+    # Extract the filename from the path
     file_name = os.path.basename(file_path)
-    timestamp_str = os.path.splitext(file_name)[0]
-    return datetime.strptime(timestamp_str, "%Y-%m-%d_%H-%M-%S")
+    # Remove the extension and extract the numeric part
+    interpolation_str = file_name.split('_')[-1].split('.')[0]
+    return int(interpolation_str)
 
 def process_hdf5_file(h5_folder, building1_path, building2_path):
 
@@ -610,7 +611,7 @@ def process_hdf5_file(h5_folder, building1_path, building2_path):
     # List all .h5 files in the folder
     h5_files = [f for f in os.listdir(h5_folder) if f.endswith('.h5')]
 
-    sorted_h5_files = sorted(h5_files, key=extract_timestamp)
+    sorted_h5_files = sorted(h5_files, key=extract_interpolation_number)
 
     image_paths = []
     for h5_file in sorted_h5_files:

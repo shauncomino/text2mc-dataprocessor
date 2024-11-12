@@ -163,13 +163,7 @@ class text2mcPredictor(nn.Module):
         two_build_render(main_folder_path, building1_path, building2_path)
 
     # Alternatively, decode and generate a single build
-    def decode_single(self, build, embedding_matrix):
-
-        # Create a new folder with the current timestamp
-        timestamp = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
-        save_directory = os.path.join(self.SAVE_DIRECTORY, timestamp)
-
-        os.makedirs(save_directory, exist_ok=True)
+    def decode_single(self, build, embedding_matrix, label):
 
         for z in build:
             recon_embedding, block_air_pred = self.decoder(z)
@@ -196,18 +190,18 @@ class text2mcPredictor(nn.Module):
             # Convert to numpy array
             recon_tokens_np = recon_tokens  # Shape: (Depth, Height, Width)
 
-            file_name = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
-
-            hdf5_file_path = f"{save_directory}/{file_name}.h5"
+            hdf5_file_path = f"{self.SAVE_DIRECTORY}/{label}.h5"
             with h5py.File(hdf5_file_path, 'w') as hdf5_file:
                 hdf5_file.create_dataset('recon_tokens', data=recon_tokens_np)
 
             # Call functions from vec2world to convert tokens to blocks and save it as a schematic
             string_world = convert_numpy_array_to_blocks(recon_tokens_np)
-            create_schematic_file(string_world, save_directory, file_name)
+            create_schematic_file(string_world, self.SAVE_DIRECTORY, label)
 
         # Save the tokens as an HDF5 file to use the rendering script.
-        one_build_render(save_directory)
+        one_build_render(self.SAVE_DIRECTORY)
+        # Delete the h5 file so as not to get stuck processing the same file.
+        os.remove(hdf5_file_path)
 
     def predict(self, building1_path: str, building2_path: str):
         building1_embedding, building2_embedding, embedding_matrix = self.embed_builds(building1_path, building2_path)
@@ -218,74 +212,66 @@ class text2mcPredictor(nn.Module):
 
         self.decode_and_generate(interpolations, embedding_matrix, building1_path, building2_path, timestamp)
 
-def encode_and_reconstruct(build_paths: list):
+def encode_and_reconstruct(build_paths: list, build_labels: list):
     predictor = text2mcPredictor()
     latents = []
 
+    # Create a new folder with the current timestamp
+    timestamp = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+    predictor.SAVE_DIRECTORY = os.path.join(predictor.SAVE_DIRECTORY, timestamp)
+
+    os.makedirs(predictor.SAVE_DIRECTORY, exist_ok=True)
+
+    index = 0
     for path in build_paths:
         build_embedding, embedding_matrix = predictor.embed_single(path)
         print("Encoding %s" % path)
         build_latent = predictor.encode_single(build_embedding)
         latents.append(build_latent)
-        predictor.decode_single([build_latent], embedding_matrix)
+        predictor.decode_single([build_latent], embedding_matrix, build_labels[index])
+        index += 1
     return latents
 
+def main():
+    paths = [
+    "batch_56_1440.h5", # Street
+    "batch_22_557.h5", # Lighthouse
+    "batch_3_67.h5", # Manor
+    ]
 
-# paths = ["batch_118_3058.h5", # House 2
-# "batch_322_8358.h5", # House 3
-# "batch_624_16217.h5", # Castle 3
-# "batch_32_829.h5", # House 4
-# "batch_81_2089.h5", # House 5
-# "batch_2_26.h5", # Tower 3
-# "batch_109_2825.h5", # Tower 1
-# "batch_61_1569.h5", # Castle 4
-# "batch_481_12502.h5", # Castle 2
-# "batch_52_1334.h5", # Tower 2
-# "batch_305_7928.h5", # Terrain 1
-# "batch_350_9081.h5", # House 6
-# "batch_512_13289.h5", # Castle 1
-# "batch_176_4551.h5"] # House 1
+    labels = [
+    "Street",
+    "Lighthouse",
+    "Manor"
+    ]
 
+    for i in range(0, len(paths)):
+        paths[i] = os.path.join("../processed_builds", paths[i])
 
-# labels = ["House 2",
-# "House 3",
-# "Castle 3",
-# "House 4",
-# "House 5",
-# "Tower 3",
-# "Tower 1",
-# "Castle 4",
-# "Castle 2",
-# "Tower 2",
-# "Terrain 1",
-# "House 6",
-# "Castle 1",
-# "House 1"]
+    latents = encode_and_reconstruct(paths, labels)
 
-# for i in range(0, len(paths)):
-#     paths[i] = os.path.join("../processed_builds", paths[i])
+    # # Get a 2D plot of build latents
+    # fig = plt.figure(figsize=(10, 10))
+    # ax = fig.add_subplot(111)
 
-# latents = encode_and_reconstruct(paths)
+    # latent_stack = torch.stack(list(latents)).detach().numpy()
+    # num_builds, a, b, c, d, e = latent_stack.shape
+    # latent_stack = latent_stack.reshape(num_builds, a*b*c*d*e)
 
-# # Get a 2D plot of build latents
-# fig = plt.figure(figsize=(10, 10))
-# ax = fig.add_subplot(111)
+    # if latent_stack.shape[-1] != 2:
+    #     latents_2d = umap.UMAP(n_neighbors=5, min_dist=0.2, n_components=2).fit_transform(latent_stack)
+    # else:
+    #     latents_2d = latent_stack
 
-# latent_stack = torch.stack(list(latents)).detach().numpy()
-# num_builds, a, b, c, d, e = latent_stack.shape
-# latent_stack = latent_stack.reshape(num_builds, a*b*c*d*e)
+    # index = 0
+    # for latent in latents_2d:
+    #     ax.scatter(*latent)
+    #     ax.annotate(labels[index], latent)
+    #     index += 1
 
-# if latent_stack.shape[-1] != 2:
-#     latents_2d = umap.UMAP(n_neighbors=5, min_dist=0.2, n_components=2).fit_transform(latent_stack)
-# else:
-#     latents_2d = latent_stack
+    # plt.tight_layout()
+    # plt.savefig("latent_plot.png", dpi=300)
+    # plt.close("all")
 
-# index = 0
-# for latent in latents_2d:
-#     ax.scatter(*latent)
-#     ax.annotate(labels[index], latent)
-#     index += 1
-
-# plt.tight_layout()
-# plt.savefig("latent_plot.png", dpi=300)
-# plt.close("all")
+if __name__=="__main__":
+    main()
