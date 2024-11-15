@@ -13,10 +13,10 @@ from datetime import datetime
 warnings.filterwarnings("ignore", category=UserWarning, module='numpy')
 
 # Path to the tok2block.json file
-tok2block_path = "/mnt/c/Users/grees/OneDrive/Desktop/SD1/text2mc-dataprocessor/world2vec/tok2block.json"
+tok2block_path = "../world2vec/tok2block.json"
 
 # Path to the Minecraft texture pack block textures
-texture_folder = "/mnt/c/Users/grees/OneDrive/Desktop/SD1/text2mc-dataprocessor/rendering/VanillaDefault 1.21/assets/minecraft/textures/block"
+texture_folder = "../rendering/VanillaDefault 1.21/assets/minecraft/textures/block"
 
 # Block size
 block_size = 1  # Adjust if necessary
@@ -26,6 +26,9 @@ vertical_block_tok = ["1511", "1658"]
 
 # Horizontal Block List
 horizontal_block_tok = ["1697"]
+
+# Wood Planks
+planks = ['oak', 'dark_oak', 'spruce', 'birch', 'jungle', 'acacia', 'crimson', 'warped', 'bamboo', 'cherry']
 
 # Air block token
 AIR_TOKEN = 102  # The integer representing air blocks
@@ -93,12 +96,25 @@ def create_voxel_mesh(block_data):
         block_token_str = str(block_token)
         block_name = tok2block.get(block_token_str, 'minecraft:unknown')
         
+        block_name = block_name[len('minecraft:'):]
         # Get base block for stairs and slabs
         if "_stairs" in block_name:
             block_name = block_name.split("_stairs")[0]
+            if block_name in planks:
+                block_name = block_name + "_planks"
+            elif 'quartz' in block_name:
+                block_name = 'quartz_block'
+            elif 'brick' in block_name:
+                block_name += 's'
             
         if "_slab" in block_name:
             block_name = block_name.split("_slab")[0]
+            if block_name in planks:
+                block_name = block_name + "_planks"
+            elif 'quartz' in block_name:
+                block_name = 'quartz_block'
+            elif 'brick' in block_name:
+                block_name += 's'
         
         texture_paths = get_texture_paths(block_name)
         if not any(texture_paths.values()):
@@ -598,7 +614,7 @@ def extract_timestamp(file_path):
     return datetime.strptime(timestamp_str, "%Y-%m-%d_%H-%M-%S")
 
 def process_hdf5_file(h5_folder):
-    output_folder = "/mnt/c/Users/grees/OneDrive/Desktop/SD1/text2mc-dataprocessor/rendering/renders"
+    output_folder = os.path.join(h5_folder, "renders")
     # Ensure output folder exists
     if not os.path.exists(output_folder):
         os.makedirs(output_folder)
