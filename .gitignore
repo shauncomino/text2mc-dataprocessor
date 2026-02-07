@@ -11,3 +11,5 @@ block2vec/lightning_logs/
 world2vec/worlds/
 world2vec/testbuilds/
 world2vec/__pycache__/
+generative_model/local_runs/processed_builds/
+generative_model/local_runs/checkpoints/
