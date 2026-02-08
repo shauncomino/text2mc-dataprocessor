@@ -16,11 +16,14 @@ import torch.nn.functional as F
 import torch.nn as nn
 from sklearn.metrics import precision_score, recall_score, f1_score
 
-batch_size = 6
+batch_size = 2
 num_epochs = 256
-fixed_size = (64, 64, 64)
+fixed_size = (32, 32, 32)
 embedding_dim = 32
-on_arcc = True
+on_arcc = False
+lr = 1e-5 / 6
+num_workers = 0
+run_name = '32_dim'
 
 if on_arcc:
     # Paths and configurations
@@ -40,7 +43,19 @@ if on_arcc:
 else:
     # Paths and configurations for local machine
     # Update these paths according to your local setup
-    pass  # Replace with your local configurations
+    checkpoint_path = 'H:/Projects/spring-2026-hmhornung-Minecraft-Dataset-Processor/text2mc-dataprocessor/generative_model/local_runs/checkpoints/checkpoint_32.pth'
+    best_model_path = 'H:/Projects/spring-2026-hmhornung-Minecraft-Dataset-Processor/text2mc-dataprocessor/generative_model/local_runs/checkpoints/best_model_32.pth'
+    tok2block_file_path = 'H:/Projects/spring-2026-hmhornung-Minecraft-Dataset-Processor/text2mc-dataprocessor/world2vec/tok2block.json'
+    builds_folder_path = 'H:/Projects/spring-2026-hmhornung-Minecraft-Dataset-Processor/text2mc-dataprocessor/generative_model/local_runs/processed_builds'
+    build1_path = 'H:/Projects/spring-2026-hmhornung-Minecraft-Dataset-Processor/text2mc-dataprocessor/generative_model/local_runs/processed_builds/batch_319_8281.h5'
+    build2_path = 'H:/Projects/spring-2026-hmhornung-Minecraft-Dataset-Processor/text2mc-dataprocessor/generative_model/local_runs/processed_builds/batch_225_5840.h5'
+    save_dir = 'H:/Projects/spring-2026-hmhornung-Minecraft-Dataset-Processor/text2mc-dataprocessor/generative_model/local_runs/interpolations'
+    block2embedding_file_path = 'H:/Projects/spring-2026-hmhornung-Minecraft-Dataset-Processor/text2mc-dataprocessor/block2vec/output/block2vec/embeddings.json'
+    
+    # Device type for arcc
+    device_type = 'cuda' if torch.cuda.is_available() else 'cpu'
+    device = torch.device(device_type)
+    print("Using device:", device)
 
 # Load mappings
 with open(tok2block_file_path, 'r') as f:
@@ -111,13 +126,13 @@ air_token_id = train_dataset.air_token
 print(f"Air token ID: {air_token_id}")
 
 # Create DataLoaders
-train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
-val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False)
+train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=num_workers, pin_memory=True)
+val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False, num_workers=num_workers, pin_memory=True)
 
 # Initialize the model components
 encoder = text2mcVAEEncoder(embedding_dim=embedding_dim).to(device)
 decoder = text2mcVAEDecoder(embedding_dim=embedding_dim).to(device)
-optimizer = optim.Adam(list(encoder.parameters()) + list(decoder.parameters()), lr=1e-5)
+optimizer = optim.Adam(list(encoder.parameters()) + list(decoder.parameters()), lr=lr)
 
 start_epoch = 1
 best_val_loss = float('inf')
@@ -270,7 +285,7 @@ def interpolate_and_generate(encoder, decoder, build1_path, build2_path, save_di
             recon_tokens_np = recon_tokens.cpu().numpy().squeeze(0)  # Shape: (Depth, Height, Width)
 
             # Save the interpolated build as an HDF5 file
-            save_path = os.path.join(save_dir, f'epoch_{epoch}_interp_{idx}.h5')
+            save_path = os.path.join(save_dir, f'epoch_{epoch}_interp_{idx}_{run_name}.h5')
             with h5py.File(save_path, 'w') as h5f:
                 h5f.create_dataset('build', data=recon_tokens_np, compression='gzip')
 
